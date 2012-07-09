@@ -1,0 +1,7 @@
+#main-menu {
+  position: absolute;
+  top: 93px;
+}
+#main-menu a {
+  line-height: 23px !important;
+}

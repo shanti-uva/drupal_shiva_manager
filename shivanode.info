@@ -1,0 +1,12 @@
+name = SHIVA Element Node
+description = A custom node module for managing elements created by the SHANTI Interactive Visualization Application (SHIVA)
+package = UVa-Shanti
+core = 7.x
+dependencies[] = lightbox2
+dependencies[] = services
+dependencies[] = rest_server
+dependencies[] = taxonomy
+dependencies[] = zend
+files[] = shivanode.module
+files[] = shivanode.inc
+configure = admin/config/content/shivanode

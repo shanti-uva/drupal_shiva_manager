@@ -1,0 +1,474 @@
+
+/*
+ *  File:         demo_table.css
+ *  CVS:          $Id$
+ *  Description:  CSS descriptions for DataTables demo pages
+ *  Author:       Allan Jardine
+ *  Created:      Tue May 12 06:47:22 BST 2009
+ *  Modified:     $Date$ by $Author$
+ *  Language:     CSS
+ *  Project:      DataTables
+ *
+ *  Copyright 2009 Allan Jardine. All Rights Reserved.
+ *
+ * ***************************************************************************
+ * DESCRIPTION
+ *
+ * The styles given here are suitable for the demos that are used with the standard DataTables
+ * distribution (see www.datatables.net). You will most likely wish to modify these styles to
+ * meet the layout requirements of your site.
+ *
+ * Common issues:
+ *   'full_numbers' pagination - I use an extra selector on the body tag to ensure that there is
+ *     no conflict between the two pagination types. If you want to use full_numbers pagination
+ *     ensure that you either have "example_alt_pagination" as a body class name, or better yet,
+ *     modify that selector.
+ *   Note that the path used for Images is relative. All images are by default located in
+ *     ../images/ - relative to this CSS file.
+ */
+
+/*=============== DataTables features */
+ 
+.top, .bottom {
+	margin-top: 5px !important;
+	padding: 10px 10px 6px !important;
+	background-color: #CCCCCC !important;
+	border: 2px solid #AAAAAA !important;
+	height: 25px !important;
+}
+
+/*#shiva_node_list_wrapper .top,
+div.jqdtable-div .top {
+	display: none;
+}*/
+
+p.top-sort-subtext{font-size:12px; float:left; margin:0px; padding:0px; padding-left:10px; color:#606060; margin-bottom:-30px;}
+
+.dataTables_wrapper { font-size:13px; margin-right:3px; margin-left:1px;
+	position: relative;
+	min-height: 302px;
+	clear: both;
+	_height: 302px;
+	zoom: 1; /* Feeling sorry for IE */
+}
+
+
+.dataTables_wrapper select option{ padding:2px 5px 0px 5px; height:14px;}
+
+p.reset-data-table { margin:0px; padding:0px; position:absolute; left:130px; top:75px; z-index:10;}
+p.info-data-table  { margin:0px; padding:0px; position:absolute; left:325px; top:75px; z-index:10;}
+p.reset-data-table a,
+p.reset-data-table a:visited, 
+p.info-data-table a,
+p.info-data-table a:visited { 	
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
+	margin: 0 3px;
+	cursor: pointer;
+	/*cursor: hand; was prepended with * */
+	background-color:#ddd;
+	font-size:11px;
+}
+p.reset-data-table a:hover, p.info-data-table a:hover{ border-color:#aaa; background-color:#ccc;}
+p.reset-data-table a:active, p.info-data-table a:active { border-color:#aaa; background-color:#99b3ff;}
+
+/* #data-table_info {white-space: nowrap; }*/
+
+.dataTables_processing {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 250px;
+	height: 30px;
+	margin-left: -125px;
+	margin-top: -15px;
+	padding: 14px 0 2px 0;
+	border: 1px solid #ddd;
+	text-align: center;
+	color: #999;
+	font-size: 14px;
+	background-color: white;
+}
+
+.dataTables_length {
+	width: 40%;
+	position: relative;
+	left: 0px;
+	padding-left:5px;
+	font-family:verdana, arial, sans-serif;
+	font-size:11px;
+	color: #606060;
+}
+
+.dataTables_filter {
+	width: 300px;
+	float: right;
+	padding:2px 5px 0;
+	font-size:11px;
+	line-height:14px;
+	height:18px;
+	color: #606060;
+	margin-bottom:5px;
+	margin-top:0px;
+}
+
+.dataTables_filter label {
+	display: inline;
+	padding-right: 3px;
+	text-align: right;
+	line-height: 24px;
+	font-family:verdana, arial, sans-serif;
+}
+
+.dataTables_filter input{
+	position:relative;
+	top:-3px;
+	float:right;
+	height:16px;
+	width: 150px;
+	padding:1px 5px;
+	font-size: 14px;
+}
+
+.dataTables_info {
+	width: 50%;
+	float: left;
+	padding-left:5px; color:#606060; font-weight:bold; font-size:11px; font-family:verdana, arial, sans-serif;
+}
+
+.dataTables_paginate {
+	float: right;
+	text-align: right;
+	padding-right:5px;
+	font-size:11px;
+}
+
+/*
+.dataTables_paginate {
+    float: right;
+    position: absolute !important;
+    right: 0;
+    top: 31px;
+}*/
+
+/* Pagination nested */
+.paginate_disabled_previous, .paginate_enabled_previous, .paginate_disabled_next, .paginate_enabled_next {
+	height: 19px;
+	width: 19px;
+	margin-left: 3px;
+	float: left;
+}
+
+.paginate_disabled_previous {
+	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/back_disabled.jpg);
+}
+
+.paginate_enabled_previous {
+	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/back_enabled.jpg);
+}
+
+.paginate_disabled_next {
+	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/forward_disabled.jpg);
+}
+
+.paginate_enabled_next {
+	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/forward_enabled.jpg);
+}
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables display
+ */
+table.display {
+	margin: 0 !important;
+	clear: both;
+	width: 100%;
+	
+	/* Note Firefox 3.5 and before have a bug with border-collapse                                                                                       
+	 * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 ) 
+	 * border-spacing: 0; is one possible option. Conditional-css.com is
+	 * useful for this kind of thing
+	 *
+	 * Further note IE 6/7 has problems when calculating widths with border width.
+	 * It subtracts one px relative to the other browsers from the first column, and
+	 * adds one to the end...
+	 *
+	 * If you want that effect I'd suggest setting a border-top/left on th/td's and 
+	 * then filling in the gaps with other borders.
+	 */
+}
+
+table.display select option{ padding:1px 3px;}
+
+table.display thead th {
+	padding: 4px 18px 4px 10px;
+	border-bottom: 1px solid #c0c0c0;
+	font-weight: bold;
+	cursor: pointer;
+	/* * cursor: hand; */
+	 font-size:13px; color:#404040; white-space:nowrap;
+}
+
+table.display th.thl-mapID{ padding-left:20px;}
+
+table.display{ margin-top:4px; margin-bottom:4px; border-top:1px solid #c0c0c0; }
+
+table.display tfoot th {
+	padding: 3px 18px 3px 10px;
+	border-top: 1px solid #c0c0c0;
+	font-weight: bold;
+}
+
+table.display tr.heading2 td {
+	border-bottom: 1px solid #c0c0c0;
+}
+
+table.display td {
+	padding: 3px 10px; font-size:13px; color:#404040; height:20px; line-height:20px;
+}
+
+body table.display td {
+    /* white-space:nowrap;*/
+    vertical-align: top;
+    padding-top: 3px;
+    padding-bottom: 8px;
+}
+
+table.display td a.tib {
+    line-height: 20pt; position: relative; top: 4px; font-size: 14pt !important;
+}
+
+table.display td span.tibname {display: none;}
+
+table.display td span.wyname {display: block; }
+
+table.display td.thl-mapID{ padding-right:20px;padding-left:20px;}
+
+table.display td.thl-mapTitle{ width:100%; padding-left:20px;}
+
+table.display td.center {
+	text-align: center;
+}
+
+table.display td.col-thl-id {
+	text-align: center;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables sorting
+ */
+
+.sorting_disabled{ background: #f5f5f5;}
+
+.sorting_asc {
+	background: #e7eeee url(../images/sort_asc.png) no-repeat center right;
+}
+
+.sorting_desc {
+	background: #e7eeee url(../images/sort_desc.png) no-repeat center right;
+}
+
+.sorting {
+	background: #f5f5f5 url(../images/sort_both.png) no-repeat center right;
+}
+
+.sorting_asc_disabled {
+	background: #f5f5f5 url(../images/sort_asc_disabled.png) no-repeat center right;
+}
+
+.sorting_desc_disabled {
+	background: #f5f5f5 url(../images/sort_desc_disabled.png) no-repeat center right;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * DataTables row classes
+ */
+table.display tr.odd.gradeA {
+	background-color: #f0f0f6;
+}
+
+table.display tr.even.gradeA {
+	background-color: #fff;
+}
+
+
+tr.odd {
+	background-color: #eee;
+}
+
+tr.even {
+	background-color: fff;
+}
+
+tr.odd td.meta-drop, tr.even td.meta-drop { display:none;} 
+
+
+
+ #data-table tr.odd.highlight {
+  background-color: #E2E4FF;
+ }
+ #data-table tr.even.highlight {
+  background-color: #E2E4FF;
+ }
+ #data-table tr.odd.highlight td.sorting_1{
+  background-color: #D3D6FF;
+ }
+ #data-table tr.even.highlight td.sorting_1{
+  background-color: #D3D6FF;
+ }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Misc
+ */
+.dataTables_scroll {
+	clear: both;
+}
+
+.dataTables_scrollBody {
+	*margin-top: -1px;
+}
+
+
+.clear {
+	clear: both;
+}
+
+.dataTables_empty {
+	text-align: center;
+}
+
+tfoot input {
+	margin: 0.5em 0;
+	width: 100%;
+	color: #444;
+}
+
+tfoot input.search_init {
+	color: #999;
+}
+
+td.group {
+	background-color: #d1cfd0;
+	border-bottom: 2px solid #A19B9E;
+	border-top: 2px solid #A19B9E;
+}
+
+table.display td.details {
+	background-color: #f9f9f9;
+	border: 1px solid #ddd;
+	padding-top:15px; 
+	padding-bottom:25px;
+	font-size:12px;
+	line-height:16px;
+}
+
+table.display td a, table.display td a:visited{ color:#00e}
+table.display td a:hover{ color:#00a; text-decoration:underline;}
+
+
+.example_alt_pagination div.dataTables_info {
+	width: 40%;
+}
+
+.paging_full_numbers {
+	width: 400px;
+	height: 22px;
+	line-height: 22px;
+}
+
+.paging_full_numbers span.paginate_button,
+ 	.paging_full_numbers span.paginate_active {
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
+	margin: 0 3px;
+	cursor: pointer;
+	*cursor: hand;
+}
+
+.paging_full_numbers span.paginate_button {
+	background-color: #ddd;
+}
+
+.paging_full_numbers span.paginate_button:hover {
+	background-color: #ccc;
+}
+
+.paging_full_numbers span.paginate_active {
+	background-color: #99B3FF;
+}
+
+table.display tr.even.row_selected td {
+	background-color: #B0BED9;
+}
+
+table.display tr.odd.row_selected td {
+	background-color: #9FAFD1;
+}
+
+
+/*
+ * Sorting classes for columns
+ */
+/* For the standard odd/even */
+tr.odd td.sorting_1 {
+	background-color: #ccc;
+}
+tr.even td.sorting_1 {
+	background-color: #eee;
+}
+
+
+
+/* For the Conditional-CSS grading rows */
+/*
+ 	Colour calculations (based off the main row colours)
+  Level 1:
+		dd > c4
+		ee > d5
+	Level 2:
+	  dd > d1
+	  ee > e2
+*/
+
+
+tr.odd.gradeA td.sorting_1 {
+	background-color: #e0e0ef;
+}
+
+
+/*
+ * KeyTable
+ */
+table.KeyTable td {
+	border: 3px solid transparent;
+}
+
+table.KeyTable td.focus {
+	border: 3px solid #3366FF;
+}
+
+table.display tr.gradeA {
+	background-color: #eeffee;
+}
+
+div.box {
+	height: 100px;
+	padding: 10px;
+	overflow: auto;
+	border: 1px solid #8080FF;
+	background-color: #E5E5FF;
+}
+
+/* Chrome Styles */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    
+    /*.dataTables_filter input{ top:-18px; right: -4px;}*/
+    
+}
+
+

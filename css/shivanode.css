@@ -1,0 +1,409 @@
+body.section-restricted div#content {
+	background: transparent url(../../../pictures/bg-keys-gray.jpg) no-repeat 50px 50px;
+	height: 1000px;
+}
+
+body.section-restricted div#content p {
+	width: 700px;
+}
+
+div.shivanode_display {
+  border: outset 4px #99CCCC;
+  display: block;
+  margin: 12px;
+  padding: 6px;
+}
+
+/* Upper Action buttons in Edit Form */
+div#upperbuttons {
+	float: right;
+	padding-top: 8px;
+	margin-top: -35px;
+}
+
+div#otherbuttons {
+	margin-top: 45px;
+}
+
+div.sn-share-button {
+	display: inline !important;
+	float:right;
+	padding-bottom: 6px;
+}
+
+form.node-shivanode-form div.sn-share-button  {
+	margin-right: 3px;
+}
+
+div.sn-share-button span { 
+	color: #656565;
+	background-color: #adadad;
+	border-radius: 8px; 
+	-moz-border-radius: 8px; 
+	-webkit-border-radius: 8px; 
+	border: 1px solid #888;
+	padding: 2px 6px;
+}
+
+div.sn-share-button span a {
+	color: white;
+	font-weight: bold;
+	border: none !important;
+}
+
+#shivanode-node-form div.form-item-title, #shivanode-node-form div#edit-shivanode-element-type {
+  float: left;
+  padding-right: 12px;
+}
+
+#shivanode-node-form input#edit-button, #shivanode-node-form input#edit-new-button {
+  float: right;
+  margin-top: 0px;
+}
+
+#shivanode-node-form div#edit-shivanode-access {
+  float: left;
+  height: 2em;
+}
+
+div#use-data-element-link {
+  padding-top: 24px;
+}
+
+div#use-data-element-link a {
+  padding-left: 12px;
+}
+
+#iframe_container {
+  clear: both;
+}
+
+#iframe_container legend span.form-required {
+  padding-left: 6px;
+}
+
+div#edit-shivanode-tags {
+  clear: both;
+  display: block;
+}
+
+fieldset#iframe_container iframe {
+  margin-top: 18px;
+}
+
+iframe#shivaViewFrame {
+  border: none!important;
+  clear: both;
+  display: block;
+}
+
+fieldset#edit-shivanode-container {clear: both;}
+
+select#elementType {
+  display: none;
+}
+
+input.nobutton {
+	cursor: pointer;
+  background-color: transparent;
+  border: none;
+  color: #496771;
+  padding: 0px;
+  font-size: 14px;
+}
+
+input.nobutton:hover {
+	cursor: pointer;
+  color: #0071B3;
+	text-decoration: underline;
+}
+
+input.error {
+  border: thin solid red;
+}
+
+div.jsonEditMsg {
+  position:absolute;
+  width: 250px;
+  height: 50px;
+  color:red;
+  border: outset 3px #DB2323;
+  padding: 4px;
+}
+
+#shiva_node_list .actions {
+  font-size: smaller;
+  white-space: nowrap;
+}
+
+p.table-note {
+  margin: 6px 6px;
+  font-size: small;
+  font-style: italic;
+}
+
+form.node-shivanode-form, form.node-shivanode-form .form-item {
+  margin-top: 0px !important;
+}
+
+div.addspreadsheet-button {
+	float: right;
+	padding: 10px 0px 0px 0px;
+}
+
+div.addspreadsheet-button span {
+	background-color: #DDDEEA; /*#adadad;*/
+	border-radius: 4px; 
+	-moz-border-radius: 4px; 
+	-webkit-border-radius: 4px; 
+	border: 1px solid #888;
+	padding: 2px 6px;
+}
+
+div.addspreadsheet-button span a {
+	color: #496771;
+}
+
+div.spreadsheet-add-de-link {
+	padding-top: 24px
+}
+
+div#data_sheet_link_buttons {
+	display: inline;
+}
+
+input#edit-reset-button {
+	font-size: 1em;
+	background: none!important;
+	border: none;
+	padding: 0!important;
+	color: #496771;
+
+}
+
+input#edit-reset-button:hover {
+	text-decoration: underline;
+	color: #0071B3;
+}
+
+#block-shivanode-recent-nodes td.shivanode-type {
+  width: 15%;
+}
+
+#block-shivanode-recent-nodes td.edit, #block-shivanode-recent-nodes td.delete {
+  width: 8%;
+  text-align: center;
+}
+
+#guser-reset {
+  float: right !important;
+  text-align: right;
+  width: 100%;
+  margin-top: -15px;
+}
+
+#gdoclist-back {
+  float: right !important;
+  text-align: right;
+  margin-top: -32px;
+  margin-right: -48px;
+}
+
+#edit-gss-form .form-type-checkbox label{
+  display: inline;
+  font-weight: normal;
+}
+
+ul.content-list li.content-item * {
+  display: inline!important;
+}
+
+#edit-gss-done .fieldset-legend, #edit-gss-list .fieldset-legend {
+	font-weight: bold;
+}
+
+div#addspreadsheet-filter {
+	text-align: right;
+	white-space: nowrap !important;
+}
+
+div#addspreadsheet-filter  * {
+	white-space: nowrap !important;
+}
+
+/*
+#user-login-form #edit-submit {
+  font-family: 'Trebuchet MS', Verdana, sans-serif;
+  width: 100px;
+  height: 25px;
+  border: none !important;
+  background: transparent url(../images/button_orange.gif) top left no-repeat;
+  font-weight: bold;
+  font-size: 13px;
+  padding-top: 2px;
+  float: left;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: white;
+  text-align: center;
+}
+*/
+ul.shivanode-spreadsheets li {
+  list-style-type: none;
+}
+
+ul.shivanode-spreadsheets li * {
+  display: inline !important;
+}
+
+.views-field-shivanode-description {
+	max-width: 350px;
+}
+
+.view-shiva-elements table.views-table * {
+	vertical-align: top;
+}
+
+.view-shiva-elements table.views-table p {
+	margin-top: 0px;
+}
+
+/* For Lightbox popups */
+
+iframe#lightboxFrame {
+  border: none !important;
+}
+
+#imageDataContainer {
+  height: 0px !important;
+}
+
+#imageData #bottomNav {
+  height: 30px;
+  position: absolute;
+  top: 0px;
+}
+
+#bottomNavClose {
+  display: block;
+  z-index: 200;
+  background: url(../../lightbox2/images/close.gif) left no-repeat;
+  position: relative !important;
+  top: 0px;
+  left: 775px !important;
+  height: 26px;
+  width: 26px;
+  margin-top: 0px !important;
+}
+
+/* Add any custom headers here, if you want them hidden in popups */
+html.lightpop #header, html.lightpop #navigation, html.lightpop #footer, 
+html.lightpop #sidebar-first, html.lightpop #sidebar-second, 
+html.lightpop #toolbar, html.lightpop #admin-menu, 
+html.lightpop #header-top, html.lightpop #block-search-form {
+	display: none !important;
+}
+
+html.lightpop body, html.lightpop #page-wrapper {
+	height: 800px !important;
+	width: 800px !important;
+}
+
+html.lightpop .popup, html.lightpop .form-textarea-wrapper {
+	width: 750px !important;
+}
+
+
+div#sninsert-popup {
+	position: absolute !important;
+	top: 100px;
+	left: 200px;
+	width: 600px;
+	height: 500px;
+	overflow: auto;
+	border: 3px ridge silver;
+	padding: 12px;
+	font-size: small;
+	background-color: #fdfdfd;
+}
+
+div#sninsert-popup .closeBtn {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	width: 25px;
+	height: 25px;
+	background: url(../../lightbox2/images/close.gif) left no-repeat;
+	border: 3px outset;
+}
+
+/* General class styles */
+/* .button-link: a class to make a button look like a regular link */
+span.button-link input {
+	font-size: 1em;
+	background: none!important;
+	border: none;
+	padding: 0!important;
+	color: #496771;
+}
+
+span.button-link input:hover {
+	text-decoration: underline;
+	color: #0071B3;
+}
+
+span.list-select, span.list-checkbox {
+  display: inline !important;
+}
+
+span.private {padding-left: 2px; color: #990000;}
+
+.float-right { float: right; }
+
+.float-left { float: left; }
+
+.normal {
+	font-weight: normal !important;
+	font-style: normal !important;
+}
+
+.bold {
+	font-weight: bold !important;
+}
+
+.italic {
+	font-style: italic !important;
+}
+
+.error {
+  border: 2px solid red !important;
+}
+
+.warning {
+	border: 2px solid orange !important;
+}
+
+.jscommands {
+  display: none;
+}
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.nobreak {
+  white-space: nowrap;
+}
+
+.inline {
+  display: inline !important;
+}
+
+.link {
+	cursor: pointer;
+}
+
+.link:hover {
+	text-decoration: underline;
+}
