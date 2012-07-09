@@ -1,6 +1,7 @@
 README for Shivanode Module
 
-	-- Text of read me here.
+	The Shivanode module allows for the creation and management of SHIVA visualizations within a Drupal website.
+	As a module, it can be plugged into any drupal installation.
 	
 July 9, 2012
 
