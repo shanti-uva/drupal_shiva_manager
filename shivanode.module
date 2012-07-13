@@ -6,10 +6,10 @@
  */
  
 // default URL for Visualization Player
-define('SHIVA_VIEWER', 'http://www.viseyes.org/shiva/go.htm');
+define('SHIVA_VIEWER', 'http://shiva.shanti.virginia.edu/go.htm');
 
- // default URL for Visualization Editors
-define('SHIVA_EDITOR', 'http://www.viseyes.org/shiva/');
+ // default (base) URL for Visualization Editors
+define('SHIVA_EDITOR', 'http://shiva.shanti.virginia.edu/');
 
 // default URL for Chart Editor
 define('SHIVA_CHART_EDITOR', 'chart.htm');

@@ -385,7 +385,7 @@
 	 * 													and send the json definition of that list to the Iframe.
 	 */
 	Drupal.Shivanode.getGroupElements = function(gid) {
-		var url = 'http://shantivis.org/api/rest/shivanode.json?var[gid]=';
+		var url = Drupal.settings.basePath + 'api/rest/shivanode.json?var[gid]=';
 		if(gid.indexOf('n') == 0) {
 			url = url.replace('[gid]','[gnid]');
 			gid = gid.substr(1);

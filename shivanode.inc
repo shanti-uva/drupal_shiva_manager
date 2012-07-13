@@ -481,6 +481,7 @@ function _shivanode_parse_json($jdata) {
  */
 function _shivanode_admin_settings($form, &$form_state) {
   
+	//dpm($form_state, "Form State in original routine");
   $form['shivanode_settings_header'] = array(
     '#markup'=> '<h3>Settings for the Shivanode Module</h3>' .
       '<p>' . t('There are two types of settings for the Shivanode module. The display settings are where one can set ' .
@@ -694,11 +695,12 @@ function _shivanode_admin_settings($form, &$form_state) {
   $form['actions']['default_values'] = array(
     '#type' => 'button',
     '#value' => t('Reset Default Settings'),
+  /*  '#submit' => array('_shivanode_settings_default_values'),
     '#ajax' => array(
       'callback' => '_shivanode_settings_default_values',
       'wrapper' => 'shiva_settings_form_div',
       'effect' => 'slide',
-    ),
+    ),*/
     '#weight' => 20,
   );
   
@@ -710,35 +712,46 @@ function _shivanode_admin_settings($form, &$form_state) {
  * Uses constants set at the top of shivanode.module
  * 
  */
-function _shivanode_settings_default_values(&$form, &$form_state) {
-  // Display Settings
-  $element = $form['shivanode_display_settings'];
-  $element['shivanode_default_height']['#value'] = SHIVA_IFRAME_HEIGHT;
-  $element['shivanode_default_width']['#value'] = SHIVA_IFRAME_WIDTH;
-  $element['shivanode_edit_height']['#value'] = SHIVA_IFRAME_HEIGHT_EDIT;
-  $element['shivanode_edit_width']['#value'] = SHIVA_IFRAME_WIDTH_EDIT;
-  $element['shivanode_teaser_height']['#value'] = SHIVA_IFRAME_HEIGHT_TEASER;
-  $element['shivanode_teaser_width']['#value'] = SHIVA_IFRAME_WIDTH_TEASER;
-  $element['shivanode_max_size']['#value'] = SHIVA_IFRAME_DIMENSION_MAXIMUM;
-  $element['shivanode_min_size']['#value'] = SHIVA_IFRAME_DIMENSION_MINIMUM;
-  $element['shivanode_default_override']['#value'] = SHIVA_DEFAULT_OVERRIDE;
-  $element['shivanode_show_json']['#value'] = SHIVA_SHOW_JSON;
+function _shivanode_admin_settings_validate($form, &$form_state) {
+	if($form_state['triggering_element']['#id'] == 'edit-default-values') {
+		_shivanode_settings_default_values($form_state);
+	}
+} 
+
+/*
+ *  _shivanode_settings_default_values(&$form_state) : called by the shivanode admin settings validation routine
+ * 						when the "reset" button is pressed. Resets all values to default ~~in the form only~~
+ * 						Reset settings must be saved to tke effect and a warning to that effect is given.
+ */
+function _shivanode_settings_default_values(&$form_state) {
+  // Display Settings 
+  $form_state['input']['shivanode_default_height'] = SHIVA_IFRAME_HEIGHT;
+  $form_state['input']['shivanode_default_width'] = SHIVA_IFRAME_WIDTH;
+  $form_state['input']['shivanode_edit_height'] = SHIVA_IFRAME_HEIGHT_EDIT;
+  $form_state['input']['shivanode_edit_width'] = SHIVA_IFRAME_WIDTH_EDIT;
+  $form_state['input']['shivanode_teaser_height'] = SHIVA_IFRAME_HEIGHT_TEASER;
+  $form_state['input']['shivanode_teaser_width'] = SHIVA_IFRAME_WIDTH_TEASER;
+  $form_state['input']['shivanode_max_size'] = SHIVA_IFRAME_DIMENSION_MAXIMUM;
+  $form_state['input']['shivanode_min_size'] = SHIVA_IFRAME_DIMENSION_MINIMUM;
+  $form_state['input']['shivanode_default_override'] = SHIVA_DEFAULT_OVERRIDE;
+  $form_state['input']['shivanode_show_json'] = SHIVA_SHOW_JSON;
   
   // Viewer and Editor URLS
-  $element['shivanode_chart_viewer']['#value'] = SHIVA_VIEWER;
-  $element['shivanode_editor_url']['#value'] = SHIVA_EDITOR;
-  $element['shivanode_chart_editor']['#value'] = SHIVA_CHART_EDITOR;
-  $element['shivanode_data_editor']['#value'] = SHIVA_DATA_EDITOR;
-  $element['shivanode_image_editor']['#value'] = SHIVA_IMAGE_EDITOR;
-  $element['shivanode_map_editor']['#value'] = SHIVA_MAP_EDITOR;
-  $element['shivanode_network_editor']['#value'] = SHIVA_NETWORK_EDITOR;
-  $element['shivanode_subway_editor']['#value'] = SHIVA_SUBWAY_EDITOR;
-  $element['shivanode_timeline_editor']['#value'] = SHIVA_TIMELINE_EDITOR;
-  $element['shivanode_video_editor']['#value'] = SHIVA_VIDEO_EDITOR;
-  $element['shivanode_control_editor']['#value'] = SHIVA_CONTROL_EDITOR;
-  $element['shivanode_canvas_editor']['#value'] = SHIVA_CANVAS_EDITOR;
-
-  return $element;
+  $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
+  $form_state['input']['shivanode_editor_url'] = SHIVA_EDITOR;
+  $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
+  $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
+  $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
+  $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
+  $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
+  $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
+  $form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
+  $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
+  $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
+  $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
+	
+	drupal_set_message(t('All values have been reset to their default'));
+	drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
 }
 
 function _shivanode_integer_check($element, &$form_state, $form) {
@@ -1411,9 +1424,6 @@ function _shivanode_greset_form_submit($form, &$form_state) {
 function _get_shivaframe_url($opt) {
   if(is_array($opt)) { $opt = $opt[0]; } // if it's an array take first element value
 	if(!is_numeric($opt)) { $opt = 7; } // default is visualization
-	//$htmroot = "http://www.viseyes.org/shiva";
-  //$otherroot = "http://dev1.shanti.virginia.edu/shiva/sites/shiva/files/html/shivaedit";
-  //$otherroot = "http://shantivis.org/sites/all/files/html/shivaedit";  // Localhost version of $otherroot
 	switch($opt) {
 		case 1:  // Data
       $player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
