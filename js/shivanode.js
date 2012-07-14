@@ -94,7 +94,7 @@
        		retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
        		break;
        	case 'if':
-       		retval = '<iframe src="' + url + ' height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
+       		retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
        		break;
        	case 'json':
        		retval = Drupal.Shivanode.node.json;
