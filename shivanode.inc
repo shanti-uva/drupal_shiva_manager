@@ -493,7 +493,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#description' => t('The display settings for SHIVA elements'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#title' => t('Display'),
     '#prefix' => '<div id="shiva_settings_form_div">',
     '#suffix' => '</div>',
@@ -583,7 +583,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#description' => t('The urls for the SHIVA player and editors'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#title' => t('SHIVA Player/Editor URLS'),
     '#prefix' => '<div id="shiva_url_form_div">',
     '#suffix' => '</div>',
@@ -1101,7 +1101,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
   foreach($picks as $pick) {
     // Only create a node if there's a url
     $today = date("D, j M Y"); 
-    // convert url to shared URL 
+    // convert url to URL of the google 'shared' version
     $pick['url'] = str_replace('https://spreadsheets.google.com/ccc', 'https://docs.google.com/spreadsheet/ccc', $pick['url']);
     $snjson = '{"dataSourceUrl":"' . $pick['url'] . '","title":"' . $pick['title'] . '","shivaId":"0",' .
       '"shivaMod":"' . $today . '","shivaGroup":"Data"}';
@@ -1461,6 +1461,10 @@ function _get_shivaframe_url($opt) {
   return $player;
 }
 
+/*
+ * _shivanode_node_json($nid): Function called by the menu path 'data/json/%' in shivanode_menu
+ * 		This function retreives the node, gets its SHIVA json data and publishes that
+ */
 function _shivanode_node_json($nid) {
   $node = node_load($nid);
   $json = _shivanode_get_json($node);
@@ -2022,7 +2026,8 @@ function _shivanode_node_embed_page($nid) {
       '#markup' => '<script type="text/javascript"> Drupal.Shivanode.node = {
         "nid": ' . $nid . ',
         "title": "' . str_replace('"', '\"', $node->title) . '",
-        "json": \'' . _shivanode_get_json($node,FALSE) . '\'
+        "json": \'' . _shivanode_get_json($node,FALSE) . '\',
+        "player": "' . variable_get('shivanode_chart_viewer') . '"
       };</script>',
     ),
   );

@@ -78,11 +78,32 @@
 			 
 			// If it's an embed code pop-up, add change to the select
 			// to relay the request for the appropriate get function and put its result in the text area
+			// the object Drupal.Shivanode.node is embeded in popup window by the Drupal _shivanode_node_embed_page($nid) function
+			// it contains values for nid (node id), title, json, and player.
 			$('#snembedselect').change(function() {
-        var choice = $(this).val();
-        if (choice == 'none') { $('#sn-embedcode-area').val(''); }
-        if (choice == 'json') { $('#sn-embedcode-area').val('Loading ...'); }
-        window.parent.postMessage('RelayRequest=' + choice,'*');
+       var choice = $(this).val();
+   		 var url = Drupal.Shivanode.node.player + "?m=http://" + window.location.host + Drupal.settings.basePath 
+   								+ 'data/json/' + Drupal.Shivanode.node.nid;
+   		 var jobj = JSON.parse(Drupal.Shivanode.node.json);
+   		 var retval = '';
+       switch (choice) {
+       	case 'wp':
+       		retval = "[iframe src='" + url + "']";
+       		break;
+       	case 'link':
+       		retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
+       		break;
+       	case 'if':
+       		retval = '<iframe src="' + url + ' height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
+       		break;
+       	case 'json':
+       		retval = Drupal.Shivanode.node.json;
+       		break;
+       	default:
+       		retval = url;				
+       		break;
+       }
+       $('#sn-embedcode-area').val(retval); 
       });
 			
 			// if format=simple then hide header footer and sidenavs
@@ -249,7 +270,7 @@
 	    response=e.data.substr(8);
 	    
 		// GetWordPress= : Receive the response for GetWordPress and send to lightframe
-		// GetWebPage= : eceive the response for GetWebPage and send to lightframe
+		// GetWebPage= : Receive the response for GetWebPage and send to lightframe
 		} else if (e.data.indexOf('GetWordPress=') == 0 || e.data.indexOf('GetWebPage=') == 0) {
 			var embed = e.data.substr(e.data.indexOf('=') + 1);
 			Drupal.Shivanode.doWebEmbed(embed);
