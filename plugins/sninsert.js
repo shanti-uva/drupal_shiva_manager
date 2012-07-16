@@ -115,7 +115,7 @@ Drupal.Shivanode.popup = {
 			}
 		);
 	},
-	
+	 
 	hide: function() {
 		$('#sninsert-popup').hide();
 		$('#sninsert-popup').remove();
