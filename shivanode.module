@@ -510,6 +510,7 @@ function shivanode_field_formatter_info() {
  *  
  */
 function shivanode_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
+	global $base_root, $base_path;
   $override = variable_get('shivanode_default_override', SHIVA_DEFAULT_OVERRIDE);
   $element = array();
   switch ($display['type']) {
@@ -550,8 +551,9 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
         $height = variable_get('shivanode_teaser_height', (isset($display['settings']['height'])?$display['settings']['height']:SHIVA_IFRAME_HEIGHT_TEASER));
         $width = variable_get('shivanode_teaser_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH_TEASER));
       }
-      // create IFrame URL with the json data
-      $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal
+      // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
+      $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $base_root . $base_path . 'data/json/' .  $object->nid;
+      //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
       $disStr = '';
       $iframe = '';
       if (_shivanode_get_element_type($object) == 'Data') {
@@ -602,6 +604,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $iframe .= ' scrolling="no" frameborder="0" ' . $disStr;
       $iframe .= '> </iframe>';
       $iframe .= '<div id="shivaViewFrameData" style="display: none;">' . $item['value'] . '</div>';
+/*
       $iframe .= '<script type="text/javascript">
                     (function($) {
                       $(document).ready(function () {
@@ -611,7 +614,8 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
                         });
                       });
                     }) (jQuery);
-                 </script>';
+                 </script>';*/
+
       $element[$delta]['#markup'] =  $iframe; //theme('example_node_color', array('color' => $color));
     }
     //break;

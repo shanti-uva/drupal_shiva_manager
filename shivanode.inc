@@ -1464,11 +1464,14 @@ function _get_shivaframe_url($opt) {
 /*
  * _shivanode_node_json($nid): Function called by the menu path 'data/json/%' in shivanode_menu
  * 		This function retreives the node, gets its SHIVA json data and publishes that
+ * 		Returned in jsonp format for the new viewer.
  */
 function _shivanode_node_json($nid) {
   $node = node_load($nid);
-  $json = _shivanode_get_json($node);
-  drupal_json_output($json);
+  $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
+	$json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
+	drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
+  echo $json;
 }
 
 function _shivanode_search_json($q) {
@@ -1817,7 +1820,7 @@ function _shivanode_get_element_type($node, $type = "string") {
 function _shivanode_get_json($node, $as_obj = TRUE) {
   if( isset($node->shivanode_json) ) {
     $eljson = $node->shivanode_json['und'][0]['value'];
-    return ($as_obj) ? json_decode($eljson) : $eljson;
+    return ($as_obj) ? drupal_json_decode($eljson) : $eljson;
   } else {
     return false;
   }
