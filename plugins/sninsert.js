@@ -122,29 +122,21 @@ Drupal.Shivanode.popup = {
 		Drupal.Shivanode.popup.instanceId = null;
 	},
 	
-	setElement: function(data) {
+	setElement: function(nid) {
 		Drupal.Shivanode.popup.hide();
-		$.getJSON(window.location.protocol + '//' + window.location.host + Drupal.settings.basePath + '/api/rest/shivanode/' + data + '.json', 
+		var basepath = window.location.protocol + '//' + window.location.host + Drupal.settings.basePath;
+		$.getJSON(basepath + '/api/rest/shivanode/' + nid + '.json', 
 			function(data) {
 				var json = JSON.parse(data.json);
-				var url= Drupal.Shivanode.snviewer + '?';
+				var url= Drupal.Shivanode.snviewer + '?m=' + window.location.protocol + '//' + window.location.host + Drupal.settings.basePath + 'data/json/' + nid;
+				console.info("url: " + url);
 				var pref = '';
-				var fwidth = 800;
-				var fheight = 500;
-				for(var prop in json) {
-					var value = (typeof(json[prop]) == "string")? json[prop] : JSON.stringify(json[prop]);
-					value = value.replace(/#/g,'%60%60');
-					if(prop != 'shivaId' && prop != 'shivaMod') {
-						url += pref + prop + '=' + value;
-						pref = '&';
-						if(prop == "height") { fheight = value; }
-						if(prop == "weight") { fwidth = value; }
-					}
-				}
+				var fheight = (typeof(json.height) == "undefined" || json.height < 1) ? 800 : json.height;
+				var fwidth = (typeof(json.width) == "undefined" || json.width < 1) ? 500 : json.width;
+	
 				if(!isNaN(fheight)) { fheight = parseInt(fheight) + 15; }
 				if(!isNaN(fwidth)) { fwidth = parseInt(fwidth) + 15; }
 				var iframe = document.createElement('iframe');
-				console.info("url: " + url);
 				iframe.setAttribute('src', url);
 				iframe.setAttribute('frameborder','0');
 				iframe.setAttribute('scrolling','no');

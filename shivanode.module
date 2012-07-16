@@ -94,7 +94,7 @@ function shivanode_init() {
       $js = drupal_get_path('module', 'shivanode') . $js;
     }
     drupal_add_js($js, $type);
-    drupal_add_js('jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . SHIVA_VIEWER . '"});','inline');
+    drupal_add_js('jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"});','inline');
   }
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/shivanode.css');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
