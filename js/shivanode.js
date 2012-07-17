@@ -78,6 +78,12 @@
 						$('.spreadsheet-add-de-link').hide();
 					}
 				});
+				
+				// Register last submit button clicked in window.lastButtonClicked variable to check if leaving without saving in
+				//     .setWindowUnloadConfirm function
+				$('input[type="submit"]').each(function() {
+					$(this).click(function() { window.lastButtonClicked = $(this).attr('id'); });
+				});
 			}
 			 
 			// If it's an embed code pop-up, add change to the select
@@ -634,13 +640,29 @@
 		}
 	};
 	
+	/*
+	 * setUnloadConfirm: sets the window onbeforeunload function to check if leaving the page without saving.
+	 * 			In document ready function above, all input[type="submit"] are made to record their ID in 
+	 * 			window.lastButtonClicked when they are clicked. This is checked and the .val() of the button
+	 * 			is retreived (i.e. the button text) if this text has "save" in it anywhere, then it proceeds
+	 * 			otherwise it asks user to confirm.
+	 * 
+	 * 			In case of overlay, if the close button is clicked, then it asks for confirmation.
+	 */
 	Drupal.Shivanode.setUnloadConfirm = function(ison) { 
 		if(ison) {
 			jQuery('#overlay-close, input[value=New]').attr('onmousedown', 
 				'javascript: if(confirm(\"Are you sure you want to leave without saving?\")) {jQuery(this).click();}');
 			if(window.onbeforeunload == null) {
-				window.onbeforeunload = function () {
-					return "You have changed the data on this page.";
+				window.onbeforeunload = function (e) {
+					var retval = "You have changed the data on this page.";
+					var btext = "";
+					if(typeof(window.lastButtonClicked) != "undefined") {
+						var bid = window.lastButtonClicked;
+						btext = $('#' + bid).val().toLowerCase();
+						if(btext.indexOf('save') > -1 || btext.indexOf('update') > -1 || btext.indexOf('preview') > -1) { retval = null; }
+					}
+					return retval;
 				}
 			}
 		} else {

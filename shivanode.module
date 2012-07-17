@@ -196,6 +196,7 @@ function shivanode_menu() {
   
 	$items['shib/auth/check'] = array(
 		'title' => t('Check Shibboleth Authentication'),
+		'type' => MENU_LOCAL_TASK,
     'description' => t('URL called by JS Interval to check if Shibboleth session is still active'),
     'page callback' => '_shivanode_shib_check',
     'access callback' => TRUE,
