@@ -194,6 +194,13 @@ function shivanode_menu() {
       'file' => 'shivanode.inc',
     );
   
+	$items['shib/auth/check'] = array(
+		'title' => t('Check Shibboleth Authentication'),
+    'description' => t('URL called by JS Interval to check if Shibboleth session is still active'),
+    'page callback' => '_shivanode_shib_check',
+    'access callback' => TRUE,
+    'file' => 'shivanode.inc',
+	);
   return $items;
 }
 

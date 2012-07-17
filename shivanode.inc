@@ -359,96 +359,6 @@ function _get_shivanode_access_status($node) {
 }
 
 /**
- * Callback that for menu item that creates a page listing all shivanodes
- *
- * @return
- *   a build array
- *   a renderable array showing a list of our nodes.
- *
- * @see node_load()
- * @see node_view()
- * @see node_example_field_formatter_view()
- */
-/*   This function is replaced by a View
-function _shivanode_list_page() {
-  global $user;
-  $uid = $user->uid;
-  drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
-  // Find all nodes of type shivanode and put the data into a renderable array
-  $markup = "";
-  $query = db_select('node', 'n');
-  $query->join('field_data_shivanode_element_type', 'stype', 'n.nid = stype.entity_id');
-  $query->fields('n')
-    ->fields('stype')
-    ->condition('n.type', 'shivanode');
-  $results = $query->execute();
-  $tagdata = db_query('SELECT t.tid, t.name FROM {taxonomy_term_data} t');
-  $tags = array();
-  foreach ($tagdata as $tag) {
-    $tags[$tag->tid] = $tag->name;
-  }
-  $etypes = _shivanode_element_typelist();
-  $markup .= '<p>This is a list of all the Shiva Elements that have been created to date.</p>';
-  //$show_one = 0;
-  $markup .= '<table id="shiva_node_list" class="display"><thead><tr>' .
-              '<!--<th>ID</th>--><th>Title</th><th>Type</th><th>Author</th>' .
-              '<th>Date Created</th><th>Date Modified</th><th>Tags</th><th>Actions</th>' .
-              '</tr></thead><tbody>';
-  foreach ($results as $row) {
-    $node = node_load($row->nid);
-    if (node_access('view', $node)) {
-      $nid = $node->nid;
-      $npath = 'node/' . $nid;
-      $tagstr = '';
-      $nodetags = db_query("SELECT t.tid FROM {taxonomy_index} t WHERE t.nid = :nid", array(':nid' => $nid));
-      foreach ($nodetags as $tag) {
-        $tid = $tag->tid;
-        $tagstr .= l($tags[$tid], 'taxonomy/term/' . $tid) . ', ';
-      }
-      $tagstr = substr($tagstr, 0, strlen($tagstr) - 2);
-      // markup of table body
-      $statstr = '';
-      if (_get_shivanode_access_status($node) == "Private") {
-        $statstr = '<span class="private" title="Private element">*</span>';
-      }
-      $markup .= '<tr>';
-      //$markup .= '<td>' . l($nid, $npath) . '</td>'; // Node ID
-      $markup .= '<td>' . trim(l($node->title, $npath)) . $statstr . '</td>'; // Node Title
-      $markup .= '<td>' . $etypes[$row->shivanode_element_type_value] . '</td>'; // Element Type
-      $uid = $node->uid;
-      $account = user_load($uid);
-      $uname = (isset($account->name))?$account->name:"anonymous";
-      $markup .= '<td>' . $uname . '</td>'; // Creators Name
-      $created = $node->created;
-      $markup .= '<td class="nobreak"><span class="hidden">' . $created . '</span>' . date('M j, Y<\b\r/>g:i:s a', $created) . '</td>'; // Date Created
-      $changed = $node->changed;
-      $markup .= '<td class="nobreak"><span class="hidden">' . $changed . '</span>' . date('M j, Y<\b\r/>g:i:s a', $changed) . '</td>'; // Date Modified
-      $markup .= '<td>' . $tagstr . '</td>'; // Tags
-      $act_str = '<span class="actions">';
-      $nodeuser = $node->uid;
-      //
-      $drupal_base = str_replace(drupal_get_destination(), '', request_uri()) . drupal_get_path('module', 'shivanode');
-      $imgtag = '<img src="' . $drupal_base . '/images/ICONTYPE_icon.png" title="ICONTYPE" class="link" />';
-      $actions = array();
-      $actions[] = l(str_replace('ICONTYPE', 'view', $imgtag), 'node/' . $nid, array('html' => array('html' => 'true')));
-      if (node_access('update', $node)) {
-        $actions[] = l(str_replace('ICONTYPE', 'edit', $imgtag), 'node/' . $nid . '/edit', array('html' => array('html' => 'true')));
-      }
-      if (node_access('delete', $node)) {
-        $actions[] = l(str_replace('ICONTYPE', 'delete', $imgtag), 'node/' . $nid . '/delete', array('html' => array('html' => 'true')));
-      }
-      $act_str = '<span class="actions">' . implode(' ', $actions) . '</span>';
-      $markup .= '<td>' . $act_str . '</td>'; // Controls
-      $markup .= '</tr>';
-    }
-  }
-  $markup .= '</table>';
-  $markup .= '<p class="table-note"><span class="private" title="Private element">*</span> indicates a private element viewable only by the creator and administrators.</p>';
-  return $markup;
-}
- */
- 
-/**
  * Function for turning a JSON Hash Object into a Shiva Go URL query string
  *
  * @return
@@ -1511,6 +1421,16 @@ function _shivanode_search_json($q) {
     );
   }
   //echo drupal_json_encode(_shivanode_search($q,$conditions));
+}
+
+/*
+ * _shivanode_shib_check(): called by the menu item which is called by a JS interval to test 
+ * 			if Shibboleth session is still active. If expired, JS popups up an alert
+ */
+function _shivanode_shib_check() {
+	$status = (!empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired";
+	$json = '{ "status": "' . $status . '"}';
+	drupal_json_output($json);
 }
 
 /* code initially copied from node_search_execute */

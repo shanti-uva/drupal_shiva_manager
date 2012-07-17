@@ -14,6 +14,10 @@
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
 			setTimeout(function () {$('body').css('padding-top', '0px');}, 50);
 			
+			Drupal.Shivanode.shibstatus = null;
+			
+			setInterval(function () { Drupal.Shivanode.testShibAuth(); }, 120000); // Test Shibolleth Authentication every 2 mins
+			
 			// Initialize HTML5 messaging
 			if (window.addEventListener) {
 				window.addEventListener('message', Drupal.Shivanode.shivaMessageHandler, false);
@@ -672,6 +676,27 @@
 	  	console.log('There is no frame by the name of: ' + iFrame); // for debugging messages, send to console
 	  }
 	};
+	
+	/*
+	 * testShibAuth: a function that tests whether Shibolleth authentication is still valid
+	 */
+	Drupal.Shivanode.testShibAuth = function() {
+		 // if shibstatus variable is undefined, don't check, because they haven't logged in yet
+		jQuery.getJSON(Drupal.settings.basePath + 'shib/auth/check', function(data) { 
+			var status = JSON.parse(data).status;
+/*
+			if(typeof(console) == "object") { 
+					console.info('testing shibboleth authentication: present status = ' + status + ', past = ' + Drupal.Shivanode.shibstatus); 
+			}
+*/
+			if(Drupal.Shivanode.shibstatus == "ok" && status != "ok") {
+				alert("Your Netbadge session has expired!");
+				Drupal.Shivanode.shibstatus = null; // so message only appears once
+			} else {
+				Drupal.Shivanode.shibstatus = status;
+			}
+		});
+	}
 	
 	/*
 	 * toggleJsonElement : a function that hides or shows the div with the JSON data in it
