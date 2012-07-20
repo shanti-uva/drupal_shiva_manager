@@ -655,12 +655,12 @@
 				'javascript: if(confirm(\"Are you sure you want to leave without saving?\")) {jQuery(this).click();}');
 			if(window.onbeforeunload == null) {
 				window.onbeforeunload = function (e) {
-					var retval = "You have changed the data on this page.";
+					var retval = "You have changed the data on this page without saving it.";
 					var btext = "";
 					if(typeof(window.lastButtonClicked) != "undefined") {
 						var bid = window.lastButtonClicked;
 						btext = $('#' + bid).val().toLowerCase();
-						if(btext.indexOf('save') > -1 || btext.indexOf('update') > -1 || btext.indexOf('preview') > -1) { retval = null; }
+						if(btext.match(/save|update|preview|delete/)) { retval = null; }
 					}
 					return retval;
 				}
