@@ -609,7 +609,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       if(is_numeric($width)) { $width += 50;}
       $iframe .= '<iframe id="shivaViewFrame" src="' . $iframeurl . '"';
       $iframe .= ' height="' . $height . '" width="' . $width . '"';
-      $iframe .= ' scrolling="no" frameborder="0" ' . $disStr;
+      $iframe .= ' scrolling="auto" style="overflow: auto;" frameborder="0" ' . $disStr;
       $iframe .= '> </iframe>';
       $iframe .= '<div id="shivaViewFrameData" style="display: none;">' . $item['value'] . '</div>';
 /*
@@ -835,6 +835,7 @@ function shivanode_add_og_user_role($form, &$form_state) {
  *  This code creates the input and edit form for a shivanode
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
+  _shivanode_check_google_login();
   $action = $form['#action']; // the action url as stored in form
   $sntype = _shivanode_get_element_type($form['#node']);
   // Make a json object from json string if set, otherwise set jobj to FALSE
