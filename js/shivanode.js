@@ -28,30 +28,23 @@
 			
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
-				// When there's a validation error, reload the type of iframe
+				// When returning from a validation error, reload the type of iframe (because .IframeSrcUrl is defined)
 				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
 					$('#shivaEditFrame').attr('src', Drupal.Shivanode.IframeSrcUrl);
 					$('#iframe_container .fieldset-legend').text(Drupal.Shivanode.IframeType);
 					Drupal.Shivanode.IframeSrcUrl = null;
 				}
+/*
 				$('iframe#shivaEditFrame').load(function() {
 					var json = $('#edit-shivanode-json-und-0-value').val();
 					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
 						setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 1500);
-						// Drupal.Shivanode.loadJS = false;
 					}
-					/*
-					if(json.length > 10 ) { // if json exists it's an edit frame and load that json value into iframe'
-						Drupal.Shivanode.putJSON('shivaEditFrame',json);
-					} else {
-						Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); // If not, it's a new frame and get the starting JSON from it 
-					}*/
 					if($('#iframe_container legend .form-required').length == 0) {
 						$('#iframe_container legend span').append('<span title="This field is required." class="form-required">*</span>');
 					}
-					// after 3 seconds wait, start getting JSON from iframe every sec
-					//setTimeout('Drupal.Shivanode.monitorEditFrame(true)',3000);
-				});
+				});*/
+
 				// move the required asterisk from the uneditable JSON field to the Iframe legend
 				$("#shivanode_json_div label:contains('Shiva Element')").text('JSON Value');
 				$('#shivanode-json-add-more-wrapper label span.form-required').appendTo('#iframe_container legend span');
@@ -313,6 +306,16 @@
 		} else if (e.data.indexOf('SetDataElement=') == 0) {
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
+			
+		// ShivaReady=true : Sent by editor page when it's ready to receive the JSON data for a visualization
+		} else if (e.data.indexOf('ShivaReady=') == 0 ) {
+			var shivaready = e.data.substr(11);
+			if(shivaready == "true" && Drupal.Shivanode.loadJS == true) {
+				var json = $('#edit-shivanode-json-und-0-value').val();
+				//Drupal.Shivanode.putJSON('shivaEditFrame',json);
+				setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 1000);
+				Drupal.Shivanode.loadJS = false;
+			}
 		}
 	};
 
@@ -459,6 +462,7 @@
 	 * 		Those pages then handle the putJSON= message, which is not handled in this JS
 	 */
 	Drupal.Shivanode.putJSON = function(iframe,json) {
+		console.trace();
 		if(Drupal.Shivanode.debug != null && Drupal.Shivanode.debug.send != '' && typeof(console) == 'object') {
 			var pref = ($("html.lightpop").length > 0 || $('#' +iframe).parents('#overlay').length > 0) ? "Popup " : "Parent ";
 			//console.debug(pref + "(Sending JSON to " + iframe + "): " + json);
