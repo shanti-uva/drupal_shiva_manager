@@ -615,6 +615,7 @@
 		}
   	// Otherwise, it's the Shiva Manager asking for the JSON of an Element to store
 		var jobj = JSON.parse(json); 
+		Drupal.Shivanode.checkKMLUrls(jobj);
 		var jdurl = jobj.dataSourceUrl;
 		// if there's no dataSourceUrl and a data element is linked with the present edit form, then add that info
 		if(typeof(jdurl) == 'string' && jdurl == '' && $('#data_sheet_in_use').length == 1) {
@@ -630,6 +631,32 @@
 			var ide = Drupal.Shivanode.IDE;
 			Drupal.Shivanode.IDE = null;
 			Drupal.Shivanode.doInsertDataElement(ide.url, ide.json);
+		}
+	};
+	
+	Drupal.Shivanode.checkKMLUrls = function(jobj) {
+		for(var o in jobj) {
+			if(o.indexOf("item-") > -1) {
+				var srch = jobj[o].match(/layerSource:([^;]+)/);
+				if(typeof(srch[1]) != "undefined") {
+					var url = srch[1].replace(/`/g, ":");
+					$.ajax({
+						url: 'http://shantivis.org/sites/all/modules/shivanode/pingurl.php',
+						data: 'url=' + url,
+						async: false,
+						success: function(data) {
+							var layername = o.replace("item","Layer");
+							if(data=="false" && typeof(window[layername + "-alert"]) == "undefined") {
+								alert(o.replace("item","Layer") + " url is invalid: \n" + url);
+								window[layername + "-alert"] = true;
+							}
+						},
+						error: function(e) {
+							alert("Error testing KML layer url (" + o.replace("item","Layer") +  ")");
+						}
+					})
+				}
+			}
 		}
 	};
 	
