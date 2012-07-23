@@ -3,6 +3,8 @@
  * @file
  * A custom module that creates, manages, and displays a node type for instances (elements)
  *   of the Shanti Interactive Visualization Application (SHIVA) plugin.
+ * 
+ * I am in the test branch now!
  */
  
 // default URL for Visualization Player
