@@ -1025,7 +1025,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         $eltype . '</span></legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
-        '" scrolling="no" frameborder="0" onmouseout="Drupal.Shivanode.getJSON();"> </iframe></fieldset>' .
+        '" scrolling="auto" style="overflow: auto;" frameborder="0" onmouseout="Drupal.Shivanode.getJSON();"> </iframe></fieldset>' .
         '<div id="shivanode_json_div"' . $jsonDivDisplay . '>';
   $form['shivanode_json']['#suffix'] = '</div>';
   $form['shivanode_json']['#weight'] = '4';
