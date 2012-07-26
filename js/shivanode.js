@@ -37,7 +37,7 @@
 				$('iframe#shivaEditFrame').load(function() {
 					var json = $('#edit-shivanode-json-und-0-value').val();
 					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
-						setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 1500);
+						setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
 						// Drupal.Shivanode.loadJS = false;
 					}
 					/*
@@ -313,6 +313,13 @@
 		} else if (e.data.indexOf('SetDataElement=') == 0) {
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
+		
+		} else if (e.data.indexOf('ShivaReady=') == 0) {
+			if(Drupal.Shivanode.loadJS == true) {
+				var json = $('#edit-shivanode-json-und-0-value').val();
+				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
+				Drupal.Shivanode.loadJS = false;
+			}
 		}
 	};
 
@@ -470,6 +477,7 @@
 		try {
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.ShivaMessage(iframe,cmd);
+			console.info(cmd);
 		} catch(e) {
 			if(typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
