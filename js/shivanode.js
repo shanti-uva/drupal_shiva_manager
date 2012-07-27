@@ -37,7 +37,7 @@
 				$('iframe#shivaEditFrame').load(function() {
 					var json = $('#edit-shivanode-json-und-0-value').val();
 					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
-						setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
+						//setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
 						// Drupal.Shivanode.loadJS = false;
 					}
 					/*
@@ -242,10 +242,11 @@
 		
 	  // ChartChanged={chart type} : When the visualization chart is changed
 	  if (e.data.indexOf('ChartChanged=') == 0) {
-	  	if($('#shivanode_data_nid').length > 0) {
-	  		// if there is a set data node, then reinsert that data
-	  		setTimeout(Drupal.Shivanode.insertDataElement('preset'), 1000);
-	  	}
+			if($('#shivanode_data_nid').length > 0) {
+				// if there is a set data node, then reinsert that data
+				setTimeout(Drupal.Shivanode.insertDataElement('preset'), 1000);
+			}
+			
 		// DataChanged={boolean} : When certain pages are changed
 		} else if (e.data.indexOf('DataChanged=') == 0) {
 			var mode = e.data.substr(12);
@@ -287,7 +288,6 @@
 					
 		// RelayJSON= : Relay JSON from one Iframe (lightbox popup) to another (Shiveyes editor)
 		} else if (e.data.indexOf('RelayJSON=') == 0) {
-			//console.info("here: " + Drupal.Shivanode.loadJS)
 			if (Drupal.Shivanode.loadJS) { return; }
 			var json = e.data.substr(10);
 			Drupal.Shivanode.relayJSON(json, e);
@@ -315,11 +315,12 @@
 			Drupal.Shivanode.setDataElement(did);
 		
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
-			if(Drupal.Shivanode.loadJS == true) {
+			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
-				Drupal.Shivanode.loadJS = false;
+				Drupal.Shivanode.jsonloaded = true;
 			}
+			
 		}
 	};
 
@@ -468,7 +469,6 @@
 	Drupal.Shivanode.putJSON = function(iframe,json) {
 		if(Drupal.Shivanode.debug != null && Drupal.Shivanode.debug.send != '' && typeof(console) == 'object') {
 			var pref = ($("html.lightpop").length > 0 || $('#' +iframe).parents('#overlay').length > 0) ? "Popup " : "Parent ";
-			//console.debug(pref + "(Sending JSON to " + iframe + "): " + json);
 			if(Drupal.Shivanode.debug.trace) { console.trace();}
 		}
 		if (typeof(json) == 'object') {
@@ -477,7 +477,6 @@
 		try {
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.ShivaMessage(iframe,cmd);
-			console.info(cmd);
 		} catch(e) {
 			if(typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
@@ -647,25 +646,41 @@
 			if(o.indexOf("item-") > -1) {
 				var srch = jobj[o].match(/layerSource:([^;]+)/);
 				if(typeof(srch[1]) != "undefined") {
-					var url = srch[1].replace(/`/g, ":");
+					var dataurl = srch[1].replace(/`/g, ":");
+					var wloc = window.location;
+					var ajaxurl = Drupal.Shivanode.getModuleUrl() + 'pingurl.php';
 					$.ajax({
-						url: 'http://shantivis.org/sites/all/modules/shivanode/pingurl.php',
-						data: 'url=' + url,
+						url: ajaxurl,
+						data: 'url=' + dataurl,
 						async: false,
 						success: function(data) {
 							var layername = o.replace("item","Layer");
 							if(data=="false" && typeof(window[layername + "-alert"]) == "undefined") {
-								alert(o.replace("item","Layer") + " url is invalid: \n" + url);
+								alert(o.replace("item","Layer") + " url is invalid: \n" + dataurl);
 								window[layername + "-alert"] = true;
 							}
 						},
 						error: function(e) {
-							alert("Error testing KML layer url (" + o.replace("item","Layer") +  ")");
+							//alert("Error testing KML layer url (" + o.replace("item","Layer") +  ")");
+							if(typeof(console) == "object") { console.info(e); }
 						}
 					})
 				}
 			}
 		}
+	};
+	
+	Drupal.Shivanode.getModuleUrl = function() {
+		var scripturl = '';
+		$('script').each(function() {
+			var src = $(this).attr('src');
+			if(typeof(src) == "string" && src.indexOf('shivanode.js') > -1) {
+				src = src.replace('shivanode.js','');
+				var pts = src.split('js/?');
+				scripturl = pts[0];
+			}
+		});
+		return scripturl;
 	};
 	
 	Drupal.Shivanode.setIframeSpecifics = function() {
