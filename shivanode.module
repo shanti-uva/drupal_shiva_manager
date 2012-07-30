@@ -836,7 +836,6 @@ function shivanode_add_og_user_role($form, &$form_state) {
  *  This code creates the input and edit form for a shivanode
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
-  _shivanode_check_google_login();
   $action = $form['#action']; // the action url as stored in form
   $sntype = _shivanode_get_element_type($form['#node']);
   // Make a json object from json string if set, otherwise set jobj to FALSE
@@ -856,7 +855,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $eltype = '';
   $form['shivanode_element_type']['#weight'] = 1;
   $form['shivanode_access']['#weight'] = 2;
-  if ($isNewEl) { 
+  if ($isNewEl) {
+  	_shivanode_check_google_login(); 
     $form['shivanode_access']['und']['#default_value'] = 1;
     $form['shivanode_element_type']['und']['#default_value'] = 7; // default value is visualization
     $eltype = t('Visualization');

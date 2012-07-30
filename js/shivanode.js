@@ -320,7 +320,6 @@
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
 				Drupal.Shivanode.jsonloaded = true;
 			}
-			
 		}
 	};
 
