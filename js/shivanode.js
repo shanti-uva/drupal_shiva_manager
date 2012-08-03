@@ -644,7 +644,7 @@
 		for(var o in jobj) {
 			if(o.indexOf("item-") > -1) {
 				var srch = jobj[o].match(/layerSource:([^;]+)/);
-				if(typeof(srch[1]) != "undefined") {
+				if(srch != null && typeof(srch[1]) != "undefined") {
 					var dataurl = srch[1].replace(/`/g, ":");
 					var wloc = window.location;
 					var ajaxurl = Drupal.Shivanode.getModuleUrl() + 'pingurl.php';
