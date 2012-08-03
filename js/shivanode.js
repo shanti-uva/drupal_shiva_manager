@@ -35,7 +35,6 @@
 					Drupal.Shivanode.IframeSrcUrl = null;
 				}
 				$('iframe#shivaEditFrame').load(function() {
-					
 					var json = $('#edit-shivanode-json-und-0-value').val();
 					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
 						//setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
@@ -222,8 +221,6 @@
 		 * 																					 and the parent calls the same function to get the data elemen through the API 
 		 * 																					 and inserts the info into the form.
 		 * 
-		 * 		16. ShivaReady=true : Sent from SHIVA_Show.js object when a visualization is ready for input
-		 * 
 		 */
 		
 	  var response='';
@@ -316,9 +313,7 @@
 		} else if (e.data.indexOf('SetDataElement=') == 0) {
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
-			
-		// ShivaReady Message: Sent when the visualization is ready
-
+		
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
 			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
@@ -486,7 +481,7 @@
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
 			}
 		}
-		//setTimeout("Drupal.Shivanode.loadJS = false;", 1000);
+		setTimeout("Drupal.Shivanode.loadJS = false;", 1000);
 		//Drupal.Shivanode.monitorEditFrame(true);
 	};
 	
