@@ -173,6 +173,8 @@
 	
 	Drupal.Shivanode.dataChanged = false;
 	
+	Drupal.Shivanode.dataChangedTimes = 0; // Count the number of dataChanged messages sent. Only register after 2nd time. See message handler below.
+	
 	Drupal.Shivanode.chartChanged = false;
 	
 	/*
@@ -225,10 +227,6 @@
 		
 	  var response='';
 	  
-	  if(e.data.indexOf('DataChanged') > -1) {
-	  	//alert("data changed: " + e.data);
-	  }
-	  
 	  if(Drupal.Shivanode.debug != null && typeof(console) == 'object') {
 	  	if(Drupal.Shivanode.debug.receive == true) {
 	  		if(Drupal.Shivanode.debug.receivetype == 'all' || e.data.indexOf(Drupal.Shivanode.debug.receivetype) > -1) {
@@ -248,10 +246,16 @@
 			}
 			
 		// DataChanged={boolean} : When certain pages are changed
+		// When editing data gets changed upon initialization and after sending JSON to editor
+	  //  so we only need to register a change after the 2nd time this is called
 		} else if (e.data.indexOf('DataChanged=') == 0) {
 			var mode = e.data.substr(12);
-			Drupal.Shivanode.setDataChanged(mode);
-
+			if (mode != "false") { // Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
+				Drupal.Shivanode.dataChangedTimes++;
+				if(Drupal.Shivanode.dataChangedTimes > 2) { // wait until after 2nd time
+					Drupal.Shivanode.setDataChanged(mode);
+				}
+			}
 	  // dataSourceUrl : opens a list of data elements to use to create a visualization
 		} else if (e.data.indexOf('dataSourceUrl') == 0) {
 			//Drupal.Shivanode.monitorEditFrame(false);
