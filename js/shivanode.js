@@ -314,6 +314,7 @@
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
 		
+		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
 			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();

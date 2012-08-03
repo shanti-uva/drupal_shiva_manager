@@ -1840,8 +1840,8 @@ function _shivanode_add_datalink(&$form, $did, $isNewEl) {
     // if it is a  new element call JS function to load the data element data once form is loaded.
     // use 'preset' because this function already sets the markup for the data element
     // Otherwise, load the data from the Drupal unless told not to
-    $jsfunct =  ($isNewEl)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : ''; //if(!Drupal.Shivanode.loadJS) { Drupal.Shivanode.setDataSheet(\'' . $dataurl . '\', \'' . $datatitle . '\');} 
-
+    $jsfunct =  ($isNewEl)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
+    		'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . $dataurl . '\', \'' . $datatitle . '\');}';
     $form['gdocinfo']['script'] = array(
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript">' .
