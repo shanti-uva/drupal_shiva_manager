@@ -31,6 +31,10 @@ div.sn-share-button {
 	padding-bottom: 6px;
 }
 
+div.node-shivanode div.sn-share-button {
+	margin-top: -60px;
+}
+
 form.node-shivanode-form div.sn-share-button  {
 	margin-right: 3px;
 }

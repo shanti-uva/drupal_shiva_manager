@@ -244,7 +244,7 @@
 	  if (e.data.indexOf('ChartChanged=') == 0) {
 			if($('#shivanode_data_nid').length > 0) {
 				// if there is a set data node, then reinsert that data
-				setTimeout(Drupal.Shivanode.insertDataElement('preset'), 1000);
+				setTimeout("Drupal.Shivanode.insertDataElement('preset');", 1000);
 			}
 			
 		// DataChanged={boolean} : When certain pages are changed
