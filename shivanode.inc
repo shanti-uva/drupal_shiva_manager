@@ -218,6 +218,7 @@ function _shivanode_installed_instances() {
 function _shivanode_element_typelist() {
   $options = array(
     1 => t('Data'),
+    11 => t('Draw'),
     2 => t('Image'),
     3 => t('Map'),
     10 => t('Network'),
@@ -228,8 +229,6 @@ function _shivanode_element_typelist() {
     /*
     8 => 'Control',
         9 => 'Canvas',*/
-    
-    
   );
   return $options;
 }
@@ -246,6 +245,7 @@ function _shivanode_options_list($option = NULL) {
   $options = array(
     t('Elements') => array(
       1 => t('Data'),
+      11 => t('Draw'),
       2 => t('Image'),
       3 => t('Map'),
       10 => t('Network'),
@@ -530,6 +530,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
     
+  $form['shivanode_url_settings']['shivanode_draw_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Draw Editor File: '),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_draw_editor', SHIVA_DRAW_EDITOR),
+    '#required' => TRUE,
+  );
+	  
   $form['shivanode_url_settings']['shivanode_image_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Image Editor File: '),
@@ -651,6 +659,7 @@ function _shivanode_settings_default_values(&$form_state) {
   $form_state['input']['shivanode_editor_url'] = SHIVA_EDITOR;
   $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
   $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
+  $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
   $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
   $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
   $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
@@ -1365,6 +1374,9 @@ function _get_shivaframe_url($opt) {
     case 10:  // Network
       $player =  variable_get('shivanode_network_editor', SHIVA_NETWORK_EDITOR);
       break;
+		case 11:  // Draw
+      $player = variable_get('shivanode_drawditor', SHIVA_DRAW_EDITOR); 
+			break;
 	}
 	if(strpos($player,'http://') === false) {  $player = variable_get('shivanode_editor_url', SHIVA_EDITOR) . $player; }
   $player = $player . '?pr=d';

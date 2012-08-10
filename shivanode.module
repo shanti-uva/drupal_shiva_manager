@@ -18,6 +18,9 @@ define('SHIVA_CHART_EDITOR', 'chart.htm');
 // default URL for Data Editor
 define('SHIVA_DATA_EDITOR', 'data.htm');
 
+// default URL for Draw Editor
+define('SHIVA_DRAW_EDITOR', 'draw.htm');
+
 // default URL for Image Editor
 define('SHIVA_IMAGE_EDITOR', 'image.htm');
 
