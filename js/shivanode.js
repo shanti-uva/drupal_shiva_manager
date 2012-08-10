@@ -223,6 +223,8 @@
 		 * 																					 and the parent calls the same function to get the data elemen through the API 
 		 * 																					 and inserts the info into the form.
 		 * 
+		 * 		16. ShivaReady=true: Sent from editor frame and first time puts the Drupal JSON into it
+		 * 
 		 */
 		
 	  var response='';
@@ -473,7 +475,7 @@
 	Drupal.Shivanode.putJSON = function(iframe,json) {
 		if(Drupal.Shivanode.debug != null && Drupal.Shivanode.debug.send != '' && typeof(console) == 'object') {
 			var pref = ($("html.lightpop").length > 0 || $('#' +iframe).parents('#overlay').length > 0) ? "Popup " : "Parent ";
-			if(Drupal.Shivanode.debug.trace) { console.trace();}
+			if(Drupal.Shivanode.debug.trace) { console.trace(); }
 		}
 		if (typeof(json) == 'object') {
 			json = JSON.stringify(json);
