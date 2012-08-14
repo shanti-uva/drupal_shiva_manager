@@ -304,9 +304,10 @@ function _get_shivanodes($stype = 0) {
     ->fields('stype')
     ->condition('n.type', 'shivanode')
     ->condition('n.status', NODE_PUBLISHED);
-  if(strpos($stype,'recent') > -1 ) {
+  if (strpos($stype, 'recent') > -1 ) {
     $query->orderBy('n.changed', 'DESC');
-  } else {
+  } 
+  else {
     $query->orderBy('n.title', 'ASC');
   }
   // if stype variable is supplied and its a number get only that type of shivanode
@@ -318,11 +319,12 @@ function _get_shivanodes($stype = 0) {
   foreach ($results as $row) {
     $node = node_load($row->nid);
     if ($node->uid == $uid || _get_shivanode_access_status($node) == "Public" ||  user_access('bypass node access')) {
-      if(strpos($stype, "nodata") > -1 ) {
-        if(_get_shivanode_type($node) != "Data") {
+      if (strpos($stype, "nodata") > -1 ) {
+        if (_get_shivanode_type($node) != "Data") {
           $nodes[] = $node;
         }
-      } else {
+      } 
+      else {
         $nodes[] = $node;
       }
     }
@@ -353,7 +355,9 @@ function _get_shivanode_access_status($node) {
     $options = _shivanode_access_modes();
     $accessfield = $node->shivanode_access;
     $val = $accessfield['und']['0']['value'] * 1;
-    if(isset($options[$val])) { $status = $options[$val];  }
+    if (isset($options[$val])) {
+      $status = $options[$val];  
+    }
   }
   return $status;
 }
@@ -391,9 +395,9 @@ function _shivanode_parse_json($jdata) {
  */
 function _shivanode_admin_settings($form, &$form_state) {
   
-	//dpm($form_state, "Form State in original routine");
+  //dpm($form_state, "Form State in original routine");
   $form['shivanode_settings_header'] = array(
-    '#markup'=> '<h3>Settings for the Shivanode Module</h3>' .
+    '#markup' => '<h3>Settings for the Shivanode Module</h3>' .
       '<p>' . t('There are two types of settings for the Shivanode module. The display settings are where one can set ' .
       'the dimensions of the visualizations and whether individual elements can override the default settings. ' .
       'In the URL section the adminitrator can set the URLs for the default players and editors for Shivanodes.') . '</p.',
@@ -484,7 +488,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_display_settings']['p'] = array(
     '#type' => 'markup',
-    '#markup' => '<p>' . t('Settings to show or hide the underlying JSON of a SHIVA element are found within ') .
+    '#markup' => '<p>' . t('Settings to show or hide the underlying JSON of a SHIVA element are found within') . ' ' .
       l(t('the indvidual user permisions'), 'admin/people/permissions') . '.</p>',
   );
   
@@ -509,7 +513,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_url_settings']['shivanode_editor_url'] = array(
     '#type' => 'textfield',
-    '#title' => t('Base URL (path) for the SHIVA editors: '),
+    '#title' => t('Base URL (path) for the SHIVA editors:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_editor_url', SHIVA_EDITOR),
     '#required' => TRUE,
@@ -524,7 +528,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_url_settings']['shivanode_data_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Data Editor File: '),
+    '#title' => t('Name of the Data Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR),
     '#required' => TRUE,
@@ -532,15 +536,15 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_draw_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Draw Editor File: '),
+    '#title' => t('Name of the Draw Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_draw_editor', SHIVA_DRAW_EDITOR),
     '#required' => TRUE,
   );
-	  
+
   $form['shivanode_url_settings']['shivanode_image_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Image Editor File: '),
+    '#title' => t('Name of the Image Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_image_editor', SHIVA_IMAGE_EDITOR),
     '#required' => TRUE,
@@ -548,7 +552,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_map_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Map Editor File: '),
+    '#title' => t('Name of the Map Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_map_editor', SHIVA_MAP_EDITOR),
     '#required' => TRUE,
@@ -556,7 +560,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_network_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Network Editor File: '),
+    '#title' => t('Name of the Network Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_network_editor', SHIVA_NETWORK_EDITOR),
     '#required' => TRUE,
@@ -564,7 +568,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_subway_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Subway Editor File: '),
+    '#title' => t('Name of the Subway Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR),
     '#required' => TRUE,
@@ -572,7 +576,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_timeline_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Timeline Editor File: '),
+    '#title' => t('Name of the Timeline Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR),
     '#required' => TRUE,
@@ -580,7 +584,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_video_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Video Editor File: '),
+    '#title' => t('Name of the Video Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR),
     '#required' => TRUE,
@@ -588,7 +592,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_chart_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Visualization (chart) Editor File: '),
+    '#title' => t('Name of the Visualization (chart) Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR),
     '#required' => TRUE,
@@ -596,7 +600,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_url_settings']['shivanode_control_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Control Editor File: '),
+    '#title' => t('Name of the Control Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_control_editor', SHIVA_CONTROL_EDITOR),
     '#required' => TRUE,
@@ -604,7 +608,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_url_settings']['shivanode_canvas_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Canvas Editor File: '),
+    '#title' => t('Name of the Canvas Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR),
     '#required' => TRUE,
@@ -631,9 +635,9 @@ function _shivanode_admin_settings($form, &$form_state) {
  * 
  */
 function _shivanode_admin_settings_validate($form, &$form_state) {
-	if($form_state['triggering_element']['#id'] == 'edit-default-values') {
-		_shivanode_settings_default_values($form_state);
-	}
+  if ($form_state['triggering_element']['#id'] == 'edit-default-values') {
+    _shivanode_settings_default_values($form_state);
+  }
 } 
 
 /*
@@ -668,9 +672,9 @@ function _shivanode_settings_default_values(&$form_state) {
   $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
   $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
   $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
-	
-	drupal_set_message(t('All values have been reset to their default'));
-	drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
+
+  drupal_set_message(t('All values have been reset to their default'));
+  drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
 }
 
 function _shivanode_integer_check($element, &$form_state, $form) {
@@ -720,31 +724,32 @@ function _get_recent_shivanodes() {
 
 function _shivanode_gss_form($form, &$form_state) {
   _shivanode_check_google_login();
-  drupal_set_title('Spreadsheet Data');
+  drupal_set_title(t('Spreadsheet Data'));
 
   // Print out a list of spreadsheets using that client.
   $page = array();
   $sslists = _shivanode_get_spreadsheet_list();
   
-  if($sslists === FALSE) {
+  if ($sslists === FALSE) {
     $form['error'] = array(
       'header' => array(
         '#markup' => '<h2>Problem Accessing Information</h2>',
       ),
       'p0' => array(
-        '#markup' => '<p><b>Unexpected Exception Thrown:</b> ' . $msg .  '</p>',
+        '#markup' => '<p><b>Unexpected Exception Thrown:</b> ' . $msg . '</p>',
       ),
       'p1' => array(
-        '#markup' => '<p><b>Session Token:</b> ' . $_SESSION['gdoc_token'] .  '</p>',
+        '#markup' => '<p><b>Session Token:</b> ' . $_SESSION['gdoc_token'] . '</p>',
       ),
       'backlink' => array(
-        '#markup' => '<p>' . l('Try Again?', 'node/spreadsheets') . '</p>',
+        '#markup' => '<p>' . l(t('Try Again?'), 'node/spreadsheets') . '</p>',
       ),
     );
     
     return $form;
     
-  } else {
+  } 
+  else {
       
     // Create a checkable list of spreadsheets that can be converted into data elements
     $avail_list = $sslists[0];
@@ -752,7 +757,6 @@ function _shivanode_gss_form($form, &$form_state) {
     $hasels = $sslists[1];
     $total_sheets = count($avail_list) + count($hasels);
     
-    $ssStr = ($total_sheets == '1')?'spreadsheet':'spreadsheets';
     $form['#prefix'] = '<div class="shivanode_google_spreadsheets">';
     $form['#suffix'] = '</div>';
     // Link to google reauthentication>
@@ -782,25 +786,25 @@ function _shivanode_gss_form($form, &$form_state) {
       '#markup' => '<p>' . t('To create a SHIVA Element using a Google Doc spreadsheet, you must first import that spreadsheet into Shiva to make it into a Shiva data element. The present page has two sections:  Shiva Data Elements, which shows already imported spreadsheets for the Goolge account to which you are currently logged in; and (ii) "My Remaining Google Spreadsheets", which shows your other Google spreadsheets that are available for importation into Shiva. In the first section, you choose one of the Shiva data elements as the base for creating a new Shiva visualization. In the second section, you can import one of your other Google spreadsheets into Shiva, after which it will then appear in the first section, and you can use it as the basis of a visualization. To convert a Google spreadsheet into a Shiva element, check the box next to the spreadsheets you wish to convert into data elements and when you click the button "Create Data Elements" at the bottom, data elements for each of those spreadsheets will be created. If you wish to log on to a different Google Doc account, click the "Switch Google Account" button above.') . '</p>' .
                     '<p>' . t('Finally, the link "View All Shiva Data Elements" above will show you other people&rsquo;s data elements that they have shared with you or a group of which you are part, rather than only showing Shiva data elements that you personally created.') . '<p>',
     );
-	
+
     $form['filterdiv'] = array(
       '#prefix' => '<div id="addspreadsheet-filter"><span class="label">' . t('Filter') . ': </span>',
       '#suffix' => '</div>',
     );
-	
-	$form['filterdiv']['input'] = array(
-		'#type' => 'markup',
-		'#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
-						value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
-	);
-	
+
+    $form['filterdiv']['input'] = array(
+      '#type' => 'markup',
+      '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
+				value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
+    );
+
     $form['gss_done'] = array(
       '#type' => 'fieldset',
       '#title' => t('SHIVA Data Elements (Already Imported Spreadsheets)'),
       '#collapsible' => TRUE,
     );
     
-    if(count($hasels) > 0) {
+    if (count($hasels) > 0) {
       $form['gss_done']['p'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('The following ' . count($hasels) . ' spreadsheets from your Google Docs account have ' .
@@ -812,9 +816,9 @@ function _shivanode_gss_form($form, &$form_state) {
         '#suffix' => '</ul>',
       );
       $list = '';
-      foreach($hasels as $el) {
+      foreach ($hasels as $el) {
         $enode = node_load($el['nid']);
-        $targetTopAttr = array(
+        $target_top_attr = array(
           'attributes' => array(
             'target' => '_top',
           )
@@ -822,12 +826,13 @@ function _shivanode_gss_form($form, &$form_state) {
         $form['gss_done']['ul'][] = array(
           '#type' => 'markup',
           '#markup' => '<li>' . $el['title'] . ' (' . 
-             l(t('Select'), 'node/add/shivanode/' . $el['nid'], $targetTopAttr) . ' | ' .
-             l(t('View'), 'node/' . $el['nid'], $targetTopAttr) . ' | ' .
-             l(t('Edit'), 'node/' . $el['nid'] . '/edit', $targetTopAttr) .  ')</li>',
+             l(t('Select'), 'node/add/shivanode/' . $el['nid'], $target_top_attr) . ' | ' .
+             l(t('View'), 'node/' . $el['nid'], $target_top_attr) . ' | ' .
+             l(t('Edit'), 'node/' . $el['nid'] . '/edit', $target_top_attr) . ')</li>',
         );
       }
-    } else {
+    } 
+    else {
       $form['gss_done']['p'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('You have not added any spreadsheets from the presently logged in Google Docs account. Choose from among ' .
@@ -840,8 +845,9 @@ function _shivanode_gss_form($form, &$form_state) {
       '#type' => 'fieldset',
       '#title' => t('My Remaining Google Spreadsheets'),
       '#collapsible' => TRUE,
-      '#description' => t('Choose from among the ' . ((count($hasels) > 0)?'remaining ': '') . count($avail_list) . ' spreadsheets in your Google Docs account ' .
-        'which ones you would like to make into data elements:'),
+      '#description' => check_plain( t('Choose from among the ' . ((count($hasels) > 0)?'remaining ': '') . 
+        count($avail_list) . ' spreadsheets in your Google Docs account ' .
+        'which ones you would like to make into data elements:')),
     );
     
     // Create Checkboxes
@@ -852,7 +858,7 @@ function _shivanode_gss_form($form, &$form_state) {
     );
     
     $alct = -1;
-    foreach($avail_list as $key =>$value) {
+    foreach ($avail_list as $key => $value) {
       $alct++;
       $form['gss_list']['choices'][$alct] = array(
         '#type' => 'markup',
@@ -867,7 +873,7 @@ function _shivanode_gss_form($form, &$form_state) {
         '#type' => 'checkbox',
         '#prefix' => '<span class="list-checkbox">',
         '#suffix' => '</span>',
-        '#title' => $value,
+        '#title' => check_plain($value),
         '#default_value' => $key,
       );
     }
@@ -903,8 +909,8 @@ function _shivanode_get_spreadsheet_list() {
     return _shivanode_filter_gss_list($sslist);
   } catch (Exception $e) {
     $msg = $e->getMessage();
-    drupal_set_message($msg,'error');
-    return false;
+    drupal_set_message(check_plain($msg), 'error');
+    return FALSE;
   }
 }
 
@@ -914,12 +920,12 @@ function _shivanode_filter_gss_list($sslist) {
   $haselement = array();
  
   $msg = '';
-  foreach($sslist as $url => $title) {
+  foreach ($sslist as $url => $title) {
     // Get all Shiva Data elements from Database
     $query = db_select('node', 'n');
-    $query->join('field_data_shivanode_element_type','t','n.nid=t.entity_id');
-    $query->join('field_data_shivanode_access','a','n.nid=a.entity_id');
-    $query->join('field_data_shivanode_json','j','n.nid=j.entity_id');
+    $query->join('field_data_shivanode_element_type', 't', 'n.nid=t.entity_id');
+    $query->join('field_data_shivanode_access', 'a', 'n.nid=a.entity_id');
+    $query->join('field_data_shivanode_json', 'j', 'n.nid=j.entity_id');
     $query
       ->fields('n', array('nid', 'type', 'title', 'created', 'uid'))
       ->fields('a', array('shivanode_access_value'))
@@ -927,7 +933,7 @@ function _shivanode_filter_gss_list($sslist) {
       ->fields('j', array('shivanode_json_value'))
       ->condition('n.type', 'shivanode', '=')
       ->condition('t.shivanode_element_type_value', 1, '=');
-    $gkey = substr($url,strpos($url,'?'));
+    $gkey = substr($url, strpos($url, '?'));
     $result = $query->execute();
     $found = 0;
     $nid = '';
@@ -935,43 +941,45 @@ function _shivanode_filter_gss_list($sslist) {
     foreach ($result as $record) {
       $json = $record->shivanode_json_value;
       // If the google key is within the data element's json then that spreadsheet has been added.
-      if(strpos($json,$gkey) > -1) {
+      if (strpos($json, $gkey) > -1) {
         // but add the record to the already added list only if the user owns this data element.
-        if($record->uid == $user->uid) {
+        if ($record->uid == $user->uid) {
           $nid = $record->nid;
           $found = 1;
           break;
         }
       }
     }
-    if($found) {
+    if ($found) {
       $haselement[] = array(
           'nid' => $nid,
           'url' => $url,
           'title' => $title,
       );
-    } else {
+    } 
+    else {
       $noelement[] = $title . "_URL:" . $url;
     }
   }
   asort($noelement);
   // split no element items into keyed array
   $avail_list = array();
-  foreach($noelement as $item) {
+  foreach ($noelement as $item) {
     $pts = explode('_URL:', $item);
     $avail_list[$pts[1]] = $pts[0];
   }
-  usort($haselement, 'cmpHasEls');
-  return array($avail_list,$haselement);
+  usort($haselement, 'cmp_titles');
+  return array($avail_list, $haselement);
 }
 
-function cmpHasEls($a, $b) 
-{
-  if($a['title'] < $b['title']) {
+function cmp_titles($a, $b) {
+  if ($a['title'] < $b['title']) {
     return -1;
-  } else if ($a['title'] == $b['title']) {
+  } 
+  elseif ($a['title'] == $b['title']) {
     return 0;
-  } else {
+  } 
+  else {
     return 1;
   }
 }
@@ -994,13 +1002,13 @@ function _shivanode_gss_form_submit($form, &$form_state) {
   $formvalues = $form_state['values'];
   $values = array();
   foreach ($formvalues as $key => $val) {
-    $ind = str_replace(array('access','cbox'),'',$key);
-    $subind = preg_replace('/\d+/','',$key);
+    $ind = str_replace(array('access', 'cbox'), '', $key);
+    $subind = preg_replace('/\d+/', '', $key);
     $values[$ind][$subind] = intval($val);
   }
   $choices = $form_state['complete form']['gss_list']['choices'];
-  foreach(array_keys($values) as $key) {
-    if(is_numeric($key)) {
+  foreach (array_keys($values) as $key) {
+    if (is_numeric($key)) {
       $values[$key]['title'] = $choices[$key]['cbox' . $key]['#title'] . ' (Data)';
       $values[$key]['url'] = $choices[$key]['cbox' . $key]['#default_value'];
     }
@@ -1008,8 +1016,8 @@ function _shivanode_gss_form_submit($form, &$form_state) {
   
   // Filter the $values array created above to $pick which contains only checked options
   $picks = array();
-  foreach($values as $key => $item) {
-    if(isset($item['cbox']) && intval($item['cbox']) == 1) {
+  foreach ($values as $key => $item) {
+    if (isset($item['cbox']) && intval($item['cbox']) == 1) {
       $picks[$key] = $item;
     }
   }
@@ -1017,7 +1025,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
   // Now iterate through the picks and create a node for each
   $out = ""; // For the resulting message after form processing.
   $nct = 0;
-  foreach($picks as $pick) {
+  foreach ($picks as $pick) {
     // Only create a node if there's a url
     $today = date("D, j M Y"); 
     // convert url to URL of the google 'shared' version
@@ -1041,8 +1049,8 @@ function _shivanode_gss_form_submit($form, &$form_state) {
     $nct++;
   }
   // Output message about which spreadsheets have been turned into data elements.
-  $out = $nct . ' data elements have been created!'; 
-  drupal_set_message($out);
+  $out = $nct . ' ' . t('data elements have been created!'); 
+  drupal_set_message(check_plain($out));
 }
 
 /*
@@ -1057,8 +1065,12 @@ function _shivanode_check_google_login($authenticate = TRUE) {
         $session_token = Zend_Gdata_AuthSub::getAuthSubSessionToken($_GET['token']);
         // Store the session token in session.
         $_SESSION['gdoc_token'] = $session_token;
-      } else {
-        if(!$authenticate) { return FALSE; } // if just testing, return false
+      } 
+      else {
+        // if just testing, return false
+        if (!$authenticate) {
+          return FALSE; 
+        }
         // Display link to generate single-use token
         $gdocs = 'http://spreadsheets.google.com/feeds/';
         $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
@@ -1108,10 +1120,10 @@ function _shivanode_data_elements($form, &$form_state) {
                             'and click the &lsquo;Add Spreadsheet&rsquo; button.') . '</p>',
   );
     
-  if(!_shivanode_check_google_login(FALSE)) {
+  if (!_shivanode_check_google_login(FALSE)) {
     $markup['addbutton'] = array(
       '#prefix' => '<div class="addspreadsheet-button"><span>',
-      '#markup' => l('Authenticate Google Account', 'data/spreadsheets', array(
+      '#markup' => l(t('Authenticate Google Account'), 'data/spreadsheets', array(
                       'attributes' => array(
                         'target' => '_top',
                         'class' => 'shiva-button',
@@ -1119,16 +1131,17 @@ function _shivanode_data_elements($form, &$form_state) {
                     )),
        '#suffix' => ' </span></div>',
     );
-  } else {
-  	$markup['filterdiv'] = array(
+  } 
+  else {
+    $markup['filterdiv'] = array(
       '#prefix' => '<div id="addspreadsheet-filter"><span class="label">' . t('Filter') . ': </span>',
       '#suffix' => '</div>',
     );
-	$markup['filterdiv']['input'] = array(
-		'#type' => 'markup',
-		'#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
-						value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
-	);
+    $markup['filterdiv']['input'] = array(
+      '#type' => 'markup',
+      '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
+         value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
+    );
   }
   $markup['existing'] = array(
     '#type' => 'fieldset',
@@ -1137,7 +1150,9 @@ function _shivanode_data_elements($form, &$form_state) {
   );
   
   $markup['existing']['sntoggle'] = array(
-    '#markup' =>'<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode, #shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . t('Public Data Elements') . '<p/>',
+    '#markup' => '<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode, ' . 
+        '#shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . 
+        t('Public Data Elements') . '<p/>',
   );
   
   $markup['existing']['snlist'] = array(
@@ -1147,17 +1162,17 @@ function _shivanode_data_elements($form, &$form_state) {
   
   $nodes = _get_shivanodes(1); // get all shivanode that are data elements (type = 1)
   $lict = 0;
-  foreach($nodes as $node) {
+  foreach ($nodes as $node) {
     $csscode = ($user->uid == $node->uid)? 'mynode"' : 'othernode" style="display:none;"';
     $nuser = user_load($node->uid);
     if (node_access('view', $node)) {
       $lict++;
-      $limarkup = '<li class="' . $csscode . '>'  . l($node->title, 'node/' . $node->nid, array(
+      $limarkup = '<li class="' . $csscode . '>' . l($node->title, 'node/' . $node->nid, array(
         'attributes' => array(
           'target' => '_top',
         ),
       )) . '<span class="uname" style="display: none;">&nbsp;by ' . $nuser->name . '</span> (';
-      $limarkup .= '<a class="link" onmousedown="Drupal.Shivanode.setDataElement(\''.  $node->nid . 
+      $limarkup .= '<a class="link" onmousedown="Drupal.Shivanode.setDataElement(\'' . $node->nid . 
                     '\', true);">' . t('Select') . '</a>';
       if (node_access('update', $node)) {
         $limarkup .=  ' | ' . l(t('Edit'), 'node/' . $node->nid . '/edit', array(
@@ -1173,7 +1188,7 @@ function _shivanode_data_elements($form, &$form_state) {
     }
   }
   
-  if(_shivanode_check_google_login(FALSE)) {
+  if (_shivanode_check_google_login(FALSE)) {
     $sslists = _shivanode_get_spreadsheet_list();
     $gsheets = $sslists[0];
     $markup['spreadsheets'] = array(
@@ -1205,7 +1220,7 @@ function _shivanode_data_elements($form, &$form_state) {
 function _shivanode_data_elements_submit($form, &$form_state) {
   $ssurl = $form_state['values']['newss'];
   $sstitle = $form_state['complete form']['spreadsheets']['newss'][$ssurl]['#title'] . ' (Data)';
-  $ssurl = str_replace('spreadsheets.google.com/ccc','docs.google.com/spreadsheet/ccc',$ssurl);
+  $ssurl = str_replace('spreadsheets.google.com/ccc', 'docs.google.com/spreadsheet/ccc', $ssurl);
   $newel = new stdClass();
   $newel->type = 'shivanode';
   node_object_prepare($newel);
@@ -1232,10 +1247,10 @@ function _shivanode_data_elements_submit($form, &$form_state) {
  */
 function _shivanode_get_dataurl($node) {
   $result = FALSE;
-  if(isset($node->shivanode_json)) {
-    $jsonStr = $node->shivanode_json['und'][0]['value'];
-    $json = json_decode($jsonStr);
-    if(isset($json->dataSourceUrl)) {
+  if (isset($node->shivanode_json)) {
+    $json_str = $node->shivanode_json['und'][0]['value'];
+    $json = json_decode($json_str);
+    if (isset($json->dataSourceUrl)) {
       $result = $json->dataSourceUrl;
     }
   }
@@ -1255,11 +1270,12 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
   unset($gdinfo['script']);
   unset($gdinfo['data_nid']);
   // If it's during the creation of a new element, one message
-  if($form['#action'] == '/node/add/shivanode') {
+  if ($form['#action'] == '/node/add/shivanode') {
     $gdinfo['span']['#markup'] = '<span>' . t('No data element will be linked to this one.') . '</span>';
     $gdinfo['button_div'] = array();
   // otherwise if editing an existing element, another message and ...
-  } else {
+  } 
+  else {
     $gdinfo['span']['#markup'] = '<span>' . t('Link to data element:') . '</span>';
     $gdinfo['old_button_div'] = array(
       '#type' => 'markup',
@@ -1285,21 +1301,26 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
  * 
  */
 function _shivanode_remove_datalink($node) {
-  if($node->type == 'shivanode') {
+  if ($node->type == 'shivanode') {
     $nid = $node->nid;
     $results = db_select('shivanode_links', 'sl')
       ->fields('sl')
       ->condition('sn_id', $nid)
       ->execute()
       ->fetchCol(0);
-    if(count($results) == 0) { return;  }
+    if (count($results) == 0) {
+      return;  
+    }
     $num_deleted = db_delete('shivanode_links')
       ->condition('sn_id', $nid)
       ->execute();
-    if($num_deleted == 1) {
-      drupal_set_message(t('Link to data element removed.'));
-    } else {
-      drupal_set_message(t('More than one link (' . $num_deleted . ') to data elements from node ' . $nid . ' removed!'),'error');
+    if ($num_deleted == 1) {
+      drupal_set_message(check_plain(t('Link to data element removed.')));
+    } 
+    else {
+      drupal_set_message(
+        check_plain($num_deleted . ' ' . t('links to data elements removed!')), 
+        'error');
     }
   }
 }
@@ -1335,50 +1356,58 @@ function _shivanode_greset_form($form, $form_state) {
  *              by deleting the information stored in the session variable 'gdoc_token'
  */
 function _shivanode_greset_form_submit($form, &$form_state) {
-  if(isset($_SESSION['gdoc_token'])) { unset($_SESSION['gdoc_token']); }
-  drupal_set_message(t('Google account authorization has been reset.'));
+  if (isset($_SESSION['gdoc_token'])) {
+    unset($_SESSION['gdoc_token']); 
+  }
+  drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
   drupal_goto('data/spreadsheets');
 }
 
 function _get_shivaframe_url($opt) {
-  if(is_array($opt)) { $opt = $opt[0]; } // if it's an array take first element value
-	if(!is_numeric($opt)) { $opt = 7; } // default is visualization
-	switch($opt) {
-		case 1:  // Data
+  if (is_array($opt)) {
+    $opt = $opt[0]; 
+  } // if it's an array take first element value
+  if (!is_numeric($opt)) {
+    $opt = 7; 
+  } // default is visualization
+  switch ($opt) {
+    case 1:  // Data
       $player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
-			break;
-		case 2: 	// Image
-			$player =  variable_get('shivanode_image_editor', SHIVA_IMAGE_EDITOR);
-			break;
-		case 3:  // Maps
-			$player =  variable_get('shivanode_map_editor', SHIVA_MAP_EDITOR);
-			break;
-		case 4: // Subway
-			$player =  variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR);
-			break;
-		case 5: // Timelines
-			$player =  variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR);
-			break;
-		case 6: // Videos
-			$player =  variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR);
-			break;
-		case 7:  // Visualization
-			$player =  variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR);
-			break;
-		case 8:  // Controls
-			$player =  variable_get('shivanode_control_editor', SHIVA_CONTROL_EDITOR);
-			break;
-		case 9:  // Canvas
-			$player =  variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR);
-			break;
+      break;
+    case 2:   // Image
+      $player =  variable_get('shivanode_image_editor', SHIVA_IMAGE_EDITOR);
+      break;
+    case 3:  // Maps
+      $player =  variable_get('shivanode_map_editor', SHIVA_MAP_EDITOR);
+      break;
+    case 4: // Subway
+      $player =  variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR);
+      break;
+    case 5: // Timelines
+      $player =  variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR);
+      break;
+    case 6: // Videos
+      $player =  variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR);
+      break;
+    case 7:  // Visualization
+      $player =  variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR);
+      break;
+    case 8:  // Controls
+      $player =  variable_get('shivanode_control_editor', SHIVA_CONTROL_EDITOR);
+      break;
+    case 9:  // Canvas
+      $player =  variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR);
+      break;
     case 10:  // Network
       $player =  variable_get('shivanode_network_editor', SHIVA_NETWORK_EDITOR);
       break;
-		case 11:  // Draw
+    case 11:  // Draw
       $player = variable_get('shivanode_drawditor', SHIVA_DRAW_EDITOR); 
-			break;
-	}
-	if(strpos($player,'http://') === false) {  $player = variable_get('shivanode_editor_url', SHIVA_EDITOR) . $player; }
+      break;
+  }
+  if (strpos($player, 'http://') === FALSE) {
+    $player = variable_get('shivanode_editor_url', SHIVA_EDITOR) . $player; 
+  }
   $player = $player . '?pr=d';
   return $player;
 }
@@ -1391,8 +1420,8 @@ function _get_shivaframe_url($opt) {
 function _shivanode_node_json($nid) {
   $node = node_load($nid);
   $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
-	$json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
-	drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
+  $json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
+  drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
   echo $json;
 }
 
@@ -1404,12 +1433,13 @@ function _shivanode_search_json($q) {
   $uid = '';
   $ntype = '';
   $etype = '';
-  if(isset($_GET['q']) || isset($_GET['uid'])) {
+  if (isset($_GET['q']) || isset($_GET['uid'])) {
     $q = (isset($_GET['q']))?$_GET['q']:'';
     $uid = (isset($_GET['uid']))?$_GET['uid']:'';
     $ntype = (isset($_GET['ntype']))?$_GET['ntype']:'shivanode';
     $etype = (isset($_GET['etype']))?$_GET['etype']:'';
-  } else if (isset($_POST['q']) || isset($_POST['uid'])) {
+  } 
+  elseif (isset($_POST['q']) || isset($_POST['uid'])) {
     $q = (isset($_POST['q']))?$_POST['q']:'';
     $uid = (isset($_POST['uid']))?$_POST['uid']:'';
     $ntype = (isset($_POST['ntype']))?$_POST['ntype']:'shivanode';
@@ -1440,9 +1470,9 @@ function _shivanode_search_json($q) {
  * 			if Shibboleth session is still active. If expired, JS popups up an alert
  */
 function _shivanode_shib_check() {
-	$status = (!empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired";
-	$json = '{ "status": "' . $status . '"}';
-	drupal_json_output($json);
+  $status = (!empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired";
+  $json = '{ "status": "' . $status . '"}';
+  drupal_json_output($json);
 }
 
 /* code initially copied from node_search_execute */
@@ -1455,8 +1485,8 @@ function _shivanode_search($keys = NULL, $conditions = NULL) {
     ->addTag('node_access')
     ->searchExpression($keys, 'node');
   
-  if($conditions != NULL) {
-    foreach($conditions as $cond) {
+  if ($conditions != NULL) {
+    foreach ($conditions as $cond) {
       $query->condition($cond['key'], $cond['val']);
     }
   }
@@ -1549,8 +1579,8 @@ function _shivanode_resource_index($fields, $var, $page, $page_size) {
     ->orderBy('created', 'DESC');
     
   // Add type = shivanode
-  $node_select->condition('t.type','shivanode');
-  /*
+  $node_select->condition('t.type', 'shivanode');
+  /* 
   // set type to Shivanode
     if(!isset($var['type'])) {
       $var['type'] = 'shivanode';
@@ -1560,49 +1590,56 @@ function _shivanode_resource_index($fields, $var, $page, $page_size) {
   // if var[tags] is set, find all shivanodes with the tid values
   // Just searches in the taxonomy vocabularies. Must do something different for KMAPS
 
-  if(isset($var['tags'])) {
+  if (isset($var['tags'])) {
     $tags = $var['tags'];
     $delim = 'or';
-    if(is_string($tags) && strpos($tags,',') > -1 ) { $tags = explode(',',$tags); }
-    if(is_string($tags) && strpos($tags,'+') > -1 ) { $tags = explode('+', $tags);}
+    if (is_string($tags) && strpos($tags, ',') > -1 ) {
+      $tags = explode(',', $tags); 
+    }
+    if (is_string($tags) && strpos($tags, '+') > -1 ) {
+      $tags = explode('+', $tags);
+    }
     $nids = _shivanode_taxterms_to_nids($tags, $delim);
-    if(is_array($nids)) {
-      if(count($nids) == 0) { return $nids; }
+    if (is_array($nids)) {
+      if (count($nids) == 0) {
+        return $nids; 
+      }
       $node_select->condition('t.nid', $nids, 'IN');
     }
   }
   unset($var['tags']);
   // If UID is a true string, it's users name, so find the ID
-  if(isset($var['uid']) && !is_numeric($var['uid'])) {
-    if($var['uid'] == 'my') {
+  if (isset($var['uid']) && !is_numeric($var['uid'])) {
+    if ($var['uid'] == 'my') {
       global $user;
       $var['uid'] = $user->uid;
     }
     $snuser = user_load_by_name($var['uid']);
-    if(isset($snuser->uid)) {
+    if (isset($snuser->uid)) {
       $var['uid'] = $snuser->uid;
     }
   }
   
   // Allow for use of fields=all
-  if($fields == 'all') {
+  if ($fields == 'all') {
     $fields = '*';
   }
   
   $gid = 0;
   // Search for nodes belonging to gid, if Og exists
-  if(module_exists('og')) {
-    if(isset($var['gid']) || isset($var['gnid']))  {
+  if (module_exists('og')) {
+    if (isset($var['gid']) || isset($var['gnid']))  {
       // if gid variable is set, looking for a gid
       if (isset($var['gid']) ) {
         $gid = $var['gid'];
         unset($var['gid']); 
-      } else { 
+      } 
+      else { 
         // if gnid is set, looking for a group by nid so convert to gid
         $gnid = $var['gnid'];
         unset($var['gnid']);
         $oggroup = og_get_group('node', $gnid);
-        if(isset($oggroup->gid)) {
+        if (isset($oggroup->gid)) {
           $gid = $oggroup->gid;
         }
       }
@@ -1610,16 +1647,16 @@ function _shivanode_resource_index($fields, $var, $page, $page_size) {
       $fields = '*';
       $node_select->join('field_data_group_audience', 'g', 't.nid=g.entity_id');
       $node_select->fields('g', array('group_audience_gid'))
-        ->condition('g.group_audience_gid',$gid);
+        ->condition('g.group_audience_gid', $gid);
     }
   } 
   
   // Add the Shivanode JSON field to output
-  if(strpos($fields,'json') || $fields == '*') {
-    $node_select->join('field_data_shivanode_json','j', 't.nid=j.entity_id');
-    $node_select->addField('j','shivanode_json_value','json');
+  if (strpos($fields, 'json') || $fields == '*') {
+    $node_select->join('field_data_shivanode_json', 'j', 't.nid=j.entity_id');
+    $node_select->addField('j', 'shivanode_json_value', 'json');
     // take out the json field from the list now that it is dealt with
-    $fields = implode(',',_shivanode_array_remove_value(explode(',',$fields), 'json'));
+    $fields = implode(',', _shivanode_array_remove_value(explode(',', $fields), 'json'));
   }
   services_resource_build_index_query($node_select, $page, $fields, $var, $page_size, 'node');
 
@@ -1629,8 +1666,8 @@ function _shivanode_resource_index($fields, $var, $page, $page_size) {
   
   $results = services_resource_execute_index_query($node_select);
   $nodes = services_resource_build_index_list($results, 'node', 'nid');
-  foreach($nodes as $node) {
-    $node->uri = str_replace('/node/','/shivanode/',$node->uri) . '.json';
+  foreach ($nodes as $node) {
+    $node->uri = str_replace('/node/', '/shivanode/', $node->uri) . '.json';
   }
   return $nodes;
 }
@@ -1643,14 +1680,16 @@ function _shivanode_resource_index($fields, $var, $page, $page_size) {
  */ 
 
 function _shivanode_taxterms_to_nids($tags, $delim = 'or') {
-  if(!is_array($tags)) { $tags = array($tags); }
+  if (!is_array($tags)) {
+    $tags = array($tags); 
+  }
   $out = array();
   $tids = array();
   
   // Turn Terms into term ids (tids)
-  foreach($tags as $key => $term) {
+  foreach ($tags as $key => $term) {
     $term = strtolower($term);
-    $query = db_select('taxonomy_term_data','t')
+    $query = db_select('taxonomy_term_data', 't')
       ->fields('t', array('tid', 'name'))
       ->where('LOWER(t.name) = :term', array(':term' => $term));
     $result = $query->execute();
@@ -1658,25 +1697,28 @@ function _shivanode_taxterms_to_nids($tags, $delim = 'or') {
       $tids[] = $record->tid;
     }
   }
-  if(count($tids) == 0 ) { return $tids; }
+  if (count($tids) == 0 ) {
+    return $tids; 
+  }
   
   // Find nodes with those terms
   // The basic query
-  $query = db_select('field_data_shivanode_tags','f')
+  $query = db_select('field_data_shivanode_tags', 'f')
     ->fields('f', array('entity_id', 'shivanode_tags_tid'));
-  if($delim == 'and') {
+  if ($delim == 'and') {
     // the 'and' conditions
-    foreach($tids as $n => $tid) {
+    foreach ($tids as $n => $tid) {
       $query->condition('f.shivanode_tags_tid', $tid, '=');
     }
-  } else {
+  } 
+  else {
     // the 'or' condition
     $query->condition('f.shivanode_tags_tid', $tids, 'IN');
   }
   
   // Perform query and put resulting nids in the out array removing duplicates
   $results = $query->execute();
-  foreach($results as $result) {
+  foreach ($results as $result) {
     $out[] = $result->entity_id;
   }
   return array_unique($out);
@@ -1684,13 +1726,13 @@ function _shivanode_taxterms_to_nids($tags, $delim = 'or') {
 
 function _shivanode_array_remove_value($array, $item) {
   $i = -1;
-  foreach($array as $n => $value) {
-    if($value == $item) {
+  foreach ($array as $n => $value) {
+    if ($value == $item) {
       $i = $n;
       break;
     }
   }
-  if( $i > -1 ) {
+  if ( $i > -1 ) {
     unset($array[$i]);
   }
   return $array;
@@ -1711,11 +1753,11 @@ function _shivanode_resource_retrieve($nid) {
   unset($node->shivanode_json);
   
   // add the tag name for each tag id
-  if(isset($node->shivanode_tags['und']) && is_array($node->shivanode_tags['und'])) {
-    foreach($node->shivanode_tags['und'] as $n => &$t) {
-      $query = db_select('taxonomy_term_data','t')
+  if (isset($node->shivanode_tags['und']) && is_array($node->shivanode_tags['und'])) {
+    foreach ($node->shivanode_tags['und'] as $n => &$t) {
+      $query = db_select('taxonomy_term_data', 't')
         ->fields('t', array('tid', 'name'))
-        ->condition('t.tid',$t['tid'],'=');
+        ->condition('t.tid', $t['tid'], '=');
       $result = $query->execute();
       foreach ($result as $record) {
         $t['name'] = $record->name;
@@ -1724,11 +1766,11 @@ function _shivanode_resource_retrieve($nid) {
   }
   
   // add the kmap category name for each kmap tag id
-  if(isset($node->field_kmap_tags['und']) && is_array($node->field_kmap_tags['und'])) {
-    foreach($node->field_kmap_tags['und'] as $n => &$t) {
-      $query = db_select('taxonomy_term_data','t')
+  if (isset($node->field_kmap_tags['und']) && is_array($node->field_kmap_tags['und'])) {
+    foreach ($node->field_kmap_tags['und'] as $n => &$t) {
+      $query = db_select('taxonomy_term_data', 't')
         ->fields('t', array('tid', 'name'))
-        ->condition('t.tid',$t['tid'],'=');
+        ->condition('t.tid', $t['tid'], '=');
       $result = $query->execute();
       foreach ($result as $record) {
         $t['name'] = $record->name;
@@ -1740,21 +1782,23 @@ function _shivanode_resource_retrieve($nid) {
 }
 
 function _shivanode_get_element_type($node, $type = "string") {
-  if(isset($node->shivanode_element_type)) {
+  if (isset($node->shivanode_element_type)) {
     $options = _shivanode_element_typelist();
     $typenum = $node->shivanode_element_type['und'][0]['value'];
     return ($type == "number" || $type == "num") ? $typenum : $options[$typenum];
-  } else {
-    return false;
+  } 
+  else {
+    return FALSE;
   }
 }
 
 function _shivanode_get_json($node, $as_obj = TRUE) {
-  if( isset($node->shivanode_json) ) {
+  if (isset($node->shivanode_json)) {
     $eljson = $node->shivanode_json['und'][0]['value'];
     return ($as_obj) ? drupal_json_decode($eljson) : $eljson;
-  } else {
-    return false;
+  } 
+  else {
+    return FALSE;
   }
 }
 
@@ -1769,10 +1813,11 @@ function _shivanode_get_data_element($source) {
       ->condition('sn_id', $nid, '=')
       ->execute()
       ->fetchCol(2); 
-  if(count($result) > 0) {
+  if (count($result) > 0) {
     return $result[0];
-  } else {
-    return false;
+  } 
+  else {
+    return FALSE;
   }
 }
 
@@ -1784,8 +1829,8 @@ function _shivanode_get_data_element($source) {
 function _shivanode_get_tags() {
   $vs = taxonomy_get_vocabularies('shivanode');
   $vids = array();
-  foreach($vs as $voc) {
-    if($voc->module == 'taxonomy') {
+  foreach ($vs as $voc) {
+    if ($voc->module == 'taxonomy') {
       array_push($vids, $voc->vid);
     }
   }
@@ -1806,21 +1851,22 @@ function _shivanode_get_tags() {
  *    This function should only be called for shivanodes that are not themselves data elements.
  */
 function _shivanode_add_data_correspondence($node) {
-  if(isset($node->data_id)) {
+  if (isset($node->data_id)) {
     $nid = $node->nid;
     $result = db_select('shivanode_links', 'l')
         ->fields('l')
         ->condition('sn_id', $nid, '=')
         ->execute()
         ->fetchCol(2);
-    if($result) {
+    if ($result) {
       db_update('shivanode_links')
         ->fields(array(
           'data_id' => $node->data_id,
         ))
         ->condition('sn_id', $node->nid, '=')
         ->execute();
-    } else {
+    } 
+    else {
       db_insert('shivanode_links')
         ->fields(array(
           'sn_id' => $node->nid,
@@ -1836,31 +1882,32 @@ function _shivanode_add_data_correspondence($node) {
  * _shivanode_add_datalink: Adds a link to a data element to a shivanode create/edit form
  *      Requires the form, the data element id, and a boolean as to whether it is a new node (create) or not (edit)
  */
-function _shivanode_add_datalink(&$form, $did, $isNewEl) {
-  if(!isset($isNewEl)) { $isNewEl = FALSE; }
+function _shivanode_add_datalink(&$form, $did, $is_new_el) {
+  if (!isset($is_new_el)) {
+    $is_new_el = FALSE; 
+  }
   $dnode = node_load($did);
-  if($dnode) {
-    $form['gdocinfo']['#prefix'] = str_replace('none;','block;', $form['gdocinfo']['#prefix']);
+  if ($dnode) {
+    $form['gdocinfo']['#prefix'] = str_replace('none;', 'block;', $form['gdocinfo']['#prefix']);
     $dataurl = _shivanode_get_dataurl($dnode);
     $datatitle = $dnode->title;
     
     // if it's a new element use its title for visualizations title
-    if($isNewEl) {
-       $form['title']['#default_value'] = str_replace(' (Data)','', $datatitle); 
+    if ($is_new_el) {
+       $form['title']['#default_value'] = str_replace(' (Data)', '', $datatitle); 
     } 
     
     // if it is a  new element call JS function to load the data element data once form is loaded.
     // use 'preset' because this function already sets the markup for the data element
     // Otherwise, load the data from the Drupal unless told not to
-    $jsfunct =  ($isNewEl)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
-    		'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . $dataurl . '\', \'' . $datatitle . '\');}';
+    $jsfunct =  ($is_new_el)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
+              'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . 
+              $dataurl . '\', \'' . $datatitle . '\');}';
     $form['gdocinfo']['script'] = array(
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript">' .
               'jQuery(document).ready(function() {' .
-               ' jQuery(\'#shivaEditFrame\').load(function() { ' .
-                    $jsfunct.
-                 '});' .
+               ' jQuery(\'#shivaEditFrame\').load(function() { ' . $jsfunct . '});' .
               '});' .
           '</script>',
     );
@@ -1961,7 +2008,7 @@ function _shivanode_node_embed_page($nid) {
       '#markup' => '<script type="text/javascript"> Drupal.Shivanode.node = {
         "nid": ' . $nid . ',
         "title": "' . str_replace('"', '\"', $node->title) . '",
-        "json": \'' . _shivanode_get_json($node,FALSE) . '\',
+        "json": \'' . _shivanode_get_json($node, FALSE) . '\',
         "player": "' . variable_get('shivanode_chart_viewer') . '"
       };</script>',
     ),
@@ -1971,7 +2018,7 @@ function _shivanode_node_embed_page($nid) {
 
 function _node_using_data_element($dnid) {
   $results = db_query('shivanode_links', 'l')
-      ->condition('data_id',$dnid)
+      ->condition('data_id', $dnid)
       ->execute()
       ->fetchCol(1);
   return $results;

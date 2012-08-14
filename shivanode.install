@@ -61,9 +61,9 @@ function shivanode_install() {
  
 function shivanode_uninstall() {
   // Delete the Shivanode view if it exists
-  if(module_exists('views')) {
+  if (module_exists('views')) {
     $snview = views_get_view('shiva_elements');
-    if(isset($snview)) {
+    if (isset($snview)) {
       views_delete_view($snview);
     }
   }
@@ -155,9 +155,10 @@ function shivanode_update_7001() {
 
 function shivanode_enable() {
   shivanode_create_service();
-  if(module_exists('views')) {
+  if (module_exists('views')) {
     shivanode_create_view();
-  } else {
+  } 
+  else {
     drupal_set_message(t('Views is not enabled. Unable to create list view.'));
   }
 }
@@ -165,8 +166,8 @@ function shivanode_enable() {
 function shivanode_create_service() {
   $service_name = SHIVA_SERVICE;
   $endpoint = services_endpoint_load($service_name);
-  $ea = array('installed','install');
-  if(!$endpoint) {
+  $ea = array('installed', 'install');
+  if (!$endpoint) {
     $endpoint = new stdClass();
     $endpoint->disabled = TRUE;
     $endpoint->api_version = 3;
@@ -190,25 +191,29 @@ function shivanode_create_service() {
       ),
     );
     $endpoint->debug = 0;
-  } else {
+  } 
+  else {
     $endpoint->disabled = FALSE;
-    $ea = array('enabled','enable');
+    $ea = array('enabled', 'enable');
   }
   services_endpoint_save($endpoint);
-  $msg = services_endpoint_load($service_name) ? "'$service_name' REST service " . $ea[0] . "!":"Unable to " . $ea[1] . " the REST service '$service_name'!";
-  $mtyp = (strpos($msg,'Unable') > -1) ? 'warning':'status';
-  drupal_set_message($msg,$mtyp);
+  $msg = services_endpoint_load($service_name) ? 
+           "'$service_name' REST service " . $ea[0] . "!" : 
+           "Unable to " . $ea[1] . " the REST service '$service_name'!";
+  $mtyp = (strpos($msg, 'Unable') > -1) ? 'warning':'status';
+  drupal_set_message(check_plain($msg), $mtyp);
 }
 
 function shivanode_create_view() {
   $snview = views_get_view('shiva_elements');
-    if(!isset($snview)) {
+    if (!isset($snview)) {
       shivanode_build_view();
       $snview = views_get_view('shiva_elements');
-      if(isset($snview)) {
-        drupal_set_message(t('Shiva elements list view has been installed!'));
-      } else {
-        drupal_set_message(t('Failed to install Shiva elements list view! (' . $snview . ')'));
+      if (isset($snview)) {
+        drupal_set_message(check_plain(t('Shiva elements list view has been installed!')));
+      } 
+      else {
+        drupal_set_message(check_plain(t('Failed to install Shiva elements list view!') . ' (' . $snview . ')'));
       }
     }
 }
@@ -752,7 +757,7 @@ function shivanode_build_view() {
 
 function shivanode_disable() {
   $endpoint = services_endpoint_load(SHIVA_SERVICE);
-  if($endpoint) {
+  if ($endpoint) {
     $endpoint->disabled = TRUE;
     services_endpoint_save($endpoint);
   }
@@ -780,20 +785,20 @@ function shivanode_update_7000() {
 function shivanode_update_7001() {
   $field = db_select('field_config', 'fc')
     ->fields('fc')
-    ->condition('field_name','shivanode_json')
+    ->condition('field_name', 'shivanode_json')
     ->execute()
     ->fetchAssoc();
   $def = $field['data']; // Get the data blob defining the field
   // Replace the max length definition with no settings
   $old = 's:8:"settings";a:1:{s:10:"max_length";i:2048;}';
   $new = 's:8:"settings";a:0:{}';
-  $def = str_replace($old,$new,$def);
+  $def = str_replace($old, $new, $def);
   // set new def and change type to text_long
   $num_updated = db_update('field_config')
     ->fields(array(
       'type' => 'text_long',
       'data' => $def,
     ))
-    ->condition('field_name','shivanode_json')
+    ->condition('field_name', 'shivanode_json')
     ->execute();
 }

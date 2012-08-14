@@ -708,10 +708,10 @@
 	Drupal.Shivanode.setUnloadConfirm = function(ison) { 
 		if(ison) {
 			jQuery('#overlay-close, input[value=New]').attr('onmousedown', 
-				'javascript: if(confirm(\"Are you sure you want to leave without saving?\")) {jQuery(this).click();}');
+				'javascript: if(confirm(Drupal.t(\"Are you sure you want to leave without saving?\"))) {jQuery(this).click();}');
 			if(window.onbeforeunload == null) {
 				window.onbeforeunload = function (e) {
-					var retval = "You have changed the data on this page without saving it.";
+					var retval = Drupal.t("You have changed the data on this page without saving it.");
 					var btext = "";
 					if(typeof(window.lastButtonClicked) != "undefined") {
 						var bid = window.lastButtonClicked;
@@ -768,7 +768,7 @@
 			}
 */
 			if(Drupal.Shivanode.shibstatus == "ok" && status != "ok") {
-				alert("Your Netbadge session has expired!");
+				alert(Drupal.t("Your Netbadge session has expired!"));
 				Drupal.Shivanode.shibstatus = null; // so message only appears once
 			} else {
 				Drupal.Shivanode.shibstatus = status;

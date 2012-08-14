@@ -279,6 +279,10 @@ iframe#lightboxFrame {
   border: none !important;
 }
 
+html.lightpop #content {
+  margin-left: 0px !important;
+}
+
 #imageDataContainer {
   height: 0px !important;
 }
