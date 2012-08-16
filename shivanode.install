@@ -779,9 +779,9 @@ function shivanode_update_7000() {
   db_change_field($table, $field, $field_new, $spec);
 }
 
-/*
- * Change the field definition in the field_config table to text_long
- */
+/**
+* Change the field definition in the field_config table to text_long
+*/
 function shivanode_update_7001() {
   $field = db_select('field_config', 'fc')
     ->fields('fc')
@@ -801,4 +801,21 @@ function shivanode_update_7001() {
     ))
     ->condition('field_name', 'shivanode_json')
     ->execute();
+}
+
+/**
+* Change the description on the Data Popup list block so it doesn't match the recent shiva elements block.
+*/
+function shivanode_update_7002() {
+  if (module_exists('views')) {
+    $view = views_get_view('shiva_elements');
+    if ($view) {
+      $dblock = &$view->display['data_popup_block'];
+      if($dblock) {
+        $dopts = &$dblock->display_options;
+        $dopts['block_description'] = "Shivanode Data Popup Block";
+        views_save_view($view);
+      }
+    }
+  }
 }
