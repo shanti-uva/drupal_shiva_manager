@@ -1,15 +1,11 @@
 
 /*
  *  File:         demo_table.css
- *  CVS:          $Id$
- *  Description:  CSS descriptions for DataTables demo pages
- *  Author:       Allan Jardine
- *  Created:      Tue May 12 06:47:22 BST 2009
- *  Modified:     $Date$ by $Author$
- *  Language:     CSS
- *  Project:      DataTables
+ *  Description:  CSS descriptions for DataTables in the Drupal Shivanode module
+ *  Based on the original demo CSS by Allan Jardine
+ *  These are the CSS styles used for THL Bellezza site at http://www.thlib.org/bellezza/sites/
+ *  Adopted to Shivanode Module:      July 13, 2012
  *
- *  Copyright 2009 Allan Jardine. All Rights Reserved.
  *
  * ***************************************************************************
  * DESCRIPTION
@@ -31,10 +27,9 @@
  
 .top, .bottom {
 	margin-top: 5px !important;
-	padding: 10px 10px 6px !important;
+	padding: 2px 4px 6px !important;
 	background-color: #CCCCCC !important;
 	border: 2px solid #AAAAAA !important;
-	height: 25px !important;
 }
 
 /*#shiva_node_list_wrapper .top,
@@ -139,9 +134,10 @@ p.reset-data-table a:active, p.info-data-table a:active { border-color:#aaa; bac
 }
 
 .dataTables_paginate {
-	float: right;
-	text-align: right;
-	padding-right:5px;
+  position: relative;
+  top: -18px;
+  float: left;
+  padding-left: 20px;
 	font-size:11px;
 }
 
@@ -162,19 +158,19 @@ p.reset-data-table a:active, p.info-data-table a:active { border-color:#aaa; bac
 }
 
 .paginate_disabled_previous {
-	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/back_disabled.jpg);
+	background-image: url(../images/jq-tables/back_disabled.jpg);
 }
 
 .paginate_enabled_previous {
-	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/back_enabled.jpg);
+	background-image: url(../images/jq-tables/back_enabled.jpg);
 }
 
 .paginate_disabled_next {
-	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/forward_disabled.jpg);
+	background-image: url(../images/jq-tables/forward_disabled.jpg);
 }
 
 .paginate_enabled_next {
-	background-image: url(/places/culturalgeography/tibet/zhangzhung/images/jq-tables/forward_enabled.jpg);
+	background-image: url(../images/jq-tables/forward_enabled.jpg);
 }
 
 
