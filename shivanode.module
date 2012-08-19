@@ -409,9 +409,7 @@ function shivanode_node_submit($node, $form, &$form_state) {
  *
  */ 
 function shivanode_view($node, $view_mode) {
-  if ($view_mode == "teaser") {
-    dpm("here");
-  }
+
 }
 
 /**
@@ -421,9 +419,6 @@ function shivanode_view($node, $view_mode) {
  */ 
 function shivanode_node_view_alter(&$build) {
   global $base_path;
-  if ($build['#view_mode'] == 'teaser') {
-    dpm($build);
-  }
   $node = $build['#node'];
 
   // If viewing a node that is a shivanode, show the Share button
