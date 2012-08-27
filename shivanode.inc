@@ -1150,8 +1150,8 @@ function _shivanode_data_elements($form, &$form_state) {
   );
   
   $markup['existing']['sntoggle'] = array(
-    '#markup' => '<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode, ' . 
-        '#shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . 
+    '#markup' => '<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode\').toggle(); ' . 
+        'jQuery(\'#shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . 
         t('Public Data Elements') . '<p/>',
   );
   
@@ -1175,9 +1175,9 @@ function _shivanode_data_elements($form, &$form_state) {
       $limarkup .= '<a class="link" onmousedown="Drupal.Shivanode.setDataElement(\'' . $node->nid . 
                     '\', true);">' . t('Select') . '</a>';
       if (node_access('update', $node)) {
-        $limarkup .=  ' | ' . l(t('Edit'), 'node/' . $node->nid . '/edit', array(
+        $limarkup .=  ' | ' . l(t('Edit'), _shivanode_get_dataurl($node), array(
           'attributes' => array(
-            'target' => '_top',
+            'target' => '_blank',
           ),
         ));
       }
@@ -1194,7 +1194,7 @@ function _shivanode_data_elements($form, &$form_state) {
     $markup['spreadsheets'] = array(
       '#type' => 'fieldset',
       '#title' => t('Remaining Google Spreadsheets'),
-      '#description' => t('Choose from one of your remaining @num Google spreadsheets to create a visualization from it:', array('@num' => count($gsheets))),
+      '#description' => t('Choose from one of your remaining @num Google spreadsheets to create a visualization from it. Select the radio button and then press the &lsquo;Add Spreadsheet&rsquo; button:', array('@num' => count($gsheets))),
       '#collapsible' => TRUE,
     );
     $markup['spreadsheets']['newss'] = array(

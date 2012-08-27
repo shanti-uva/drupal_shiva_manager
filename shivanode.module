@@ -136,7 +136,7 @@ function shivanode_menu() {
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'shivanode.inc',
   );
-    // Defines link page that lists Google spreadsheets 
+    // Defines link page that lists Google spreadsheets (OLD FORM)
   $items['data/spreadsheets'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Google Spreadsheets',
@@ -147,7 +147,7 @@ function shivanode_menu() {
     'file' => 'shivanode.inc',
   );
   
-  // Defines link to Page that lists all registered Data elements in SHIVA manager
+  // Defines link to Page that lists all registered Data elements in SHIVA manager (NEW FORM)
   $items['node/data-elements'] = array(
     'title' => 'Available Shiva Data Elements',
     'description' => 'List of Available Shiva Data Elements',
@@ -307,7 +307,9 @@ function shivanode_node_delete($node) {
     $relations = array();
     foreach ($results as $n => $link) {
       $node = node_load($link->sn_id);
-      $relations[] = l($node->title, 'node/' . $node->nid);
+      if ($node) {
+        $relations[] = l($node->title, 'node/' . $node->nid);
+      }
     }
     $num_deleted = db_delete('shivanode_links')
       ->condition('data_id', $nid)
