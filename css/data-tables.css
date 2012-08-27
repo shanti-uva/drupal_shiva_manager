@@ -159,6 +159,7 @@ p.reset-data-table a:active, p.info-data-table a:active { border-color:#aaa; bac
 
 .paginate_disabled_previous {
 	background-image: url(../images/jq-tables/back_disabled.jpg);
+	cursor: auto;
 }
 
 .paginate_enabled_previous {
@@ -167,91 +168,13 @@ p.reset-data-table a:active, p.info-data-table a:active { border-color:#aaa; bac
 
 .paginate_disabled_next {
 	background-image: url(../images/jq-tables/forward_disabled.jpg);
+  cursor: auto;
 }
 
 .paginate_enabled_next {
 	background-image: url(../images/jq-tables/forward_enabled.jpg);
 }
 
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * DataTables display
- */
-table.display {
-	margin: 0 !important;
-	clear: both;
-	width: 100%;
-	
-	/* Note Firefox 3.5 and before have a bug with border-collapse                                                                                       
-	 * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 ) 
-	 * border-spacing: 0; is one possible option. Conditional-css.com is
-	 * useful for this kind of thing
-	 *
-	 * Further note IE 6/7 has problems when calculating widths with border width.
-	 * It subtracts one px relative to the other browsers from the first column, and
-	 * adds one to the end...
-	 *
-	 * If you want that effect I'd suggest setting a border-top/left on th/td's and 
-	 * then filling in the gaps with other borders.
-	 */
-}
-
-table.display select option{ padding:1px 3px;}
-
-table.display thead th {
-	padding: 4px 18px 4px 10px;
-	border-bottom: 1px solid #c0c0c0;
-	font-weight: bold;
-	cursor: pointer;
-	/* * cursor: hand; */
-	 font-size:13px; color:#404040; white-space:nowrap;
-}
-
-table.display th.thl-mapID{ padding-left:20px;}
-
-table.display{ margin-top:4px; margin-bottom:4px; border-top:1px solid #c0c0c0; }
-
-table.display tfoot th {
-	padding: 3px 18px 3px 10px;
-	border-top: 1px solid #c0c0c0;
-	font-weight: bold;
-}
-
-table.display tr.heading2 td {
-	border-bottom: 1px solid #c0c0c0;
-}
-
-table.display td {
-	padding: 3px 10px; font-size:13px; color:#404040; height:20px; line-height:20px;
-}
-
-body table.display td {
-    /* white-space:nowrap;*/
-    vertical-align: top;
-    padding-top: 3px;
-    padding-bottom: 8px;
-}
-
-table.display td a.tib {
-    line-height: 20pt; position: relative; top: 4px; font-size: 14pt !important;
-}
-
-table.display td span.tibname {display: none;}
-
-table.display td span.wyname {display: block; }
-
-table.display td.thl-mapID{ padding-right:20px;padding-left:20px;}
-
-table.display td.thl-mapTitle{ width:100%; padding-left:20px;}
-
-table.display td.center {
-	text-align: center;
-}
-
-table.display td.col-thl-id {
-	text-align: center;
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables sorting
@@ -261,32 +184,37 @@ table.display td.col-thl-id {
 
 .sorting_asc {
 	background: #e7eeee url(../images/sort_asc.png) no-repeat center right;
+	cursor: pointer;
 }
 
 .sorting_desc {
 	background: #e7eeee url(../images/sort_desc.png) no-repeat center right;
+  cursor: pointer;
 }
 
 .sorting {
 	background: #f5f5f5 url(../images/sort_both.png) no-repeat center right;
+  cursor: pointer;
 }
 
 .sorting_asc_disabled {
 	background: #f5f5f5 url(../images/sort_asc_disabled.png) no-repeat center right;
+  cursor: auto;
 }
 
 .sorting_desc_disabled {
 	background: #f5f5f5 url(../images/sort_desc_disabled.png) no-repeat center right;
+  cursor: auto;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables row classes
  */
-table.display tr.odd.gradeA {
+table tr.odd.gradeA {
 	background-color: #f0f0f6;
 }
 
-table.display tr.even.gradeA {
+table tr.even.gradeA {
 	background-color: #fff;
 }
 
@@ -303,16 +231,16 @@ tr.odd td.meta-drop, tr.even td.meta-drop { display:none;}
 
 
 
- #data-table tr.odd.highlight {
+tr.odd.highlight {
   background-color: #E2E4FF;
  }
- #data-table tr.even.highlight {
+tr.even.highlight {
   background-color: #E2E4FF;
  }
- #data-table tr.odd.highlight td.sorting_1{
+tr.odd.highlight td.sorting_1{
   background-color: #D3D6FF;
  }
- #data-table tr.even.highlight td.sorting_1{
+tr.even.highlight td.sorting_1{
   background-color: #D3D6FF;
  }
 
@@ -352,7 +280,7 @@ td.group {
 	border-top: 2px solid #A19B9E;
 }
 
-table.display td.details {
+table.datatables-processed td.details {
 	background-color: #f9f9f9;
 	border: 1px solid #ddd;
 	padding-top:15px; 
@@ -360,10 +288,6 @@ table.display td.details {
 	font-size:12px;
 	line-height:16px;
 }
-
-table.display td a, table.display td a:visited{ color:#00e}
-table.display td a:hover{ color:#00a; text-decoration:underline;}
-
 
 .example_alt_pagination div.dataTables_info {
 	width: 40%;
