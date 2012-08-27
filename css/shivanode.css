@@ -273,6 +273,14 @@ ul.shivanode-spreadsheets li * {
 	margin-top: 0px;
 }
 
+/* For custom User Profiles */
+div.shanti-profile-pic .panel-pane {
+  height: 100px;
+  width: 64px;
+  background: url('/sites/all/pictures/no-profile-pic.png') no-repeat top center;
+}
+
+
 /* For Lightbox popups */
 
 iframe#lightboxFrame {

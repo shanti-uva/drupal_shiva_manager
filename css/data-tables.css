@@ -41,9 +41,9 @@ p.top-sort-subtext{font-size:12px; float:left; margin:0px; padding:0px; padding-
 
 .dataTables_wrapper { font-size:13px; margin-right:3px; margin-left:1px;
 	position: relative;
-	min-height: 302px;
+	/*min-height: 302px;*/
 	clear: both;
-	_height: 302px;
+	/*_height: 302px;*/
 	zoom: 1; /* Feeling sorry for IE */
 }
 
