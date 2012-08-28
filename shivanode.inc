@@ -1352,7 +1352,7 @@ function _shivanode_greset_form($form, $form_state) {
   );
   return $form;
 }
-
+ 
 /*
  * _shivanode_greset_form_submit($form, &$form_state) : Resets (erases) Google Account logon information 
  *              by deleting the information stored in the session variable 'gdoc_token'
