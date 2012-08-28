@@ -1091,6 +1091,8 @@ function _shivanode_check_google_login($authenticate = TRUE) {
 function _shivanode_data_elements($form, &$form_state) {
   global $user;
   
+  _shivanode_check_google_login();
+  
   $markup = array(
     '#prefix' => '<div id="data-element-popup">',
     '#suffix' => '</div>',
@@ -1123,7 +1125,7 @@ function _shivanode_data_elements($form, &$form_state) {
   if (!_shivanode_check_google_login(FALSE)) {
     $markup['addbutton'] = array(
       '#prefix' => '<div class="addspreadsheet-button"><span>',
-      '#markup' => l(t('Authenticate Google Account'), 'data/spreadsheets', array(
+      '#markup' => l(t('Authenticate Google Account'), 'node/data-elements', array(
                       'attributes' => array(
                         'target' => '_top',
                         'class' => 'shiva-button',
@@ -1360,7 +1362,7 @@ function _shivanode_greset_form_submit($form, &$form_state) {
     unset($_SESSION['gdoc_token']); 
   }
   drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
-  drupal_goto('data/spreadsheets');
+  drupal_goto('node/data-elements');
 }
 
 function _get_shivaframe_url($opt) {

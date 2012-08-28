@@ -951,7 +951,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
           ),
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
-        l(t('Create a Data Element from Google Spreadsheet'), 'data/spreadsheets') . '</div>';
+        l(t('Create a Data Element from Google Spreadsheet'), 'node/data-elements') . '</div>';
      
   // The upper Save/Update button
   $form['upperbuttons'] = array(
