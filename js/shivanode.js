@@ -147,6 +147,11 @@
 				$('body *').hide();
 				Drupal.Shivanode.setDataElement($did, false);
 			}
+			
+			// Show popup is popup=dataurl is in url
+			if(window.location.search.indexOf('popup=dataurl') > -1) {
+			  $('#use-data-element-link a').click();
+			}
 		}
 	};
 

@@ -1091,7 +1091,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
 function _shivanode_data_elements($form, &$form_state) {
   global $user;
   
-  _shivanode_check_google_login();
+  //_shivanode_check_google_login();
   
   $markup = array(
     '#prefix' => '<div id="data-element-popup">',
@@ -1121,30 +1121,16 @@ function _shivanode_data_elements($form, &$form_state) {
                             'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
                             'and click the &lsquo;Add Spreadsheet&rsquo; button.') . '</p>',
   );
-    
-  if (!_shivanode_check_google_login(FALSE)) {
-    $markup['addbutton'] = array(
-      '#prefix' => '<div class="addspreadsheet-button"><span>',
-      '#markup' => l(t('Authenticate Google Account'), 'node/data-elements', array(
-                      'attributes' => array(
-                        'target' => '_top',
-                        'class' => 'shiva-button',
-                      )
-                    )),
-       '#suffix' => ' </span></div>',
-    );
-  } 
-  else {
-    $markup['filterdiv'] = array(
-      '#prefix' => '<div id="addspreadsheet-filter"><span class="label">' . t('Filter') . ': </span>',
-      '#suffix' => '</div>',
-    );
-    $markup['filterdiv']['input'] = array(
-      '#type' => 'markup',
-      '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
-         value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
-    );
-  }
+
+  $markup['filterdiv'] = array(
+    '#prefix' => '<div id="addspreadsheet-filter"><span class="label">' . t('Filter') . ': </span>',
+    '#suffix' => '</div>',
+  );
+  $markup['filterdiv']['input'] = array(
+    '#type' => 'markup',
+    '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
+       value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
+  );
   $markup['existing'] = array(
     '#type' => 'fieldset',
     '#title' => t('Existing Data Elements'),
@@ -1207,10 +1193,27 @@ function _shivanode_data_elements($form, &$form_state) {
       '#type' => 'submit',
       '#value' => t('Add Spreadsheet'),
     );
+  } else {
+    // Display link to generate single-use token
+    $gdocs = 'http://spreadsheets.google.com/feeds/';
+    $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
+        'http://' . $_SERVER['SERVER_NAME'] . '/node/add/shivanode?popup=dataurl',
+        $gdocs, 0, 1);
+    $markup['addbutton'] = array(
+      '#prefix' => '<div class="addspreadsheet-button"><span>',
+      '#markup' => l('Authenticate Google Account', $google_uri, array(
+                      'attributes' => array(
+                        'target' => '_top',
+                        'class' => 'shiva-button',
+                      )
+                    )),
+       '#suffix' => ' </span></div>',
+    );
   }
   
   return $markup;
 }
+
 
 /*
  * _shivanode_data_elements_submit($form, &$form_state) : Called when the "Add Spreadsheet" button in the 
