@@ -395,7 +395,6 @@ function _shivanode_parse_json($jdata) {
  */
 function _shivanode_admin_settings($form, &$form_state) {
   
-  //dpm($form_state, "Form State in original routine");
   $form['shivanode_settings_header'] = array(
     '#markup' => '<h3>Settings for the Shivanode Module</h3>' .
       '<p>' . t('There are two types of settings for the Shivanode module. The display settings are where one can set ' .

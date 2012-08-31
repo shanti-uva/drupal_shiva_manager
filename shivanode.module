@@ -411,7 +411,7 @@ function shivanode_node_submit($node, $form, &$form_state) {
  *
  */ 
 function shivanode_view($node, $view_mode) {
-
+  
 }
 
 /**
@@ -479,6 +479,8 @@ function shivanode_node_view_alter(&$build) {
        ),
     );
     drupal_add_html_head($element, 'fb_share_image');
+  } else {
+    //dpm($build,'build');
   }
 }
 
@@ -617,8 +619,8 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $iframe = '';
       if (_shivanode_get_element_type($object) == 'Data') {
         $json = _shivanode_get_json($object);
-        if ($json && isset($json->dataSourceUrl)) {
-          $iframeurl = $json->dataSourceUrl;
+        if ($json && isset($json['dataSourceUrl'])) {
+          $iframeurl = $json['dataSourceUrl'];
           $disStr = ' onclick="window.open(\'' . $iframeurl . '\');" ';
           $iframeurl = $iframeurl . '&output=html&widget=true';
           $dependents = db_select('shivanode_links', 'l')
@@ -898,8 +900,6 @@ function shivanode_add_og_user_role($form, &$form_state) {
  *  This code creates the input and edit form for a shivanode
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
-  //dpm($form);
-  //dpm($form_state,'fs');
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
@@ -933,10 +933,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       'callback' => 'shivanode_element_change',
       'wrapper' => 'iframe_container',
     );
-  
+    unset($form['shivanode_element_type']['und']['#options'][1]); // remove the data option from the drop down list  Data elements are created automatically by adding spreadsheets
   }
   else {
-    
+    // Get the element type and disable the select type dropdown on exiting elements.
     $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
     $form['shivanode_element_type']['#disabled'] = TRUE;
     $form['shivanode_element_type']['#attributes'] += array(
@@ -1072,28 +1072,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     if ($dataNodeId) {
       _shivanode_add_datalink($form, $dataNodeId, $is_new_el);
     } 
-    elseif ($sntype == 'Data') {
-      if (isset($jobj->dataSourceUrl)) {
-        $form['gdocinfo'] = array(
-          '#type' => 'markup',
-          '#weight' => '3',
-          '#prefix' => '<div id="data_sheet_in_use" style="padding-top: 20px;">',
-          '#suffix' => '</div>',
-        );
-        $dataurl = $jobj->dataSourceUrl;
-        $gupts = explode('key=', $dataurl);
-        $gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1];
-        $form['gdocinfo']['edit_gdoc'] = array(
-          '#type' => 'markup',
-          '#markup' =>  l(t('Edit Data'), $gurl, array(
-            'attributes' => array(
-              'target' => '_blank',
-            ),
-          )),
-        );
-      }
-    }
   } 
+
   $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']); 
   $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' .
         $eltype . '</span></legend>' .
@@ -1106,12 +1086,13 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_json']['#attributes'] = array(
     'onclick' => 'Drupal.Shivanode.getJSON();',
   );
+  
   // if it is not a new node, then the json is defined. So, reload that json by setting Drupal.Shivanode.loadJS to true
   if (!$is_new_el) {
     $form['snload_script'] = array(
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript">' .
-                        'Drupal.Shivanode.loadJS = true; ' .
+                        'console.info(\'sending js\'); Drupal.Shivanode.loadJS = true; ' .
                     '</script>',
     );
   }
