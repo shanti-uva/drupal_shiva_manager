@@ -898,6 +898,8 @@ function shivanode_add_og_user_role($form, &$form_state) {
  *  This code creates the input and edit form for a shivanode
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
+  //dpm($form);
+  //dpm($form_state,'fs');
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
@@ -925,17 +927,23 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['shivanode_access']['und']['#default_value'] = 1;
     $form['shivanode_element_type']['und']['#default_value'] = 7; // default value is visualization
     $eltype = t('Visualization');
+      
+    // Use ajax to reload the iframe depending on element type choice
+    $form['shivanode_element_type']['und']['#ajax'] = array(
+      'callback' => 'shivanode_element_change',
+      'wrapper' => 'iframe_container',
+    );
+  
   }
   else {
+    
     $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
+    $form['shivanode_element_type']['#disabled'] = TRUE;
+    $form['shivanode_element_type']['#attributes'] += array(
+       'onmousedown' => 'alert("You cannot change the type of an existing Shiva element. \nPlease use the Create Element link to create a new element instead.");',
+    );
   }
-  
-  // Use ajax to reload the iframe depending on element type choice
-  $form['shivanode_element_type']['und']['#ajax'] = array(
-    'callback' => 'shivanode_element_change',
-    'wrapper' => 'iframe_container',
-  );
-  
+
   // Permission Value (calls JS to enforce only Public and Private)
   $form['shivanode_access']['und'] += array(
     '#attributes' => array('onchange' => 'Drupal.Shivanode.checkPermissionsValue(jQuery(this).val());'),
