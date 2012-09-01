@@ -1092,7 +1092,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['snload_script'] = array(
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript">' .
-                        'console.info(\'sending js\'); Drupal.Shivanode.loadJS = true; ' .
+                        'Drupal.Shivanode.loadJS = true; ' .
                     '</script>',
     );
   }
