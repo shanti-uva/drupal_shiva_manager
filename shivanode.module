@@ -430,14 +430,18 @@ function shivanode_node_view_alter(&$build) {
       '#prefix' => '<div class="sn-share-button">',
       '#suffix' => '</div>',
     );
-
+    
+    $shareicon = '/' . drupal_get_path('module','shivanode') . '/images/share_icon.png';
+    
     $build['sharediv']['share'] = array(
       '#type' => 'markup',
-      '#markup' => '<span>' . l('Share', 'node/' . $node->nid . '/share', array(
+      '#markup' => '<span>' . l('<img height="20" width="20" src="' . $shareicon . '" />', 'node/' . $node->nid . '/share', array(
         'attributes' => array(
           'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
           //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
+          'title' => 'Share this visualization!',
         ),
+        'html' => true,
         'query' => array(
           'format' => 'simple',
           'class' => 'lightbox',
@@ -965,13 +969,15 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   );
   
   if (isset($form['#node']->nid) && $sntype != 'Data') {
+    $imgurl = drupal_get_path('module','shivanode') . '/images/share_icon.png';
     $form['upperbuttons']['sharediv']['share'] = array(
       '#type' => 'markup',
-      '#markup' => '<span>' . l('Share', 'node/' . $form['#node']->nid . '/share', array(
+      '#markup' => '<span>' . l('<img height="25" width="25" src="' . $imgurl . '" />', 'node/' . $form['#node']->nid . '/share', array(
         'attributes' => array(
           'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
           'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
         ),
+        'html' => true,
         'query' => array(
           'format' => 'simple',
           'class' => 'lightbox',
