@@ -2017,6 +2017,13 @@ function _shivanode_node_embed_page($nid) {
       };</script>',
     ),
   );
+  if(module_exists('sharethis')) {
+    $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
+    $page['stdiv'] = array(
+      '#type' => 'markup',
+      '#markup' => $block['content'],
+    );
+  }
   return $page;
 }
 
