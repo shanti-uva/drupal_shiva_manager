@@ -916,7 +916,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     //_shivanode_check_google_login(); only ask when necessary
     $form['shivanode_access']['und']['#default_value'] = 1;
     $form['shivanode_element_type']['und']['#default_value'] = 7; // default value is visualization
-    $eltype = t('Visualization');
+    $eltype = t('Chart');
       
     // Use ajax to reload the iframe depending on element type choice
     $form['shivanode_element_type']['und']['#ajax'] = array(

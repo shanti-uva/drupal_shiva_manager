@@ -217,6 +217,7 @@ function _shivanode_installed_instances() {
  */
 function _shivanode_element_typelist() {
   $options = array(
+    7 => t('Chart'),
     1 => t('Data'),
     11 => t('Draw'),
     2 => t('Image'),
@@ -225,7 +226,6 @@ function _shivanode_element_typelist() {
     4 => t('Subway'),
     5 => t('Timeline'),
     6 => t('Video'),
-    7 => t('Visualization'),
     /*
     8 => 'Control',
         9 => 'Canvas',*/
@@ -244,6 +244,7 @@ function _shivanode_element_typelist() {
 function _shivanode_options_list($option = NULL) {
   $options = array(
     t('Elements') => array(
+      7 => t('Chart'),
       1 => t('Data'),
       11 => t('Draw'),
       2 => t('Image'),
@@ -252,7 +253,6 @@ function _shivanode_options_list($option = NULL) {
       4 => t('Subway'),
       5 => t('Timeline'),
       6 => t('Video'),
-      7 => t('Visualization'),
     ),
    /*
     t('Other') => array(
@@ -591,7 +591,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     
   $form['shivanode_url_settings']['shivanode_chart_editor'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name of the Visualization (chart) Editor File:'),
+    '#title' => t('Name of the Chart Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR),
     '#required' => TRUE,
@@ -1393,7 +1393,7 @@ function _get_shivaframe_url($opt) {
     case 6: // Videos
       $player =  variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR);
       break;
-    case 7:  // Visualization
+    case 7:  // Chart
       $player =  variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR);
       break;
     case 8:  // Controls
