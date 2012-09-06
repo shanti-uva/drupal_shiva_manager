@@ -28,6 +28,7 @@ div#otherbuttons {
 div.sn-share-button {
 	display: inline !important;
 	float:right;
+	margin-top: -8px;
 	padding-bottom: 6px;
 }
 

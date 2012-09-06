@@ -431,7 +431,7 @@ function shivanode_node_view_alter(&$build) {
       '#suffix' => '</div>',
     );
     
-    $shareicon = '/' . drupal_get_path('module','shivanode') . '/images/share_icon.png';
+    $shareicon = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
     
     $build['sharediv']['share'] = array(
       '#type' => 'markup',
@@ -473,8 +473,7 @@ function shivanode_node_view_alter(&$build) {
     }
     
     // Add meta tag for facebook sharing to include a custom image/icon
-    $imagePath = 'http://' . $_SERVER['SERVER_NAME'] . $base_path . drupal_get_path('module', 'shivanode') . 
-                   '/images/sn-fb-share-icon.jpg';
+    $imagePath = $base_path . drupal_get_path('module', 'shivanode') . '/images/sn-fb-share-icon.jpg';
     $element = array(
       '#tag' => 'meta',
       '#attributes' => array(
@@ -890,6 +889,7 @@ function shivanode_add_og_user_role($form, &$form_state) {
  *  This code creates the input and edit form for a shivanode
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
+  global $base_path;
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
@@ -969,7 +969,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   );
   
   if (isset($form['#node']->nid) && $sntype != 'Data') {
-    $imgurl = drupal_get_path('module','shivanode') . '/images/share_icon.png';
+    $imgurl = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
     $form['upperbuttons']['sharediv']['share'] = array(
       '#type' => 'markup',
       '#markup' => '<span>' . l('<img height="25" width="25" src="' . $imgurl . '" />', 'node/' . $form['#node']->nid . '/share', array(
