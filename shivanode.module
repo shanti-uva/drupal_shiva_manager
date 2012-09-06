@@ -557,7 +557,7 @@ function shivanode_field_formatter_info() {
     
     'shiva_visualizer' => array(
       'label' => t('JSON Visualization Display (SHIVA)'),
-      'field types' => array('text'),
+      'field types' => array('text', 'text_long', 'text_with_summary'),
     ),
   );  
 }
@@ -904,7 +904,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $action = $aparts[0];
   }
   $form_state['no_redirect'] = TRUE;
-  $is_new_el = (strpos($action, '/add/') > -1)?TRUE:FALSE;
+  $is_new_el = (strpos($action, '/add/') > -1) ? TRUE : FALSE;
   // default settings are for the edit form
   $submitVal = ($is_new_el) ? t('Save') : t('Update');
   
@@ -1108,7 +1108,7 @@ function shivanode_element_change($form, $form_state) {
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span></legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
-        '" scrolling="no" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe></fieldset>';
+        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe></fieldset>';
   return $iframe;
 }
 
