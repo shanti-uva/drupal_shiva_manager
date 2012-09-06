@@ -976,6 +976,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         'attributes' => array(
           'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
           'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
+          'title' => 'Share this visualization!',
         ),
         'html' => true,
         'query' => array(

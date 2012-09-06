@@ -35,6 +35,7 @@
 					Drupal.Shivanode.IframeSrcUrl = null;
 				}
 				$('iframe#shivaEditFrame').load(function() {
+				  Drupal.Shivanode.ShivaMessage("shivaEditFrame", "GetType"); // once edit frame is loaded send GetType message just to register this page as parent frame
 					var json = $('#edit-shivanode-json-und-0-value').val();
 					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
 						//setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
@@ -161,7 +162,7 @@
 	Drupal.Shivanode.debug = { 
 		send : true, 
 		sendtype : 'all',
-		receive : true,
+		receive : false,
 		receivetype : 'all',
 		trace : true
 	};
@@ -231,7 +232,7 @@
 		 * 		16. ShivaReady=true: Sent from editor frame and first time puts the Drupal JSON into it
 		 * 
 		 */
-		
+
 	  var response='';
 	  
 	  if(Drupal.Shivanode.debug != null && typeof(console) == 'object') {
