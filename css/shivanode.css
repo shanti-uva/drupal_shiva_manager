@@ -39,6 +39,21 @@ div.node-shivanode div.sn-share-button {
 form.node-shivanode-form div.sn-share-button  {
 	margin-right: 3px;
 }
+
+div.sn-share-button img {
+  vertical-align: middle;
+}
+
+/*
+div.sn-share-button span {
+  color: #496771;
+  font-size: 10pt;
+}
+
+div.sn-share-button span:hover {
+  color: #0071B3;
+  text-decoration: underline;
+}*/
 /*
 
 div.sn-share-button span { 
@@ -51,12 +66,12 @@ div.sn-share-button span {
 	border: 1px solid #888;
 	padding: 1px 3px;
 }*/
-
+/*
 div.sn-share-button span a {
 	color: white;
 	font-weight: bold;
 	border: none !important;
-}
+}*/
 
 #shivanode-node-form div.form-item-title, #shivanode-node-form div#edit-shivanode-element-type {
   float: left;
