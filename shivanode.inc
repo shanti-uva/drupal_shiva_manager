@@ -2018,10 +2018,16 @@ function _shivanode_node_embed_page($nid) {
     ),
   );
   if(module_exists('sharethis')) {
+    // add meta tag for share image
+    _shivanode_add_share_meta($node);
     $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
+    $bcontent = $block['content'];
+    $bcontent = preg_replace('/node\/(\d+)\/share/','node/$1', $bcontent);
+    $imgurl = _get_thumb_image($node);
+    $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
     $page['stdiv'] = array(
       '#type' => 'markup',
-      '#markup' => $block['content'],
+      '#markup' => $bcontent,
     );
   }
   return $page;
@@ -2051,4 +2057,69 @@ function _shivanode_node_list_popup() {
     );
   }
   drupal_json_output($list);
+}
+
+// Add meta tag for facebook sharing to include title, desc, and a custom image/icon
+function _shivanode_add_share_meta($node) {
+  global $base_root, $base_path;
+  //$imgurl = 'https://shiva.virginia.edu/sites/shiva/files/shivathumbs/hinduism-in-africa.PNG';
+  $imgurl = _get_thumb_image($node);
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+       "property" => "og:image",
+       "content" => $imgurl,
+     ),
+  );
+  drupal_add_html_head($element, 'og_image');
+  
+  // Add Meta Title tag
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+       "property" => "og:title",
+       "content" => $node->title,
+     ),
+  );
+  drupal_add_html_head($element, 'og_title');
+  
+  // Add Meta Description
+  $desc = 'A visualization created with through the SHIVA application (http://shiva.virginia.edu/)';
+  if(isset($node->shivanode_description['und'][0])) {
+    if($node->shivanode_description['und'][0]['safe_summary'] != '') {
+      $desc = trim(strip_tags($node->shivanode_description['und'][0]['safe_summary']));
+    } else {
+      $desc = trim(strip_tags($node->shivanode_description['und'][0]['safe_value']));
+    }
+  }
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+       "property" => "og:description",
+       "content" => $desc,
+     ),
+  );
+  drupal_add_html_head($element, 'og_desc');
+  
+  // Meta URL
+  $url = $base_root . $base_path . 'node/' . $node->nid;
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+       "property" => "og:url",
+       "content" => $url,
+     ),
+  );
+  drupal_add_html_head($element, 'og_url');
+}
+
+function _get_thumb_image($node) {
+  global $base_path;
+  // Add image meta tag (og:image)
+  //  e.g. <meta property="og:image" content="Image url here">
+  $imgurl = $base_path . drupal_get_path('module', 'shivanode') . '/images/sn-fb-share-icon.jpg'; // Default url for when there is no thumbnail
+  if (isset($node->field_image['und'][0]['uri']) ) {
+    $imgurl = file_create_url($node->field_image['und'][0]['uri']);
+  }
+  return $imgurl;
 }

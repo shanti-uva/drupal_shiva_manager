@@ -471,18 +471,9 @@ function shivanode_node_view_alter(&$build) {
         );
       }
     }
-    
-    // Add meta tag for facebook sharing to include a custom image/icon
-    $imagePath = $base_path . drupal_get_path('module', 'shivanode') . '/images/sn-fb-share-icon.jpg';
-    $element = array(
-      '#tag' => 'meta',
-      '#attributes' => array(
-         "property" => "og:image",
-         "content" => $imagePath,
-       ),
-    );
-    drupal_add_html_head($element, 'fb_share_image');
-  } 
+    _shivanode_add_share_meta($node);
+    if(isset($build['field_image'])) { unset($build['field_image']); }
+  }
 }
 
 /**
