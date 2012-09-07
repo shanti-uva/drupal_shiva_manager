@@ -349,16 +349,20 @@
 	Drupal.Shivanode.doInsertDataElement = function(url, jsonparam) {
 		var title = '';
 		var ispreset = false;
-		var json = $('#edit-shivanode-json-und-0-value').val();
+		// Get the Data 
+		var json = $('#edit-shivanode-json-und-0-value').val(); // Get JSON from Drupal json field. This is the default JSON data value
+		// if url is 'preset', means reinsert the dataSource Url from the data element associated. Get info from it
 		if(url == 'preset') {
 			url = $('#chosen_data_element_url').text();
 			title = $('#chosen_data_element_title').text();
 			ispreset = true;
+		// if jsonparam is given then use that for the ul and title	
 		} else if(typeof(jsonparam) == "string" && jsonparam != "") {
 			var jobjSent = JSON.parse(jsonparam);
 			url = jobjSent.dataSourceUrl;
 			title = jobjSent.title;
 		}
+		// Parse JSON into object and validate data
 		var jobj = JSON.parse(json); //var jobj = $.evalJSON(json);
 		if(typeof(jobj.dataSourceUrl) != 'undefined') { jobj.dataSourceUrl = url; }
 		if(typeof(jobj.title) != 'undefined') { jobj.title = title.replace(' (Data)',''); }
@@ -366,17 +370,18 @@
 			var dt = new Date;
 			jobj.shivaMod = dt.toDateString();
 		}
-		// When not present (preset means the shivanode_data_nid is already set and we are reinserting the data into the entry form)
+		// When not preset (preset means the shivanode_data_nid is already set and we are reinserting the data into the entry form)
 		// Then add the markup in the node create/edit form
 		if (ispreset == false ) {
 			$("#data_sheet_in_use").html('<input id="shivanode_data_nid" name="shivanode_data_nid" type="hidden" value="' + jobj.did + '" /> ' +
-				'Using Data Element: <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
+				'<strong>Using Data Element: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
 				'<span id= "chosen_data_element_url" class="hidden">' + url + '</span>' +
-				'(<a href="#" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;">Re-Insert</a> | ' +
+				'(<a href="#" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;">Refresh Data</a> | ' +
 				'<a href="#" onclick="jQuery(\'#data_sheet_in_use\').html(\'\'); return false;">Remove</a>)');
 			$("#data_sheet_in_use").show();
 			$("#edit-title").val(title.replace(' (Data)',''));
 		}
+		// Reconvert JSON obj to JSON string and send to edit frame
 		json = JSON.stringify(jobj); //json = $.toJSON(jobj);
 		Drupal.Shivanode.putJSON('shivaEditFrame',json);
 	};
