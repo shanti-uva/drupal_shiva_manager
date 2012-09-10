@@ -1975,6 +1975,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
 }
 
 function _shivanode_node_embed_page($nid) {
+  global $base_root, $base_path;
   $node = node_load($nid);
   $page = array(
     'head' => array(
@@ -2019,10 +2020,13 @@ function _shivanode_node_embed_page($nid) {
   );
   if(module_exists('sharethis')) {
     // add meta tag for share image
+    // Can also be done through custom JS adding chicklets as outlined on http://support.sharethis.com/customer/portal/articles/475079-share-properties-and-sharing-custom-information
+    // but have been unable to get thumnail and node name to be shared.
     _shivanode_add_share_meta($node);
     $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
     $bcontent = $block['content'];
     $bcontent = preg_replace('/node\/(\d+)\/share/','node/$1', $bcontent);
+    $bcontent = preg_replace('/stLight.options\(\{publisher:([^\}]+)\}\);/','stLight.options({publisher:$1, onhover:\'false\'});', $bcontent);
     $imgurl = _get_thumb_image($node);
     $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
     $page['stdiv'] = array(
