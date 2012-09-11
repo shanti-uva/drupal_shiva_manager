@@ -14,6 +14,7 @@
  *  An associative array specifying the fields we wish to add to our
  *  new node type.
  */
+ 
 function _shivanode_installed_fields() {
   $t = get_t();
   return array(
@@ -1198,15 +1199,24 @@ function _shivanode_data_elements($form, &$form_state) {
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
         'http://' . $_SERVER['SERVER_NAME'] . '/node/add/shivanode?popup=dataurl',
         $gdocs, 0, 1);
-    $markup['addbutton'] = array(
+    $markup['spreadsheets'] = array(
+      '#type' => 'markup',
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+    );
+    $markup['spreadsheets']['addbutton'] = array(
       '#prefix' => '<div class="addspreadsheet-button"><span>',
-      '#markup' => l('Authenticate Google Account', $google_uri, array(
+      '#markup' => l('Authorize Access to Google Docs', $google_uri, array(
                       'attributes' => array(
                         'target' => '_top',
                         'class' => 'shiva-button',
                       )
                     )),
        '#suffix' => ' </span></div>',
+    );
+    $markup['spreadsheets']['instructions'] = array(
+      '#type' => 'markup',
+      '#markup' =>'<p>' . t('To add further spreadsheets from your Google Doc account you must give permission for this site to have read-only access to your Google Docs. To do so, you will be directed away from this page to a Google authentication page. From there click "Grant Access", and you will automatically be redirected back here.') . '</p>',
     );
   }
   

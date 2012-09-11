@@ -1095,6 +1095,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
  */
 function shivanode_element_change($form, $form_state) {
   $typeVal = $form_state['values']['shivanode_element_type']['und'][0]['value'];
+  setcookie('Drupal.Shivanode.lastElementType',$typeVal, time() + 300,'/','');
   $typeStr = _shivanode_options_list($typeVal);
   $iframeUrl = _get_shivaframe_url($typeVal);
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span></legend>' .

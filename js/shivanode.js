@@ -151,7 +151,17 @@
 			
 			// Show popup is popup=dataurl is in url
 			if(window.location.search.indexOf('popup=dataurl') > -1) {
-			  $('#use-data-element-link a').click();
+			  if(Drupal.Shivanode.getShivaCookie('Drupal.Shivanode.popup') != 'done') {
+			    var etyp = Drupal.Shivanode.getShivaCookie('Drupal.Shivanode.lastElementType');
+			    if(etyp) {
+            $('#edit-shivanode-element-type-und').val(etyp);
+            $('#edit-shivanode-element-type-und').change();
+          }
+          setTimeout(function() {
+            $('#use-data-element-link a').click();
+          }, 500);
+  			  Drupal.Shivanode.setShivaCookie('Drupal.Shivanode.popup', 'done', 1);
+  			}
 			}
 		}
 	};
@@ -659,7 +669,6 @@
 	};
 	
 	Drupal.Shivanode.checkKMLUrls = function(jobj) {
-	  console.info(jobj);
 		for(var o in jobj) {
 			if(o.indexOf("item-") > -1) {
 				var srch = jobj[o].match(/layerSource:([^;]+)/);
@@ -786,7 +795,7 @@
 				Drupal.Shivanode.shibstatus = status;
 			}
 		});
-	}
+	};
 	
 	/*
 	 * toggleJsonElement : a function that hides or shows the div with the JSON data in it
@@ -818,6 +827,25 @@
 				break;
 		}
 		window.location.pathname = path;
-	}
+	};
 	
+	// Generic Set Cookie function: No path or domain set, takes cookie name, value, and expiration in hours
+	//     to delete a cookie set val = '' and hours to a negative number, e.g. -1
+	Drupal.Shivanode.setShivaCookie = function(cname, cval, chours) {
+    var now = new Date();
+    now.setHours( now.getHours() + chours ); 
+    document.cookie=cname + "=" +  escape(cval.trim()) + ";" + "expires=" + now.toUTCString() + "; path=/; domain=";
+	};
+	
+	// Generic Get cookie function by name
+	Drupal.Shivanode.getShivaCookie = function(cname) {
+	  var allcookies = document.cookie;
+	  var re = new RegExp(cname + '=([^;]+)');
+	  var mtch = allcookies.match(re);
+	  if(mtch != null && mtch.length == 2) {
+	    return mtch[1];
+	  } else {
+	    return false;
+	  }
+	};
 }) (jQuery);
