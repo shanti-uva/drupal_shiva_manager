@@ -157,9 +157,7 @@
             $('#edit-shivanode-element-type-und').val(etyp);
             $('#edit-shivanode-element-type-und').change();
           }
-          setTimeout(function() {
-            $('#use-data-element-link a').click();
-          }, 500);
+          $('#use-data-element-link a').click();
   			  Drupal.Shivanode.setShivaCookie('Drupal.Shivanode.popup', 'done', 1);
   			}
 			}
@@ -834,7 +832,7 @@
 	Drupal.Shivanode.setShivaCookie = function(cname, cval, chours) {
     var now = new Date();
     now.setHours( now.getHours() + chours ); 
-    document.cookie=cname + "=" +  escape(cval.trim()) + ";" + "expires=" + now.toUTCString() + "; path=/; domain=";
+    document.cookie=cname + "=" +  escape(cval.trim()) + ";" + "expires=" + now.toUTCString() + ";path=/;domain=;";
 	};
 	
 	// Generic Get cookie function by name
