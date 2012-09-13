@@ -2098,7 +2098,7 @@ function _shivanode_add_share_meta($node) {
   drupal_add_html_head($element, 'og_title');
   
   // Add Meta Description
-  $desc = 'A visualization created with through the SHIVA application (http://shiva.virginia.edu/)';
+  $desc = 'A visualization created with the SHIVA application provided by SHANTI at the University of Virginia (http://shiva.virginia.edu/)';
   if(isset($node->shivanode_description['und'][0])) {
     if($node->shivanode_description['und'][0]['safe_summary'] != '') {
       $desc = trim(strip_tags($node->shivanode_description['und'][0]['safe_summary']));
@@ -2134,6 +2134,9 @@ function _get_thumb_image($node) {
   $imgurl = $base_path . drupal_get_path('module', 'shivanode') . '/images/sn-fb-share-icon.jpg'; // Default url for when there is no thumbnail
   if (isset($node->field_image['und'][0]['uri']) ) {
     $imgurl = file_create_url($node->field_image['und'][0]['uri']);
+  } else {
+    // Use PagePeeker Thumbnails as a default for sharing.
+    $imgurl = 'http://pagepeeker.com/thumbs.php?size=l&url=https://shiva.virginia.edu/node/' . $node->nid;
   }
   return $imgurl;
 }
