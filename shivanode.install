@@ -819,3 +819,42 @@ function shivanode_update_7002() {
     }
   }
 }
+
+/**
+ * 
+ * Creating a field for kml files associated with Maps
+ *
+*
+function shivanode_update_7003() {
+  if (!field_info_field('field_kml_file')) {
+    $field = array(
+      'field_name' => 'field_kml_file', 
+      'type' => 'file', 
+    );
+    field_create_field($field);
+    
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_kml_file', 
+      'description' => t('A field to hold KML files associated with Shiva map elements as layers'),
+      'entity_type' => 'node', 
+      'label' => 'KML files', 
+      'bundle' => 'shivanode', 
+      'required' => FALSE,
+      'cardinality' => 10,
+      'settings' => array(
+        'file_extensions' => 'kml',
+        'file_directory' => 'shivanode/kml',
+        'max_filesize' => '1 MB',
+        'description_field' => 0,
+      ),
+      'widget' => array(
+          'type' => 'file_generic',
+      ), 
+    );
+    field_create_instance($instance);
+    drupal_set_message('The field, field_kml_file, has been created for Shivanodes!');
+  } else {
+    drupal_set_message('The field, field_kml_file, already exists!','warning');
+  }
+}*/
