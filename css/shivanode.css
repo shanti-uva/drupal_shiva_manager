@@ -120,7 +120,8 @@ div#edit-shivanode-tags {
 }
 
 fieldset#iframe_container iframe {
-  margin-top: 18px;
+  margin: 0px;
+  padding: 0px;
 }
 
 iframe#shivaViewFrame {

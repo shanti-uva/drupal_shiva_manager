@@ -341,6 +341,12 @@
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
 				Drupal.Shivanode.jsonloaded = true;
 			}
+			
+		// GetKML= : Set the data element in the Iframe using the data elements ID.
+    } else if (e.data.indexOf('GetKML=') == 0) {
+      var json = e.data.substr(7);
+      Drupal.Shivanode.setDrupalJSON(json);
+      $('#use-kml-link a').click();
 		}
 	};
 
@@ -697,6 +703,12 @@
 				}
 			}
 		}
+	};
+	
+	Drupal.Shivanode.sendKMLUrl = function(kmlurl) {
+    Drupal.Shivanode.ShivaMessage('shivaEditFrame','PutKML=' + kmlurl);
+	  window.parent.Lightbox.end();
+	  return false;
 	};
 	
 	Drupal.Shivanode.getModuleUrl = function() {

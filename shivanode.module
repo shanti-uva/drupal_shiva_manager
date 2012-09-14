@@ -200,6 +200,8 @@ function shivanode_menu() {
       'file' => 'shivanode.inc',
     );
 
+  // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
+  // Calls _shivanode_shib_check
   $items['shib/auth/check'] = array(
     'title' => 'Check Shibboleth Authentication',
     'type' => MENU_LOCAL_TASK,
@@ -208,6 +210,17 @@ function shivanode_menu() {
     'access callback' => TRUE,
     'file' => 'shivanode.inc',
   );
+  
+  // Path for list/kml provides a list of all KML files uploaded by user
+  $items['list/kml'] = array(
+    'title' => '',
+    'description' => 'Displays a page listing KML files belonging to the user',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_kml_list'),
+    'access callback' => 'is_auth_user',
+    'file' => 'shivanode.inc',
+  );
+  
   return $items;
 }
 
@@ -903,6 +916,23 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $eltype = '';
   $form['shivanode_element_type']['#weight'] = 1;
   $form['shivanode_access']['#weight'] = 2;
+         
+  // Hidden link for popup to show the KML file list. Called by JS when message received from shiva edit frame
+  $form['shivanode_kmlfiles'] = array(
+    '#type' => 'markup',
+    '#markup' => '<div id="use-kml-link" style="display: none;">' .
+      l('Use an KML File', 'list/kml',
+        array(
+          'attributes' => array(
+            'rel' => 'lightframe[|width:800px; height:900px; scrolling: auto;]',
+          ),
+          'query' => array(
+            'format' => 'simple',
+          ),
+        )
+      ) . '</div>',
+  );
+  
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
     $form['shivanode_access']['und']['#default_value'] = 1;
@@ -944,7 +974,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
         l(t('Create a Data Element from Google Spreadsheet'), 'node/data-elements') . '</div>';
-     
+  
   // The upper Save/Update button
   $form['upperbuttons'] = array(
     '#type' => 'markup',
