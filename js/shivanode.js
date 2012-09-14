@@ -382,7 +382,7 @@
 		// Then add the markup in the node create/edit form
 		if (ispreset == false ) {
 			$("#data_sheet_in_use").html('<input id="shivanode_data_nid" name="shivanode_data_nid" type="hidden" value="' + jobj.did + '" /> ' +
-				'<strong>Using Data Element: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
+				'<strong>Data Used: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
 				'<span id= "chosen_data_element_url" class="hidden">' + url + '</span>' +
 				'(<a href="#" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;">Refresh Data</a> | ' +
 				'<a href="#" onclick="jQuery(\'#data_sheet_in_use\').html(\'\'); return false;">Remove</a>)');
@@ -844,6 +844,15 @@
 	    return mtch[1];
 	  } else {
 	    return false;
+	  }
+	};
+	
+	Drupal.Shivanode.dataSheetEdit = function() {
+	  if($.browser.msie) {
+	    var href = jQuery('#datasheeturl').attr('href');
+	    window.open(href);
+	  } else {
+	    jQuery('#datasheeturl').click();
 	  }
 	};
 }) (jQuery);

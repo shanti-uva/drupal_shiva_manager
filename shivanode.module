@@ -1046,7 +1046,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   );
   $form['gdocinfo']['span'] = array(
     '#type' => 'markup',
-    '#markup' => '<span class="label">' . t('Using Data Element') . ': </span>',
+    '#markup' => '<span class="label">' . t('Data Used') . ': </span>',
   );
   // if it's a new element being created with a datasheet in the URL, or if it's an edit of an existing element
   if (($is_new_el && is_numeric($urlsuffix)) || $urlsuffix == 'edit') {

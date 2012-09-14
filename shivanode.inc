@@ -1950,36 +1950,36 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     );
     // Link to Edit Google Doc source spreadsheet
     $gupts = explode('key=', $dataurl);
-    $gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1];
+    $gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1]; //$(this).parent().click();
     $form['gdocinfo']['button_div']['edit_gdoc'] = array(
       '#type' => 'markup',
-      '#prefix' => '(',
-      '#markup' =>  l(t('Edit Data'), $gurl, array(
+      '#markup' =>  '&nbsp;' . l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" />', $gurl, array(
         'attributes' => array(
           'target' => '_blank',
+          'id' => 'datasheeturl'
         ),
+        'html' => true,
       )),
       '#suffix' => ' | ',
     );
     // Link to reinsert Google url into data table.
     $form['gdocinfo']['button_div']['insert_button'] = array(
       '#type' => 'markup',
-      '#markup' => '<a href="#" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' .
-        'title="' . t('Insert the Data URL from this link in the form below.') . '" >' . t('Refresh Data') . '</a> ',
+      '#markup' => '<input type="button" value="' . t('Refresh Data') . '" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' .
+        'title="' . t('Insert the Data URL from this link in the form below.') . '" />',
         '#suffix' => ' | ',
     );
     // The clear link to clear the link from shivanode to data element.
     $form['gdocinfo']['button_div']['remove_datanid'] = array(
       '#type' => 'button',
-      '#value' =>  t('Remove'),
+      '#value' =>  t('Remove Link to Data'),
       '#attributes' => array(
         'title' => t('Remove the association between this element and the data element that supplies its Data Source URL.'),
-        'class' => array('nobutton'),
+        //'class' => array('nobutton'),
       ),
       '#ajax' => array(
         'callback' => '_shivanode_set_to_remove_datainfo',
       ),
-      '#suffix' => ')',
     );
   }
 }

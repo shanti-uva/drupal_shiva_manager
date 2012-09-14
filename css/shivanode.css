@@ -73,6 +73,16 @@ div.sn-share-button span a {
 	border: none !important;
 }*/
 
+div#data_sheet_in_use {
+  background-color: #E1E1E1;
+  padding: 3px 6px;
+  margin-bottom: -8px;
+}
+
+div#data_sheet_in_use.messages {
+  padding: 10px 10px 10px 50px;
+}
+
 #shivanode-node-form div.form-item-title, #shivanode-node-form div#edit-shivanode-element-type {
   float: left;
   padding-right: 12px;
@@ -406,6 +416,10 @@ span.private {padding-left: 2px; color: #990000;}
 
 .bold {
 	font-weight: bold !important;
+}
+
+.label {
+  font-weight: bold !important;
 }
 
 .italic {
