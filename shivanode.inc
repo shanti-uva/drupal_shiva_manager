@@ -1965,7 +1965,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $form['gdocinfo']['button_div']['insert_button'] = array(
       '#type' => 'markup',
       '#markup' => '<a href="#" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' .
-        'title="' . t('Insert the Data URL from this link in the form below.') . '" >' . t('Re-Insert URL') . '</a> ',
+        'title="' . t('Insert the Data URL from this link in the form below.') . '" >' . t('Refresh Data') . '</a> ',
         '#suffix' => ' | ',
     );
     // The clear link to clear the link from shivanode to data element.
