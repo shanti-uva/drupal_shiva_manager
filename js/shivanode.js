@@ -61,7 +61,7 @@
 				if($('#json-hide-link').length == 0 ) {
 					$("#shivanode_json_div label:contains('JSON Value')")
 						.append('<span> (<a href="#" id="json-hide-link" class="toggle-link" ' +
-						'onclick="Drupal.Shivanode.toggleJsonElement(); return false;">Hide</a>)</span>');			
+						'onclick="Drupal.Shivanode.toggleJsonElement(); return false;" title="Hide this field">Hide</a>)</span>');			
 				}
 				// Add separator line of dashes before control option if not already there
 				/* Uncomment this when Controls and Canvas are activated
@@ -92,29 +92,29 @@
 			// the object Drupal.Shivanode.node is embeded in popup window by the Drupal _shivanode_node_embed_page($nid) function
 			// it contains values for nid (node id), title, json, and player.
 			$('#snembedselect').change(function() {
-       var choice = $(this).val();
-   		 var url = Drupal.Shivanode.node.player + "?m=http://" + window.location.host + Drupal.settings.basePath 
-   								+ 'data/json/' + Drupal.Shivanode.node.nid;
-   		 var jobj = JSON.parse(Drupal.Shivanode.node.json);
-   		 var retval = '';
-       switch (choice) {
-       	case 'wp':
-       		retval = "[iframe src='" + url + "']";
-       		break;
-       	case 'link':
-       		retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
-       		break;
-       	case 'if':
-       		retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
-       		break;
-       	case 'json':
-       		retval = Drupal.Shivanode.node.json;
-       		break;
-       	default:
-       		retval = url;				
-       		break;
-       }
-       $('#sn-embedcode-area').val(retval); 
+         var choice = $(this).val();
+     		 var url = Drupal.Shivanode.node.player + "?m=http://" + window.location.host + Drupal.settings.basePath 
+     								+ 'data/json/' + Drupal.Shivanode.node.nid;
+     		 var jobj = JSON.parse(Drupal.Shivanode.node.json);
+     		 var retval = '';
+         switch (choice) {
+         	case 'wp':
+         		retval = "[iframe src='" + url + "']";
+         		break;
+         	case 'link':
+         		retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
+         		break;
+         	case 'if':
+         		retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
+         		break;
+         	case 'json':
+         		retval = Drupal.Shivanode.node.json;
+         		break;
+         	default:
+         		retval = url;				
+         		break;
+         }
+         $('#sn-embedcode-area').val(retval); 
       });
 			
 			// if format=simple then hide header footer and sidenavs
@@ -191,6 +191,8 @@
 	
 	Drupal.Shivanode.chartChanged = false;
 	
+	Drupal.Shivanode.fileItemIndex = null; // The index of the item for which a file request has been made in GetFile
+	
 	/*
 	  shivaMessageHandler(e) : A handler for HTML 5 messages to the current frame
 	  	- Handler for HTML 5 messages received
@@ -238,6 +240,12 @@
 		 * 																					 and inserts the info into the form.
 		 * 
 		 * 		16. ShivaReady=true: Sent from editor frame and first time puts the Drupal JSON into it
+		 * 
+		 *    17. GetFile={File Type}={Item Index}: Message from the shiveEditFrame to get a file of File type for the item index given
+		 *                                          
+		 * 
+		 *    18. PutFile={File Type}={Item Index}={Url} : Message from a lightbox popup to put a file of filetype with item index
+		 *                                                 Sending the URL
 		 * 
 		 */
 
@@ -342,12 +350,18 @@
 				Drupal.Shivanode.jsonloaded = true;
 			}
 			
-		// GetKML= : Set the data element in the Iframe using the data elements ID.
-    } else if (e.data.indexOf('GetKML=') == 0) {
-      var json = e.data.substr(7);
-      Drupal.Shivanode.setDrupalJSON(json);
-      $('#use-kml-link a').click();
-		}
+		// GetKML={layerid} : Set the data element in the Iframe using the data elements ID.
+    } else if (e.data.indexOf('GetFile=') == 0) {
+      Drupal.Shivanode.getFile(e.data.substr(8));
+
+    // PutKML={layerid} : Set the data element in the Iframe using the data elements ID.
+    } else if (e.data.indexOf('PutFile=') == 0) {
+      console.info("got put file message: " + e.data.substr(8));
+      var pts = e.data.substr(8).split("=");
+      if(pts.length == 2)
+        Drupal.Shivanode.putFile(pts[0],pts[1]);
+    }
+		
 	};
 
 	// checkPrivacyValue(val): Checking the privacy value and not allowing any but public and private
@@ -668,7 +682,7 @@
 			e.source.postMessage('PutJSON=' + JSON.stringify(jobj),'*');
 			return;
 		}
-		$('#edit-shivanode-json-und-0-value').attr('readonly','').val(JSON.stringify(jobj)).attr('readonly','readonly');
+		$('#edit-shivanode-json-und-0-value').attr('readonly', false).val(JSON.stringify(jobj)).attr('readonly', true);
 		if(typeof(Drupal.Shivanode.IDE) != 'undefined' && Drupal.Shivanode.IDE != null) {
 			var ide = Drupal.Shivanode.IDE;
 			Drupal.Shivanode.IDE = null;
@@ -705,9 +719,31 @@
 		}
 	};
 	
-	Drupal.Shivanode.sendKMLUrl = function(kmlurl) {
-    Drupal.Shivanode.ShivaMessage('shivaEditFrame','PutKML=' + kmlurl);
-	  window.parent.Lightbox.end();
+	Drupal.Shivanode.getFile = function(data) {
+	  
+	  console.info("data is: " + data );
+	  var prms = data.split("=");
+	  Drupal.Shivanode.fileItemIndex = prms[1];
+	  switch(prms[0]) {
+	    case "KML":
+       $('#use-kml-link a').click();
+       break;
+	  }
+	}
+	
+	Drupal.Shivanode.putFile = function(type, fileurl) {
+	  console.info("in put file function: " + type + ":" + fileurl);
+	  // If the html element has a class "lightpop" it is the popup list, so send it to the main drupal page
+	  if( $("html").hasClass('lightpop')) {
+	    console.info('sending message to Drupal parent frame');
+	    window.parent.postMessage('PutFile=' + type + "=" + fileurl,'*');
+      window.parent.Lightbox.end();
+    // Else send the message to the map.htm in the shivaeditframe 
+	  } else if (Drupal.Shivanode.fileItemIndex != null) {
+	    console.info("activelayer: " + Drupal.Shivanode.fileItemIndex);
+      Drupal.Shivanode.ShivaMessage('shivaEditFrame','PutFile=' + type +  "=" + Drupal.Shivanode.fileItemIndex + "=" + fileurl);
+      Drupal.Shivanode.fileItemIndex = null;
+	  }
 	  return false;
 	};
 	
@@ -814,7 +850,7 @@
 	/*
 	 * toggleJsonElement : a function that hides or shows the div with the JSON data in it
 	 */
-	Drupal.Shivanode.toggleJsonElement = function() { // used to be shivanode_toggle_json_element
+	Drupal.Shivanode.toggleJsonElement = function(type) { // used to be shivanode_toggle_json_element
 		if($("#shivanode_json_div label:contains('JSON Value') a.toggle-link").text() == 'Hide') {
 			$("#shivanode_json_div label:contains('JSON Value')").nextAll().hide();	
 			$("#shivanode_json_div label:contains('JSON Value') a.toggle-link").text('Show');

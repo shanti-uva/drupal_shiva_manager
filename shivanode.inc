@@ -1426,45 +1426,6 @@ function _get_shivaframe_url($opt) {
   return $player;
 }
 
-// Function called by the menu list/kml 
-// Lists all KML files uploaded by the user and public ones by others
-function _shivanode_kml_list($form, &$form_state) {
-  global $user;
-  $name = (isset($user->field_first_name['und'][0]['value'])) ? $user->field_first_name['und'][0]['value'] : $user->name;
-  $form['instructions'] = array(
-    '#type' => 'markup',
-    '#markup' => '<p>' . t('Choose one of the following KML files that you have uploaded to user for this layer. Click the KML file&rsquo;s title to insert it into the layer form:') . ' ' . $name . ':</p>',
-  );
-  $form['list'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<ul>',
-    '#suffix' => '</ul>',
-  );
-  
-  // EntityFieldQuery is a Drupal 7 class for locating entities based on conditions
-  // use it here to find all kml_files created by uid.
-  $query = new EntityFieldQuery;
-  $result = $query
-    ->entityCondition('entity_type', 'node')
-    ->propertyCondition('status', 1)
-    ->propertyCondition('type', 'kml_file')
-    ->propertyCondition('uid', $user->uid)
-    ->execute();
-  $nids = array_keys($result['node']);
-  $nodes = node_load_multiple($nids);
-  $r = -1;
-  foreach($nodes as $n) {
-    $r++;
-    $furl = $n->field_kml_file['und'][0]['uri'];
-    $ftitle = $n->title;
-    $form['list'][$r] = array(
-      '#type' => 'markup',
-      '#markup' => '<li><a href="#" onclick="Drupal.Shivanode.sendKMLUrl(\'' . file_create_url($furl) . '\');" >' . $ftitle . '</a></li>',
-    );
-  }
-  return $form;
-}
-
 /*
  * _shivanode_node_json($nid): Function called by the menu path 'data/json/%' in shivanode_menu
  * 		This function retreives the node, gets its SHIVA json data and publishes that
@@ -2061,12 +2022,12 @@ function _shivanode_node_embed_page($nid) {
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript"> Drupal.Shivanode.node = {
         "nid": ' . $nid . ',
-        "title": "' . str_replace('"', '\"', $node->title) . '",
-        "json": \'' . _shivanode_get_json($node, FALSE) . '\',
+        "title": "' . str_replace('"', '\"', $node->title) . '", 
+        "json": \'' . preg_replace("/'/","\'",_shivanode_get_json($node, FALSE)) . '\',
         "player": "' . variable_get('shivanode_chart_viewer') . '"
       };</script>',
     ),
-  );
+  ); 
   if(module_exists('sharethis')) {
     // add meta tag for share image
     // Can also be done through custom JS adding chicklets as outlined on http://support.sharethis.com/customer/portal/articles/475079-share-properties-and-sharing-custom-information

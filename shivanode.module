@@ -211,18 +211,25 @@ function shivanode_menu() {
     'file' => 'shivanode.inc',
   );
   
-  // Path for list/kml provides a list of all KML files uploaded by user
-  $items['list/kml'] = array(
-    'title' => '',
-    'description' => 'Displays a page listing KML files belonging to the user',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_kml_list'),
-    'access callback' => 'is_auth_user',
-    'file' => 'shivanode.inc',
-  );
-  
   return $items;
 }
+
+/**
+ * Implements hook_node_info: 
+ **/
+function shivanode_node_info() {
+  return array(
+    'shivanode' => array(
+      'name' => t('Shivanode'), 
+      'base' => 'shivanode', 
+      'has_title' => TRUE,
+      'title_label' => t('Title'),
+      'description' => t('A <em>Shivanode</em> creates a visualization using the SHIVA framework'), 
+      'title_label' => t('Shiva Visualization'),
+    ),
+  );
+}
+
 
 /**
  * Implements hook_help.
@@ -911,26 +918,42 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $is_new_el = (strpos($action, '/add/') > -1) ? TRUE : FALSE;
   // default settings are for the edit form
   $submitVal = ($is_new_el) ? t('Save') : t('Update');
-  
+  if(!isset($form['title'] )) {
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain('Title'),
+      '#default_value' => !empty($form['#node']->title) ? $form['#node']->title : '',
+      '#required' => TRUE, 
+      '#weight' => -5
+    );
+  }
   // if it's not the edit form, it's the save form. Set default values and buttons
   $eltype = '';
   $form['shivanode_element_type']['#weight'] = 1;
   $form['shivanode_access']['#weight'] = 2;
-         
+  
+  // Determine whether KML submodule is enabled and if so, link to that popup list. Otherwise give alert explanation
+  $lnkmu =  '<div id="use-kml-link" style="display: none;"><a onclick="javascript: alert(\'' . 
+            t('The Shiva KML module has not been enabled to allow you to upload and use KML files.') . '\')">KML Module not Enabled</a></div>';
+            
+  if(module_exists('shivakml')) {
+    $lnkmu = '<div id="use-kml-link" style="display: none;">' .
+        l('Use an KML File', 'list/kml',
+          array(
+            'attributes' => array(
+              'rel' => 'lightframe[|width:800px; height:900px; scrolling: auto;]',
+            ),
+            'query' => array(
+              'format' => 'simple',
+            ),
+          )
+        ) . '</div>';
+  } 
+  
   // Hidden link for popup to show the KML file list. Called by JS when message received from shiva edit frame
   $form['shivanode_kmlfiles'] = array(
     '#type' => 'markup',
-    '#markup' => '<div id="use-kml-link" style="display: none;">' .
-      l('Use an KML File', 'list/kml',
-        array(
-          'attributes' => array(
-            'rel' => 'lightframe[|width:800px; height:900px; scrolling: auto;]',
-          ),
-          'query' => array(
-            'format' => 'simple',
-          ),
-        )
-      ) . '</div>',
+    '#markup' => $lnkmu,
   );
   
   if ($is_new_el) {
