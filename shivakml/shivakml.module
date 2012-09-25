@@ -32,7 +32,7 @@ function shivakml_menu() {
   
   // Path for list/kml provides a list of all KML files uploaded by user
   $items['list/kml'] = array(
-    'title' => '',
+    'title' => 'KML File List',
     'type' => MENU_LOCAL_TASK,
     'description' => 'Displays a page listing KML files belonging to the user',
     'page callback' => 'drupal_get_form',
@@ -102,7 +102,8 @@ field_update_instance($instance);
 // Function called by the menu list/kml 
 // Lists all KML files uploaded by the user and public ones by others
 function _shivanode_kml_list($form, &$form_state) {
-  global $user;
+  global $user, $base_root, $base_path;
+  drupal_set_title(t('Choose or Upload a KML File'));
   $name = (isset($user->field_first_name['und'][0]['value'])) ? $user->field_first_name['und'][0]['value'] : $user->name;
   $form['instructions'] = array(
     '#type' => 'markup',
@@ -137,6 +138,15 @@ function _shivanode_kml_list($form, &$form_state) {
       );
     }
   }
+  /*
+  
+    $form['upload'] = array(
+      '#type' => 'markup',
+      '#markup' => '<input type="button" value="' . t('Upload a new KML File') . '" onclick="window.location.href=\'' .
+          $base_root . $base_path . 'node/add/shivakml-file?format=simple\';" />',
+    );
+    */
+  
   return $form;
 }
 

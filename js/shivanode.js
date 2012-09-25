@@ -356,7 +356,6 @@
 
     // PutKML={layerid} : Set the data element in the Iframe using the data elements ID.
     } else if (e.data.indexOf('PutFile=') == 0) {
-      console.info("got put file message: " + e.data.substr(8));
       var pts = e.data.substr(8).split("=");
       if(pts.length == 2)
         Drupal.Shivanode.putFile(pts[0],pts[1]);
@@ -721,7 +720,6 @@
 	
 	Drupal.Shivanode.getFile = function(data) {
 	  
-	  console.info("data is: " + data );
 	  var prms = data.split("=");
 	  Drupal.Shivanode.fileItemIndex = prms[1];
 	  switch(prms[0]) {
@@ -732,15 +730,12 @@
 	}
 	
 	Drupal.Shivanode.putFile = function(type, fileurl) {
-	  console.info("in put file function: " + type + ":" + fileurl);
 	  // If the html element has a class "lightpop" it is the popup list, so send it to the main drupal page
 	  if( $("html").hasClass('lightpop')) {
-	    console.info('sending message to Drupal parent frame');
 	    window.parent.postMessage('PutFile=' + type + "=" + fileurl,'*');
       window.parent.Lightbox.end();
     // Else send the message to the map.htm in the shivaeditframe 
 	  } else if (Drupal.Shivanode.fileItemIndex != null) {
-	    console.info("activelayer: " + Drupal.Shivanode.fileItemIndex);
       Drupal.Shivanode.ShivaMessage('shivaEditFrame','PutFile=' + type +  "=" + Drupal.Shivanode.fileItemIndex + "=" + fileurl);
       Drupal.Shivanode.fileItemIndex = null;
 	  }
