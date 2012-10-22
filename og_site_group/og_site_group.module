@@ -1,0 +1,51 @@
+<?php
+/**
+ * @file
+ * A custom module for automatically assigning a "site" group to all users
+ * 
+ */
+ 
+ 
+/**
+ * Implements hook_menu.
+ *
+ */
+ 
+function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $form['shiva_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Shiva Site Group Settings'
+  );
+  $form['shiva_group']['shiva_site_group']= array(
+    '#type' => 'textfield',
+    '#title' => t('Default Site Group Number'),
+    '#description' => t('The group number (gid) of the organic group that all users should be added to upon creation. Used by the OG Site Group submodule of Shivanode.'),
+    '#size' => 3,
+    '#default_value' => variable_get('shiva_site_group', SHIVA_SITE_GROUP),
+    '#required' => TRUE,
+    //'#element_validate' => array('_shivanode_size_settings_check', ), Need to add Group Validation
+  );
+  
+  $form['shiva_group']['shiva_site_group_create_button']= array(
+    '#type' => 'button',
+    '#value' => t('Create Site Group'),
+    '#title' => t('Automatically create a site group and assign all users to it.'),
+    '#size' => 3,
+    '#default_value' => variable_get('shiva_site_group', SHIVA_SITE_GROUP),
+    '#required' => TRUE,
+    //'#element_validate' => array('_shivanode_size_settings_check', ), Need to add Group Validation
+  );
+}
+
+/**
+ * Implements hook_user_insert(&$edit, $account, $category)
+ *    Assign user automatically to the global group so og create permissions does not throw error
+ *    
+ */
+function og_site_group_user_insert(&$edit, $account, $category) {
+  $gid = 7; // your group ID
+  $values['entity'] = user_load($account->uid); // load a user entity
+  $values['entity type'] = 'user';
+  $values['state'] = OG_STATE_ACTIVE; // set membership type
+  $create = og_group($gid, $values); 
+}

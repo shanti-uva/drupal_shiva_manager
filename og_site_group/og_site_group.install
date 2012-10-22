@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Install file for shivakml sub module.
+
+ */
+ 
+/**
+ * Implements hook_install().
+ */
+function og_site_group_enable() {
+  $default_site_group_name = "Site Group";
+  
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+ 
+function og_site_group_uninstall() {
+  
+}
+
+function og_site_group_create_group($name, $user) {
+  $node = new stdClass();
+  $node->type = 'MY_GROUP_TYPE';
+  $node->title = $name;
+  $node->uid = $user->uid;
+  $node->name = $user->name;
+  $node->comment = 0;
+  $node->promote = 0;
+ 
+  //Organic groups fields
+  $node->og_description = 'A group managed by ' . $user->name;
+  $node->og_register = 0;
+  $node->og_directory = 0;
+  $node->og_private = 1;
+  $node->og_selective = 3;
+ 
+  //create the node
+  $node = node_submit($node);
+  node_save($node);
+}

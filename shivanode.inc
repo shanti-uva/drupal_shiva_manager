@@ -403,6 +403,7 @@ function _shivanode_admin_settings($form, &$form_state) {
       'In the URL section the adminitrator can set the URLs for the default players and editors for Shivanodes.') . '</p.',
   );
   
+  // Display Settings for Shivanode dealing with size of views etc.
   $form['shivanode_display_settings'] = array(
     '#description' => t('The display settings for SHIVA elements'),
     '#type' => 'fieldset',
