@@ -62,6 +62,21 @@ function shivakml_form_shivakml_file_node_form_alter(&$form, &$form_state, $form
   return $form;
 }
 
+
+function shivakml_node_submit($node, $form, &$form_state) {
+  // when adding a file from the KML list popup page, save the node and return to that page.
+  if($form['#action'] == '/node/add/shivakml-file?format=simple&context=kml') {
+    node_save($node);
+    drupal_set_message(check_plain('KML file stored as node ' . $node->nid . '!'));
+    drupal_goto('list/kml', array(
+      'query' => array(
+        'format' => 'simple',
+      ),
+    ));
+  }
+}
+
+
 /**
  * Implement hook_node_view_alter()
  * 
@@ -138,15 +153,12 @@ function _shivanode_kml_list($form, &$form_state) {
       );
     }
   }
-  /*
   
-    $form['upload'] = array(
-      '#type' => 'markup',
-      '#markup' => '<input type="button" value="' . t('Upload a new KML File') . '" onclick="window.location.href=\'' .
-          $base_root . $base_path . 'node/add/shivakml-file?format=simple\';" />',
-    );
-    */
-  
+  $form['upload'] = array(
+    '#type' => 'markup',
+    '#markup' => '<input type="button" value="' . t('Upload a new KML File') . '" onclick="window.location.href=\'' .
+        $base_root . $base_path . 'node/add/shivakml-file?format=simple&context=kml\';" />',
+  );
   return $form;
 }
 
