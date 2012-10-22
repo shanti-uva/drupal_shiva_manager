@@ -1,8 +1,18 @@
-README for Shivanode Module
+README for Shanti Shiva Node Module
 
-	The Shivanode module allows for the creation and management of SHIVA visualizations within a Drupal website.
-	As a module, it can be plugged into any drupal installation. More testing text.... ANd again testing.... YEt again!
+	The Shiva Node module allows for the creation and management of SHIVA visualizations within a Drupal website.
 	
-July 9, 2012
+	The central module creates a "shivanode" content-type for SHIVA visualizations.
+	
+	The directories of the shivanode module folder are:
+	   - css: for css stylesheets
+	   - images: for various images used in the site
+	   - js: contains the javascript for the module and html messaging as well as jQuery plugins used by the module.
+	   - plugins: this contains the php/js/css code for the TinyMCE editor plugin
+	   
+	Other files to note are:
+	   - pingurl.php: this file is called as a URI by the javascript to test KML url that users enter for map shiva nodes
+	   
+October 22, 2012
 
 Than Grove
