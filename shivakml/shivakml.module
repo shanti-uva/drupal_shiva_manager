@@ -5,6 +5,10 @@
  * 
  */
 
+ 
+// KML SCHEMA at Google
+define('KML_SCHEMA', 'https://developers.google.com/kml/schema/kml21.xsd');
+ 
 /**
  * Implements hook_node_info: 
  **/
@@ -59,11 +63,72 @@ function shivakml_form_shivakml_file_node_form_alter(&$form, &$form_state, $form
     );
   }
   $form['field_kml_file']['#weight'] = -2;
+  
+  // add text field with kml file in it
+  $furl = file_create_url($form['field_kml_file']['und'][0]['#default_value']['uri']);
+  $xmldata = file_get_contents($furl);
+  $form['xmlfile'] = array(
+    '#type' => 'textarea',
+    '#title' => 'KML Content',
+    '#description' => '<span class="strong red">' . t('Warning') . ':</span>' . t('You may make minor edits to the KML here, but the results will not be validated.'),
+    '#rows' => 25,
+    '#weight' => 5,
+    '#default_value' => $xmldata,
+    '#prefix' => '<div id="kml_message"></div>',
+    /*
+     *   Validation does not work so leaving out for now.
+     * '#ajax' => array(
+      'event' => 'change',
+      'callback' => 'shivakml_validate',
+      'wrapper' => 'kml_message',
+    ),*/
+    '#attributes' => array(
+      'onchange' => 'jQuery(".form-item-shivakml-change input[type=checkbox]").attr(\'checked\', true);'
+    ),
+  );
+  
+  // Add a checkbox for saving updated KML, automatically checked if above field is changed
+  $form['shivakml_change'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Save New KML',
+    '#default_value' => FALSE,
+    '#weight' => 6,
+  );
+  
   return $form;
 }
 
 
+function shivakml_validate(&$form, &$form_state) {
+  
+  // Doesn't work with KML files. So not called
+  libxml_use_internal_errors(true); 
+  $xml = $form_state['values']['xmlfile'];
+  $xml = new DOMDocument(); 
+  $xml->loadXML($xml); 
+  $msg = "KML is valid!";
+  if (!$xml->schemaValidate(KML_SCHEMA)) { 
+    $msg = "Your KML is not valid: ";
+    $errors = libxml_get_errors(); 
+    foreach ($errors as $error) { 
+      $msg .= '<br/>' . $error->code . ': ' . $error->message; 
+    } 
+    libxml_clear_errors(); 
+  } 
+  return $msg;
+}
+
 function shivakml_node_submit($node, $form, &$form_state) {
+  // Check to see if KML was changed
+  dpm($form_state,'form state in kml');
+  if(isset($form_state['values']['shivakml_change']) && $form_state['values']['shivakml_change']) {
+    $furl = $form['field_kml_file']['und'][0]['#default_value']['uri'];
+    $xml = $form_state['values']['xmlfile'];
+    $results = file_save_data($xml, $furl, FILE_EXISTS_REPLACE);
+    if(!$results) {
+      drupal_set_message(check_plain(t('There was a problem saving the KML file. It could not be update!')));
+    }
+  } 
   // when adding a file from the KML list popup page, save the node and return to that page.
   if($form['#action'] == '/node/add/shivakml-file?format=simple&context=kml') {
     node_save($node);
