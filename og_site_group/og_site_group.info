@@ -1,5 +1,5 @@
 name = SHANTI Organic Group Site Group
-description = A fix for Organic Groups create permissions automatically assigns all users current and future to a specified "site group"
+description = A fix for Organic Groups Create Permissions that automatically assigns all users to a specified "site group"
 package = SHANTI Shiva
 core = 7.x
 dependencies[] = og
