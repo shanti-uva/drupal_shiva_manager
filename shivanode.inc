@@ -1088,7 +1088,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  * _shivanode_data_elements: Lists all data elements for inclusion in lightbox popup
  *     when icon on a shiva edit page is clicked to use a data element for a visualization,
  *      this function produces the content displayed in a popup for choosing which data element
- *
+ * this is only on test branch for now.
  */
 function _shivanode_data_elements($form, &$form_state) {
   global $user, $base_root, $base_path;
