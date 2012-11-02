@@ -403,6 +403,7 @@ function _shivanode_admin_settings($form, &$form_state) {
       'In the URL section the adminitrator can set the URLs for the default players and editors for Shivanodes.') . '</p.',
   );
   
+  // Display Settings for Shivanode dealing with size of views etc.
   $form['shivanode_display_settings'] = array(
     '#description' => t('The display settings for SHIVA elements'),
     '#type' => 'fieldset',
@@ -1059,6 +1060,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
  *      else it returns false
  */
 function _shivanode_check_google_login($authenticate = TRUE) {
+  global $base_root, $base_path;
   if (!isset($_SESSION['gdoc_token'])) {
       if (isset($_GET['token'])) {
         // Converting single-use token to a session token.
@@ -1074,7 +1076,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
         // Display link to generate single-use token
         $gdocs = 'http://spreadsheets.google.com/feeds/';
         $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-            'http://' . $_SERVER['SERVER_NAME'] . request_uri(),
+            'http://' . $base_root . $base_path . request_uri(),
             $gdocs, 0, 1);
         drupal_goto($google_uri);
       }
@@ -1089,7 +1091,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  *
  */
 function _shivanode_data_elements($form, &$form_state) {
-  global $user;
+  global $user, $base_root, $base_path;
   
   //_shivanode_check_google_login();
   
@@ -1195,9 +1197,15 @@ function _shivanode_data_elements($form, &$form_state) {
     );
   } else {
     // Display link to generate single-use token
+    
+    // if the request uri has ?format=simple in it 
+    // then it's in the add data element popup, return there;
+    $return_page = 'node/data-elements';
+    $rui = request_uri();
+    if(strpos($rui, 'format=simple') > -1) { $return_page  = 'node/add/shivanode?popup=dataurl'; }
     $gdocs = 'http://spreadsheets.google.com/feeds/';
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-        'http://' . $_SERVER['SERVER_NAME'] . '/node/add/shivanode?popup=dataurl',
+        $base_root . $base_path . $return_page,
         $gdocs, 0, 1);
     $markup['spreadsheets'] = array(
       '#type' => 'markup',
@@ -1370,11 +1378,12 @@ function _shivanode_greset_form($form, $form_state) {
  *              by deleting the information stored in the session variable 'gdoc_token'
  */
 function _shivanode_greset_form_submit($form, &$form_state) {
+  global $base_root, $base_path;
   if (isset($_SESSION['gdoc_token'])) {
     unset($_SESSION['gdoc_token']); 
   }
   drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
-  drupal_goto('node/data-elements');
+  drupal_goto($base_root . $base_path . 'node/data-elements');
 }
 
 function _get_shivaframe_url($opt) {
@@ -2024,7 +2033,7 @@ function _shivanode_node_embed_page($nid) {
         "nid": ' . $nid . ',
         "title": "' . str_replace('"', '\"', $node->title) . '", 
         "json": \'' . preg_replace("/'/","\'",_shivanode_get_json($node, FALSE)) . '\',
-        "player": "' . variable_get('shivanode_chart_viewer') . '"
+        "player": "' . variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"
       };</script>',
     ),
   ); 

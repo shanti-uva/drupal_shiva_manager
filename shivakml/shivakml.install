@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * @file
+ * Install file for shivakml sub module.
+
+ */
+ 
+/**
+ * Implements hook_install().
+ */
+function shivakml_install() {
+  $t = get_t();
+  $kmlnode= array(
+    'type' => 'shivakml_file',
+    'name' => t('Shiva KML File'),
+    'base' => 'node_content',
+    'description' => t('A content type to store KML files to be used as a layer for a Shiva Map visualization'),
+    'custom' => TRUE, 
+    'modified' => TRUE, 
+    'locked' => FALSE, 
+    'help' => '', 
+    'min_word_count' => '',
+  );
+  
+  // Complete the node type definition by setting any defaults not explicitly
+  // declared above.
+  // http://api.drupal.org/api/function/node_type_set_defaults/7
+  $content_type = node_type_set_defaults($kmlnode);
+
+  //Add a body field and set the body label immediately.
+  node_add_body_field($content_type, t('Description'));
+  
+  // Load the instance definition for our content type's body
+  // http://api.drupal.org/api/function/field_info_instance/7
+  $body_instance = field_info_instance('node', 'body', 'shivakml_file');
+
+  //As an alternative for node_add_body_field($type, $label = 'Body')
+  //the 'label'-key can be used to set the body label on the field instance
+  //$body_instance['label'] = $t('Example Description');
+
+  // Add our example_node_list view mode to the body instance display by
+  // instructing the body to display as a summary
+  $body_instance['widget']['weight'] = 10;
+
+  // Save our changes to the body field instance.
+  // http://api.drupal.org/api/function/field_update_instance/7
+  field_update_instance($body_instance);
+  
+  // Save the content type
+  node_type_save($content_type);
+
+  foreach(shivakml_fields() as $field) {
+    field_create_field($field);
+  }
+  
+  foreach(shivakml_fields_instances() as $instance) {
+    field_create_instance($instance);
+  }
+  // disable comments for this content type doesn't seem to work
+  variable_set('comment_shivakml_file', COMMENT_NODE_CLOSED);
+  
+  drupal_set_message('The content type, shivakml_file, has been created!');
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+ 
+function shivakml_uninstall() {
+  
+  // Gather all the example content that might have been created while this
+  // module was enabled.  Simple selects still use db_query().
+  // http://api.drupal.org/api/function/db_query/7
+  $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
+  $result = db_query($sql, array(':type' => 'shivakml_file'));
+  $nids = array();
+  foreach ($result as $row) {
+    $nids[] = $row->nid;
+  }
+
+  // Delete all the nodes at once
+  // http://api.drupal.org/api/function/node_delete_multiple/7
+  node_delete_multiple($nids);
+
+  // Loop over each of the fields defined by this module and delete
+  // all instances of the field, their data, and the field itself.
+  // http://api.drupal.org/api/function/field_delete_field/7
+  foreach (array_keys(shivakml_fields()) as $field) {
+    field_delete_field($field);
+  }
+
+  // Loop over any remaining field instances attached to the node_example
+  // content type (such as the body field) and delete them individually.
+  // http://api.drupal.org/api/function/field_delete_field/7
+  $instances = field_info_instances('node', 'shivakml_file');
+  foreach ($instances as $instance_name => $instance) {
+    field_delete_instance($instance);
+  }
+
+  // Delete our content type
+  // http://api.drupal.org/api/function/node_type_delete/7
+  node_type_delete('shivakml_file');
+
+  // Purge all field infromation
+  // http://api.drupal.org/api/function/field_purge_batch/7
+  field_purge_batch(1000);
+  
+  drupal_uninstall_schema('shivakml_file');
+  
+  drupal_set_message('The content type, shivakml_file, has been removed!');
+}
+
+function shivakml_fields() {
+    
+  $fields = array(
+    'field_kml_file' => array(
+      'field_name'  => 'field_kml_file',
+      'type' => 'file',
+      'entity_types' => array('node'),
+      'cardinality' => 1,
+      'settings' => array(
+        'display_field' => 0,
+        'display_default' => 0,
+        'uri_scheme' => variable_get('file_default_scheme', 'public'),
+      ),
+      'module' => 'file',
+    ),
+  );
+  
+  return $fields;
+}
+
+
+function shivakml_fields_instances() {
+  $instances = array(
+    'field_kml_file' => array(
+      'field_name'  => 'field_kml_file',
+      'entity_type' => 'node',
+      'bundle' => 'shivakml_file', 
+      'label'  => t('KML File'),
+      'required' => TRUE,
+      'default_value' => array(),
+      'settings' => array(
+        'file_extensions' => 'kml kmz xml',
+        'file_directory' => 'shivakml',
+        'max_filesize' => '2 MB',
+        'description_field' => 0,
+      ),
+      'widget' => array(
+        'type'    => 'file_generic',
+        'weight'  => 0,
+      ),
+    ),
+  );
+  return $instances;
+}

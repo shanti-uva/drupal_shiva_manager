@@ -252,21 +252,6 @@ function is_auth_user() {
   return user_is_logged_in();
 }
 
-/**
- * Implements hook_user_insert(&$edit, $account, $category)
- *    Assign user automatically to the global group so og create permissions does not throw error
- *    
- */
-function shivanode_user_insert(&$edit, $account, $category) {
-  /* Only necessary for 7.9 or lower when error is thrown
-   *  must be a generic group ID 7
-  $gid = 7; // your group ID
-  $values['entity'] = user_load($account->uid); // load a user entity
-  $values['entity type'] = 'user';
-  $values['state'] = OG_STATE_ACTIVE; // set membership type
-  $create = og_group($gid, $values); 
-    */
-}
 
 /**
 * Implements hook_permission().
@@ -1245,3 +1230,9 @@ function shivanode_theme() {
 function theme_shivanode($variables) {
   return '<div class="shivanode_' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
+
+
+// function shivanode_form_alter(&$form, &$form_state, $form_id) {
+ // // dpm($form_id . "  (hook_form_" . $form_id . "_alter)",'Form id: ');
+// }
+

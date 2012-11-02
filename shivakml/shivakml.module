@@ -1,0 +1,232 @@
+<?php
+/**
+ * @file
+ * A custom module for managing KML files associated with SHIVA maps
+ * 
+ */
+
+ 
+// KML SCHEMA at Google
+define('KML_SCHEMA', 'https://developers.google.com/kml/schema/kml21.xsd');
+ 
+/**
+ * Implements hook_node_info: 
+ **/
+function shivakml_node_info() {
+  return array(
+    'shivakml_file' => array(
+      'name' => t('KML File'), 
+      'base' => 'shivanode', 
+      'has_title' => TRUE,
+      'title_label' => t('KML File'),
+      'description' => t('A <em>KML File</em> stores a KML file to be used as a layer in a SHIVA Map visualization'), 
+      'locked' => FALSE,
+    ), 
+  );
+}
+
+
+/**
+ * Implements hook_menu
+ */
+ 
+function shivakml_menu() {
+  
+  $items = array();
+  
+  // Path for list/kml provides a list of all KML files uploaded by user
+  $items['list/kml'] = array(
+    'title' => 'KML File List',
+    'type' => MENU_LOCAL_TASK,
+    'description' => 'Displays a page listing KML files belonging to the user',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_kml_list'),
+    'access callback' => 'user_is_logged_in',
+  );
+  
+  return $items;
+}
+
+/**
+ * Implements hook_FORMID_form_alter(form, form_state, form_id)
+ *
+ *  This code creates the input and edit form for a shivanode
+ */
+function shivakml_form_shivakml_file_node_form_alter(&$form, &$form_state, $form_id) {
+  if(!isset($form['title'] )) {
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain('Title'),
+      '#default_value' => !empty($form['#node']->title) ? $form['#node']->title : '',
+      '#required' => TRUE, 
+      '#weight' => -5
+    );
+  }
+  $form['field_kml_file']['#weight'] = -2;
+  
+  // add text field with kml file in it, if it is not a new kml file
+  if(strpos($form['#action'], 'node/add') == -1) {
+    $furl = file_create_url($form['field_kml_file']['und'][0]['#default_value']['uri']);
+    if(strpos($furl, '.kmz') == -1) {
+      $xmldata = file_get_contents($furl);
+      $form['xmlfile'] = array(
+        '#type' => 'textarea',
+        '#title' => 'KML Content',
+        '#description' => '<span class="strong red">' . t('Warning') . ':</span>' . t('You may make minor edits to the KML here, but the results will not be validated.'),
+        '#rows' => 25,
+        '#weight' => 5,
+        '#default_value' => $xmldata,
+        '#prefix' => '<div id="kml_message"></div>',
+        /*
+         *   Validation does not work so leaving out for now.
+         * '#ajax' => array(
+          'event' => 'change',
+          'callback' => 'shivakml_validate',
+          'wrapper' => 'kml_message',
+        ),*/
+        '#attributes' => array(
+          'onchange' => 'jQuery(".form-item-shivakml-change input[type=checkbox]").attr(\'checked\', true);'
+        ),
+      );
+      // Add a checkbox for saving updated KML, automatically checked if above field is changed
+      $form['shivakml_change'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Save edits to KML in text area',
+        '#default_value' => FALSE,
+        '#weight' => 6,
+      );
+    }
+  }
+  
+  return $form;
+}
+
+
+function shivakml_validate(&$form, &$form_state) {
+  
+  // Doesn't work with KML files. So not called
+  libxml_use_internal_errors(true); 
+  $xml = $form_state['values']['xmlfile'];
+  $xml = new DOMDocument(); 
+  $xml->loadXML($xml); 
+  $msg = "KML is valid!";
+  if (!$xml->schemaValidate(KML_SCHEMA)) { 
+    $msg = "Your KML is not valid: ";
+    $errors = libxml_get_errors(); 
+    foreach ($errors as $error) { 
+      $msg .= '<br/>' . $error->code . ': ' . $error->message; 
+    } 
+    libxml_clear_errors(); 
+  } 
+  return $msg;
+}
+
+function shivakml_node_submit($node, $form, &$form_state) {
+  // Check to see if KML was changed
+  if(isset($form_state['values']['shivakml_change']) && $form_state['values']['shivakml_change']) {
+    $furl = $form['field_kml_file']['und'][0]['#default_value']['uri'];
+    $xml = $form_state['values']['xmlfile'];
+    $results = file_save_data($xml, $furl, FILE_EXISTS_REPLACE);
+    if(!$results) {
+      drupal_set_message(check_plain(t('There was a problem saving the KML file. It could not be update!')));
+    }
+  } 
+  // when adding a file from the KML list popup page, save the node and return to that page.
+  if($form['#action'] == '/node/add/shivakml-file?format=simple&context=kml') {
+    node_save($node);
+    drupal_set_message(check_plain('KML file stored as node ' . $node->nid . '!'));
+    drupal_goto('list/kml', array(
+      'query' => array(
+        'format' => 'simple',
+      ),
+    ));
+  }
+}
+
+
+/**
+ * Implement hook_node_view_alter()
+ * 
+ */
+
+function shivakml_node_view_alter(&$build) {
+  if ($build['#bundle'] == 'shivakml_file') {
+    if (isset($build['field_kml_file']['#items']['0']['uri'])) {
+      $furl = file_create_url($build['field_kml_file']['#items']['0']['uri']);
+      $build['furl'] = array(
+        '#type' => 'markup',
+        '#markup' => '<p><b>Public URL: </b> ' . $furl . '</p>',
+      );
+      if(strpos($furl, '.kmz') == -1) {
+        $xmldata = file_get_contents($furl);
+        $xmldata = preg_replace('/\</','&lt;', $xmldata);
+        $xmldata = preg_replace('/\</','&gt;', $xmldata);
+        $xmldata = preg_replace('/\n/','<br />', $xmldata);
+        $build['xmldata'] = array(
+          '#type' => 'markup',
+          '#markup' => '<h4>File Contents</h4><p>' . $xmldata . '</p>',
+        ); 
+      }
+    }  
+  }
+}
+
+/*
+ * Sample code for changing the file_directory used for saving: 
+ * Need to check if can save in user named folders
+ * 
+ $instance = field_info_instance('node', 'field_kml_file', 'shivakml_file');
+$instance['settings']['file_directory'] = 'shivakmlfiles';
+field_update_instance($instance);
+ * 
+ **/
+
+
+// Function called by the menu list/kml 
+// Lists all KML files uploaded by the user and public ones by others
+function _shivanode_kml_list($form, &$form_state) {
+  global $user, $base_root, $base_path;
+  drupal_set_title(t('Choose or Upload a KML File'));
+  $name = (isset($user->field_first_name['und'][0]['value'])) ? $user->field_first_name['und'][0]['value'] : $user->name;
+  $form['instructions'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p>' . t('Choose one of the following KML files that you have uploaded to user for this layer. Click the KML file&rsquo;s title to insert it into the layer form:') . ' ' . $name . ':</p>',
+  );
+  $form['list'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<ul>',
+    '#suffix' => '</ul>',
+  );
+  
+  // EntityFieldQuery is a Drupal 7 class for locating entities based on conditions
+  // use it here to find all kml_files created by uid.
+  $query = new EntityFieldQuery;
+  $result = $query
+    ->entityCondition('entity_type', 'node')
+    ->propertyCondition('status', 1)
+    ->propertyCondition('type', 'shivakml_file')
+    ->propertyCondition('uid', $user->uid)
+    ->execute();
+  if (isset($result['node']) && count($result['node']) > 0) {
+    $nids = array_keys($result['node']);
+    $nodes = node_load_multiple($nids);
+    $r = -1;
+    foreach($nodes as $n) {
+      $r++;
+      $furl = $n->field_kml_file['und'][0]['uri'];
+      $ftitle = $n->title;
+      $form['list'][$r] = array(
+        '#type' => 'markup',
+        '#markup' => '<li><a href="#" onclick="Drupal.Shivanode.putFile(\'KML\',\''. file_create_url($furl) . '\');" >' . $ftitle . '</a></li>',
+      );
+    }
+  }
+  
+  $form['upload'] = array(
+    '#type' => 'markup',
+    '#markup' => '<input type="button" value="' . t('Upload a new KML File') . '" onclick="window.location.href=\'' .
+        $base_root . $base_path . 'node/add/shivakml-file?format=simple&context=kml\';" />',
+  );
+  return $form;
+}
+

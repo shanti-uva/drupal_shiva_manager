@@ -1,0 +1,174 @@
+<?php
+/**
+ * @file
+ * A custom module for automatically assigning a "site" group to all users
+ * 
+ */
+ 
+define('SHIVA_SITE_GROUP_NAME', 'Site Group');
+
+define('SHIVA_SITE_GROUP_MACHINE_NAME', 'sitegroup1');
+
+define('SHIVA_SITE_GROUP_NUM', '-1');
+
+define('SHIVA_SITE_GROUP_DESC', 'This is a global site group to which all members of this Drupal site are added. It has been created programmatically by the Shivanode OG Site Group submodule as a fix for an ajax error thrown by organic groups if a user is not assigned to any group');
+ 
+/**
+ * Implements hook_form_FORMID_alter for OG UI User admin settings with fields for
+ *    - group title/name
+ *    - its nid
+ *    - its description/body
+ * 
+ * or if one uses an existing group nid, it assigns that group to be the site group and adds all users to it
+ *
+ */
+ 
+function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $form['shiva_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Shiva Site Group Settings',
+    '#description' => t('Site group is a generic group to which all users will be added to prevent an AJAX error bug being thrown for OG create permissions.'),
+  );
+  $form['shiva_group']['shiva_site_group_num']= array(
+    '#type' => 'textfield',
+    '#title' => t('Default Site Group Number'),
+    '#description' => t('The node id (nid) of the organic group that all users should be added to upon creation. (Not the group id!) Used by the OG Site Group submodule of Shivanode. ' .
+                      'If you leave it as -1, a new group will be created.'),
+    '#size' => 3,
+    '#default_value' => variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM),
+    '#required' => TRUE,
+    '#prefix' => '<div style="float: left;">',
+    '#suffix' => '</div>',
+  );
+  $form['shiva_group']['shiva_site_group_name']= array(
+    '#type' => 'textfield',
+    '#title' => t('Default Site Group Name'),
+    '#description' => t('The name to give the organic group that all users should be added to upon creation. This is only used if the above field is set to -1.'),
+    '#size' => 25,
+    '#default_value' => variable_get('shiva_site_group_name', SHIVA_SITE_GROUP_NAME),
+    '#required' => TRUE,
+  );
+  $form['shiva_group']['shiva_site_group_desc']= array(
+    '#type' => 'textarea',
+    '#title' => t('Default Site Group Description'),
+    '#description' => t('A short description for the site group page'),
+    '#size' => 15,
+    '#default_value' => variable_get('shiva_site_group_desc', SHIVA_SITE_GROUP_DESC),
+    '#required' => TRUE,
+  );
+  $form['#validate'][] = 'og_sitegroup_validate';
+  $form['#submit'][] = 'og_sitegroup_create';
+}
+
+/*
+ *  og_sitegroup_validate: function to make sure that the given node id is a group node
+ * 
+ */
+function og_sitegroup_validate(&$form, &$form_state) {
+  $site_num = $form_state['values']['shiva_site_group_num'];
+  if($site_num != -1) {
+    $node = node_load($site_num);
+    if($node->type != 'group') {
+      form_set_error('Not a Group',t('The node ID you have given is not that of a group. Please enter the node ID (nid) of a node that is a group. (Not the group ID.)'));
+    }
+  }
+}
+
+/**
+ *   og_sitegroup_create:  Check to see if a NID is given and use that group node for the site group
+ *                         If NID = -1 then create a new group node and make that the site group
+ */
+function og_sitegroup_create(&$form, &$form_state) {
+  $site_name = $form_state['values']['shiva_site_group_name'];
+  $site_num = $form_state['values']['shiva_site_group_num'];
+  $site_desc = $form_state['values']['shiva_site_group_desc'];
+  $act = t('');
+  $node = node_load($site_num);
+  if(is_numeric($site_num) && $node && $node->type == 'group') { // && !empty(og_get_group_ids('node', array($site_num)))
+    $site_name = $node->title;
+    variable_set('shiva_site_group_name',$site_name);
+    drupal_set_message(
+      t('Assigned the group called, @sitename (nid: @nid), as the site group to which all users have been added.'),
+        array(
+          '@sitename' => $site_name,
+          '@nid' => $site_num,
+        )
+    );
+  } else {
+    $newNode = new stdClass();
+    $newNode->type = "group";
+    $newNode->title = $site_name;
+    $newNode->language= LANGUAGE_NONE;
+    $newNode->body[$newNode->language][0]['value']   = $site_desc;
+    $newNode->body[$newNode->language][0]['summary'] = text_summary($site_desc);
+    $newNode->body[$newNode->language][0]['format']  = 'filtered_html';
+    $newNode->options = array();
+    $newNode->uid = 1;
+    $newNode->promote = 0;
+    $newNode->module = 'node';
+    node_object_prepare($newNode);
+    node_save($newNode);
+    $site_num = $newNode->nid;
+    drupal_set_message(
+      t('Created a group called, @sitename (nid: @nid), as the site group to which all users have been added.'),
+        array(
+          '@sitename' => $site_name,
+          '@nid' => $site_num,
+        )
+    );
+  }
+  variable_set('shiva_site_group_num',$site_num);
+  og_sitegroup_addall();
+  
+}
+
+/*
+ * og_sitegroup_addall(): Function to all all existing users other than admin to the site group.
+ */
+function og_sitegroup_addall() {
+  $group = og_get_group('node', variable_get('shiva_site_group_num'));
+  $uids = db_select('users','u')->fields('u', array('uid'))->execute()->fetchCol(0);
+  foreach ($uids as $uid) {
+    if($uid > 1) {
+      $uaccount = user_load($uid); 
+      og_group($group->gid, array('entity' => $uaccount));
+    }
+  }
+}
+
+/**
+ * Implements hook_user_insert(&$edit, $account, $category)
+ *    Assign user automatically to the global group so og create permissions does not throw error
+ *    
+ */
+function og_site_group_user_insert(&$edit, $account, $category) {
+  global $base_root, $base_path;
+  if(variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM) == '-1') {
+      drupal_set_message(t('You have enabled the site group work-around module for Shanti/SHIVA but have not set the site group number. ' . 
+      'Please do so at ') .  l(t('Organic Groups Settings Page'), $base_root . $base_path .  'admin/config/group/settings'), 'warning');
+      return;
+  }
+  $group = og_get_group('node', variable_get('shiva_site_group_num'));
+  og_group($group->gid, array('entity' => $account));
+}
+
+/**
+ *   Implement hook_form_node_delete_confirm_alter:
+ *       Present warning message if admin tries to delete the site group node
+ */
+function og_site_group_form_node_delete_confirm_alter(&$form, &$form_state, $form_id) {
+  $nid = $form['nid']['#value'];
+  if ($nid == variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM)) {
+    drupal_set_message(t('The group you are about to delete is the site group for the Shanti OG Site group submodule of Shivanode. Deleting it may prevent users from creating SHIVA elements.'), 'warning');
+  }
+}
+
+/**
+ *    Implements hook_node_delete:
+ *        Reset the Drupal vairable, shiva_site_group_num, to -1, if group node gets deleted.
+ */
+function og_site_group_node_delete($node) {
+  if ($node->nid == variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM)) {
+    variable_set('shiva_site_group_num', -1);
+  }
+} 
