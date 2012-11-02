@@ -1060,6 +1060,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
  *      else it returns false
  */
 function _shivanode_check_google_login($authenticate = TRUE) {
+  global $base_root, $base_path;
   if (!isset($_SESSION['gdoc_token'])) {
       if (isset($_GET['token'])) {
         // Converting single-use token to a session token.
@@ -1075,7 +1076,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
         // Display link to generate single-use token
         $gdocs = 'http://spreadsheets.google.com/feeds/';
         $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-            'http://' . $_SERVER['SERVER_NAME'] . request_uri(),
+            'http://' . $base_root . $base_path . request_uri(),
             $gdocs, 0, 1);
         drupal_goto($google_uri);
       }
