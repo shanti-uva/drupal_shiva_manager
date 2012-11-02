@@ -1,4 +1,4 @@
-name = SHIVA KLM Files
+name = SHIVA KML Files
 description = A custom content type for managing KML files used by the SHANTI Interactive Visualization Application (SHIVA)
 package = SHANTI Shiva
 core = 7.x

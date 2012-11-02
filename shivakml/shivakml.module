@@ -64,36 +64,39 @@ function shivakml_form_shivakml_file_node_form_alter(&$form, &$form_state, $form
   }
   $form['field_kml_file']['#weight'] = -2;
   
-  // add text field with kml file in it
-  $furl = file_create_url($form['field_kml_file']['und'][0]['#default_value']['uri']);
-  $xmldata = file_get_contents($furl);
-  $form['xmlfile'] = array(
-    '#type' => 'textarea',
-    '#title' => 'KML Content',
-    '#description' => '<span class="strong red">' . t('Warning') . ':</span>' . t('You may make minor edits to the KML here, but the results will not be validated.'),
-    '#rows' => 25,
-    '#weight' => 5,
-    '#default_value' => $xmldata,
-    '#prefix' => '<div id="kml_message"></div>',
-    /*
-     *   Validation does not work so leaving out for now.
-     * '#ajax' => array(
-      'event' => 'change',
-      'callback' => 'shivakml_validate',
-      'wrapper' => 'kml_message',
-    ),*/
-    '#attributes' => array(
-      'onchange' => 'jQuery(".form-item-shivakml-change input[type=checkbox]").attr(\'checked\', true);'
-    ),
-  );
-  
-  // Add a checkbox for saving updated KML, automatically checked if above field is changed
-  $form['shivakml_change'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'Save New KML',
-    '#default_value' => FALSE,
-    '#weight' => 6,
-  );
+  // add text field with kml file in it, if it is not a new kml file
+  if(strpos($form['#action'], 'node/add') == -1) {
+    $furl = file_create_url($form['field_kml_file']['und'][0]['#default_value']['uri']);
+    if(strpos($furl, '.kmz') == -1) {
+      $xmldata = file_get_contents($furl);
+      $form['xmlfile'] = array(
+        '#type' => 'textarea',
+        '#title' => 'KML Content',
+        '#description' => '<span class="strong red">' . t('Warning') . ':</span>' . t('You may make minor edits to the KML here, but the results will not be validated.'),
+        '#rows' => 25,
+        '#weight' => 5,
+        '#default_value' => $xmldata,
+        '#prefix' => '<div id="kml_message"></div>',
+        /*
+         *   Validation does not work so leaving out for now.
+         * '#ajax' => array(
+          'event' => 'change',
+          'callback' => 'shivakml_validate',
+          'wrapper' => 'kml_message',
+        ),*/
+        '#attributes' => array(
+          'onchange' => 'jQuery(".form-item-shivakml-change input[type=checkbox]").attr(\'checked\', true);'
+        ),
+      );
+      // Add a checkbox for saving updated KML, automatically checked if above field is changed
+      $form['shivakml_change'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Save edits to KML in text area',
+        '#default_value' => FALSE,
+        '#weight' => 6,
+      );
+    }
+  }
   
   return $form;
 }
@@ -120,7 +123,6 @@ function shivakml_validate(&$form, &$form_state) {
 
 function shivakml_node_submit($node, $form, &$form_state) {
   // Check to see if KML was changed
-  dpm($form_state,'form state in kml');
   if(isset($form_state['values']['shivakml_change']) && $form_state['values']['shivakml_change']) {
     $furl = $form['field_kml_file']['und'][0]['#default_value']['uri'];
     $xml = $form_state['values']['xmlfile'];
@@ -151,20 +153,21 @@ function shivakml_node_view_alter(&$build) {
   if ($build['#bundle'] == 'shivakml_file') {
     if (isset($build['field_kml_file']['#items']['0']['uri'])) {
       $furl = file_create_url($build['field_kml_file']['#items']['0']['uri']);
-      $build['fieldset'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('File Contents'),
-        '#weight' => 15,
-      );
-      $xmldata = file_get_contents($furl);
-      $xmldata = preg_replace('/\</','&lt;', $xmldata);
-      $xmldata = preg_replace('/\</','&gt;', $xmldata);
-      $xmldata = preg_replace('/\n/','<br />', $xmldata);
-      $build['fieldset']['xmldata'] = array(
+      $build['furl'] = array(
         '#type' => 'markup',
-        '#markup' => '<p>' . $xmldata . '</p>',
+        '#markup' => '<p><b>Public URL: </b> ' . $furl . '</p>',
       );
-    }
+      if(strpos($furl, '.kmz') == -1) {
+        $xmldata = file_get_contents($furl);
+        $xmldata = preg_replace('/\</','&lt;', $xmldata);
+        $xmldata = preg_replace('/\</','&gt;', $xmldata);
+        $xmldata = preg_replace('/\n/','<br />', $xmldata);
+        $build['xmldata'] = array(
+          '#type' => 'markup',
+          '#markup' => '<h4>File Contents</h4><p>' . $xmldata . '</p>',
+        ); 
+      }
+    }  
   }
 }
 

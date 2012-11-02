@@ -1,7 +1,6 @@
 (function($) {
 	
-	/* shivanode.js: Javascript functions for use within shivanode Drupal Module */
-	
+/* shivanode.js: Javascript functions for use within shivanode Drupal Module */
 	
 /*
  *    Use Drupal.behaviors as $(document).ready() to call upon load.

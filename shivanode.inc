@@ -1198,7 +1198,7 @@ function _shivanode_data_elements($form, &$form_state) {
     // Display link to generate single-use token
     $gdocs = 'http://spreadsheets.google.com/feeds/';
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-        'http://' . $_SERVER['SERVER_NAME'] . '/node/add/shivanode?popup=dataurl',
+        'http://' . $_SERVER['SERVER_NAME'] . '/node/data-elements',
         $gdocs, 0, 1);
     $markup['spreadsheets'] = array(
       '#type' => 'markup',
@@ -2025,7 +2025,7 @@ function _shivanode_node_embed_page($nid) {
         "nid": ' . $nid . ',
         "title": "' . str_replace('"', '\"', $node->title) . '", 
         "json": \'' . preg_replace("/'/","\'",_shivanode_get_json($node, FALSE)) . '\',
-        "player": "' . variable_get('shivanode_chart_viewer') . '"
+        "player": "' . variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"
       };</script>',
     ),
   ); 
