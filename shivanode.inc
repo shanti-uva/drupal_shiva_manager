@@ -1091,7 +1091,7 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  *
  */
 function _shivanode_data_elements($form, &$form_state) {
-  global $user;
+  global $user, $base_root, $base_path;
   
   //_shivanode_check_google_login();
   
@@ -1197,9 +1197,15 @@ function _shivanode_data_elements($form, &$form_state) {
     );
   } else {
     // Display link to generate single-use token
+    
+    // if the request uri has ?format=simple in it 
+    // then it's in the add data element popup, return there;
+    $return_page = 'node/data-elements';
+    $rui = request_uri();
+    if(strpos($rui, 'format=simple') > -1) { $return_page  = 'node/add/shivanode?popup=dataurl'; }
     $gdocs = 'http://spreadsheets.google.com/feeds/';
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-        'http://' . $_SERVER['SERVER_NAME'] . '/node/data-elements',
+        $base_root . $base_path . $return_page,
         $gdocs, 0, 1);
     $markup['spreadsheets'] = array(
       '#type' => 'markup',
