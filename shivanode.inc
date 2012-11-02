@@ -1371,11 +1371,12 @@ function _shivanode_greset_form($form, $form_state) {
  *              by deleting the information stored in the session variable 'gdoc_token'
  */
 function _shivanode_greset_form_submit($form, &$form_state) {
+  global $base_root, $base_path;
   if (isset($_SESSION['gdoc_token'])) {
     unset($_SESSION['gdoc_token']); 
   }
   drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
-  drupal_goto('node/data-elements');
+  drupal_goto($base_root . $base_path . 'node/data-elements');
 }
 
 function _get_shivaframe_url($opt) {
