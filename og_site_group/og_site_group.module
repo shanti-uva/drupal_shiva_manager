@@ -24,10 +24,13 @@ define('SHIVA_SITE_GROUP_DESC', 'This is a global site group to which all member
  */
  
 function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $sgn = variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM);
+  $current_link = ($sgn == -1) ? '' : l(t('View current site group'), 'node/' . $sgn);
   $form['shiva_group'] = array(
     '#type' => 'fieldset',
     '#title' => 'Shiva Site Group Settings',
-    '#description' => t('Site group is a generic group to which all users will be added to prevent an AJAX error bug being thrown for OG create permissions.'),
+    '#description' => t('Site group is a generic group to which all users will be added to prevent an AJAX error bug being thrown for OG create permissions.') . '<br/>' .
+      $current_link,
   );
   $form['shiva_group']['shiva_site_group_num']= array(
     '#type' => 'textfield',
