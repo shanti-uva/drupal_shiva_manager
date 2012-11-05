@@ -34,7 +34,7 @@ function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state
   );
   $form['shiva_group']['shiva_site_group_num']= array(
     '#type' => 'textfield',
-    '#title' => t('Default Site Group Number'),
+    '#title' => t('Site Group Number'),
     '#description' => t('The node id (nid) of the organic group that all users should be added to upon creation. (Not the group id!) Used by the OG Site Group submodule of Shivanode. ' .
                       'If you leave it as -1, a new group will be created.'),
     '#size' => 3,
@@ -45,7 +45,7 @@ function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state
   );
   $form['shiva_group']['shiva_site_group_name']= array(
     '#type' => 'textfield',
-    '#title' => t('Default Site Group Name'),
+    '#title' => t('Site Group Name'),
     '#description' => t('The name to give the organic group that all users should be added to upon creation. This is only used if the above field is set to -1.'),
     '#size' => 25,
     '#default_value' => variable_get('shiva_site_group_name', SHIVA_SITE_GROUP_NAME),
@@ -53,7 +53,7 @@ function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state
   );
   $form['shiva_group']['shiva_site_group_desc']= array(
     '#type' => 'textarea',
-    '#title' => t('Default Site Group Description'),
+    '#title' => t('Site Group Description'),
     '#description' => t('A short description for the site group page'),
     '#size' => 15,
     '#default_value' => variable_get('shiva_site_group_desc', SHIVA_SITE_GROUP_DESC),
