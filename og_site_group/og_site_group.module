@@ -5,7 +5,7 @@
  * 
  */
  
-define('SHIVA_SITE_GROUP_NAME', 'Site Group');
+define('SHIVA_SITE_GROUP_NAME', 'Global Site');
 
 define('SHIVA_SITE_GROUP_MACHINE_NAME', 'sitegroup1');
 
