@@ -5,7 +5,7 @@
  * 
  */
  
-define('SHIVA_SITE_GROUP_NAME', 'Site Group');
+define('SHIVA_SITE_GROUP_NAME', 'Global Site');
 
 define('SHIVA_SITE_GROUP_MACHINE_NAME', 'sitegroup1');
 
@@ -24,14 +24,17 @@ define('SHIVA_SITE_GROUP_DESC', 'This is a global site group to which all member
  */
  
 function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $sgn = variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM);
+  $current_link = ($sgn == -1) ? '' : l(t('View current site group'), 'node/' . $sgn);
   $form['shiva_group'] = array(
     '#type' => 'fieldset',
     '#title' => 'Shiva Site Group Settings',
-    '#description' => t('Site group is a generic group to which all users will be added to prevent an AJAX error bug being thrown for OG create permissions.'),
+    '#description' => t('Site group is a generic group to which all users will be added to prevent an AJAX error bug being thrown for OG create permissions.') . '<br/>' .
+      $current_link,
   );
   $form['shiva_group']['shiva_site_group_num']= array(
     '#type' => 'textfield',
-    '#title' => t('Default Site Group Number'),
+    '#title' => t('Site Group Number'),
     '#description' => t('The node id (nid) of the organic group that all users should be added to upon creation. (Not the group id!) Used by the OG Site Group submodule of Shivanode. ' .
                       'If you leave it as -1, a new group will be created.'),
     '#size' => 3,
@@ -42,7 +45,7 @@ function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state
   );
   $form['shiva_group']['shiva_site_group_name']= array(
     '#type' => 'textfield',
-    '#title' => t('Default Site Group Name'),
+    '#title' => t('Site Group Name'),
     '#description' => t('The name to give the organic group that all users should be added to upon creation. This is only used if the above field is set to -1.'),
     '#size' => 25,
     '#default_value' => variable_get('shiva_site_group_name', SHIVA_SITE_GROUP_NAME),
@@ -50,7 +53,7 @@ function og_site_group_form_og_ui_user_admin_settings_alter(&$form, &$form_state
   );
   $form['shiva_group']['shiva_site_group_desc']= array(
     '#type' => 'textarea',
-    '#title' => t('Default Site Group Description'),
+    '#title' => t('Site Group Description'),
     '#description' => t('A short description for the site group page'),
     '#size' => 15,
     '#default_value' => variable_get('shiva_site_group_desc', SHIVA_SITE_GROUP_DESC),
@@ -110,11 +113,11 @@ function og_sitegroup_create(&$form, &$form_state) {
     node_save($newNode);
     $site_num = $newNode->nid;
     drupal_set_message(
-      t('Created a group called, @sitename (nid: @nid), as the site group to which all users have been added.'),
+      t('Created a group called, @sitename (nid: @nid), as the site group to which all users have been added.',
         array(
           '@sitename' => $site_name,
           '@nid' => $site_num,
-        )
+        )), 'status'
     );
   }
   variable_set('shiva_site_group_num',$site_num);
@@ -144,7 +147,7 @@ function og_sitegroup_addall() {
 function og_site_group_user_insert(&$edit, $account, $category) {
   global $base_root, $base_path;
   if(variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM) == '-1') {
-      drupal_set_message(t('You have enabled the site group work-around module for Shanti/SHIVA but have not set the site group number. ' . 
+    drupal_set_message(t('You have enabled the site group work-around module for Shanti/SHIVA but have not set the site group number. ' . 
       'Please do so at ') .  l(t('Organic Groups Settings Page'), $base_root . $base_path .  'admin/config/group/settings'), 'warning');
       return;
   }
@@ -168,7 +171,11 @@ function og_site_group_form_node_delete_confirm_alter(&$form, &$form_state, $for
  *        Reset the Drupal vairable, shiva_site_group_num, to -1, if group node gets deleted.
  */
 function og_site_group_node_delete($node) {
+  global $base_root, $base_path;
   if ($node->nid == variable_get('shiva_site_group_num', SHIVA_SITE_GROUP_NUM)) {
     variable_set('shiva_site_group_num', -1);
+    $msgs = drupal_get_messages(); // Resets messages (?) and prevents last message from appearing again.
+    drupal_set_message(t('You have deleted the site group. This may prevent users from creating SHIVA elements. Visit ') .
+      l(t('Organic Groups Settings Page'), $base_root . $base_path .  'admin/config/group/settings') . t(' to create a global user group.'), 'warning');
   }
 } 
