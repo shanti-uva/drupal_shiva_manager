@@ -94,7 +94,7 @@ function _shivanode_installed_instances() {
   return array(
     'shivanode_element_type' => array(
       'field_name'  => 'shivanode_element_type',
-      'label'  => $t('Element Type'),
+      'label'  => $t('Visualization Type'),
       'required' => 1,
       'display' => array(
         'default' => array(
@@ -152,7 +152,7 @@ function _shivanode_installed_instances() {
     ),
     'shivanode_json' => array(
       'field_name' => 'shivanode_json',
-      'label'       => $t('Shiva Element'),
+      'label'       => $t('Shiva Visualization'),
       'required' => 1,
       'display' => array(
         'default' => array(
@@ -235,7 +235,7 @@ function _shivanode_element_typelist() {
 }
 
 /**
- * Implements hook_options_list for the options widget of the element type field
+ * Implements hook_options_list for the options widget of the visualization type field
  * Returns a structured array defining the values for the chart type list
  *
  * @return
@@ -244,7 +244,7 @@ function _shivanode_element_typelist() {
  */
 function _shivanode_options_list($option = NULL) {
   $options = array(
-    t('Elements') => array(
+    t('Visualizations') => array(
       7 => t('Chart'),
       1 => t('Data'),
       11 => t('Draw'),
@@ -266,7 +266,7 @@ function _shivanode_options_list($option = NULL) {
     if (!is_numeric($option)) {
       return "The option index, $option, is not a numeric.";
     }
-    $subtype = ($option != 8 && $option != 9) ? t('Elements'):t('Other');
+    $subtype = ($option != 8 && $option != 9) ? t('Visualizations'):t('Other');
     return $options[$subtype][$option];
   }
   else {
@@ -334,7 +334,7 @@ function _get_shivanodes($stype = 0) {
 }
 
 /*
- * Gets the type of element in the Shiva node
+ * Gets the type of visualization in the Shiva node
  */
 function _get_shivanode_type($node, $mode = 'string') {
   $type = FALSE;
@@ -348,7 +348,7 @@ function _get_shivanode_type($node, $mode = 'string') {
 }
 
 /*
- * Gets the access value (0 = private, 1 = public) of element in the Shiva node
+ * Gets the access value (0 = private, 1 = public) of visualization in the Shiva node
  */
 function _get_shivanode_access_status($node) {
   $status = FALSE;
@@ -399,13 +399,13 @@ function _shivanode_admin_settings($form, &$form_state) {
   $form['shivanode_settings_header'] = array(
     '#markup' => '<h3>Settings for the Shivanode Module</h3>' .
       '<p>' . t('There are two types of settings for the Shivanode module. The display settings are where one can set ' .
-      'the dimensions of the visualizations and whether individual elements can override the default settings. ' .
+      'the dimensions of the visualizations and whether individual visualizations can override the default settings. ' .
       'In the URL section the adminitrator can set the URLs for the default players and editors for Shivanodes.') . '</p.',
   );
   
   // Display Settings for Shivanode dealing with size of views etc.
   $form['shivanode_display_settings'] = array(
-    '#description' => t('The display settings for SHIVA elements'),
+    '#description' => t('The display settings for SHIVA visualizations'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
@@ -433,8 +433,8 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_display_settings']['shivanode_default_override'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Element\'s settings override default settings'),
-    '#description' => t('Allows the SHIVA element settings for height and width to override default settings for the full display.'),
+    '#title' => t('Visualization\'s settings override default settings'),
+    '#description' => t('Allows the SHIVA visualization settings for height and width to override default settings for the full display.'),
     '#default_value' => variable_get('shivanode_default_override', SHIVA_DEFAULT_OVERRIDE),
   );
   
@@ -489,7 +489,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_display_settings']['p'] = array(
     '#type' => 'markup',
-    '#markup' => '<p>' . t('Settings to show or hide the underlying JSON of a SHIVA element are found within') . ' ' .
+    '#markup' => '<p>' . t('Settings to show or hide the underlying JSON of a SHIVA visualization are found within') . ' ' .
       l(t('the indvidual user permisions'), 'admin/people/permissions') . '.</p>',
   );
   
@@ -754,7 +754,7 @@ function _shivanode_gss_form($form, &$form_state) {
       
     // Create a checkable list of spreadsheets that can be converted into data elements
     $avail_list = $sslists[0];
-    // Create a list of Spreadsheets that already have elements associated with them
+    // Create a list of Spreadsheets that already have visualizations associated with them
     $hasels = $sslists[1];
     $total_sheets = count($avail_list) + count($hasels);
     
@@ -771,10 +771,10 @@ function _shivanode_gss_form($form, &$form_state) {
         )) . '</p>',
     );
     
-    // View All Shiva Elements Link
+    // View All Shiva Visualizations Link
     $form['viewall'] = array(
       '#type' => 'markup',
-      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Elements'), 'node/data-elements', array(
+      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'node/data-elements', array(
         'attributes' => array(
           'target' => '_top',
         )
@@ -784,8 +784,8 @@ function _shivanode_gss_form($form, &$form_state) {
     // Instructions
     $form['intro'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('To create a SHIVA Element using a Google Doc spreadsheet, you must first import that spreadsheet into Shiva to make it into a Shiva data element. The present page has two sections:  Shiva Data Elements, which shows already imported spreadsheets for the Goolge account to which you are currently logged in; and (ii) "My Remaining Google Spreadsheets", which shows your other Google spreadsheets that are available for importation into Shiva. In the first section, you choose one of the Shiva data elements as the base for creating a new Shiva visualization. In the second section, you can import one of your other Google spreadsheets into Shiva, after which it will then appear in the first section, and you can use it as the basis of a visualization. To convert a Google spreadsheet into a Shiva element, check the box next to the spreadsheets you wish to convert into data elements and when you click the button "Create Data Elements" at the bottom, data elements for each of those spreadsheets will be created. If you wish to log on to a different Google Doc account, click the "Switch Google Account" button above.') . '</p>' .
-                    '<p>' . t('Finally, the link "View All Shiva Data Elements" above will show you other people&rsquo;s data elements that they have shared with you or a group of which you are part, rather than only showing Shiva data elements that you personally created.') . '<p>',
+      '#markup' => '<p>' . t('To create a SHIVA Visualization using a Google Doc spreadsheet, you must first import that spreadsheet into Shiva to make it into a Shiva data entry. The present page has two sections:  Shiva Data Entries, which shows already imported spreadsheets for the Goolge account to which you are currently logged in; and (ii) "My Remaining Google Spreadsheets", which shows your other Google spreadsheets that are available for importation into Shiva. In the first section, you choose one of the Shiva data elements as the base for creating a new Shiva visualization. In the second section, you can import one of your other Google spreadsheets into Shiva, after which it will then appear in the first section, and you can use it as the basis of a visualization. To convert a Google spreadsheet into a Shiva Visualization, check the box next to the spreadsheets you wish to convert into data entries and when you click the button "Create Data Entries" at the bottom, data entries for each of those spreadsheets will be created. If you wish to log on to a different Google Doc account, click the "Switch Google Account" button above.') . '</p>' .
+                    '<p>' . t('Finally, the link "View All Shiva Data Entries" above will show you other people&rsquo;s data entries that they have shared with you or a group of which you are part, rather than only showing Shiva data entries that you personally created.') . '<p>',
     );
 
     $form['filterdiv'] = array(
@@ -801,7 +801,7 @@ function _shivanode_gss_form($form, &$form_state) {
 
     $form['gss_done'] = array(
       '#type' => 'fieldset',
-      '#title' => t('SHIVA Data Elements (Already Imported Spreadsheets)'),
+      '#title' => t('SHIVA Data Entries (Already Imported Spreadsheets)'),
       '#collapsible' => TRUE,
     );
     
@@ -809,7 +809,7 @@ function _shivanode_gss_form($form, &$form_state) {
       $form['gss_done']['p'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('The following ' . count($hasels) . ' spreadsheets from your Google Docs account have ' .
-          'already been added as data elements. Click on the "Select" option to create a visualization from it: ') . '</p>',
+          'already been added as data entries. Click on the "Select" option to create a visualization from it: ') . '</p>',
       );
       $form['gss_done']['ul'] = array(
         '#type' => 'markup',
@@ -837,7 +837,7 @@ function _shivanode_gss_form($form, &$form_state) {
       $form['gss_done']['p'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('You have not added any spreadsheets from the presently logged in Google Docs account. Choose from among ' .
-          'your spreadsheets listed below those you would like to make into data elements.') . '</p>',
+          'your spreadsheets listed below those you would like to make into data entries.') . '</p>',
       );
     }
     
@@ -848,7 +848,7 @@ function _shivanode_gss_form($form, &$form_state) {
       '#collapsible' => TRUE,
       '#description' => check_plain( t('Choose from among the ' . ((count($hasels) > 0)?'remaining ': '') . 
         count($avail_list) . ' spreadsheets in your Google Docs account ' .
-        'which ones you would like to make into data elements:')),
+        'which ones you would like to make into data entry:')),
     );
     
     // Create Checkboxes
@@ -882,7 +882,7 @@ function _shivanode_gss_form($form, &$form_state) {
     // The Submit button
     $form['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Create Data Elements'),
+      '#value' => t('Create Data Entries'),
       '#prefix' => '<p>',
       '#suffix' => '</p>',
     );
@@ -905,8 +905,8 @@ function _shivanode_get_spreadsheet_list() {
       $sslist[$key] = $value;
     }
     // Call _shivanode_filter_gss_list() to separate list between those
-    //    spreadsheets that have data elements associated with them [1]
-    //    and those that do not already have data elements [0]
+    //    spreadsheets that have data entries associated with them [1]
+    //    and those that do not already have data entries [0]
     return _shivanode_filter_gss_list($sslist);
   } catch (Exception $e) {
     $msg = $e->getMessage();
@@ -922,7 +922,7 @@ function _shivanode_filter_gss_list($sslist) {
  
   $msg = '';
   foreach ($sslist as $url => $title) {
-    // Get all Shiva Data elements from Database
+    // Get all Shiva Data entries from Database
     $query = db_select('node', 'n');
     $query->join('field_data_shivanode_element_type', 't', 'n.nid=t.entity_id');
     $query->join('field_data_shivanode_access', 'a', 'n.nid=a.entity_id');
@@ -938,12 +938,12 @@ function _shivanode_filter_gss_list($sslist) {
     $result = $query->execute();
     $found = 0;
     $nid = '';
-    // Iterate through all data elements and see if one is based on this google doc ($url)
+    // Iterate through all data entries and see if one is based on this google doc ($url)
     foreach ($result as $record) {
       $json = $record->shivanode_json_value;
-      // If the google key is within the data element's json then that spreadsheet has been added.
+      // If the google key is within the data entry's json then that spreadsheet has been added.
       if (strpos($json, $gkey) > -1) {
-        // but add the record to the already added list only if the user owns this data element.
+        // but add the record to the already added list only if the user owns this data entry.
         if ($record->uid == $user->uid) {
           $nid = $record->nid;
           $found = 1;
@@ -990,7 +990,7 @@ function cmp_titles($a, $b) {
  * 
  * called upon submission of the gss_form which lists one's google
  * spreadsheets with checkboxes. For each ss checked in that form this function
- * will create a Shiva data element with title and URL.
+ * will create a Shiva data entry with title and URL.
  *
  */
 function _shivanode_gss_form_submit($form, &$form_state) {
@@ -1039,7 +1039,9 @@ function _shivanode_gss_form_submit($form, &$form_state) {
     $node->title    = $pick['title'];
     $node->language = LANGUAGE_NONE;
     $node->shivanode_element_type[$node->language][0]['value'] = 1;
-    $body_text = 'Shiva data element created from Google spreadsheet on ' . date('c');
+    $body_text = t('Shiva data entry created from Google spreadsheet on @datestr', array(
+        '@datestr' => date('c'),
+      ));
     $node->body[$node->language][0]['value']   = $body_text;
     $node->body[$node->language][0]['summary'] = text_summary($body_text);
     $node->body[$node->language][0]['format']  = 'filtered_html';
@@ -1049,8 +1051,8 @@ function _shivanode_gss_form_submit($form, &$form_state) {
     node_save($node);
     $nct++;
   }
-  // Output message about which spreadsheets have been turned into data elements.
-  $out = $nct . ' ' . t('data elements have been created!'); 
+  // Output message about which spreadsheets have been turned into data entries.
+  $out = $nct . ' ' . t('data entries have been created!'); 
   drupal_set_message(check_plain($out));
 }
 
@@ -1085,9 +1087,9 @@ function _shivanode_check_google_login($authenticate = TRUE) {
 }
 
 /**
- * _shivanode_data_elements: Lists all data elements for inclusion in lightbox popup
- *     when icon on a shiva edit page is clicked to use a data element for a visualization,
- *      this function produces the content displayed in a popup for choosing which data element
+ * _shivanode_data_elements: Lists all data entries for inclusion in lightbox popup
+ *     when icon on a shiva edit page is clicked to use a data entry for a visualization,
+ *      this function produces the content displayed in a popup for choosing which data entries
  *
  */
 function _shivanode_data_elements($form, &$form_state) {
@@ -1116,8 +1118,8 @@ function _shivanode_data_elements($form, &$form_state) {
   $markup['instruct']['p'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('This list allows you to specify the data that you would like to call upon for the Shiva visualization on which you are currently working. ' . 
-                            'Shiva visualizations draw upon Shiva Data elements, which are typically created from Google Doc spreadsheets. ' .
-                            'The first section of this page shows you Shiva Data elements that you have personally created and also allows you see Shiva ' .
+                            'Shiva visualizations draw upon Shiva Data entries, which are typically created from Google Doc spreadsheets. ' .
+                            'The first section of this page shows you Shiva Data entries that you have personally created and also allows you see Shiva ' .
                             'Data elements others have created and shared with groups to which you belong.  ' .
                             'The second section of this page shows your Google spreadsheets that you have not yet added. ' .
                             'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
@@ -1135,14 +1137,14 @@ function _shivanode_data_elements($form, &$form_state) {
   );
   $markup['existing'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Existing Data Elements'),
+    '#title' => t('Existing Data Entries'),
     '#collapsible' => TRUE,
   );
   
   $markup['existing']['sntoggle'] = array(
     '#markup' => '<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode\').toggle(); ' . 
         'jQuery(\'#shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . 
-        t('Public Data Elements') . '<p/>',
+        t('Public Data Entries') . '<p/>',
   );
   
   $markup['existing']['snlist'] = array(
@@ -1150,7 +1152,7 @@ function _shivanode_data_elements($form, &$form_state) {
     '#suffix' => '</ul>',
   );
   
-  $nodes = _get_shivanodes(1); // get all shivanode that are data elements (type = 1)
+  $nodes = _get_shivanodes(1); // get all shivanode that are data entries (type = 1)
   $lict = 0;
   foreach ($nodes as $node) {
     $csscode = ($user->uid == $node->uid)? 'mynode"' : 'othernode" style="display:none;"';
@@ -1199,7 +1201,7 @@ function _shivanode_data_elements($form, &$form_state) {
     // Display link to generate single-use token
     
     // if the request uri has ?format=simple in it 
-    // then it's in the add data element popup, return there;
+    // then it's in the add data entry popup, return there;
     $return_page = 'node/data-elements';
     $rui = request_uri();
     if(strpos($rui, 'format=simple') > -1) { $return_page  = 'node/add/shivanode?popup=dataurl'; }
@@ -1234,10 +1236,10 @@ function _shivanode_data_elements($form, &$form_state) {
 
 /*
  * _shivanode_data_elements_submit($form, &$form_state) : Called when the "Add Spreadsheet" button in the 
- *      shivanode data element form is pressed, only when adding a previously unused spreadsheet.
+ *      shivanode data entry form is pressed, only when adding a previously unused spreadsheet.
  *      This function creates the data node for the spreadsheet and then redirects the form (which is in a popup window)
  *      to the data node with a query of insert=nid, e.g. /node/123?insert=123. This triggers the javascript in the popup 
- *      to send an html5 message to the parent base page to insert the new data element and then closes the popup.
+ *      to send an html5 message to the parent base page to insert the new data entry and then closes the popup.
  */
 function _shivanode_data_elements_submit($form, &$form_state) {
   $ssurl = $form_state['values']['newss'];
@@ -1280,7 +1282,7 @@ function _shivanode_get_dataurl($node) {
 }
 
 /*
- * function _shivanode_set_to_remove_datainfo($form, $form_state): adds hidden element to trigger removal of data element upon saving.
+ * function _shivanode_set_to_remove_datainfo($form, $form_state): adds hidden element to trigger removal of data entry upon saving.
  * 
  */
 
@@ -1291,14 +1293,14 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
   $gdinfo['#prefix'] = '<div id="data_sheet_in_use" style="display: block; clear: both;" class="messages status">';
   unset($gdinfo['script']);
   unset($gdinfo['data_nid']);
-  // If it's during the creation of a new element, one message
+  // If it's during the creation of a new visualization, one message
   if ($form['#action'] == '/node/add/shivanode') {
-    $gdinfo['span']['#markup'] = '<span>' . t('No data element will be linked to this one.') . '</span>';
+    $gdinfo['span']['#markup'] = '<span>' . t('No data entry will be linked to this one.') . '</span>';
     $gdinfo['button_div'] = array();
-  // otherwise if editing an existing element, another message and ...
+  // otherwise if editing an existing visualization, another message and ...
   } 
   else {
-    $gdinfo['span']['#markup'] = '<span>' . t('Link to data element:') . '</span>';
+    $gdinfo['span']['#markup'] = '<span>' . t('Link to data entry:') . '</span>';
     $gdinfo['old_button_div'] = array(
       '#type' => 'markup',
       '#prefix' => '<div id="old_button_div" class="hidden">',
@@ -1314,12 +1316,12 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
   }
   // Ajax commands to return
   $actions[] = ajax_command_replace('#data_sheet_in_use', drupal_render($gdinfo)); // replace gdinfo markup
-  $actions[] = ajax_command_remove('#shivanode_data_nid'); // remove hidden value to link to another data element from form
+  $actions[] = ajax_command_remove('#shivanode_data_nid'); // remove hidden value to link to another data entry from form
   return array('#type' => 'ajax', '#commands' => $actions);
 }
 
 /*
- * _shivanode_remove_datalink($node) : a function to remove the link between a shiva node element and a data element
+ * _shivanode_remove_datalink($node) : a function to remove the link between a shiva node visualization and a data entry
  * 
  */
 function _shivanode_remove_datalink($node) {
@@ -1337,11 +1339,11 @@ function _shivanode_remove_datalink($node) {
       ->condition('sn_id', $nid)
       ->execute();
     if ($num_deleted == 1) {
-      drupal_set_message(check_plain(t('Link to data element removed.')));
+      drupal_set_message(check_plain(t('Link to data entry removed.')));
     } 
     else {
       drupal_set_message(
-        check_plain($num_deleted . ' ' . t('links to data elements removed!')), 
+        check_plain($num_deleted . ' ' . t('links to data entries removed!')), 
         'error');
     }
   }
@@ -1826,7 +1828,7 @@ function _shivanode_get_json($node, $as_obj = TRUE) {
 }
 
 /* _shivanode_get_data_element($source) :
- *    returns the NID of the data element that the $souce element relies on
+ *    returns the NID of the data entry that the $souce element relies on
  *    $source: is either a $form from the edit page or a NID number
  */
 function _shivanode_get_data_element($source) {
@@ -1867,11 +1869,11 @@ function _shivanode_get_tags() {
 }
 
 /* _shivanode_add_data_correspondence($node) :
- *     adds or updates the shivanode_links table with an entry linking the given node with it's data element
+ *     adds or updates the shivanode_links table with an entry linking the given node with it's data entry
  *    $node: the node being added or updated, when submitted a data_id field is added to the node object with 
- *            the nid of the data element it is linked to. 
+ *            the nid of the data entry it is linked to. 
  * 
- *    This function should only be called for shivanodes that are not themselves data elements.
+ *    This function should only be called for shivanodes that are not themselves data entries.
  */
 function _shivanode_add_data_correspondence($node) {
   if (isset($node->data_id)) {
@@ -1902,8 +1904,8 @@ function _shivanode_add_data_correspondence($node) {
 }
 
 /*
- * _shivanode_add_datalink: Adds a link to a data element to a shivanode create/edit form
- *      Requires the form, the data element id, and a boolean as to whether it is a new node (create) or not (edit)
+ * _shivanode_add_datalink: Adds a link to a data entry to a shivanode create/edit form
+ *      Requires the form, the data entry id, and a boolean as to whether it is a new node (create) or not (edit)
  */
 function _shivanode_add_datalink(&$form, $did, $is_new_el) {
   if (!isset($is_new_el)) {
@@ -1915,13 +1917,13 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $dataurl = _shivanode_get_dataurl($dnode);
     $datatitle = $dnode->title;
     
-    // if it's a new element use its title for visualizations title
+    // if it's a new entry use its title for visualizations title
     if ($is_new_el) {
        $form['title']['#default_value'] = str_replace(' (Data)', '', $datatitle); 
     } 
     
-    // if it is a  new element call JS function to load the data element data once form is loaded.
-    // use 'preset' because this function already sets the markup for the data element
+    // if it is a  new visualization call JS function to load the data entry data once form is loaded.
+    // use 'preset' because this function already sets the markup for the data entry
     // Otherwise, load the data from the Drupal unless told not to
     $jsfunct =  ($is_new_el)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
               'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . 
@@ -1935,7 +1937,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
           '</script>',
     );
 
-    // Add the form elements display what the linked data element is with links to reinsert, clear, and edit data.
+    // Add the form elements display what the linked data entry is with links to reinsert, clear, and edit data.
     $form['gdocinfo']['data_nid'] = array(
       '#type' => 'hidden',
       '#value' => $did,
@@ -1978,12 +1980,12 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
         'title="' . t('Insert the Data URL from this link in the form below.') . '" />',
         '#suffix' => ' | ',
     );
-    // The clear link to clear the link from shivanode to data element.
+    // The clear link to clear the link from shivanode to data entry.
     $form['gdocinfo']['button_div']['remove_datanid'] = array(
       '#type' => 'button',
       '#value' =>  t('Remove Link to Data'),
       '#attributes' => array(
-        'title' => t('Remove the association between this element and the data element that supplies its Data Source URL.'),
+        'title' => t('Remove the association between this visualization and the data entry that supplies its Data Source URL.'),
         //'class' => array('nobutton'),
       ),
       '#ajax' => array(

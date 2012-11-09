@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * A custom module that creates, manages, and displays a node type for instances (elements)
+ * A custom module that creates, manages, and displays a node type for instances (Visualizations)
  *   of the Shanti Interactive Visualization Application (SHIVA) plugin.
  * 
  */
@@ -45,13 +45,13 @@ define('SHIVA_CONTROL_EDITOR', 'control.htm');
 // default URL for Canvas Editor
 define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
-// default Iframe Height for Full Display of Shiva Element
+// default Iframe Height for Full Display of Shiva visualization
 define('SHIVA_IFRAME_HEIGHT', 800);
 
-// default Iframe Width for Full Display of Shiva Element
+// default Iframe Width for Full Display of Shiva visualization
 define('SHIVA_IFRAME_WIDTH', 925);
 
-// default value for ability for element height/width to override default Iframe height/width
+// default value for ability for visualization height/width to override default Iframe height/width
 define('SHIVA_DEFAULT_OVERRIDE', FALSE);
 
 // default height value for edit IFrame
@@ -60,10 +60,10 @@ define('SHIVA_IFRAME_HEIGHT_EDIT', 1000);
 // default width value for edit IFrame
 define('SHIVA_IFRAME_WIDTH_EDIT', 1150);
 
-// default Iframe Height for Teaser Display of Shiva Element
+// default Iframe Height for Teaser Display of Shiva visualization
 define('SHIVA_IFRAME_HEIGHT_TEASER', 300);
 
-// default Iframe Width for Teaser Display of Shiva Element
+// default Iframe Width for Teaser Display of Shiva visualization
 define('SHIVA_IFRAME_WIDTH_TEASER', 400);
 
 // default Minimum Height/Width
@@ -72,7 +72,7 @@ define('SHIVA_IFRAME_DIMENSION_MINIMUM', 50);
 // default Maximum Height/Width
 define('SHIVA_IFRAME_DIMENSION_MAXIMUM', 5000);
 
-// Number of Recent SHIVA Elements to Show in Recent Shivanode Block
+// Number of Recent SHIVA visualizations to Show in Recent Shivanode Block
 define('SHIVA_RECENT_ENTRIES', 5);
 
 // Whether to show JSON in Edit Form  
@@ -120,7 +120,7 @@ function shivanode_menu() {
  * 
   $items['node/shivanode/list'] = array(
     'type' => MENU_NORMAL_ITEM,
-    'title' => 'Shiva Element List',
+    'title' => 'Shiva visualization List',
     'page callback' => '_shivanode_list_page',
     'access callback' => TRUE,
     'file' => 'shivanode.inc',
@@ -147,10 +147,10 @@ function shivanode_menu() {
     'file' => 'shivanode.inc',
   );
   
-  // Defines link to Page that lists all registered Data elements in SHIVA manager (NEW FORM)
+  // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
   $items['node/data-elements'] = array(
-    'title' => 'Available Shiva Data Elements',
-    'description' => 'List of Available Shiva Data Elements',
+    'title' => 'Available Shiva Data Entries',
+    'description' => 'List of Available Shiva Data Entries',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_data_elements'),
     'access callback' => 'is_auth_user',
@@ -259,7 +259,7 @@ function is_auth_user() {
 function shivanode_permission() {
   return array(
     'access shivanode view settings' => array(
-      'title' => t('Change the view settings to Shiva Elements'),
+      'title' => t('Change the view settings to Shiva Visualizations'),
     ),
     'access shivanode view json' => array(
       'title' => t('Show the JSON text in uneditable div when editing node.'),
@@ -298,7 +298,7 @@ function shivanode_node_insert($node) {
 
 /*
  * Implements hook_node_delete
- *   When a shivanode is deleted, remove any links to other shivanodes if it is a data element
+ *   When a shivanode is deleted, remove any links to other shivanodes if it is a data visualization
  */
 function shivanode_node_delete($node) {
   $etype = _shivanode_get_element_type($node);
@@ -328,7 +328,7 @@ function shivanode_node_delete($node) {
         );
       }
       drupal_set_message(
-        check_plain( t('Deleted links to the following ' . $num_deleted . ' elements:') . ' ' . implode(',', $relations))
+        check_plain( t('Deleted links to the following ' . $num_deleted . ' visualizations:') . ' ' . implode(',', $relations))
       );
     }
   }
@@ -341,7 +341,7 @@ function shivanode_node_delete($node) {
  */
 function shivanode_node_update($node) {
   if ($node->type == 'shivanode') {
-    // if it's a data element update shiva elements linked to it
+    // if it's a data visualization update shiva visualizations linked to it
     if (_shivanode_get_element_type($node) == "Data") {
       $nids = array();
       $result = db_select('shivanode_links', 'l')
@@ -368,7 +368,7 @@ function shivanode_node_update($node) {
           $msg = substr_replace($msg, ', and', strrpos($msg, ','), 1);
         }
         drupal_set_message(
-            check_plain(t("The following Shiva Elements which use this data have also been modified:")) . " " . $msg
+            check_plain(t("The following Shiva visualizations which use this data have also been modified:")) . " " . $msg
         );
       }
     // otherwise if data_id is set, store that in the shivanode_links table
@@ -455,9 +455,9 @@ function shivanode_node_view_alter(&$build) {
     );
   }
   
-  $sntype = _shivanode_get_element_type($node); // type of shiva element
+  $sntype = _shivanode_get_element_type($node); // type of shiva visualization
   $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
-  // only do the modifications for Shivanodes that are non-Data elements, i.e. actual visualizations
+  // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
   if ($node->type == 'shivanode' && $sntype != 'Data') {
     // If it's got a data element link, display that info
     if ($data_id) {
@@ -465,7 +465,7 @@ function shivanode_node_view_alter(&$build) {
       if ($dnode && node_access('view', $dnode)) {
         // make text to display: link if user has permission to view, otherwise just text
         $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
-        // Put it after element type or assign it a weight of 12
+        // Put it after visualization type or assign it a weight of 12
         $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
         $build['data_element'] = array(
           '#type' => 'markup',
@@ -485,7 +485,7 @@ function shivanode_node_view_alter(&$build) {
  * Implements form_id_validate(form, form_state)
  *
  *   This code is called upon submission of the input/edit form for a shivanode
- *   It tests 1. if the resulting JSON element data is valid
+ *   It tests 1. if the resulting JSON visualization data is valid
  *   and 2. that a data source URL has been given
  */
 function shivanode_form_validate(&$form, &$form_state) {
@@ -498,7 +498,7 @@ function shivanode_form_validate(&$form, &$form_state) {
   if (is_null($jobj)) {
     form_set_error('shivanode_json', t('Your JSON is not valid:') . $jsonStr);
   }
-  // If it's a element that needs a dataSourceUrl, make sure it has a valid one
+  // If it's a visualization that needs a dataSourceUrl, make sure it has a valid one
   if ($jobj && isset($jobj->dataSourceUrl)) {
     if ($jobj->dataSourceUrl == "") {
       $form['shivanode_validationErrors'] = array(
@@ -506,8 +506,8 @@ function shivanode_form_validate(&$form, &$form_state) {
         '#markup' => '<input type="hidden" name="validationErrors" id="validationErrors" value="source" />',
       );
       form_set_error('', t('You must include a data source url that points to a Google Doc spreadsheet! ' .
-        'Click on the icon next to the data source url label <!--or click on the "Use Existing Data Element" Link --> ' .
-        'to add the URL from an existing data element.'));
+        'Click on the icon next to the data source url label <!--or click on the "Use Existing Data" Link --> ' .
+        'to add the URL from an existing data listing.'));
       $form_state['complete form']['shivanode_container']['#attributes'] = array( 'class' => array('error') );
     }
     elseif (!valid_url($jobj->dataSourceUrl)) {
@@ -625,10 +625,10 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
             ->condition('data_id', $object->nid, '=')
             ->execute()
             ->fetchCol(1);
-          $flabel = t('No other elements use this data.');
+          $flabel = t('No other visualizations use this data.');
           $fclass = ' normal';
           if ($dependents) {
-            $flabel = t('Elements using this data:') . '&nbsp;';
+            $flabel = t('Visualizations using this data:') . '&nbsp;';
             $fclass = '';
           }
           $iframe .= '<div class="field field-name-shivanode-dependents field-type-list-integer field-label-inline">';
@@ -730,11 +730,11 @@ function shivanode_block_save($delta = '', $edit = array()) {
  * This hook generates the contents of the shivanode recent block. The bulk of this code is copied
  * from node.module -> function theme_node_recent_block($variables) so that _get_recent_shivanodes()
  * could be used for the list of recent nodes, the "more" link could be changed to go 
- * to node/shivanode/list, shiva element type added, and style issues could be controlled more closely.
+ * to node/shivanode/list, shiva Visualization type added, and style issues could be controlled more closely.
  */
 function shivanode_block_view($delta = '') {
   if ($delta == 'recent_nodes') {
-    $block['subject'] = t('Recent SHIVA Elements');
+    $block['subject'] = t('Recent SHIVA Visualizations');
     $block['content'] = shivanode_render_recent_block();
   }
   return $block;
@@ -781,10 +781,10 @@ function shivanode_render_recent_block() {
     }
 
     $output = theme('table', array('rows' => $rows));
-    $output .= theme('more_link', array('url' => 'node/elements', 'title' => t('Show all elements')));
+    $output .= theme('more_link', array('url' => 'node/elements', 'title' => t('Show all Visualizations')));
     if ($isPrivate) {
-      $output .= '<p class="table-note"><span class="private" title="Private element">*</span> ' .
-        t('indicates a private element viewable only by the creator and administrators') . '.</p>';
+      $output .= '<p class="table-note"><span class="private" title="Private Visualization">*</span> ' .
+        t('indicates a private Visualization viewable only by the creator and administrators') . '.</p>';
     }
   }
   return $output;
@@ -947,7 +947,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['shivanode_element_type']['und']['#default_value'] = 7; // default value is visualization
     $eltype = t('Chart');
       
-    // Use ajax to reload the iframe depending on element type choice
+    // Use ajax to reload the iframe depending on Visualization type choice
     $form['shivanode_element_type']['und']['#ajax'] = array(
       'callback' => 'shivanode_element_change',
       'wrapper' => 'iframe_container',
@@ -955,11 +955,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     unset($form['shivanode_element_type']['und']['#options'][1]); // remove the data option from the drop down list  Data elements are created automatically by adding spreadsheets
   }
   else {
-    // Get the element type and disable the select type dropdown on exiting elements.
+    // Get the Visualization type and disable the select type dropdown on exiting Visualizations.
     $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
     $form['shivanode_element_type']['#disabled'] = TRUE;
     $form['shivanode_element_type']['#attributes'] += array(
-       'onmousedown' => 'alert("You cannot change the type of an existing Shiva element. \nPlease use the Create Element link to create a new element instead.");',
+       'onmousedown' => 'alert("You cannot change the type of an existing Shiva Visualization. \nPlease use the Create Visualization link to create a new Visualization instead.");',
     );
   }
 
@@ -971,7 +971,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
   // Link is hidden but click is mimiced from JS when Iframe sends a message asking for DataSourceURL
   $form['shivanode_access']['#suffix'] = '<div id="use-data-element-link" style="display: none;">' .
-      l('Use an Existing Data Element', 'node/data-elements',
+      l('Use an Existing Data Listing', 'node/data-elements',
         array(
           'attributes' => array(
             'rel' => 'lightframe[|width:800px; height:900px; scrolling: auto;]',
@@ -981,7 +981,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
           ),
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
-        l(t('Create a Data Element from Google Spreadsheet'), 'node/data-elements') . '</div>';
+        l(t('Create a Data Listing from Google Spreadsheet'), 'node/data-elements') . '</div>';
   
   // The upper Save/Update button
   $form['upperbuttons'] = array(
@@ -1023,7 +1023,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         'shivanode_redirect_to_new',
        ),
       '#attributes' => array(
-        'title' => t('Create a new SHIVA element'),
+        'title' => t('Create a new SHIVA Visualization'),
       ),
       '#value' => t('New'),
     );
@@ -1040,7 +1040,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#value' => $submitVal,
     '#attributes' => array(
       'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()', // retrieve the latest JSON before saving
-      'title' => $submitVal . ' ' . t('and view the element'),
+      'title' => $submitVal . ' ' . t('and view the Visualization'),
     ),
     '#theme_wrappers' => array('button'),
   );
@@ -1086,7 +1086,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#type' => 'markup',
     '#markup' => '<span class="label">' . t('Data Used') . ': </span>',
   );
-  // if it's a new element being created with a datasheet in the URL, or if it's an edit of an existing element
+  // if it's a new Visualization being created with a datasheet in the URL, or if it's an edit of an existing Visualization
   if (($is_new_el && is_numeric($urlsuffix)) || $urlsuffix == 'edit') {
     $dataNodeId = ($is_new_el) ? $urlsuffix : _shivanode_get_data_element($form);
     // a number at the end of /node/add/shivanode is an nid of a data node to use for new shivanode
@@ -1128,7 +1128,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 
 /*
  * Function shivanode_element_change($form, $form_state) :
- *    Function called when the drop down for selecting the element type is changes
+ *    Function called when the drop down for selecting the Visualization type is changes
  * 
  */
 function shivanode_element_change($form, $form_state) {
