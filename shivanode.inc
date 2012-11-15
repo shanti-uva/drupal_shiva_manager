@@ -221,6 +221,7 @@ function _shivanode_element_typelist() {
     7 => t('Chart'),
     1 => t('Data'),
     11 => t('Draw'),
+    12 => t('Earth'),
     2 => t('Image'),
     3 => t('Map'),
     10 => t('Network'),
@@ -248,6 +249,7 @@ function _shivanode_options_list($option = NULL) {
       7 => t('Chart'),
       1 => t('Data'),
       11 => t('Draw'),
+      12 => t('Earth'),
       2 => t('Image'),
       3 => t('Map'),
       10 => t('Network'),
@@ -542,6 +544,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_draw_editor', SHIVA_DRAW_EDITOR),
     '#required' => TRUE,
   );
+    
+  $form['shivanode_url_settings']['shivanode_earth_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Earth Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_earth_editor', SHIVA_EARTH_EDITOR),
+    '#required' => TRUE,
+  );
 
   $form['shivanode_url_settings']['shivanode_image_editor'] = array(
     '#type' => 'textfield',
@@ -665,6 +675,7 @@ function _shivanode_settings_default_values(&$form_state) {
   $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
   $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
   $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
+  $form_state['input']['shivanode_earth_editor'] = SHIVA_EARTH_EDITOR;
   $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
   $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
   $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
@@ -1427,7 +1438,10 @@ function _get_shivaframe_url($opt) {
       $player =  variable_get('shivanode_network_editor', SHIVA_NETWORK_EDITOR);
       break;
     case 11:  // Draw
-      $player = variable_get('shivanode_drawditor', SHIVA_DRAW_EDITOR); 
+      $player = variable_get('shivanode_draw_editor', SHIVA_DRAW_EDITOR); 
+      break;
+    case 12:  // Earth
+      $player = variable_get('shivanode_earth_editor', SHIVA_EARTH_EDITOR); 
       break;
   }
   if (strpos($player, 'http://') === FALSE) {
