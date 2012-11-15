@@ -53,10 +53,10 @@
 					//setTimeout('Drupal.Shivanode.monitorEditFrame(true)',3000);
 				});
 				// move the required asterisk from the uneditable JSON field to the Iframe legend
-				$("#shivanode_json_div label:contains('Shiva Element')").text('JSON Value');
+				$("#shivanode_json_div label:contains('Shiva Visualization')").text('JSON Value');
 				$('#shivanode-json-add-more-wrapper label span.form-required').appendTo('#iframe_container legend span');
 				$("#shivanode_json_div label:contains('JSON Value'), #shivanode_json_div textarea")
-					.attr('title','This field is uneditable. Use the form above to edit the element. Click here to refresh JSON based on form above.');
+					.attr('title','This field is uneditable. Use the form above to edit the visualization. Click here to refresh JSON based on form above.');
 				if($('#json-hide-link').length == 0 ) {
 					$("#shivanode_json_div label:contains('JSON Value')")
 						.append('<span> (<a href="#" id="json-hide-link" class="toggle-link" ' +
@@ -69,7 +69,7 @@
 										.after('<option id="stypeseparator" disabled="disabled">\u2014\u2014\u2014\u2014\u2014\u2014</option>'); 
 								}*/
 				
-				// Add change listener to element type, when it's a data element show add other data elements link
+				// Add change listener to visualization type, when it's a data entry show add other data entries link
 				$('#edit-shivanode-element-type-und').change(function() {
 					var v = $('#edit-shivanode-element-type-und option[value=' + $(this).val() + ']').text();
 					if(v == 'Data') {
@@ -196,7 +196,7 @@
 	  shivaMessageHandler(e) : A handler for HTML 5 messages to the current frame
 	  	- Handler for HTML 5 messages received
 	  	- NOTE: the message putJSON= is not handled here but is handled in the Shiveyes edit frames: chart.htm, subway.htm etc.
-	  				  putJSON= is sent to these edit frames from Drupal with the SHIVA element JSON to use
+	  				  putJSON= is sent to these edit frames from Drupal with the SHIVA visualization JSON to use
 	*/
 	Drupal.Shivanode.shivaMessageHandler = function(e)
 	{
@@ -207,14 +207,14 @@
 		 * 
 		 * 		2. DataChanged={mode} : When data is changed on certain other pages (Replaces #1 by assigning chart-type to mode)
 		 * 
-		 * 		3. dataSourceUrl : Triggers the opening of a popup window for choosing a data element
+		 * 		3. dataSourceUrl : Triggers the opening of a popup window for choosing a data entry
 		 * 
-		 * 		4. DataUrl={url of google spreadsheet& title} : Inserts the URL and title into the Shiva element edit form and sets preset indicator 
+		 * 		4. DataUrl={url of google spreadsheet& title} : Inserts the URL and title into the Shiva visualization edit form and sets preset indicator 
 		 * 
-		 * 		5. GetElements : Invokes a message from this frame that returns a JSON object describing all elements created by current user
+		 * 		5. GetElements : Invokes a message from this frame that returns a JSON object describing all visualizations created by current user
 		 * 
 		 * 		6. GetGroupElements= : append either group id as number or group's node id, e.g. 6, as 'n' + number, e.g. n23, this will return 
-		 * 												the group's list of element info to the shivaEditFrame
+		 * 												the group's list of visualization info to the shivaEditFrame
 		 * 
 		 * 		7. GetJSON={json} : The JSON returned by the shivaEdit frame after this parent makes a "GetJSON" request. Calls setDrupalJSON.
 		 * 
@@ -233,8 +233,8 @@
 		 * 
 		 * 		14. SetUrl= : Allows the child IFrame to set the URL of the parent or a higher level Iframe, used by the highlight box popup iframes
 		 * 
-		 * 		15. SetDataElement={data element id} : when given a data element ID, this will look up the data element and insert its info in the present SHIVA element form
-		 * 																					 the child iframe (i.e. the list of possible datat elements) calls SetDataElement(did) to send this message to the parent (i.e. the editing form) 
+		 * 		15. SetDataElement={data element id} : when given a data entry ID, this will look up the data entry and insert its info in the present SHIVA visualization form
+		 * 																					 the child iframe (i.e. the list of possible data entrys) calls SetDataElement(did) to send this message to the parent (i.e. the editing form) 
 		 * 																					 and the parent calls the same function to get the data elemen through the API 
 		 * 																					 and inserts the info into the form.
 		 * 
@@ -279,7 +279,7 @@
 					Drupal.Shivanode.setDataChanged(mode);
 				}
 			}
-	  // dataSourceUrl : opens a list of data elements to use to create a visualization
+	  // dataSourceUrl : opens a list of data entries to use to create a visualization
 		} else if (e.data.indexOf('dataSourceUrl') == 0) {
 			//Drupal.Shivanode.monitorEditFrame(false);
 			$('#use-data-element-link a').click();  // click on hidden popup (lighbox) link
@@ -289,11 +289,11 @@
 			response=e.data.substr(8);
 			Drupal.Shivanode.insertDataElement(response);
 
-		// GetElements : When IFrame requests a list of Elements created by the User (for Canvas)
+		// GetElements : When IFrame requests a list of visualizations created by the User (for Canvas)
 		} else if (e.data.indexOf('GetElements') == 0) {
 			Drupal.Shivanode.getElementList();
 			
-		// GetGroupElements: Get a list of an group's element. Give either GID or Group's node ID, n + number
+		// GetGroupElements: Get a list of an group's visualization. Give either GID or Group's node ID, n + number
 		} else if (e.data.indexOf('GetGroupElements=') == 0) {
 			var gid = e.data.substr(17);
 			Drupal.Shivanode.getGroupElements(gid);
@@ -336,7 +336,7 @@
 			var url = e.data.substr(7);
 			Drupal.Shivanode.setUrl(url);
 			
-		// SetDataElement= : Set the data element in the Iframe using the data elements ID.
+		// SetDataElement= : Set the data entry in the Iframe using the data entry ID.
 		} else if (e.data.indexOf('SetDataElement=') == 0) {
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
@@ -349,11 +349,11 @@
 				Drupal.Shivanode.jsonloaded = true;
 			}
 			
-		// GetKML={layerid} : Set the data element in the Iframe using the data elements ID.
+		// GetKML={layerid} : Set the data entry in the Iframe using the data entries ID.
     } else if (e.data.indexOf('GetFile=') == 0) {
       Drupal.Shivanode.getFile(e.data.substr(8));
 
-    // PutKML={layerid} : Set the data element in the Iframe using the data elements ID.
+    // PutKML={layerid} : Set the data entry in the Iframe using the data entrys ID.
     } else if (e.data.indexOf('PutFile=') == 0) {
       var pts = e.data.substr(8).split("=");
       if(pts.length == 2)
@@ -369,7 +369,7 @@
 		$('#edit-shivanode-access-und').val(sval);
 	};
 	
-	// Function called once JSON from Iframe have been delivered. It completes the insertion of data element data.
+	// Function called once JSON from Iframe have been delivered. It completes the insertion of data entry data.
 	//    When done through the url with ?url=...&title=... or if url = false, then through json
 	// 		Check to see if url method is used at all
 	Drupal.Shivanode.doInsertDataElement = function(url, jsonparam) {
@@ -377,7 +377,7 @@
 		var ispreset = false;
 		// Get the Data 
 		var json = $('#edit-shivanode-json-und-0-value').val(); // Get JSON from Drupal json field. This is the default JSON data value
-		// if url is 'preset', means reinsert the dataSource Url from the data element associated. Get info from it
+		// if url is 'preset', means reinsert the dataSource Url from the data entry associated. Get info from it
 		if(url == 'preset') {
 			url = $('#chosen_data_element_url').text();
 			title = $('#chosen_data_element_title').text();
@@ -448,7 +448,7 @@
 	};
 	
 	/*
-	 * getElementList() : A function that uses the API to get a list of the users elements and send it to the Iframe with putElem
+	 * getElementList() : A function that uses the API to get a list of the users visualizations and send it to the Iframe with putElem
 	 * 										Meant to be used for canvas
 	 */
 	Drupal.Shivanode.getELementList = function() {
@@ -467,7 +467,7 @@
 	};
 	
 	/*
-	 * getGroupElements(gid) : a function that uses the API to retrieve a list of elements associated iwth a group
+	 * getGroupElements(gid) : a function that uses the API to retrieve a list of visualizations associated iwth a group
 	 * 													and send the json definition of that list to the Iframe.
 	 */
 	Drupal.Shivanode.getGroupElements = function(gid) {
@@ -606,9 +606,9 @@
 	};
 	
 	/*
-	 * setDataElement(did, isnew) : set or relay the ID for a data element linked to a visualization
+	 * setDataElement(did, isnew) : set or relay the ID for a data entry linked to a visualization
 	 * 					did = the data node's node id (nid)
-	 * 					isnew = whether or not it is a new element and the add/shivanode page has not yet been called
+	 * 					isnew = whether or not it is a new visualization and the add/shivanode page has not yet been called
 	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
 	 */
 	Drupal.Shivanode.setDataElement = function(did, isnew) {
@@ -622,13 +622,13 @@
 			$('#bottomNavClose').click(); // if above doesn't work.
 			return false;
 		} else if(isnew) {
-			// if it's a brand new element and its in the parent position it's a link from the All Data Elements page
-			//  to create a new visualization based on a data element so redirect
+			// if it's a brand new visualization and its in the parent position it's a link from the All Data Entries page
+			//  to create a new visualization based on a data entry so redirect
 			var newloc = Drupal.settings.basePath + 'node/add/shivanode/' + did;
 			setTimeout(function () { window.location.href = newloc;},300);
 			return false;
 		} else {
-			// If parent controller, then get the data element JSON and send to Iframe Editor with RelayJSON message
+			// If parent controller, then get the data entry JSON and send to Iframe Editor with RelayJSON message
 			$.ajax({
 				type: "GET",
 				url: Drupal.settings.basePath + 'api/rest/shivanode/' + did + '.json',
@@ -644,7 +644,7 @@
 	
 	/* 
 	 * Send given Gdoc url and title to Visualization editing frame
-	 * 		for creating visualizations from data elements
+	 * 		for creating visualizations from data entrys
 	 */
 	Drupal.Shivanode.setDataSheet = function(gdoc, gtitle) {
 		var dt = new Date;
@@ -659,7 +659,7 @@
 		}
 	};
 	
-	// Function to set the JSON value of elements within a Shivanode edit/create form
+	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
 		Drupal.Shivanode.latestJSON = json;
   	// if Drupal.Shivanode.embedCallType is set to 'json', means Lightbox Frame is requesting JSON so set it.
@@ -667,11 +667,11 @@
 			Drupal.Shivanode.ShivaMessage('lightboxFrame', 'SetEmbed=' + json);
 			Drupal.Shivanode.embedCallType = '';
 		}
-  	// Otherwise, it's the Shiva Manager asking for the JSON of an Element to store
+  	// Otherwise, it's the Shiva Manager asking for the JSON of an visualization to store
 		var jobj = JSON.parse(json); 
 		Drupal.Shivanode.checkKMLUrls(jobj);
 		var jdurl = jobj.dataSourceUrl;
-		// if there's no dataSourceUrl and a data element is linked with the present edit form, then add that info
+		// if there's no dataSourceUrl and a data entry is linked with the present edit form, then add that info
 		if(typeof(jdurl) == 'string' && jdurl == '' && $('#data_sheet_in_use').length == 1) {
 			jobj.dataSourceUrl = $('#chosen_data_element_url').text();
 			if(typeof(jobj.title) != 'string' || jobj.title == '') {
