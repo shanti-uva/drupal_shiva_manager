@@ -14,6 +14,16 @@ div.shivanode_display {
   padding: 6px;
 }
 
+/* Help button in edit form */
+div#sn-helplink {
+  float: left;
+  margin-top: 22px;
+}
+
+div#sn-helplink a {
+  padding-left: 12px;
+}
+
 /* Upper Action buttons in Edit Form */
 div#upperbuttons {
 	float: right;

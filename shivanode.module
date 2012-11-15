@@ -985,6 +985,12 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
         l(t('Create a Data Listing from Google Spreadsheet'), 'node/data-elements') . '</div>';
+ 
+  $form['shivanode_help'] = array(
+    '#type' => 'markup',
+    '#markup' => '<div id="sn-helplink"><a href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank"><span class="charttype">Pie Chart</span> Help</a></div>',
+    '#weight' => 3,
+  );
   
   // The upper Save/Update button
   $form['upperbuttons'] = array(
@@ -1066,7 +1072,22 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['upperbuttons']['closetag'] = array(
     '#markup' => '</div>',
   );
-    
+  
+  // Lower buttons (Copies the code for upper buttons in differently weighted div)
+  $form['lowerbuttons'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="lowerbuttons">',
+    '#suffix' => '</div>',
+    '#weight' => 50,
+  );
+  
+  if (!$is_new_el) {
+    $form['lowerbuttons']['new'] = $form['upperbuttons']['new'];
+  }
+  $form['lowerbuttons']['submit'] = $form['upperbuttons']['submit'];
+  $form['lowerbuttons']['saveandcontinue'] = $form['upperbuttons']['saveandcontinue'];
+  
+
   // Display JSON depending on the setting
   $jsonDivDisplay = ' style="display:none;" '; // JSON remains hidden
   if (user_access('access shivanode view json')) {
@@ -1123,10 +1144,13 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
+  $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
+  /*
   $form['actions']['submit']['#value'] = $submitVal; // Change text of submit button at bottom
-  $form['actions']['submit']['#attributes'] = array(
-    'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
-  );
+    $form['actions']['submit']['#attributes'] = array(
+      'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
+    );*/
+  
 }
 
 /*
@@ -1142,7 +1166,8 @@ function shivanode_element_change($form, $form_state) {
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span></legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
-        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe></fieldset>';
+        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .
+        '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
   return $iframe;
 }
 

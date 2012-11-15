@@ -192,6 +192,31 @@
 	
 	Drupal.Shivanode.fileItemIndex = null; // The index of the item for which a file request has been made in GetFile
 	
+	Drupal.Shivanode.helplinks = {
+    'Annotated Time Line': 'https://wiki.shanti.virginia.edu/x/aAHLAQ',
+    'Area Chart': 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+    'Bar Chart': 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+    'Candlestick Chart': 'https://wiki.shanti.virginia.edu/x/MgLLAQ',
+    'Column Chart': 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+    'Combo Chart': 'https://wiki.shanti.virginia.edu/x/WQLLAQ',
+    'Gauge': 'https://wiki.shanti.virginia.edu/x/EADLAQ',
+    'Geo Chart': 'https://wiki.shanti.virginia.edu/x/XALLAQ',
+    'Line Chart': 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+    'Motion Chart': 'https://wiki.shanti.virginia.edu/x/fgLLAQ',
+    'Org Chart': 'https://wiki.shanti.virginia.edu/x/dQDAAQ',
+    'Pie Chart': 'https://wiki.shanti.virginia.edu/x/ZQHLAQ',
+    'Scatter Chart': 'https://wiki.shanti.virginia.edu/x/ZgDGAQ',
+    'Table': 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
+    'Tree Map': 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
+    'Draw': 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
+    'Image': 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
+    'Map': 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
+    'Network': 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
+    'Subway': 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
+    'Timeline': 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
+    'Video': 'https://wiki.shanti.virginia.edu/x/upy1AQ'
+  };
+	
 	/*
 	  shivaMessageHandler(e) : A handler for HTML 5 messages to the current frame
 	  	- Handler for HTML 5 messages received
@@ -263,6 +288,8 @@
 		
 	  // ChartChanged={chart type} : When the visualization chart is changed
 	  if (e.data.indexOf('ChartChanged=') == 0) {
+	    Drupal.Shivanode.setHelpLink(e.data.substr(13));
+	    
 			if($('#shivanode_data_nid').length > 0) {
 				// if there is a set data node, then reinsert that data
 				setTimeout("Drupal.Shivanode.insertDataElement('preset');", 1000);
@@ -686,6 +713,17 @@
 			Drupal.Shivanode.IDE = null;
 			Drupal.Shivanode.doInsertDataElement(ide.url, ide.json);
 		}
+	};
+	
+	Drupal.Shivanode.setHelpLink = function(sntype) {
+	  if(sntype == 'Chart') { sntype = 'Pie Chart'; }
+	  if(sntype != '' && typeof(Drupal.Shivanode.helplinks[sntype]) != 'undefined') {
+      $('#sn-helplink .charttype').text(sntype);
+      $('#sn-helplink a').attr('href', Drupal.Shivanode.helplinks[sntype]);
+      $('#sn-helplink').show();
+    } else {
+      $('#sn-helplink').hide(); // if help URL not defined, hide the link
+    }
 	};
 	
 	Drupal.Shivanode.checkKMLUrls = function(jobj) {
