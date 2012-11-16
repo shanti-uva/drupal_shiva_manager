@@ -1081,11 +1081,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#weight' => 50,
   );
   
-  if (!$is_new_el) {
-    $form['lowerbuttons']['new'] = $form['upperbuttons']['new'];
-  }
   $form['lowerbuttons']['submit'] = $form['upperbuttons']['submit'];
   $form['lowerbuttons']['saveandcontinue'] = $form['upperbuttons']['saveandcontinue'];
+  $form['lowerbuttons']['delete'] = $form['actions']['delete'];
   
 
   // Display JSON depending on the setting
@@ -1144,6 +1142,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
+  dpm($form['actions']);
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
   /*
   $form['actions']['submit']['#value'] = $submitVal; // Change text of submit button at bottom
