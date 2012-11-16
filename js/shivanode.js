@@ -465,7 +465,7 @@
 	
 	Drupal.Shivanode.filterSsList = function(el) {
 		var srch = $(el).val();
-		$.each($('li.mynode, #edit-newss div.form-item, #edit-gss-done li, #edit-gss-list li'), function() {
+		$.each($('li.mynode, li.othernode, #edit-newss div.form-item, #edit-gss-done li, #edit-gss-list li'), function() {
 			if($(this).text().indexOf(srch) > -1) {
 				$(this).show();
 			} else {

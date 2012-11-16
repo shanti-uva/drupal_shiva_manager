@@ -1083,9 +1083,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   $form['lowerbuttons']['submit'] = $form['upperbuttons']['submit'];
   $form['lowerbuttons']['saveandcontinue'] = $form['upperbuttons']['saveandcontinue'];
-  $form['lowerbuttons']['delete'] = $form['actions']['delete'];
+  if (!$is_new_el) {
+    $form['lowerbuttons']['delete'] = $form['actions']['delete'];
+  }
   
-
   // Display JSON depending on the setting
   $jsonDivDisplay = ' style="display:none;" '; // JSON remains hidden
   if (user_access('access shivanode view json')) {
