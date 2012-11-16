@@ -1117,7 +1117,7 @@ function _shivanode_data_elements($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Instructions'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#attributes' => array(
       'class' => array(
         'collapsible',
@@ -1131,8 +1131,8 @@ function _shivanode_data_elements($form, &$form_state) {
     '#markup' => '<p>' . t('This list allows you to specify the data that you would like to call upon for the Shiva visualization on which you are currently working. ' . 
                             'Shiva visualizations draw upon Shiva Data entries, which are typically created from Google Doc spreadsheets. ' .
                             'The first section of this page shows you Shiva Data entries that you have personally created and also allows you see Shiva ' .
-                            'Data elements others have created and shared with groups to which you belong.  ' .
-                            'The second section of this page shows your Google spreadsheets that you have not yet added. ' .
+                            'Data entries  others have created and shared with groups to which you belong.  ' .
+                            'The second section of this page shows your Google spreadsheets that you have not yet imported into Shiva. ' .
                             'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
                             'and click the &lsquo;Add Spreadsheet&rsquo; button.') . '</p>',
   );
