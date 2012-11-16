@@ -864,13 +864,14 @@ function shivanode_form_og_ui_add_users_alter(&$form, &$form_state, $form_id) {
     $defval = 0; 
   }
   $form['og_user']['og_add_user_membership_type']['#default_value'] = $defval;
-  $form['#submit'][] = 'shivanode_add_og_user_role';
+  $form['#submit'] = array('shivanode_add_og_user_role'); // replace existing submission function with custom and call existing from custom to make sure user is first added.
 }
 
 /* shivanode_add_og_user_role is the callback function to assign the role to the new group member
  *  upon adding him or her
  */
 function shivanode_add_og_user_role($form, &$form_state) {
+  og_ui_add_users_submit($form, $form_state); // make sure user is added first.
   $uname = $form_state['values']['og_add_user'];
   $guser = user_load_by_name($uname);
   $guid = $guser->uid;
@@ -1143,7 +1144,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
-  dpm($form['actions']);
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
   /*
   $form['actions']['submit']['#value'] = $submitVal; // Change text of submit button at bottom
