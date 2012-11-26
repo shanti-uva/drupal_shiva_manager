@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="mapscholaricon.ico">
+	<title>MapScholar</title>
+	<link rel="stylesheet" type="text/css" href="http://www.viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+ 	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
+ 	<script type="text/javascript" src="http://www.viseyes.org/shiva/SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src="MapScholar_Draw.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
+		p.pb { text-align:right; color:#fff; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+</head>
+<body>
+		<div id="containerDiv" style="position:absolute;width:800px;height:600px;left:20px;top:20px;"></div>
+		<div id="shelfDiv" style="position:absolute;width:230px;height:636px;left:820px;top:20px;background-color:#eee;"> </div>
+		<div id="controlBarDiv" style="position:absolute;width:800px;height:36px;top:620px;left:20px;background-color:#eee"> </div>
+<script>
+
+	var mps=null;
+	var shivaLib=null;
+	var geocoder=geocoder=new google.maps.Geocoder();
+	
+	function shivaEventHandler(e) {}
+ 
+	function ShivaPostInit()
+ 	{
+		mps.dr.InitEvents();
+	}
+	
+     $(document).ready(function() {
+		mps=new MapScholar();
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);	
+		
+		$(function() {
+		    $("#address").autocomplete({
+		      source: function(request, response) {
+		        geocoder.geocode( {'address': request.term }, function(results, status) {
+		          response($.map(results, function(item) {
+		            return {
+		              label:  item.formatted_address,
+		              value: item.formatted_address,
+		              latitude: item.geometry.location.lat(),
+		              longitude: item.geometry.location.lng()
+		            }
+		          }));
+		        })
+		      },
+	     	select: function(event, ui) {
+				var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+				shivaLib.options.mapcenter=(Math.floor(ui.item.latitude*1000)/1000+","+Math.floor(ui.item.longitude*1000)/1000);
+				shivaLib.Draw(shivaLib.options);
+		      	}
+		    });
+  		});
+
+	});
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// MAIN 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+function MapScholar()													// CONSTRUCTOR
+{
+	mps=this;																// Point to this
+	shivaLib=new SHIVA_Show("containerDiv");								// Alloc SHIVA_Show
+	shivaLib.options={ 	shivaGroup:"Earth", height:"600", width:"800", 
+ 						mapcenter:"29.36,-80.49", range:"1000000", tilt:"42", heading:"0",
+ 						panControl:"true", draggable:"true", scrollwheel:"true", overviewMapControl:"false",
+ 						terrainexag:"1", borders:"false", roads:"false"
+ 						};
+	
+	this.InitProjectData();													// Init project data
+	shivaLib.Draw(shivaLib.options);										// Draw map
+	this.dr=new MapScholar_Draw();											// Alloc draw module
+	this.sh=new MapScholar_Shelf();											// Alloc shelf module
+	this.dr.DrawControlBar(false);											// Draw control bar and shelf
+}	
+
+MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
+{
+//		atlas[
+//			name, desc, id,
+//			type (tour|collection)
+//			mids[]
+//			]
+//		mobs[
+//			name, src, title, citation, id,
+//			flyto (true|false)
+//			type (map|layer|goto)
+//			metadata{
+//				title,desc,start,end,tags,citation
+//				}
+//			] 
+
+	this.atlas=new Array();													// Holds atlas data
+	this.mobs=new Array();													// Holds map objects data
+
+	var atlas={ type:"collection",		
+				name:"Florida Maps",
+				desc:"This is a collection of florida maps",
+				mids:[],
+				id:0
+				};
+
+	this.AddNewAtlas(atlas);
+
+	var meta={	start:1754,
+				end:0,
+				tags:"England, empire",
+				citation:"John Smythe, 1754 LOC"
+				};
+	var mob={ 	type:"map", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				med:"http://www.viseyes.org/shiva/map.jpg",
+				thumb:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"1754 map of England",
+				desc:"This is a nicely drawn map of England",
+				metadata:meta 
+				}			
+	
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[0].id);
+	
+	var mob={ 	type:"layer", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"The dividing line",
+				desc:"This is is a KML of the dividing line",
+				}			
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[1].id);
+
+	var mob={ 	type:"goto", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"Central London",
+				desc:"This is is the center of London's business district in the eighteenth century",
+				}			
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[2].id);
+
+	var mob={ 	type:"map", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				med:"http://www.viseyes.org/shiva/map.jpg",
+				thumb:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"1754 map of England",
+				desc:"This is a nicely drawn map of England",
+				metadata:meta 
+				}			
+	
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[3].id);
+}
+
+MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
+{
+	atlas.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
+	this.atlas.push($.extend(true,{},atlas));								// Copy new atlas to project
+}
+
+MapScholar.prototype.AddNewMob=function(mob)							// ADD NEW MAP OBJECT TO PROJECT
+{
+	mob.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
+	this.mobs.push($.extend(true,{},mob));									// Copy new mob  to project
+}
+
+MapScholar.prototype.AddMobToAtlas=function(atlasID, mobID, num)		// ADD MOB ID TO ATLAS
+{
+	var aNum;
+	if ((aNum=this.FindAtlasByID(atlasID)) == -1)							// Get index
+		return false;														// Return if none
+	if (num == undefined)													// If num not spec'd
+		num=this.atlas[aNum].mids.length;									// Add to end
+	this.atlas[aNum].mids.splice(num,0,mobID);								// Add mob id to atlas
+}
+
+MapScholar.prototype.ShiftMob=function(aNum, from, to)					// SHIFT MAP OBJECT IN ATLAS
+{
+	var mob=this.atlas[aNum].mobs.splice(from,1);							// Remove it from old loc
+	if (to != -1)															// If not deleting
+		this.atlas[aNum].mobs.splice(to,0,mob);								// Move it to new loc
+}
+
+MapScholar.prototype.FindAtlasByID=function(id)							// FIND ATLAS INDEX BY ID
+{
+	var i;
+	for (i=0;i<this.atlas.length;++i)										// For each atlas
+		if (id == this.atlas[i].id)											// If matched
+			return i;														// Return index
+	return -1;																// Not found
+}
+
+MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY ID
+{
+	var i;
+	for (i=0;i<this.mobs.length;++i)										// For each mob
+		if (id == this.mobs[i].id)											// If matched
+			return i;														// Return index
+	return -1;																// Not found
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// SHELF 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+function MapScholar_Shelf()												// CONSTRUCTOR
+{
+	this.curAtlas=0;														// Default to all
+	this.curMob=-1;															// Default to none
+    this.mobVis=new Array();                                                // Holds hide/show status
+}
+
+MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
+{
+	var i;
+	var str="<p>";
+	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
+	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
+	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
+	$("#controlBarDiv").html(str+"</p>")										// Add to DOM
+	str="<div id='contentShelf' style='width:228px;height:598px;background-color:#fff;border:1px solid #999;margin:0px;padding:0px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
+    str+="<p align='center'><select id='tourSelect' style='font-size:x-small'>";
+    str+="<option>All maps</option>";       str+="<option>Ceded Islands</option>";
+    str+="<option>Florida</option>";
+
+	
+	$("#shelfDiv").html(str+"</table></div>");
+    var n=mps.atlas[this.curAtlas].mids.length;                                 // Number of mobs to add
+    this.mobVis=[];                                                             // Remove old array
+    for (i=0;i<n;++i)                                                           // For each mob
+	   this.mobVis.push(0);                                                     // Make it hidden                                       
+	this.FillShelf();                                                           // Drawshelf
+ }
+
+MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
+{
+	var i,o,pic;
+	var n=mps.atlas[this.curAtlas].mids.length;									// Number of mobs to add
+	str="<table cellspacing='0' cellpadding='8'>";
+	for (i=0;i<n;++i) {															// For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];			// Point at mob
+		if (o.type == "map") {													// A map													
+			if (o.thumb)														// If a thumb defined															
+				pic=o.thumb; 													// Use it
+			else if (o.med)														// Else if a med defined															
+				pic=o.med; 														// Use it
+			else if (o.large)													// Else if a large defined															
+				pic=o.med; 														// Use it
+			}
+		else if (o.type == "layer") 											// A layer													
+	        if (o.thumb)                                                        // If a thumb defined                                                           
+                pic=o.thumb;                                                    // Use it
+			else                                                                // Use icon
+			 pic="img/layericon.png";											// Set
+		else if (o.type == "goto") 												// A goto													
+			pic="img/gotoicon.png";												// Use icon
+	    str+="<tr id='mob"+i+"'";                                               // Row start
+        str+="><td width='68'><img width='64' src='"+pic+"'>";	                // Add pic
+        str+="<br/></td><td align='top'><span";
+       if (this.mobVis[i] > 0)                                                  // If showing
+            str+=" style='color:#990000'";                                      // Color it
+        str+="><b>"+o.title+"</b></span><br/>";			                        // Add title
+ 		str+=o.desc;												            // Add desc
+ 		str+="<br/><br/</td></tr>";												// Close entry
+        if ((this.curMob == i) && (this.mobVis[i] > 0) && (o.type != "goto"))  // If current and visible layer or map
+            str+="<tr style='border-collapse:collapse;border-spacing:0px;'><td align='center'>Visibility</td><td><input type='range' style='width:80px;height:14px;vertical-align:middle'; id='mobVis'/></td></tr>";   
+		}
+	$("#contentShelf").html("</table>"+str);                                    // Add mobs
+    if (this.curMob != -1) {                                                    // If a current
+        $("#visControl").show();                                                // Show it
+        $("#mobVis").val(this.mobVis[this.curMob]);                             // Set value
+        }
+	for (i=0;i<n;++i) {															// For each mob
+		$("#mob"+i).click( function(e) {										// Add click handler
+	        if (!e.shiftKey)                                                    // If not setting multiples
+	           for (j=0;j<n;++j)                                                // For each mob
+	               mps.sh.mobVis[j]=0;                                          // Hide them all
+			shivaLib.Sound("click");                                            // Click
+			var id=this.id.substr(3);                                           // Get id
+			mps.sh.curMob=id;								                    // Set curmob
+			if (mps.sh.mobVis[id] < 50)                                         // If off
+                mps.sh.mobVis[id]=100;                                          // Turn it on
+            else                                                                // If on
+                mps.sh.mobVis[id]=0;                                            // Turn it off
+			mps.sh.FillShelf();                                                 // Redraw shelf
+			});
+          }
+  
+    $("#mobVis").change(function(e){                                         // SET VISIBILITY
+         mps.sh.mobVis[mps.sh.curMob]=$("#mobVis").val();                        // Set vis factor
+         });
+
+	}
+	
+
+
+	
+
+
+</script>
+</body>
+</html>
+

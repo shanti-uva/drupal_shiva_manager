@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Dialog box editor</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		#containerDiv-frame > div.containerDiv { padding: 10px; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+</head>
+<body>
+	<div style="width:279px">
+		<p>
+			<select id="controlType" onchange="SetAttributes(this.value)">
+				<option>Dialog</option>
+				<option>Selector</option>
+				<option>TimeSlider</option>
+				<option>TimeStepper</option>
+				<option>InfoBox</option>
+			</select>
+		</p>	
+	    <table id="propertyTable" class="propTable">
+			<tr style="height:8px"><td> </td></tr>
+		</table> 
+	   <p style="text-align:right"><span id="toolbar" style="font-size:medium" >
+			<button type='button' id='tb1' onclick='ShiftItem(-1)'> </button>
+			<button type='button' id='tb2' onclick='ShiftItem(1)'> </button>
+			<button type='button' id='tb3' onclick='RemoveItem()'> </button>
+			<button type='button' id='tb4' onclick='AddNewItem()'> </button>
+		</span></p>
+		<p style="text-align:right">
+			<span id='saveAsDiv'></span>
+			<span id="samplesDiv"><br/><br/><a onClick='ShowSample()'><i>Click <u>here</u> to add samples</i></a></span>
+		</p>		
+  	<div id="helpDiv" style="width:276px;"> </div>
+ 	</div>
+	<div id="outputDiv" style="width:460px"> </div>
+ 	<div id="containerDiv" style="position:absolute;top:40px;left:308px"> </div>
+
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaGroup="Control";
+	var shivaEditor=true;
+	var items=new Array();
+	var controlType="Dialog";
+	var shivaLib=null;
+
+	var props={
+		Dialog:{
+			title: 						{	def:'', 			opt:'string',		 	 des:'Dialog title'}, 
+			draggable: 					{	def:'true', 		opt:'true|false',		 des:'Draggable?'}, 
+			modal: 						{	def:'false', 		opt:'true|false',		 des:'Modal?'}, 
+			item: 						{	def:' ', 			opt:' |',		 		 des:'<b>Choose item to edit</b>'}, 
+			label: 						{	def:'', 			opt:'string',		 	 des:'Item label'}, 
+			type:						{	def:'Checkbox', 	opt:'Button|Checkbox|Combo|Image|Input|Line|Radio|Range|Text', des: 'Item type'},
+			def:						{	def:'false', 		opt:'string', 	 	 	 des:'Item default'}, 
+			group:						{	def:'', 			opt:'string',		 	 des:'Group'}}, 
+		Selector:{
+			style:						{	def:'Radio', 		opt:'Button|Radio|Toggle', des:'Selector type'},
+			item: 						{	def:' ', 			opt:' |',		 	 	 des:'<b>Choose item to edit</b>'}, 
+			label: 						{	def:'', 			opt:'string',		 	 des:'Button label'}, 
+			type:						{	def:'Button', 		opt:'Button|carat-1-n|carat-1-ne|carat-1-e|carat-1-se|carat-1-s|carat-1-s|carat-1-w|carat-1-nw|carat-2-n-s|carat-2-e-w|triangle-1-n|triangle-1-ne|triangle-1-e|triangle-1-se|triangle-1-s|triangle-1-sw|triangle-1-w|triangle-1-nw|triangle-2-n-s|triangle-2-e-w|arrow-1-n|arrow-1-ne|arrow-1-e|arrow-1-se|arrow-1-s|arrow-1-sw|arrow-1-w|arrow-1-nw|arrow-2-n-s|arrow-2-ne-sw|arrow-2-e-w|arrow-2-se-nw|arrowstop-1-n|arrowstop-1-e|arrowstop-1-s|arrowstop-1-w|arrowthick-1-n|arrowthick-1-ne|arrowthick-1-e|arrowthick-1-se|arrowthick-1-s|arrowthick-1-sw|arrowthick-1-w|arrowthick-1-nw|arrowthick-2-n-s|arrowthick-2-ne-sw|arrowthick-2-e-w|arrowthick-2-se-nw|arrowthickstop-1-n|arrowthickstop-1-e|arrowthickstop-1-s|arrowthickstop-1-w|arrowreturnthick-1-w|arrowreturnthick-1-n|arrowreturnthick-1-e|arrowreturnthick-1-s|arrowreturn-1-w|arrowreturn-1-n|arrowreturn-1-e|arrowreturn-1-s|arrowrefresh-1-w|arrowrefresh-1-n|arrowrefresh-1-e|arrowrefresh-1-s|arrow-4|arrow-4-diag|extlink|newwin|refresh|shuffle|transfer-e-w|transferthick-e-w|folder-collapsed|folder-open|document|document-b|note|mail-closed|mail-open|suitcase|comment|person|print|trash|locked|unlocked|bookmark|tag|home|flag|calculator|cart|pencil|clock|disk|calendar|zoomin|zoomout|search|wrench|gear|heart|star|link|cancel|plus|plusthick|minus|minusthick|close|closethick|key|lightbulb|scissors|clipboard|copy|contact|image|video|script|alert|info|notice|help|check|bullet|radio-off|radio-on|pin-w|pin-s|play|pause|seek-next|seek-prev|seek-end|seek-first|stop|eject|volume-off|volume-on|power|signal-diag|signal|battery-0|battery-1|battery-2|battery-3|circle-plus|circle-minus|circle-close|circle-triangle-e|circle-triangle-s|circle-triangle-w|circle-triangle-n|circle-arrow-e|circle-arrow-s|circle-arrow-w|circle-arrow-n|circle-zoomin|circle-zoomout|circle-check|circlesmall-plus|circlesmall-minus|circlesmall-close|squaresmall-plus|squaresmall-minus|squaresmall-close|grip-dotted-vertical|grip-dotted-horizontal|grip-solid-vertical|grip-solid-horizontal|gripsmall-diagonal-se|grip-diagonal-se', 	des:'Button type'},					
+			def:						{	def:'false', 		opt:'true|false', 	 	 des:'Checked?'}}, 
+		TimeSlider:{
+			min: 						{	def:'0', 			opt:'number',			 des:'Minimum value'},
+			max: 						{	def:'100', 			opt:'number',			 des:'Maximum value'},
+			orientation: 				{	def:'Horizontal', 	opt:'Horizontal|Vertical',des:'Orientation'},
+			size: 						{	def:'300', 			opt:'number',			 des:'Size of time slider'},
+			step: 						{	def:'1', 			opt:'number',			 des:'Snap increment'},
+			type:						{	def:'Single', 		opt:'Bar|Range|Single',  des:'Slider type'},
+			def: 						{	def:'', 			opt:'string',		 	 des:'Start time'}, 
+			title: 						{	def:'', 			opt:'string',		 	 des:'Title'}, 
+			ticks: 						{	def:'0', 			opt:'number',		 	 des:'Number of tick marks'}, 
+			showValues: 				{	def:'false', 		opt:'true|false',		 des:'Show tick values?'}, 
+			suffix: 					{	def:'', 			opt:'string',		 	 des:'Tick value suffix'}}, 
+		TimeStepper:{
+			position: 					{	def:'top-left', 	opt:'string',		 	 des:'Position'}, 
+			item: 						{	def:' ', 			opt:' |',		 		 des:'<b>Choose item to edit</b>'}, 
+			label: 						{	def:'', 			opt:'string',		 	 des:'Step label'}, 
+			def: 						{	def:'', 			opt:'string',		 	 des:'Step default'}, 
+			ques: 						{	def:'', 			opt:'string',		 	 des:'Step question'}},
+		InfoBox:{
+			style: 						{	def:'Text', 		opt:'Text|DocViewer',	 des:'Type of InfoBox'}, 
+			title: 						{	def:'', 			opt:'string',		 	 des:'Dialog title'}, 
+			draggable: 					{	def:'true', 		opt:'true|false',		 des:'Draggable?'}, 
+			scroller: 					{	def:'false', 		opt:'true|false',		 des:'Show scroll bars?'}, 
+			closer: 					{	def:'true', 		opt:'true|false',		 des:'Closable?'}, 
+			width: 						{	def:'auto', 		opt:'string',		 	 des:'Width'}, 
+			height: 					{	def:'auto', 		opt:'string',		 	 des:'Height'}, 
+			backCol: 					{	def:'ffffff', 		opt:'color',		 	 des:'Background color'}, 
+			frameCol: 					{	def:'999999', 		opt:'color',		 	 des:'Frame color'}, 
+			text: 						{	def:'', 			opt:'string',		 	 des:'Content'}} 
+			}
+	
+	var helpText=new Array();
+	helpText['Dialog title']="Title of dialog box.";
+	helpText['Draggable?']="Whether the dialog box can be dragged with a mouse.";
+	helpText['Modal?']="Whether the dialog is the only active element when it is open and it is not possible to click or any other option on the page.<br/><br/><b>NOTE:</b> If you make the dialog modal, you will need to close it by clicking in the 'X' to change anything";
+	helpText['Position']="Where the control will be positioned. Can be center, top-left, top-center, top-right, bot-left, bot-center, bot-right, or [100,200], (the horizontal, vertical position in pixels).";
+	helpText['<b>Choose item to edit</b>']="Select the item to edit in this pull-down, or click and/or change the item in the dialog box to bring up its attributes."
+	helpText['Item label']="Label of item. For combo menus, separate the options by a | (i.e., true|false).";
+	helpText['Item type']="Type of item. Can be Button, Checkbox, Combo, Image, Line, Radio, Range, or Text";
+	helpText['Item default']="The default state of the item. Radio and Checkbox can be set to true, Combo can be set with initial option name, Image has the full URL of the image to show, Range can have its initial position from 0-100, and Text can show default value.";
+	helpText['Button label']="Label of button. If an icon, the label will appear to the right of the icon";
+	helpText['Button default']="The default state of the button. Can be set to true, or left blank.";
+	helpText['Button type']="Type of item. Can be Button, or one of these built-in icons: <br/><br/><image src='icons.gif' width='390' height='418'>";
+	helpText['Selector type']="Choose to add a Button or Radio. Then click the + button.";
+	helpText['Button label']="Enter text that will appear on the button.";
+	helpText['Checked?']="Set this button to true if you have more than one button and you would like one to be the default checked button.";
+	helpText['Group']="Radio buttons need to be associated as a group, so that only one in that group will be checked at any given time. Put a name here for each radio button in a given group that identifies the group, such as 'group1', or 'styles'. You can have as many group as you want.";
+	helpText['Minimum value']="Sets the value of the start of the slider.  The default is 0.";
+	helpText['Maximum value']="Sets the value of the end of the slider.  The default is 100.";
+	helpText['Orientation']="Choose whether you want your slider to be horizontal or vertical.";
+	helpText['Size of time slider']="Determines the size of the time slider in pixels.";
+	helpText['Snap increment']="Determines at what increment your slider box will jump or snap to as it travels along the slider.  If the maximum value of your slider is set to 10 and your snap increment is set to 1, then the button will snap 10 times before reaching the end of the slider.  If however the snap increment is set to 2, then the button will only snap 5 times before reaching the end of the slider.";
+	helpText['Slider type']="Choose from the available slider types.  Choose the Bar option if you wish to have the slider turn grey as the box moves up the slider.  Choose the Range option if you want the slider to start at the maximum point and snap down.  Choose the Single option to leave the slider color unchanged as the box moves up the slider.";
+	helpText['Start time']="Enter a number from along your slider if you wish the box to begin from that point rather than from the minimum point on the slider.";
+	helpText['Title']="You have the option of adding a title to your slider or leaving this blank.";
+	helpText['Number of tick marks']="Determines the number of tick marks displayed under your slider.  If your slider has a range of 0-10 and you want the box to snap in 1 tick increments to the end, then set this number to 9.  Likewise, if your slider has a range of 0-100 and you want the box to snap in 1 tick increments to the end, then set this number to 99.  And, if your slider has a range of 0-100 and you want the box to snap in increments of 10 to the end, then set this number to 9.";
+	helpText['Show tick values?']="Choose false to hide the number value of the tick marks or true to show the number value of the tick marks.";
+	helpText['Tick value suffix']="You have the option to add a suffix that will be displayed with the maximum value.  For example, if you enter enter % in this box and the Show tick values? box is set to true the the maximum value for the slider will be 100%.";
+	helpText['Step label']="Label for a step that will appear across the top.";
+	helpText['Step default']="The default value for a question if not actually changed.";
+	helpText['Step question']="The kind of question that will be asked at this step:<br/><br/><b>color</b> will bring up a color picker.<br/><b>text</b> where text can be typed<br/><b>option1|option2</b>, where a pulldown menu of options, separated by |'s, such as <i>true|false</i> or <i>left|right|center.</i><br/><br/>The response to the question is sent as a message. If no question is set, the step sends the step number as a message when step clicked.";
+	helpText['OVERVIEW']="Create Dialog Boxes, Selector buttons, Time Sliders, Time Steppers, and InfoBoxes for your project.<br/><br/>";
+	helpText['OVERVIEW']+="To get started use the drop down menu to choose what kind of control you would like to create.  Or take a look at the sample control provided for the Dialog control.  Click the + sign to to add buttons or elements to your controls.  Customize the controls to your needs.<br/><br/>";
+	helpText['Type of InfoBox']="The kind of InfoBox. <br/><br/><b>Text</b> is a simple text display, formattable using HTML and can use $$ replaceable parameters.<br/><b>Table</b> is a tabular display, filled using data from an Action in the Canvas panel.<br/><b>DocViewer</b> is a document viewer display (i.e. 2 columns with image and facing text and multiple pages. It is filled using data from an Action in the Canvas panel.";
+	helpText['Resizable?']="Whether the dialog box can be resized with a mouse.";
+	helpText['Closable?']="Whether the dialog box has a closing button.";
+	helpText['Width']="The width of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.";
+	helpText['Height']="The height of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.";
+	helpText['Background color']="The color of the background.If set to -1, the box, frame, and titlebar will be transparent.";
+	helpText['Frame color']="The color of the background. If set to -1, the frame will not be drawn.";
+	helpText['Content']="The text template if a Text box. If a Table, the phrase 'grid=true' can be added to draw a grid between the data members.";
+	
+///////// INIT  /////////////
+
+    $(document).ready(function() {
+		shivaLib=new SHIVA_Show("containerDiv",null,false);
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+		shivaLib.SetAttributes(props[controlType],items);
+		$("#toolbar").buttonset();
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
+		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
+		ReEdit();
+		Draw();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+	 });
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+	
+	function ShowSample()
+	{
+		var i=items.length;
+		AddItem('Item-'+(++i),'Checkbox','A check box','checked','');	
+		AddItem('Item-'+(++i),'Input','An input box','','');	
+		AddItem('Item-'+(++i),'Range','A range slider','80','');	
+		AddItem('Item-'+(++i),'Button','','This is a button','');	
+		AddItem('Item-'+(++i),'Line');	
+		AddItem('Item-'+(++i),'Combo','true|false','true','');	
+		AddItem('Item-'+(++i),'Radio','Radio button 1','checked','group1');	
+		AddItem('Item-'+(++i),'Radio','Radio button 1','','group1');
+		AddItem('Item-'+(++i),'Image','','http://www.viseyes.org/SHANTIlogo.gif','');	
+		AddItem('Item-'+(++i),'Text','A picture above');
+		shivaLib.SetAttributes(props[controlType],items,false);
+		Draw();	
+	}
+	
+///////// CORE  /////////////
+
+	function Draw()
+	{
+		$("#containerDiv").slider("destroy");
+		$("#selector").hide();
+		$("#samplesDiv").hide();
+		$("#toolbar").hide();
+		$("#containerDivDlg").dialog("destroy");
+		$("#stepper").hide();
+		$("#containerDiv").html("");
+		if ($("#sliderBack").length)
+			sliderContext.clearRect(0,0,1000,1000);
+		if (controlType == "Dialog") {
+			$("#toolbar").show();
+			$("#samplesDiv").show();
+			}
+		else if (controlType == "Selector") 
+			$("#toolbar").show();
+		else if (controlType == "TimeStepper") {
+			$("#toolbar").show();
+			$("#stepper").hide();
+			}
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+		}	
+
+ 	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText,controlType);
+	}	
+
+	function SetAttributes(type)
+	{
+		ShowHelp("");
+		if (controlType != type)
+			items=new Array();
+		controlType=type.replace(/ /g,"");
+		shivaLib.SetAttributes(props[controlType],items,false);
+		Draw();
+	}	
+
+ 	function ReEdit(jsonData)
+	{
+		if (jsonData) {
+			if (jsonData.chartType)
+				controlType=jsonData.chartType;
+			}
+		else{
+			var s,e;
+			var query=window.location.search.substring(1);
+			if ((s=query.indexOf("&chartType=")) != -1)
+				if ((e=query.indexOf("&",s+1)) != -1)
+					controlType=query.substring(s+11,e);
+				controlType=controlType;
+			}
+		var it=shivaLib.ReEdit(jsonData,props[controlType]);
+		var o=new Object();
+		if (it) 
+			items=it;
+		shivaLib.SetAttributes(props[controlType],items,controlType != "TimeSlider");
+	  	$("select#controlType").val(controlType);
+	  	Draw();
+	}	
+
+ 	function RunGlue(con, item, val) 
+ 	{
+		$("#accord").accordion("activate",item);
+	}
+		
+  	function SaveData(mode) 
+    {
+		return shivaLib.SaveData(mode,shivaGroup,items,props[controlType],controlType);
+	}
+
+///////// ITEMS  /////////////
+	
+	function AddItem(name, type, lab, def, group)
+	{
+		var o=new Object;
+		o.name=name;		o.type=type;		o.label=lab;		o.def=def;		o.group=group;
+		o.num=items.length;
+		items.push(o);
+	}	
+	
+	function AddNewItem()
+	{
+		var o=new Object;
+		var s=0,i=0;
+		shivaLib.Sound("ding");
+		for (var key in props[controlType]) {
+			if (key == "item")
+				s=i;
+			++i;
+			if (!s)
+				continue;
+			o[key]=props[controlType][key].def;
+			}
+		if ((controlType == "TimeStepper") && (!items.length))
+			o.def="checked";
+		items.push(o);
+		for (var i=0;i<items.length;++i)
+			if (controlType == "TimeStepper")
+				items[i].name="Step-"+(i+1);
+			else
+				items[i].name="Item-"+(i+1);
+	  	shivaLib.SetAttributes(props[controlType],items,true);
+		Draw();
+		$("#accord").accordion({ active: items.length-1 });
+	}	
+	
+	function RemoveItem()
+	{
+		var active=$("#accord").accordion("option","active");
+		if (active === false)
+			return;
+		shivaLib.Sound("delete");
+		items.splice(active,1);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Item-"+(i+1);
+	  	shivaLib.SetAttributes(props[controlType],items,true);
+		Draw();
+	}
+
+	function ShiftItem(dir)
+	{
+		var cur=shivaLib.ShiftItem(dir,items);
+		for (var i=0;i<items.length;++i) {
+			if (controlType == "TimeStepper")
+				items[i].name="Step-"+(i+1);
+			else
+				items[i].name="Item-"+(i+1);
+			}
+	  	shivaLib.SetAttributes(props[controlType],items,true);
+		if (cur != -1)
+			$("#accord").accordion({ active: cur });
+		Draw();
+	}
+
+
+///////// GUI   //////////
+
+	function trace(str) { console.log(str) };
+	
+		
+</script>
+</body></html>
+
+

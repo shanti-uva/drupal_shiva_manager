@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHANTI Interactive Visualization Application</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<style type="text/css">
+		body{ font-family:Verdana,Geneva,sans-serif; font-size:x-small;	}
+	</style>
+</head>
+<body>
+	<p><img src="http://www.viseyes.org/shiva/SHIVAlogo.gif" width="350" height="65" alt="SHIVA Logo"></p>
+<div id="tabs"> </div> 
+<script>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	  $(document).ready(function() { Init(); });
+	  
+	var shivaDataChanged=false;
+	function shivaSetUnload(on) { window.onbeforeunload = (on) ? function() {return "Any changes will be lost.";} : null; }
+
+	function ShivaDataChanged(mode)
+	{
+		shivaDataChanged=mode;
+//		shivaSetUnload(mode);
+	}
+
+ 	 var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-26255176-1']);
+	  _gaq.push(['_trackPageview']);
+	
+	  (function() {
+	    var ga=document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src=('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s=document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	function Init()
+	{
+		window.name="topWindow";
+		SetMenu();
+		$('#tabs').tabs( {
+	    	load:function(event,ui) {
+	        	$('a', ui.panel).click(function() {
+	            	$(ui.panel).load(this.href);
+	            	return false;
+	        		});
+	    		}
+			});
+		$(document).bind("shivaMessage",shivaMessageHandler);
+		}
+	
+	function shivaMessageHandler(e,o)
+	{	
+		console.log(o)
+	}
+	
+	function OpenTab(which)
+	{
+		$("#tabs").tabs("select",which);
+	}
+		
+	function SetMenu()
+	{
+		var str="<ul>";
+		if ($.browser.webkit) {
+			str+="<li><a href='#cha'>Charts</a></li>";
+			str+="<li><a href='#map'>Maps</a></li>";
+			str+="<li><a href='#ear'>Earth</a></li>";
+			}
+		else{
+			str+="<li><a href='#ear'>Earth</a></li>";
+			str+="<li><a href='#map'>Maps</a></li>";
+			str+="<li><a href='#cha'>Charts</a></li>";
+			}
+		str+="<li><a href='#tim'>Timelines</a></li>";
+		str+="<li><a href='#vid'>Videos</a></li>";
+		str+="<li><a href='#img'>Images</a></li>";
+		str+="<li><a href='#net'>Network</a></li>";
+		str+="<li><a href='#sub'>Subway</a></li>";
+		str+="<li><a href='#drw'>Draw</a></li>";
+		str+="<li><a href='#dia'>Controls</a></li>";
+		str+="<li><a href='#can'>Canvas</a></li>";
+		str+="<li><a href='#abt'>About</a></li>";
+		str+="</ul>";
+		str+="<div id='ear'><p><iframe id='shivaEar' src='earth.htm'    width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='cha'><p><iframe id='shivaCha' src='chart.htm'    width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='map'><p><iframe id='shivaMap' src='map.htm'      width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='tim'><p><iframe id='shivaTim' src='timeline.htm' width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='vid'><p><iframe id='shivaVid' src='video.htm'  	width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='img'><p><iframe id='shivaImg' src='image.htm'    width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='sub'><p><iframe id='shivaSub' src='subway.htm'   width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='drw'><p><iframe id='shivaDrw' src='draw.htm'   	width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='net'><p><iframe id='shivaNet' src='network.htm'  width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='dia'><p><iframe id='shivaCon' src='dialog.htm'   width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='can'><p><iframe id='shivaCan' src='canvas.htm'   width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		str+="<div id='abt'><p><iframe id='shivaAbt' src='about.htm' 	width='100%' height='1000' frameborder='0' marginwidth='0' marginheight='0'></iframe></p></div>";
+		$('#tabs').html(str);	
+		$('#tabs').tabs();
+	}
+	
+	
+</script>
+</body></html>
+

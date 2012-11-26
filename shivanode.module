@@ -5,12 +5,16 @@
  *   of the Shanti Interactive Visualization Application (SHIVA) plugin.
  * 
  */
- 
-// default URL for Visualization Player
-define('SHIVA_VIEWER', 'http://shiva.shanti.virginia.edu/go.htm');
+
+global $base_root, $base_path;
 
  // default (base) URL for Visualization Editors
-define('SHIVA_EDITOR', 'http://shiva.shanti.virginia.edu/');
+ // Definitive site is: http://shiva.shanti.virginia.edu/go.htm
+define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivanode') . '/SHIVA/');
+
+// default URL for Visualization Player
+define('SHIVA_VIEWER', SHIVA_ROOT . 'go.htm'); 
+
 
 // default URL for Chart Editor
 define('SHIVA_CHART_EDITOR', 'chart.htm');

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"},{"name":"earth","version":"1"}]}'></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="SHIVA_Event.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/jquery.ad-gallery.css">
+  	<link type="text/css" rel="stylesheet" href="css/timeline1.css" media="all" id="timelineCSS"/> 
+	<style type="text/css">
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		body,td,th {
+			font-family: Verdana, Geneva, sans-serif;
+			font-size:xx-small;
+			margin:0px;
+			}
+		#gallery {
+		    padding: 24px;
+		    background: #ddd;
+		  	}
+	 	#descriptions .ad-image-description {
+			position: absolute;
+	    	}
+		#descriptions .ad-image-description .ad-description-title {
+	        display: block;
+	      	}
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+	<title>SHIVA Display</title>
+</head>
+<body>
+<div style="width:600px;height:400px;position:absolute" id="containerDiv">	</div>
+
+<script>
+
+	var shivaLib=null;
+	shivaGo();
+	
+	function shivaGo()													// DRAW ELEMENT
+	{
+		var pair;
+		var options=new Object();											
+		var query=window.location.search.substring(1);						// Get query string
+		query=query.replace(/%5E/g,"^").replace(/%5e/g,"^").replace(/%C2%AE/g,"&reg").replace(/%20/g," ").replace(/%60/g,"`");
+		query=query.replace(/%3E/g,">").replace(/%3e/g,">").replace(/%3c/g,"<").replace(/%3C/g,"<").replace(/``/g,"#");;
+		var vars=query.split("&");											// Split into vars
+		if (vars.length > 2) {												// If vars on command line
+			for (var i=0;i<vars.length;i++) {								// For each var
+				vars[i]=vars[i].replace(/\^/g,"&");							// Replace "escaped" chars
+				pair=vars[i].split("=");									// Split into key/value pairs
+				for (j=2;j<pair.length;++j)									// For each part beyond 2nd 
+					pair[1]+="="+pair[j];									// Join into 2nd
+				if (pair[1]) {												// If a value
+					options[pair[0]]=pair[1];								// Set into options
+		   			if (options[pair[1]] == 'true')  options[pair[1]]=true;	// Force "true" to bool
+		   			if (options[pair[1]] == 'false') options[pair[1]]=false; // Force "false" to bool
+		  			}
+		 		}
+		 	}
+		shivaLib=new SHIVA_Show("containerDiv");							// Alloc rendering lib
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);				// If called from Drupal managrt
+		if (window.addEventListener) 										// Old style event listener
+			window.addEventListener("message",shivaEventHandler,false);		// Listen for HTML5 messages
+		else																// New style listener
+			window.attachEvent("message",shivaEventHandler);				// Listen for HTML5 messages
+		if (vars.length > 2)												// If all options set in query string
+			shivaLib.Draw(options);											// Draw it
+		else if (query.indexOf("e=") != -1) 								// If data in eStore
+			$.getJSON("http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2)+"&callback=?");	// Get data from eStore
+		else if (query.indexOf("m=") != -1) {								// If data in Drupal node
+			if (query.indexOf("?") == -1)									// If no ? in url
+				$.getJSON(query.substr(2)+"?callback=?");					// Get data from node
+			else															// Already has ?, so use &
+				$.getJSON(query.substr(2)+"&callback=?");					// Get data from node
+			}
+	}
+	
+	function shivaDataWrapper(data)										// HANDLE GETJSON DATA FROM DRUPAL
+	{
+		shivaLib.Draw(data);												// Draw element
+	}
+
+	function easyFileDataWrapper(data)									// HANDLE GETJSON DATA FROM ESTORE
+	{
+		shivaLib.Draw(data);												// Draw element
+	}
+	
+	function shivaEventHandler(e)										// HANDLE HTML5 MESSAGES
+	{
+		if (e.data.indexOf("PutJSON") == 0) 								// Incomoing JSON data
+			shivaLib.Draw($.parseJSON(e.data.substr(8)));					// Draw element
+	}
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+

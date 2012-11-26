@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+</head>
+<body>
+<script>
+	
+var sampleData="{\"chartType\": \"BarChart\",\"areaOpacity\": \".3\",\"backgroundColor\": \"\",\"chartArea\": \"\",\"colors\": \"\",\"fontName\": \"Arial\",\"fontSize\": \"automatic\",\"hAxis\": \"\",\"legend\": \"right\",\"legendTextStyle\": \"\",\"height\": \"400\",\"isStacked\": \"true\",\"lineWidth\": \"2\",\"pointSize\": \"7\",\"series\": \"\",\"title\": \"\",\"titleTextStyle\": \"\",\"tooltipTextStyle\": \"\",	\"vAxis\": \"\",\"width\": \"600\",	\"dataSourceUrl\": \"https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E&output=html\",\"query\": \"\",\"shivaGroup\": \"Visualization\"}";
+
+	$(document).ready(function() {
+		if (window.addEventListener) 
+				window.addEventListener("message",shivaMessageHandler,false);
+			else
+				window.attachEvent("message",shivaMessageHandler);
+			});
+		
+	function shivaMessageHandler(e)
+	{
+		var msg="Unrecognized";
+		if (e.data.indexOf("GetJSON=") == 0) 
+			msg=e.data.substr(8);
+		else if (e.data.indexOf("GetType=") == 0) 
+			msg=e.data.substr(8);
+		console.log(msg)
+	}
+	
+	function ShivaMessage(iFrameName,cmd) 
+	{
+	    if (cmd.indexOf("PutJSON") == 0)
+	    	cmd+="="+sampleData;
+	    document.getElementById(iFrameName).contentWindow.postMessage(cmd,"*");
+ 	}
+ </script>
+
+	<p><img src="http://www.viseyes.org/shiva/SHIVAlogo.gif" width="350" height="65" valign="middle"></p>
+	<input type='button' value="Get Type" onClick="ShivaMessage('node','GetType')" />
+	<input type='button' value="Get JSON" onClick="ShivaMessage('node','GetJSON')" />
+	<input type='button' value="Put JSON" onClick="ShivaMessage('node','PutJSON')" />
+	<p><hr/></p>
+	<iframe id='node' src='http://www.viseyes.org/shiva/chart.htm' width='100%' height='500' frameborder='0' marginwidth='0' marginheight='0'/>
+</body>
+</html>
+
+<!-- 
+	Module urls:
+	
+	Video 	=	video.htm
+	Draw	= 	draw.htm
+	WebPage = 	webpage.htm
+	Map 	= 	map.htm
+	
+--->
+

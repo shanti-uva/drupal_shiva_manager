@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Video</title>
+ 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="SHIVA_Event.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable">
+		<tr style='height:8px'><td> </td></tr>
+	</table> 
+		<p style="text-align:right">
+			<img src='eventsbutton.gif' style='vertical-align:middle' alt='Event editor' onclick='shivaLib.ev.EventEditor()'>&nbsp;&nbsp;&nbsp;
+			<img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+			<span id='saveAsDiv'></span>
+			<br/><br/><a onclick='ShowSample()'><i>Click <u>here</u> to load sample events</i></a>
+	</p>		
+ 	<div id="helpDiv"></div>
+	<p>&nbsp;</p><p>&nbsp;</p>
+	<div id="outputDiv" style="width:460px"></div>
+	</div>
+	<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px"></div>
+
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;
+	var shivaGroup="Video"
+	var items=new Array();
+
+	var props={
+		dataSourceUrl: 				{	def:'zDZFcDGpL4U', 	opt:'string',			des:'Source of video'}, 
+		start: 						{	def:'0:0', 			opt:'string',			des:'Starting time (m:s)'}, 
+		end: 						{	def:'', 			opt:'string',			des:'Ending time (m:s)'}, 
+		autoplay: 					{	def:'false', 		opt:'true|false',		des:'Auto-play?'}, 
+		volume: 					{	def:'50', 			opt:'number',			des:'Audio volume'}, 
+		height:		 				{	def:'366', 			opt:'number',		 	des:'Height of player'}, 
+		width:	 					{	def:'600', 			opt:'number',		 	des:'Width of player'},
+		duration:	 				{	def:'?', 			opt:'text',		 		des:'Duration of clip'},
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}
+		}
+	
+	var helpText=new Array();
+	helpText['Source of video']="This is the unique ID YouTube assigns to the URL of a video. Click on the text box to the right to type or paste the jumble of random letters, such as this: zDZFcDGpL4U, extracted from this URL: http://www.youtube.com/watch?v=zDZFcDGpL4U.";
+	helpText['Starting time (m:s)']="Sets the starting time, in seconds, when the video will start playing.  Click on the text box to the right to enter a start time.  For example, if you want the video to start at 1 minute and 45 seconds into the video type 1:45 into the text box.";
+	helpText['Ending time (m:s)']="Sets the ending time, in seconds, when the video will stop playing.  Click on the text box to the right to enter an end time.  For example, if you want the video to end at 2 minute and 50 seconds into the video type 2:50 into the text box.";
+	helpText['Auto-play?']="Sets Auto-play and determines if the video will play when the page is loaded.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
+	helpText['Hide controls?']="This will hide the players controls when embedded in a project.";
+	helpText['Playlists']="You can string a number of videos together by typing their IDs here, separated by commas."
+	helpText['Audio volume']="Determines the initial setting of the audio volume.  Enter a number from 0 to 100 in the text box to the right.";
+	helpText['Loop playlists?']="If set to 'true', playlists will play in a continuous loop.";
+	helpText['Height of player']="Sets the height of the video in pixels, including controls.  Click in the text box to the right to enter a number between 1 and 100000.";
+	helpText['Duration of clip']="Shows the duration of the video clip.  Click on the text box to the right to enter a time duration for your video.  For example, if you want the video to last for only 2 minute and 50 seconds then type 2:50 into the text box.";	
+	helpText['Width of player']="Set the width in pixels of the video.  Click in the text box to the right to enter a number between 1 and 100000.";	
+	helpText['OVERVIEW']+="Customize your timeline with the options available.  To add new bands click the + button.  Customize this band as needed.  Or remove a band by click the trash can button.<br/><br/>";
+	helpText['OVERVIEW']+="Below the customization box, click on the Save as pull-down menu. Choose how you want to save your timeline.<br/><br/>";
+	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
+	helpText['OVERVIEW']+="The <a href='https://wiki.shanti.virginia.edu/x/tZy1AQ' target='_blank'> UVa Knowledge Base</a> contains additional information about customizing your SHIVA Timeline Tool.";
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";
+	
+///////// INIT  /////////////
+
+	$(document).ready(function() {
+		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	SetAttributes(props);
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+	});
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0)
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+ 
+	function Draw(mode)
+	{	
+		if (shivaLib.drupalMan) 
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,null,props);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		shivaLib.ReEdit(jsonData,props);
+		Draw();
+	}	
+
+	function ShowHelp(att)
+	{
+		if (shivaLib.player){
+			if (shivaLib.player.duration) {
+				var str=Math.floor(shivaLib.player.duration()/60)+":";
+				str+=Math.ceil(shivaLib.player.duration()%60);	
+				$("#propInput7").val(str);
+				}
+			}
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Powered by YouTube&trade;<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function ShowSample()
+	{
+		var data={
+			"shivaEvents": [{"type":"popup","start":"00:05","fadein":"2","title":"This is a popup box","text":"This is <i>HTML formatted</i> text within a light grey box that faded in over 1 second, is draggable and has an icon.","url":"http://www.viseyes.org/shiva/icons/blue/book_alt2_16x14.png","frame":{"draggable":"true","width":"150","left":"70%","closer":"true"	}},
+			{"type":"image","start":"00:10","end":"00:15","click":"http://www.viseyes.org","fadein":"2","fadeout":"2","title":"75% opacity -- Click to go to viseyes.org","url":"http://www.viseyes.org/shiva/map.jpg","frame":{"width":"300","top":"50","left":"100","opacity":"75%"	}},
+			{"type":"image","start":"00:15","end":"00:24","fadein":"1","fadeout":"2","hover":"mypop","title":"Video pauses<br>Hover over me!","player":"pause","url":"http://www.primaryaccess.org/test.jpg","frame":{"width":"120","top":"20","left":"70%","color":"red"	}},
+			{"type":"iframe","start":"00:25","end":"00:34","url":"http://www.primaryaccess.org","frame":{"border":"1","width":"600","left":"620","height":"600"	}},
+			{"type":"menu","start":"00:35","title":"A quick quiz","done":"play()","url":"http://www.viseyes.org/shiva/icons/blue/question_mark_8x16.png","frame":{"left":"8","top":"60","width":"300","draggable":"true","scroller":"false","closer":"false","height":"auto","radius":"8","color":"black","background-color":"","border":"1px solid","opacity":"100"	},"text":"When did Christopher Columbus sail to America? Hint:He sailed the ocean blue in...*!!*>>1942|popup(In the middle of WW2?)*!!*>>1493|popup(Close, but no cigar)*!!*>>1492|*popup(Yes! Columbus sailed the ocean blue in 1492)","player":"pause","id":"","end":"","fadein":"","fadeout":"","hover":"","click":"","response":""},
+			{"type":"ask","start":"00:40","title":"Tell me about it","done":"play(5:00)","url":"http://www.viseyes.org/shiva/icons/blue/comment_stroke_16x14.png","text":"Find a scene that you think this scene reflects good instructional practice, and write a paragraph or two that describes what you saw.Hint:It is around 3:00>>2:45-3:15|popup(That's a good one!)|popup(That's not one I picked)","frame":{"left":"200","top":"60","width":"300","draggable":"true"	},"player":"pause"},
+			{"type":"popup","id":"mypop","title":"This goes away after mouse is out","url":"http://www.viseyes.org/shiva/icons/red/camera_12x12.png","frame":{"top":"60","left":"220"	}}],
+			"dataSourceUrl": "zDZFcDGpL4U",
+			"start": "0:0",
+			"end": "",
+			"autoplay": "false",
+			"volume": "50",
+			"height": "366",
+			"width": "600",
+			"duration": "0:0",
+			"ud": "false",
+			"shivaMod": "Wed, 05 Sep 2012",
+			"shivaGroup": "Video"
+			}
+		ReEdit(data);
+		shivaLib.Sound("ding");
+		shivaLib.ev.EventEditor();
+	}
+
+
+	function SetAttributes()
+	{
+		shivaLib.SetAttributes(props);
+	}	
+
+	function trace(str) 
+	{ 
+		console.log(str) 
+	}
+	
+	
+</script>
+</body></html>

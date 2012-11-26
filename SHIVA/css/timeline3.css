@@ -1,0 +1,52 @@
+
+
+
+/* style for ethers */
+.timeline-ether-lines{border-color:#a0a0a0;}
+  
+/*---- TIMELINE -----*/
+.timeline-ether-bg{width:100%; height:100%;}
+.timeline-band-0 .timeline-ether-bg{background:#dfdfdf url(bg-dipity.png) repeat-x bottom left;}
+.timeline-band-1 .timeline-ether-bg{background:#ccc url(bg-dipity-bott.png) repeat-x bottom left;}
+
+
+/*--- events label and icon ---*/
+div.timeline-event-icon{ margin:-7px 0 0 0 !important; } /*--- this would change if you use different size icons ---*/
+div.timeline-event-label{ padding:0px 8px; margin:-4px 0 0 6px; font-size:10px; border:1px solid #999; background-color:#f7f7f7; color:#333 !important; font-family: arial, helvetica, sans-serif; white-space:nowrap !important; -moz-border-radius:3px; -webkit-border-radius:3px; border-radius:3px;}
+
+/*--- dates for bands ---*/
+div.timeline-date-label{ color:#fff; padding:0 0 12px 2px !important; font-size:9px; font-weight:normal; font-family: verdana, arial, helvetica, sans-serif;}
+div.timeline-band-1 div.timeline-date-label{ font-size:11px; font-family: arial, helvetica, sans-serif; padding:0 0 0 4px !important;}
+div.timeline-date-label.timeline-date-label-em{ height:1.32em; letter-spacing:1px; font-size:14px !important; padding-bottom:0px; font-style:italic;   font-family: verdana, arial, helvetica, sans-serif;}
+
+img.timeline-copyright{ opacity:0.0; filter:alpha(opacity=0);} /*--- hides copyright ----*/
+
+/*--- popup styles ----*/
+div.timeline-event-bubble-image{ }
+div.timeline-event-bubble-title,
+div.timeline-event-bubble-title a,
+div.timeline-event-bubble-title a:visited{ text-decoration:underline; font-size:12px; border-bottom:none !important; font-family: "Trebuchet MS","Lucida Grande",Helvetica,Arial,sans-serif;}
+div.timeline-event-bubble-title a:hover{ color:#a9531e; text-decoration:none; border-bottom:none  !important;}
+div.timeline-event-bubble-body{ font-size:12px; font-family: arial, helvetica, sans-serif; }
+div.timeline-event-bubble-time,
+div.timeline-event-bubble-wiki{ display:none !important;} /*--- hides date and link to wiki Discuss-link ----*/
+div.simileAjax-bubble-container{ height:175px !important;} /*--- forces height to remove scrollbars ----*/
+
+div.timeline-band-0{ border-top:10px solid #ccc;} /*--- adds space at top of timeline, requires bg-dipity-2.png on top band background, with no border, then use plain bg-dipity.png ----*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Draw</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+ 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+ 	<script type="text/javascript" src="SHIVA_Show.js"></script>
+ 	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+  </style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+		</select> 
+	</p>		
+ 	<div id="helpDiv"> </div>
+	<div id="outputDiv" style="width:460px"> </div>
+	</div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px"> </div>
+ 
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;
+	var shivaGroup="Draw"
+	
+	var props={
+		height: 					{	def:'600', 			opt:'number',			des:'Height of drawing'}, 
+		width: 						{	def:'800', 			opt:'number',			des:'Width of drawing'}, 
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}
+		}
+	
+	var helpText=new Array();
+	helpText['Height of drawing']="The height of the drawing in pixels.  Click on the text box to the right to enter a number between 1 and 100000."; 
+	helpText['Width of drawing']="The width of the drawing in pixels.  Click on the text box to the right to enter a number between 1 and 100000."; 
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display when published.";	
+	helpText['OVERVIEW']="Draw provides a simple annotation tool, as well as a simple idea mapping ability. Those annotations can be lines, polygons, circles, boxes, text, icons, and images.<br/><br/> The lightbulb icon provides simple way to create Idea maps. Idea maps (also known as mind maps or concept maps), consist of a series of idea boxes containing text. These idea boxes can be linked with one another, with lines showing the connections between them forming tree-like hierarchies that help show processes and relationships.<br/><br/> Click <a href='https://wiki.shanti.virginia.edu/display/KB/SHIVA+Draw+Tool' target='_blank'>here</a> to view the full documentation";
+
+///// INIT  /////////////
+	
+	$(document).ready(function() {
+  		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	SetAttributes(props);
+		ReEdit();
+		ShowHelp("startup");
+		shivaLib.Annotate();
+		$("#shivaDrawPaletteDiv").css("left","45px")
+		$("#shivaDrawPaletteDiv").css("top","250px")
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+	});
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+
+	function Draw(mode)
+	{	
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,null,props,null);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		shivaLib.ReEdit(jsonData,props);
+		Draw();
+	}	
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function SetAttributes()
+	{
+		shivaLib.SetAttributes(props);
+	}	
+
+	function trace(str) 
+	{ 
+		console.log(str) 
+	}
+
+</script>
+</body></html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Timeline maker</title>
+	<link rel="stylesheet" type="text/css" href="timeglider/css/jquery-ui-1.8.5.timeglider.css">
+  <link rel="stylesheet" href="timeglider/css/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+		
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+	
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+	<p style="text-align:right"><img src='annotate.gif' alt='Annotate' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>
+	 <span id='saveAsDiv'></span>
+	</p>		
+	<div id="helpDiv"> </div>
+	<br/></br/>
+	<div id="p1"></div>
+	<div id="outputDiv" style="width:460px;"> </div>
+	</div>
+	<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px"> ... Loading timeline ...</div>
+
+    <!-- 3rd party libs -->
+
+  
+  <!--<script src="timeglider/timeglider-all.js" type="text/javascript" charset="utf-8"></script> -->
+
+  <script type='text/javascript'>
+
+  var items=new Array();
+  var shivaGroup="Timeline"
+  var curAtt=null;
+  var iconFolder = window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/';
+  var props={
+      dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
+      title:                { def:'History of Javascript',       opt:'string',       des:'Title of tineline'}, 
+      description:          { def:'A timeline showing a brief history of the Javascript\'s development and its evolution into a key player in Web Technologies.',      opt:'string',     des:'Description'}, 
+      height:               { def:'500',     opt:'number',     des:'Height of timeline'},
+      width:                { def:'1000',     opt:'number',     des:'Width of timeline'},
+      focus_date:           { def:'1994-06-01',      opt:'number',     des:'Center date of timeline'},
+      //timezone:             { def:'-04:00',      opt:'string',      des:'Timezone of timeline'},
+      initial_zoom:         { def:'40',    opt:'number',   des:'Initial zoom of timeline'}, 
+      min_zoom:             { def:'10',       opt:'number',        des:'Minumum zoom of timeline'}, 
+      max_zoom:             { def:'70',  opt:'number',     des:'Maximum zoom of timeline'}, 
+      font_name:            { def:'Arial',   opt:'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',     des:'Font' },
+      font_colors:           { def:'',   opt:'colors',     des:'Font colors...' },
+      background_color:     { def:'',     opt:'colors',    des:'Background colors...'},
+      //icon_folder:          { def: window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/', opt:'string', des:'Icon image folder'},
+      max_modals:           { def: '1', opt: 'number', des: 'Maximum # of Popups'},
+      show_footer:          { def:'true', opt:'true|false', des:'Show the footer?'},
+      display_zoom_level:   { def:'true', opt:'true|false', des:'Show zoom bar?'}
+  };
+    
+  var helpText=new Array();
+  helpText['Source of events']="Type the URL in the text box to the right for the Google Docs timeline spreadsheet that contains data formatted for creating a timeline. You can find out more information about all the possible data formats you can use to create a timeline <a href='http://code.google.com/p/simile-widgets/wiki/Timeline_EventSources' target='_blank'> here</a>.<br><br><a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AohdE1_3ZElJdF9rYjdZdV9hVDJJT2tYakx3Ml84Tmc' target='_blank'> Here</a> is a sample timeline you can use to test the timeline tools features and attributes.";
+  helpText['Title of tineline']="Title to display in the header of the timeline.";
+  helpText['Description']="A short description of the data represented in the timeline";
+  helpText['Height of timeline']="";
+  helpText['Width of timeline']="";
+  helpText['Center date of timeline']="";
+  
+	$(function () { 
+	  
+    shivaLib=new SHIVA_Show("containerDiv");
+    shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+    shivaLib.SetAttributes(props,items,false);
+    ReEdit();
+    //Draw();
+    ShowHelp("startup");
+    if (window.addEventListener) 
+      window.addEventListener("message",shivaEventHandler,false);
+    else
+      window.attachEvent("message",shivaEventHandler);
+    if (!shivaLib.drupalMan) {
+      var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+      str+="<option>Choose format</option>";
+      str+="<option>WordPress</option>";
+      str+="<option>eStore</option>";
+      str+="<option>iFrame</option>";
+      str+="<option>JSON</option>";
+      str+="<option>Web-page</option>";
+      str+="</select>"; 
+      $("#saveAsDiv").html(str);
+    }
+		
+	});
+	
+  function shivaEventHandler(e)
+  {
+    if (e.data.indexOf("GetJSON") == 0) 
+      e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+    else if (e.data.indexOf("GetWebPage") == 0) 
+      e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+    else if (e.data.indexOf("GetWordPress") == 0) 
+      e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+    else if (e.data.indexOf("GetType") == 0) 
+      e.source.postMessage("GetType="+shivaGroup,"*");
+    else if (e.data.indexOf("PutJSON") == 0) 
+      ReEdit($.parseJSON(e.data.substr(8)));
+  }
+ 
+  function Draw(mode)
+  { 
+    if (shivaLib.drupalMan)
+      window.parent.postMessage("DataChanged=true","*");
+    var opts = $.parseJSON(SaveData("GetJSON"));
+    shivaLib.Draw(opts);
+  }
+
+  function SaveData(mode)
+  {
+    return shivaLib.SaveData(mode,shivaGroup,items,props);
+  } 
+
+  function ReEdit(jsonData)
+  {
+    var it=shivaLib.ReEdit(jsonData,props);
+    if (it)
+      items=it;
+      shivaLib.SetAttributes(props,items,true);
+    Draw();
+  } 
+
+  function ShowHelp(att)
+  {
+    if (att == "startup") 
+      $("#helpDiv").html("<br/><p class='pb'>Powered by <a href=\"http://timeglider.com/jquery/\" target=\"_blank\">Timeglider JS</a><br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+    else
+      shivaLib.ShowHelp(att,helpText);
+  } 
+  
+</script>
+</body></html>

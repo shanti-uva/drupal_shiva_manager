@@ -514,11 +514,11 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
   
-  $form['shivanode_url_settings']['shivanode_editor_url'] = array(
+  $form['shivanode_url_settings']['shivanode_root_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Base URL (path) for the SHIVA editors:'),
     '#size' => 50,
-    '#default_value' => variable_get('shivanode_editor_url', SHIVA_EDITOR),
+    '#default_value' => variable_get('shivanode_root_url', SHIVA_ROOT),
     '#required' => TRUE,
   );
   
@@ -671,7 +671,7 @@ function _shivanode_settings_default_values(&$form_state) {
   
   // Viewer and Editor URLS
   $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
-  $form_state['input']['shivanode_editor_url'] = SHIVA_EDITOR;
+  $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
   $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
   $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
   $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
@@ -1445,7 +1445,7 @@ function _get_shivaframe_url($opt) {
       break;
   }
   if (strpos($player, 'http://') === FALSE) {
-    $player = variable_get('shivanode_editor_url', SHIVA_EDITOR) . $player; 
+    $player = variable_get('shivanode_root_url', SHIVA_ROOT) . $player; 
   }
   $player = $player . '?pr=d';
   return $player;
