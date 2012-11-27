@@ -22,6 +22,8 @@
 				  	 border-collapse: collapse;
 				  	 width:278px;
 				  	 }
+		table.propTable td { font-size: 10px; }
+		table.propTable td select {max-width: 120px;}
 	</style>
 	
 </head>
@@ -53,7 +55,7 @@
   var iconFolder = window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/';
   var props={
       dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
-      title:                { def:'History of Javascript',       opt:'string',       des:'Title of tineline'}, 
+      title:                { def:'History of Javascript',       opt:'string',       des:'Title of timeline'}, 
       description:          { def:'A timeline showing a brief history of the Javascript\'s development and its evolution into a key player in Web Technologies.',      opt:'string',     des:'Description'}, 
       height:               { def:'500',     opt:'number',     des:'Height of timeline'},
       width:                { def:'1000',     opt:'number',     des:'Width of timeline'},
@@ -63,8 +65,8 @@
       min_zoom:             { def:'10',       opt:'number',        des:'Minumum zoom of timeline'}, 
       max_zoom:             { def:'70',  opt:'number',     des:'Maximum zoom of timeline'}, 
       font_name:            { def:'Arial',   opt:'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',     des:'Font' },
-      font_colors:           { def:'',   opt:'colors',     des:'Font colors...' },
-      background_color:     { def:'',     opt:'colors',    des:'Background colors...'},
+      font_colors:           { def:'',   opt:'colors',     des:'Font colors' },
+      background_color:     { def:'',     opt:'colors',    des:'Background colors'},
       //icon_folder:          { def: window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/', opt:'string', des:'Icon image folder'},
       max_modals:           { def: '1', opt: 'number', des: 'Maximum # of Popups'},
       show_footer:          { def:'true', opt:'true|false', des:'Show the footer?'},
@@ -73,11 +75,20 @@
     
   var helpText=new Array();
   helpText['Source of events']="Type the URL in the text box to the right for the Google Docs timeline spreadsheet that contains data formatted for creating a timeline. You can find out more information about all the possible data formats you can use to create a timeline <a href='http://code.google.com/p/simile-widgets/wiki/Timeline_EventSources' target='_blank'> here</a>.<br><br><a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AohdE1_3ZElJdF9rYjdZdV9hVDJJT2tYakx3Ml84Tmc' target='_blank'> Here</a> is a sample timeline you can use to test the timeline tools features and attributes.";
-  helpText['Title of tineline']="Title to display in the header of the timeline.";
+  helpText['Title of timeline']="Title to display in the header of the timeline.";
   helpText['Description']="A short description of the data represented in the timeline";
-  helpText['Height of timeline']="";
-  helpText['Width of timeline']="";
-  helpText['Center date of timeline']="";
+  helpText['Height of timeline']="The height of the whole timeline";
+  helpText['Width of timeline']="The width of the whole timeline";
+  helpText['Center date of timeline']="The date on which the timeline is initially centered";
+  helpText['Initial zoom of timeline']="A number representing the initial zoom factor of the timeline (1 - 100)";
+  helpText['Minumum zoom of timeline']="A number representing the minimum zoom factor of the timeline (1 - 100)";
+  helpText['Maximum zoom of timeline']="A number representing the maximum zoom factor of the timeline (1 - 100)";
+  helpText['Font']="The font to use for the text of the timeline";
+  helpText['Font colors']="A list of multiple font colors of the timeline in the following order: 1. main area font, 2. header fonts for timeline and popups, 3. text of modals";
+  helpText['Background colors']="A list of multiple background colors for the following areas of the timeline: 1. main background of the timeline; 2. background for the header, footer, and zoom controls; 3. background of popup boxes, 4. background  for the image lane at the top of the timeline, 5. \'tick\' lane at the bottome of the timeline";
+  helpText['Maximum # of Popups']="Maximum number of popups to keep open. After this number is reached, the first opened popup will automatically close.";
+  helpText['Show the footer?']="Whether or not to show the footer of the timeline";
+  helpText['Show zoom bar?']="Whether or not to show the zoom bar of the timeline. In edit mode, you may have to scroll horizontally to see the timeline";
   
 	$(function () { 
 	  
@@ -143,6 +154,7 @@
 
   function ShowHelp(att)
   {
+    console.info(att);
     if (att == "startup") 
       $("#helpDiv").html("<br/><p class='pb'>Powered by <a href=\"http://timeglider.com/jquery/\" target=\"_blank\">Timeglider JS</a><br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
     else
