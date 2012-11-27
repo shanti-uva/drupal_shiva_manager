@@ -10069,7 +10069,9 @@ tg.validateOptions = function (widget_settings) {
     // otherwise returns false.
     setOptions : function (tlopts, set) {
       var otemp = $.extend({},tlopts);
-      if (this.optsCheck(otemp) && set != true) {
+      // optsCheck is a function to check whether a style option is being set if so do not reload timeline, just change the styles
+      // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
+      if ((this.optsCheck(otemp) && set != true) && $('#cp_colorbar').is(":visible") == false) {
         return false;
       }
 
