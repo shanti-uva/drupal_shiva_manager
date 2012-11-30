@@ -1088,8 +1088,9 @@ function _shivanode_check_google_login($authenticate = TRUE) {
         }
         // Display link to generate single-use token
         $gdocs = 'http://spreadsheets.google.com/feeds/';
+        $source_page = 'http://' . $base_root . $base_path . request_uri();
         $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-            'http://' . $base_root . $base_path . request_uri(),
+            $source_page,
             $gdocs, 0, 1);
         drupal_goto($google_uri);
       }
@@ -1215,7 +1216,9 @@ function _shivanode_data_elements($form, &$form_state) {
     // then it's in the add data entry popup, return there;
     $return_page = 'node/data-elements';
     $rui = request_uri();
-    if(strpos($rui, 'format=simple') > -1) { $return_page  = 'node/add/shivanode?popup=dataurl'; }
+    if(strpos($rui, 'format=simple') > -1) {
+       $return_page  = 'node/add/shivanode?popup=dataurl'; 
+    }
     $gdocs = 'http://spreadsheets.google.com/feeds/';
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
         $base_root . $base_path . $return_page,
