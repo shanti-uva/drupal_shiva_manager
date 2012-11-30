@@ -4,8 +4,8 @@
 	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHIVA Timeline maker</title>
-	<link rel="stylesheet" type="text/css" href="timeglider/css/jquery-ui-1.8.5.timeglider.css">
-  <link rel="stylesheet" href="timeglider/css/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="css/timeglider/jquery-ui-1.8.5.timeglider.css">
+  <link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
@@ -52,7 +52,7 @@
   var items=new Array();
   var shivaGroup="Timeline"
   var curAtt=null;
-  var iconFolder = window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/';
+  var iconFolder = window.location.pathname.replace('timeline.htm','') + 'images/timeglider/icons/';
   var props={
       dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
       title:                { def:'History of Javascript',       opt:'string',       des:'Title of timeline'}, 

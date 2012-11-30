@@ -85,7 +85,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;*/											 // Route on type
 		case "Timeline": 											 // Simile			
 			obj="timeglider";								     // Object to test for
-			lib="./timeglider/timeglider-all.js";  // Lib to load (NEEDS TO BE FIXED TO FINAL LOCATION)
+			lib="timeglider-all.js";  // Lib to load (NEEDS TO BE FIXED TO FINAL LOCATION)
          break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -1712,7 +1712,7 @@ SHIVA_Show.prototype.DrawTimeline=function() 											//	DRAW TIMELINE
   var stimeline = new Object();
   
   if($('link[href*=timeglider]').length == 0) {
-    $('head').append('<link rel="stylesheet" href="timeglider/css/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
+    $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
   
 	stimeline.events=null;
@@ -1787,7 +1787,7 @@ SHIVA_Show.prototype.DrawTimeline=function() 											//	DRAW TIMELINE
       window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
-          "icon_folder": 'timeglider/img/icons/', // check to see if we can make this a parameter
+          "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
           "data_source":stldata,
           "show_footer":Boolean(stimeline.options.show_footer),
           "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
