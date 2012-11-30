@@ -10134,8 +10134,8 @@ tg.validateOptions = function (widget_settings) {
       } 
 
       // Background Color
-      // 1 = main background, 2 = header, footer, and zoom controls, 3 = modal boxes, 4 =  image lange, 5 = tick lane
-      var bstyles = [ '#tg-truck', '.tg-widget-header, .timeglider-footer, .timeglider-slider-container', '.tg-modal', '.tg-image-lane-bg', '.tg-tick-body'];
+      // 1 = main background, 2 = event spans, 3 = header, footer, and zoom controls, 4 = modal boxes, 4 =  image lange, 6 = tick lane
+      var bstyles = [ '#tg-truck', '.timeglider-event-spanner', '.tg-widget-header, .timeglider-footer, .timeglider-slider-container', '.tg-modal', '.tg-image-lane-bg', '.tg-tick-body'];
       var bcolors = tlopts.background_color.replace(/\,#none/g,'').replace(/\,+$/g,'').split(','); // take out '#none' and ending commas
       
       bcolors = bcolors.filter(function(val) { return val != '' && val != '#none'});
@@ -10151,8 +10151,8 @@ tg.validateOptions = function (widget_settings) {
               if(n == 0 ) {
                 $(bstyles[n]).css({ 'background-color' : bcolor, 'background-image' : 'none' });
                 $('.timeglider-container').css({ 'background-color' : bcolor, 'background-image' : 'none' });
-                tg.updatePageStyles('.timeglider-event-spanner', {'background' : 'transparent'});
-              } else if (bstyles[n] == ".tg-modal") {
+                //tg.updatePageStyles('.timeglider-event-spanner', {'background' : 'transparent'});
+              } else if (bstyles[n] == ".tg-modal" || bstyles[n] == ".timeglider-event-spanner") { // use this condition is $element.css() doesn't work
                 tg.updatePageStyles(bstyles[n], { 'background-color' : bcolor });
               } else {
                 $(bstyles[n]).css({ 'background-color' : bcolor });

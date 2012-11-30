@@ -1072,7 +1072,8 @@
   position:absolute;
   top:0;
   left:0;
-  background-color:#ccc;
+  background-color:#eee;
+  /*background: transparent url(../../images/timeglider/timeglider-spanbg.png) repeat-x bottom;*/
 	height:16px;
 	z-index:1;
 	padding:2px;
@@ -1081,7 +1082,6 @@
 	-webkit-border-radius:3px;
 	-moz-border-radius:3px;
 	border-radius:3px;
-	
 }
 
 .timeglider-event-title {
