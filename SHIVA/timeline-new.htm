@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Timeline maker</title>
+	<link type="text/css" rel="stylesheet" href="css/timeline1.css" media="all" id="timelineCSS"/> 
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+  	<script type="text/javascript" src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true"></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+   <p style="text-align:right"><span style="vertical-align:50%">Bands </span><span id="toolbar" style="font-size:medium" >
+		<button type='button' id='tb1' onclick='RemoveItem()'> </button>
+		<button type='button' id='tb2' onclick='AddNewItem()'> </button>
+	</span></p>
+		<p style="text-align:right"><img src='annotate.gif' alt='Annotate' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+		</p>		
+	<div id="helpDiv"> </div>
+	<br/></br/>
+	<div id="outputDiv" style="width:460px;"> </div>
+	</div>
+	<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px"> ... Loading timeline ...</div>
+
+<script>
+
+///////// GLOBALS   //////////
+
+	var items=new Array();
+	var shivaGroup="Timeline"
+	var curAtt=null;
+
+	var props={
+		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'Source of events'}, 
+		query: 						{	def:'', 			opt:'query',			 des:'Data filter'}, 
+		height:		 				{	def:'350', 			opt:'number',		 	des:'Height of timeline'}, 
+		width:	 					{	def:'850', 			opt:'number',		 	des:'Width of timeline'},
+		theme:						{	def:'3',			opt:'1|2|3',			des:'Theme'},
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}, 
+		item: 						{	def:'', 			opt:'|', 				des:''}, 
+		date: 						{	def:'10/1/1884', 	opt:'string',			des:'Band start date'}, 
+		sync: 						{	def:'0', 			opt:'None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15',	des:'Synch with band'} ,
+		intu:	 					{	def:'Year', 		opt:'Second|Minute|Hour|Day|Week|Month|Year|Decade|Century|Millenium', des:'Unit of time'},
+		intw:						{	def:'100', 			opt:'number',		 	des:'Unit of time width'},
+		text:						{	def:'true',			opt:'true|false',		des:'Show event labels?'},
+		pct:	 					{	def:'100', 			opt:'number',		 	des:'Percentage of height'},
+		high:						{	def:'true',			opt:'true|false',		des:'Highlight span?'},
+		visible: 					{	def:'true', 		opt:'hidden',			des:'vis'},
+		thgt:						{	def:'16',			opt:'Number',			des:'Event bar height'}
+		}
+	
+	var helpText=new Array();
+	helpText['Choose layer to edit']="This option lets you layer another map on top of the Google map (users can layer a historical map over the Google map), add a marker to your map (users can add any number of markers to the map with rollover titles), or add a KML layer.  Select the layer to edit in this pull-down, or click on the layer in the map to bring up its attributes.<br><br>To add a new layer choose 'none' from this pull-down menu. Set the layer source, options, transparency and type. Then, click the 'Add new layer button' below.<br><br>To remove a layer choose said layer from the pull-down menu, then click the 'Remove this layer button' below.";
+	helpText['Source of events']="Type the URL in the text box to the right for the Google Docs timeline spreadsheet that contains data formatted for creating a timeline. You can find out more information about all the possible data formats you can use to create a timeline <a href='http://code.google.com/p/simile-widgets/wiki/Timeline_EventSources' target='_blank'> here</a>.<br><br><a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AohdE1_3ZElJdF9rYjdZdV9hVDJJT2tYakx3Ml84Tmc' target='_blank'> Here</a> is a sample timeline you can use to test the timeline tools features and attributes.";
+	helpText['Data filter']="Clicking on the Data filters text box will bring up an interactive box that allows you to perform queries on your data.  These queries allow you to filter the data available in your spreadsheet if you so choose.  For example say you have a spreadsheet that lists all the countries that participated in the olympics and how many gold, silver and bronze metals they received but you only want your chart to show the countries that received more than 50 gold medals you can use the Data filter to achieve this goal.  For more information and a walk through of all your Data Filter options please see documentation <a href='https://wiki.shanti.virginia.edu/x/iZ_1AQ' target='_blank'> here</a>.";
+	helpText['Orientation of timeline']="Choose whether you want the timeline to be displayed horizontally or vertically. Choose the horizontal display to display more detail on your timeline. NOTE: Not implemented yet."
+	helpText['Height of timeline']="Set the height of your timeline in pixels by entering a number into the text box to the right.  This number can be as small as 1 or as large as about 40000.";
+	helpText['Width of timeline']="Set the width of your timeline in pixels by entering a number into the text box to the right.  This number can start as small as 1 and go into the hundreds of thousands.";
+	helpText['Choose band to edit']="Use this feature to highlight a band you wish to edit.  Only one edit box for a band can be open at a time.  To edit a band box that is already open just click anywhere within the band box.  To edit a band box that is unopen click anywhere within the grey box signified with the text Band and the number of the band, for example, Band 2, and that bands edit box will open automatically.<br><br>To create a new band, set this item to 'none'. Then, edit the band's attributes like start date, synch with band option, unit of time, etc. When you have set all of the new band's attributes, click the 'Add new band button'.<br><br>If you wish to delete a band, select said band from this pull-down menu, and click the 'Remove this band button below'.";
+	helpText['Band start date']="Sets the starting date for the band and the date format. For more information about date format options, click <a href='http://code.google.com/p/simile-widgets/wiki/Timeline_EventSources#Date_Time_Formats' target='_blank'> here</a>";
+	helpText['Synch with band']="Select this feature if you want the selected band to synchronize with another band.  Click on the pull-down menu to the right to view and select from the number of bands available to synchronize the band you are currently editing with another band in your timeline.";
+	helpText['Unit of time']="Select the desired unit of time from the pull-down menu.";
+	helpText['Unit of time width']="Determines how many (seconds, minutes, hours, years, centuries, etc.) for which your band will be displayed.  Click on the pull-down menu to view and choose from your options.";
+	helpText['Show event labels?']="Click on the pull-down menu to the right to choose 'true' or 'false'.";
+	helpText['Percentage of height']="Select the percentage of the vertical space this band will take up. All band percentages must add up to 100.  Click on the text box to the right to enter the numerical value for the percentage, do not use the percent sign.";
+	helpText['Highlight span?']="Click on the pull-down menu to the right to choose 'true' or 'false'.";
+	helpText['Choose item to edit']="Use this feature to highlight a band you wish to edit.  Only one edit box for a band can be open at a time.  To edit a band box that is already open just click anywhere within the band box.  To edit a band box that is unopen click anywhere within the grey box signified with the text Band and the number of the band, for example, Band 2, and that bands edit box will open automatically.<br><br>To create a new band, set this item to 'none'. Then, edit the band's attributes like start date, synch with band option, unit of time, etc. When you have set all of the new band's attributes, click the 'Add new band button'.<br><br>If you wish to delete a band, select said band from this pull-down menu, and click the 'Remove this band button below'.";
+	helpText['Event bar height']="Select the height of an event within a band.  Click on the text box to the right to enter a numercal value for the height of the event within a band.  This number can be as small as .4 and as large as your band can accomodate.";
+	helpText['Theme']="Change the theme of the timeline\'s look and feel.<br/><br/>1 is the standard SIMILE timeline look. <br/>2 is SHANTI-themed with the labels below the event<br/> 3 is SHANTI themed with labels enclosed in a white box";	
+	helpText['OVERVIEW']="The SHIVA Timeline tool lets you create a timeline containing one or more bands, which can be panned infinitely by dragging with the mouse pointer, using the mouse scroll-wheel, or the keyboard's arrow buttons. A band can be configured to synchronize with another band such that panning one band also scrolls the other. <br/><br/>";
+	helpText['OVERVIEW']+="A timeline has been created for you to experiment with the features of this tool. Click on the Source of events text box and a link will pop-up below for a sample timeline.<br/><br/>";
+	helpText['OVERVIEW']+="Or use your own spreadsheets.  SHIVA works with spreadsheets created or imported from Excel into Google Docs.  From within your Google Docs spreadsheet, open the File pull-down menu. Choose Publish to the Web... A pop-up box will open. Click the Start Publishing button. Copy the URL address that appears in the text box below.  Paste the URL address in the Data Source URL box.<br/><br/>";
+	helpText['OVERVIEW']+="Customize your timeline with the options available.  To add new bands click the + button.  Customize this band as needed.  Or remove a band by click the trash can button.<br/><br/>";
+	helpText['OVERVIEW']+="Below the customization box, click on the Save as pull-down menu. Choose how you want to save your timeline.<br/><br/>";
+	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to you project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>",
+	helpText['OVERVIEW']+="The <a href='https://wiki.shanti.virginia.edu/x/tZy1AQ' target='_blank'> UVa Knowledge Base</a> contains additional information about customizing your SHIVA Timeline Tool.";
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";
+
+///////// INIT  /////////////
+
+	$(document).ready(function() {
+		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+		$("#toolbar").buttonset();
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
+		AddItem('Band-1','10/1/1884','1','Year','100','true','85','false',16);	
+		AddItem('Band-2','10/1/1884','1','Decade','300','false','15','true',16);	
+	  	shivaLib.SetAttributes(props,items,false);
+		ReEdit();
+		Draw();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+	});
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+ 
+	function Draw(mode)
+	{	
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,items,props);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		var it=shivaLib.ReEdit(jsonData,props);
+		if (it)
+			items=it;
+	  	shivaLib.SetAttributes(props,items,true);
+		Draw();
+	}	
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Powered by MIT Simile<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+	
+	function AddItem(name, date, sync, intu, intw, text, pct, high, thgt)
+	{
+		var o=new Object();
+		o.name=name;		o.date=date;		o.intu=intu;	o.pct=pct;		o.visible="true";	
+		o.intw=intw;		o.text=text;		o.sync=sync;	o.high=high;	o.thgt=thgt;	
+		o.num=items.length;
+		items.push(o);
+	}	
+
+	function AddNewItem()
+	{
+		var o=new Object;
+		var s=0,i=0;
+		shivaLib.Sound("ding");
+		for (var key in props) {
+			if (key == "item")
+				s=i;
+			++i;
+			if (!s)
+				continue;
+			o[key]=props[key].def;
+			}
+		items.push(o);
+		for (var i=0;i<items.length;++i)
+			items[i].name="Band-"+(i+1);
+	  	shivaLib.SetAttributes(props,items,true);
+		Draw();
+		$("#accord").accordion({ active: items.length-1 });
+	}	
+	
+	function RemoveItem()
+	{
+		var active=$("#accord").accordion("option","active");
+		if (active === false)
+			return;
+		shivaLib.Sound("delete");
+		items.splice(active,1);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Band-"+(i+1);
+	  	shivaLib.SetAttributes(props,items,true);
+		Draw();
+	}
+
+	function trace(str) { console.log(str) };
+	
+</script>
+</body></html>

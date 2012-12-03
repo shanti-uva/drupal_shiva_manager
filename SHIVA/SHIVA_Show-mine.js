@@ -36,8 +36,6 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawMap();
 	else if (group == 'Timeline')
 		this.DrawTimeline();
-	else if (group == 'Timeglider')
-		this.DrawTimeGlider();
 	else if (group == 'Control')
 		this.DrawControl();
 	else if (group == 'Video')
@@ -80,23 +78,23 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 {
  	var i,obj,lib="";
- 	switch(which) {															// Route on type
-		case "Timeline": 													// Simile			
+ 	switch(which) {	
+		/*case "Timeline": 													// Simile			
 			obj="Timeline.DefaultEventSource";								// Object to test for
 			lib="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
-          	break;
-		case "Timeglider": 													 // Time glider			
-			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js"; //http://mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
-         	break;
+          	break;*/											 // Route on type
+		case "Timeline": 											 // Simile			
+			obj="timeglider";								     // Object to test for
+			lib="timeglider-all.js";  // Lib to load (NEEDS TO BE FIXED TO FINAL LOCATION)
+         break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
-          	break;
+			lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  // Lib to load
+         break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
 			lib="jquery.ad-gallery.min.js";  								// Lib to load
-           	break;
+         break;
 		case "Network": 													// JIT
 			obj="$jit.id";													// Object to test for
 			lib="jit-yc.js";  												// Lib to load
@@ -117,12 +115,13 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			callback();														// Call callback
 			return;															// Quit
 			}
-		var head=document.getElementsByTagName('head')[0];					// Point at head
-		var script=document.createElement('script');						// Point at script
+  		var head=document.getElementsByTagName('head')[0];					// Point at head
+  		var script=document.createElement('script');						// Point at script
    		script.type="text/javascript";										// Set type
-       	script.src=lib; 													// URL
+   		script.charset="utf-8";
+      script.src=lib; 													// URL
     	script.onload=shivaJSLoaded(obj,callback);							// Set callback
-       	head.appendChild(script);											// Add to script
+      head.appendChild(script);											// Add to script
 		}
 	else																	// No lib
 		callback();															// Call callback
@@ -139,10 +138,11 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 	for (i=0;i<n;++i) 														// For each part
 		if (!(o=o[v[i]])) 													// Not a match
 			break;															// Quit looking
-	if (o && (i == n)) 														// Got them all		
+	if (o && (i == n)) 		{												// Got them all		
 		callback();															// Call callback
-	else																	// No loaded yet
-		setTimeout(function() { shivaJSLoaded(obj,callback); },50);			// Recurse		
+	} else {															// No loaded yet
+		setTimeout(function() { shivaJSLoaded(obj,callback); },50);			// Recurse	
+	}
 }
 
 SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE TO DRUPAL MANAGER
@@ -920,7 +920,7 @@ VIZ.prototype.Init = {
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			console.log(node.data);
+			//console.log(node.data);
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
@@ -1706,102 +1706,126 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
   
 //  TIMELINE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
+SHIVA_Show.prototype.DrawTimeline=function() 											//	DRAW TIMELINE
 {
-	var i;
-	var eventData=null;
-	var options=this.options;
-	var container=this.container;
-	var con="#"+container;
-	var ops=new Array();
-	var items=new Array();
-	$(con).css('width',options['width']+"px");
-	$(con).css('height',options['height']+"px");
-	var eventSource=new Timeline.DefaultEventSource();
-	$("#timelineCSS").attr('href',"css/timeline"+options.theme+".css");
-	if (oldItems)
-		items=oldItems;
-	else
-	   	for (var key in options) {
-			if (key.indexOf("item-") != -1) {
-				var o=new Object;
-				var v=options[key].split(';');
-				for (i=0;i<v.length;++i)
-					o[v[i].split(':')[0]]=v[i].split(':')[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
-				items.push(o);
-				}
-			}
-	this.items=items;
-	for (i=0;i<items.length;++i) {
-		if (items[i].visible == "false")
-			continue;
-		o=new Object();
-		o.width=items[i].pct+"%";
-		o.intervalUnit=eval("Timeline.DateTime."+items[i].intu.toUpperCase()); 
-		o.intervalPixels=Number(items[i].intw);
-		o.eventSource=eventSource;
-		o.date=items[i].date;
-		o.overview=(items[i].text == "false");
-		var theme=Timeline.ClassicTheme.create();
-		theme.event.tape.height=Number(items[i].thgt);
-		theme.event.track.height=Number(items[i].thgt)+2;
-		o.theme=theme;
-		ops.push(Timeline.createBandInfo(o));
-		if (i) {
-			if (items[i].sync != "None")
-				ops[i].syncWith=Number(items[i].sync)-1;
-				ops[i].highlight=(items[i].high == "true");
-				}
-		}
-	i=(options['orientation'] != "Vertical")?0:1; 		
-	if (this.timeLine) 
-		Timeline.timelines.pop();
-	this.timeLine=Timeline.create(document.getElementById(container),ops,i);
-	if (options['dataSourceUrl'])
-		GetSpreadsheetData(options['dataSourceUrl'],"",this);
-	else{
-  		this.timeLine.loadJSON("SimileTestData.js",function(json, url) {  eventSource.loadJSON(json, url); });
-		this.SendReadyMessage(true);											
-		}
-		
-	function GetSpreadsheetData(file, conditions, _this) 
-	{
-  		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
-  		var query=new google.visualization.Query(lastDataUrl);
-		if (conditions)
-			query.setQuery(conditions);
-   		query.send(handleQueryResponse);
+  var i;
+  var stimeline = new Object();
+  
+  if($('link[href*=timeglider]').length == 0) {
+    $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
+  }
+  
+	stimeline.events=null;
+	stimeline.options=this.options;
+	stimeline.container=this.container;
+	stimeline.con="#"+stimeline.container;
+
+  if($(stimeline.con).find('*').length > 0) {
+    // Sets timeline options. If the options that are different can be set on the fly, returns try
+    // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
+    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
+    if(ret) {
+      $(stimeline.con).timeline('resize');
+      return;
+    } 
+  } 
+  // Always set width and height before drawing timeline as the layout depends on the container size.
+  $(stimeline.con).css('width',stimeline.options['width']+"px");
+  $(stimeline.con).css('height',stimeline.options['height']+"px");
+  
+  GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
+      
+  function GetSpreadsheetData(file, conditions) 
+  {
+    lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+    var query=new google.visualization.Query(lastDataUrl);
+    if (conditions)
+      query.setQuery(conditions);
+      query.send(handleQueryResponse);
  
-	    function handleQueryResponse(response) {
-		    var i,j,key,s=0;
-			var data=response.getDataTable();
-			var rows=data.getNumberOfRows();
-			var cols=data.getNumberOfColumns();
-	 		eventData={ events:new Array() };
-			if (!$.trim(data.getColumnLabel(0)))
-				s=1;
-			for (i=s;i<rows;++i) {
- 				o=new Object();
-				for (j=0;j<cols;++j) {
-					key=$.trim(data.getColumnLabel(j));
-					if (!key)
-						key=$.trim(data.getValue(0,j));
-					if ((key == "icon") && (!data.getValue(i,j)))
-						continue;
-					if ((key == "start") || (key == "end")) {
-						if (data.getFormattedValue(i,j))
-							o[key]=_this.ConvertDateToJSON(data.getFormattedValue(i,j));
-						}
-					else	
-						o[key]=data.getValue(i,j);
-					}
- 				eventData.events.push(o);
-  				}
- 			eventSource.loadJSON(eventData,'');
-		 	shivaLib.SendReadyMessage(true);											
- 	     }
-  	}
+    function handleQueryResponse(response) {
+      
+      var i,j,key,s=0;
+      var data=response.getDataTable();
+      var rows=data.getNumberOfRows();
+      var cols=data.getNumberOfColumns();
+      eventData={ events:new Array() };
+      if (!$.trim(data.getColumnLabel(0)))
+        s=1;
+      for (i=s;i<rows;++i) {
+        o=new Object();
+        for (j=0;j<cols;++j) {
+          key=$.trim(data.getColumnLabel(j));
+          if (!key)
+            key=$.trim(data.getValue(0,j));
+          if ((key == "icon") && (!data.getValue(i,j)))
+            continue;
+        if ((key == "startdate") || (key == "enddate")) {
+          if (data.getFormattedValue(i,j))
+            //o[key]=data.getFormattedValue(i,j).replace(/\//g,'-');
+            o[key]=ConvertTimelineDate(data.getValue(i,j));
+            //console.log(o[key]);
+          }
+        else  
+          o[key]=data.getValue(i,j);
+        }
+        eventData.events.push(o);
+      }
+      
+      stimeline.events = eventData.events;
+      var stldata = [{
+        "id":"stl" + (new Date()).getTime(),
+        "title":stimeline.options.title,
+        "description":"<p>" + stimeline.options.description + "</p>",
+        "focus_date": stimeline.options.focus_date,
+        "timezone":stimeline.options.timezone,
+        "initial_zoom":stimeline.options.initial_zoom * 1,
+        "events": stimeline.events
+      }];
+      $(stimeline.con).timeline('destroy');
+      $(stimeline.con).html('');
+      window.shivaTimeline =  $(stimeline.con).timeline({
+          "min_zoom":stimeline.options.min_zoom * 1, 
+          "max_zoom":stimeline.options.max_zoom * 1, 
+          "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
+          "data_source":stldata,
+          "show_footer":Boolean(stimeline.options.show_footer),
+          "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+          "constrain_to_data":false,
+          "image_lane_height":60,
+          "loaded":function (args, data) { 
+            $(stimeline.con).timeline('setOptions', stimeline.options, true);
+            $(stimeline.con).timeline('registerEvents', stimeline.events);
+            setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+            shivaLib.SendReadyMessage(true); 
+          }
+      });
+      
+      // Make event modal windows draggable
+      window.stlInterval = setInterval(function() {
+        $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
+      }, 500);
+      
+      function ConvertTimelineDate(dateTime) {
+        var dt = new Date(dateTime);
+        var mn = padZero(dt.getMonth() + 1);
+        var dy = padZero(dt.getDate());
+        var hrs = padZero(dt.getHours());
+        var mns = padZero(dt.getMinutes());
+        var scs = padZero(dt.getSeconds());
+        var dtstr = dt.getFullYear() + "-" + mn + "-" + dy + " " + hrs + ":" + mns + ":" + scs;
+        return dtstr;
+      }
+      
+      function padZero(n) {
+        if(n < 10) { n = '0' + n; }
+        return n;
+      }
+    }
+  } 
 }
+
+
 
 //  MAP   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -2124,13 +2148,8 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	$("#"+innerChartDiv).height($(con).height());
 	ops.containerId=innerChartDiv;
 	if (!ops.colors)	delete ops.colors;
- 	if (ops.dataSourceUrl) {	
- 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
-	 	if (ops.dataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
-  			ops.dataTable=CSV(ops.dataSourceUrl,"hide","JSON");
-   			ops.dataDataSourceUrl="";
-  		}	
-  	}
+ 	if (ops.dataDataSourceUrl)	
+ 		ops.dataDataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
   	if (ops.query) {
   		var v=ops.query.split(" ");
   		for (i=0;i<v.length;++i) {
@@ -4615,28 +4634,12 @@ SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG 
 	shivaLib.Sound("ding");													// Ding sound
 }
 
-                                                                     
-                                                                     
-                                                                     
-                                             
 //////////// COLORPICKER
 
 SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
-	var sel = "";
-	console.log(isNaN(attr));
-	if (isNaN(attr)) 
-		sel="#"+attr.replace(/___/g,"");
-	else if (attr < 0) 
-		sel = "#colordiv";
-	else if (attr > 100)														
-		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
-	else sel = "#propInput" + attr;
-		
-	console.log(sel);
-    var inputBox = $(sel);
-    var inputBoxChip = $(sel+"C");
+    var inputBox = $("#propInput" + attr);
 
     //HELPER FUNCTIONS
     this.HEX_to_HSV = function(hexString) {                             
@@ -4785,12 +4788,10 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     var cp_current = 0;
     var cp_first = 0;
 
-	var z = ($('.ui-widget-overlay').length > 0)?($('.ui-widget-overlay').css('z-index')+1):'auto';
     $('body').append($("<div>", {
         id : 'shiva_dialogDiv',
         class : 'propTable',
         css : {
-        	zIndex: z,
             position : 'absolute',
             right : '100px',
             top : '30px',
@@ -4897,8 +4898,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             color : 'gray',
             position : 'absolute',
             top : '25px',
-            left : 
-            '186px',
+            left : '186px',
         }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
@@ -5187,8 +5187,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         }
         $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 180) % 360, sat, val));
-        $("#cp_schemebox").children("div").eq
-        (1).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 150) % 360, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 210) % 360, sat, val));
         $("#cp_schemebox").children("div").eq(2).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
@@ -5306,31 +5305,25 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         self.position_bar();
     }
     
-    this.drawColors = function(color_HEX) {
-		if (mode != 0) {
-			var colors = inputBox.val().split(",");
-			colors[cp_current] = color_HEX.slice(1);
+    this.drawColors = function(color_HEX){
+        var colors = inputBox.val().split(",");
+        colors[cp_current] = color_HEX.slice(1);
+        
+        var boxChip = colors[cp_current];
+        boxChip = "#"+boxChip;
+        var str = "#propInput" + attr;
+        $(str).css('border-color', boxChip);
+        $(str + "C").css('background-color', boxChip);
+          
+        var str = colors.toString();
 
-			var boxChip = colors[cp_current];
-			boxChip = "#" + boxChip;
-			inputBox.css('border-color', boxChip);
-			inputBoxChip.css('background-color', boxChip);
+        if (str[str.length - 1] != ",")
+            str += ",";
+        inputBox.val(str);
 
-			var str = colors.toString();
+        Draw();
+    }
 
-			if (str[str.length - 1] != ",")
-				str += ",";
-			inputBox.val(str);
-		}
-		else{
-			var boxChip = color_HEX;
-			inputBox.css('border-color', boxChip);
-			inputBoxChip.css('background-color', boxChip);
-			inputBox.val(boxChip.slice(1,boxChip.length));
-		}
-
-		Draw();
-	}
     this.setColor = function(h, s, v) {                       
         self.update("hue", h);
         self.update("saturation", s);
@@ -5432,483 +5425,5 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $(".slider a").hover(function() {
         $(this).css("cursor", "pointer");
     });
-}
 
-/* 	CSV has 3 required args, and one optional arg:
-	inputID: 			the id value of the source URL's <input>
-	mode: 				choose 'show' to enable user validation; 'hide' to run silently
-	output_type:		sets output type, choose 'JSON', or 'Array'; support for Gtables is possible but maybe not necessary...
-							the chartWrapper expects an array for its datasource not a Gtable
-	callback (optional): sets the callback function to be executed on completion...the final call will be callback(output_type)
-*/
-
-function CSV(inputID, mode, output_type, callback) {
-
-				var self = this;
-  
-				var cellopts = [',', '\t', 'other']
-				var textopts = ['\"', '\''];
-				var cellDelim = ',';
-				var quote = '\''
-				var CSV_title = '';
-				var csvHasHeader = false;
-				var CSV_data = [];
-
-				var input = '';
-				$.get('proxy.php', {
-					url : $('#' + inputID).val()
-				}, function(data) {
-					input = data;
-					if (data == -1) {
-						console.log("Bad data source.");
-						alert("Please check your source URL...we didn't find anything at the other end.");
-						return;
-					} else {
-						CSV_title = $('#' + inputID).val().split('/').pop().split(".")[0];
-						if (mode === 'hide') {
-							self.prep();
-							self.parse();
-							self.done();
-						} else if (mode === 'show') {
-							self.prep();
-							self.show(10);
-						} else
-							console.log("Bad mode type.");
-					}
-				});
-
-				self.prep = function() {
-					input = input.replace(/\n\r/g, '\n');
-					input = input.replace(/\r\n/g, '\n');
-					input = input.replace(/\r/g, '\n');
-
-					var c = input.split(',').length;
-					var t = input.split('\t').length;
-					var cn = input.split(';').length
-
-					//try to autodetect cell delimiter
-					if (c >= t && c >= cn)
-						cellDelim = ',';
-					else if (t >= c && t >= cn)
-						cellDelim = '\t';
-					else if (cn >= c && cn >= t)
-						cellDelim = ';';
-					//try to autodetect quote delimiter
-					quote = (input.split("\"").length >= input.split("\'").length) ? "\"" : "\'";
-				}
-
-				self.parse = function(n) {
-					var cell = "";
-					var row = 0;
-					var text = false;
-					CSV_data[row] = [];
-
-					for (var i = 0; i < input.length; i++) {
-						if ( typeof n !== 'undefined' && row === n)
-							break;
-						text = (RegExp(quote, 'g').test(input[i])) ? !text : text;
-						if (text)
-							cell += input[i];
-						else {
-							if (/\n/g.test(input[i])) {
-								CSV_data[row].push(cell);
-								cell = "";
-								row++;
-								if ( typeof input[i + 1] != 'undefined')
-									CSV_data[row] = [];
-							} else if (RegExp(cellDelim, 'g').test(input[i])) {
-								CSV_data[row].push(cell);
-								cell = "";
-							} else {
-								cell += input[i];
-							}
-						}
-					}
-					if (typeof CSV_data[0][0] != typeof CSV_data[1][0]) {
-						csvHasHeader = true;
-					}
-				}
-
-				self.init = function() {
-					$('body').append($("<div>", {
-						id : 'CSV_overlay',
-						css : {
-							color : 'black',
-							position : 'absolute',
-							top : '0',
-							left : '0',
-							width : $(document).width(),
-							height : '150%',
-							opacity : '0.4',
-							backgroundColor : 'black'
-						}
-					}).append($('<div>', {
-						id : 'CSV_preview',
-						css : {
-							padding : '56px',
-							position : 'absolute',
-							top : '10%',
-							left : '20%',
-							width : '800px',
-							height : '400px',
-							backgroundColor : 'white',
-							borderRadius : '5px'
-						}
-					}).append($("<div>", {
-						id : 'CSV_preview_table',
-						marginLeft : 'auto',
-						marginRight : 'auto',
-						css : {
-							overflow : 'scroll',
-							position : 'absolute',
-							top : '25%',
-							height : '330px',
-							width : '86%',
-							borderRadius : '5px',
-							border : 'solid thin gray'
-						}
-					})).append($("<div>", {
-						id : 'csvControl',
-						css : {
-							position : 'absolute',
-							top : '2%',
-							bottom : '76%',
-							width : '86%',
-							borderRadius : '5px',
-						}
-					}))));
-					$("#csvControl").append($("<p>", {
-						css : {
-							position : 'relative',
-							left : '5px',
-						}
-					}).append($("<span>", {
-						html : "Title: ",
-					})).append($("<input>", {
-						id : 'titleInput',
-						value: CSV_title,
-						css : {
-							position : 'relative',
-							left : '5px',
-							marginRight : '40px',
-						},
-						change: function(){
-							CSV_title = $(this).val();
-						}
-					})).append($("<span>", {
-						html : 'Data has header row?',
-					})).append($("<input>", {
-						id : 'dataHasHeader',
-						type : 'checkbox',
-						checked : (csvHasHeader) ? true : false,
-						css : {
-							position : 'relative',
-							left : '5px',
-						},
-						change : function() {
-							csvHasHeader = ($(this).is(":checked")) ? true : false;
-							self.show()
-						}
-					}))).append($("<p>", {
-						css : {
-							position : 'relative',
-							left : '5px',
-						}
-					}).append($("<span>", {
-						html : "Cell delimiter: ",
-					})).append($("<select>", {
-						id : 'cellDelimInput',
-						html : '<option value=0>Comma (,)</option><option value=1>Tab (\\t)</option><option value=2> Other </option>',
-						css : {
-							width : '100px',
-							position : 'relative',
-							left : '5px',
-							marginRight : '40px',
-						},
-						change : function() {
-							if ($(this).val() == 2) {
-								$("#cellDelimOther").show();
-							} else {
-								$("#cellDelimOther").hide();
-								cellDelim = cellopts[$(this).val()];
-								self.show();
-							}
-						}
-					})).append($("<span>", {
-						html : 'Text delimitier: ',
-					})).append($("<select>", {
-						id : 'textDelimInput',
-						html : "<option value=0>Double quote (\")</option><option value=1>Single quote (\')</option>",
-						css : {
-							position : 'relative',
-							left : '5px',
-						},
-						change : function() {
-							quote = textopts[$(this).val()];
-							self.show();
-						}
-					})));
-					$('#CSV_overlay').append($("<input>", {
-						id : 'cellDelimOther',
-						css : {
-							height : $('#cellDelimInput').css('height') - 2,
-							width : '75px',
-							position : 'absolute',
-							left : $('#cellDelimInput').offset().left,
-							top : $('#cellDelimInput').offset().top
-						},
-						change : function() {
-							cellDelim = $(this).val();
-							self.show();
-						}
-					}).hide());
-
-					$('#CSV_preview').append($("<button>", {
-						html : 'Back',
-						css : {
-							position : 'absolute',
-							bottom : '15px',
-							left : '350px',
-						},
-						click : function() {
-							$(input).val("");
-							$('#CSV_overlay').remove();
-						}
-					}).button()).append($("<button>", {
-						html : 'Accept',
-						css : {
-							position : 'absolute',
-							bottom : '15px',
-							right : '391px',
-						},
-						click : function() {
-							self.done();
-						}
-					}).button())
-
-					$('#cellDelimInput').val(cellDelim);
-					$('#textDelimInput').val(quote);
-				}
-				self.show = function() {
-					if ($('#CSV_overlay').length > 0)
-						$('#CSV_preview_table').children().remove();
-					else
-						self.init();
-					self.parse(10);
-
-					var gwidth;
-
-					for (var i = 0; i < 10; i++) {
-						var odd = (i % 2 == 0) ? 'lightgray' : 'transparent';
-						$("#CSV_preview_table").append($("<div>", {
-							class : 'row',
-							css : {
-								height : $('#CSV_preview_table').height() / 10 + 'px',
-								backgroundColor : odd,
-							}
-						}));
-						for (var j = 0; j < CSV_data[i].length; j++) {
-							var alignment = 'right';
-							if (isNaN(CSV_data[i][j]))
-								alignment = 'left';
-							$("#CSV_preview_table").children().eq(i).append($("<div>", {
-								html : (i === 0 && csvHasHeader) ? '<center><strong>' + CSV_data[i][j] + '</strong></center>' : CSV_data[i][j],
-								class : 'col' + j,
-								align : alignment,
-								css : {
-									paddingLeft : '2px',
-									paddingRight : '2px',
-									height : $('#CSV_preview_table').height() / 10 + 'px',
-									float : 'left',
-									outline : '1px solid black',
-								}
-							}));
-							if ($('.col' + j).length > 1 && $('.col' + j).last().width() > $('.col' + j).eq($('.col' + j).last().index('.col' + j) - 1).width()) {
-								$('.col' + j).css('width', $('.col' + j).last().width() + 'px');
-							} else {
-								$('.col' + j).last().css('width', $('.col' + j).width() + 'px');
-							}
-						}
-					}
-					var gwidth = 0;
-					for (var i = 0; i < $('.row').last().children().length; i++) {
-						gwidth += $('.row').last().children().eq(i).width();
-					}
-					$('.row').css('width', (gwidth + (CSV_data[0].length * 4)) + 'px');
-				}
-
-				self.to_JSON = function() {
-					if (CSV_data.length == 0) {
-						throw new Error("The CSV_data source is empty.")
-						return;
-					} else {
-						var table = {
-							"title" : (CSV_title != "") ? CSV_title : "New Table",
-							"headers" : (csvHasHeader) ? CSV_data[0] : null,
-							"data" : (csvHasHeader) ? CSV_data.slice(1) : CSV_data
-						}
-						$("#CSV_overlay").remove();
-						return table;
-					}
-				}
-
-				/*self.to_Gtable = function() {
-					if (CSV_data.length == 0) {
-						throw new Error("The CSV_data source is empty.")
-						return;
-					} else{
-						return google.visualization.arrayToDataTable(CSV_data);
-					}
-				}*/
-
-				self.done = function() {
-					self.parse();
-					if (callback != null) {
-						if (output_type === 'JSON') {
-							callback(self.to_JSON());
-						} else if (output_type === 'Google')
-							callback(self.to_Gtable());
-						else if(output_type === 'Array'){
-							callback(CSV_data);
-						}						
-						else {
-							console.log('Output type not recognized or not implemented.');
-							return;
-						}
-					} else {
-						if (output_type === 'JSON')
-							return (self.toJSON());
-						else if (output_type === 'Google')
-							return (self.to_Gtable());
-						else if(output_type === 'Array')
-							return CSV_data;
-						else
-							console.log('Output type not recognized or not implemented.');
-					}
-				}
-			}
-			
-//  TIMEGLIDER   /////////////////////////////////////////////////////////////////////////////////////////// 
-
-SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIMEGLIDER
-{
-  var i;
-  var stimeline = new Object();
-  
-  if($('link[href*=timeglider]').length == 0) {
-    $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
-  }
-  
-  stimeline.events=null;
-  stimeline.options=this.options;
-  stimeline.container=this.container;
-  stimeline.con="#"+stimeline.container;
-
-  if($(stimeline.con).find('*').length > 0) {
-    // Sets timeline options. If the options that are different can be set on the fly, returns try
-    // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
-    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
-    if(ret) {
-      $(stimeline.con).timeline('resize');
-      return;
-    } 
-  } 
-  // Always set width and height before drawing timeline as the layout depends on the container size.
-  $(stimeline.con).css('width',stimeline.options['width']+"px");
-  $(stimeline.con).css('height',stimeline.options['height']+"px");
-  
-  GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
-      
-  function GetSpreadsheetData(file, conditions) 
-  {
-    lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
-    var query=new google.visualization.Query(lastDataUrl);
-    if (conditions)
-      query.setQuery(conditions);
-      query.send(handleQueryResponse);
- 
-    function handleQueryResponse(response) {
-      
-      var i,j,key,s=0;
-      var data=response.getDataTable();
-      var rows=data.getNumberOfRows();
-      var cols=data.getNumberOfColumns();
-      eventData={ events:new Array() };
-      if (!$.trim(data.getColumnLabel(0)))
-        s=1;
-      for (i=s;i<rows;++i) {
-        o=new Object();
-        for (j=0;j<cols;++j) {
-          key=$.trim(data.getColumnLabel(j));
-          if (!key)
-            key=$.trim(data.getValue(0,j));
-          if ((key == "icon") && (!data.getValue(i,j)))
-            continue;
-        if ((key == "startdate") || (key == "enddate")) {
-          if (data.getFormattedValue(i,j))
-            //o[key]=data.getFormattedValue(i,j).replace(/\//g,'-');
-            o[key]=ConvertTimelineDate(data.getValue(i,j));
-            //console.log(o[key]);
-          }
-        else  
-          o[key]=data.getValue(i,j);
-        }
-        eventData.events.push(o);
-      }
-      
-      stimeline.events = eventData.events;
-      var stldata = [{
-        "id":"stl" + (new Date()).getTime(),
-        "title":stimeline.options.title,
-        "description":"<p>" + stimeline.options.description + "</p>",
-        "focus_date": ConvertTimelineDate(stimeline.options.focus_date),
-        "timezone":stimeline.options.timezone,
-        "initial_zoom":stimeline.options.initial_zoom * 1,
-        "events": stimeline.events
-      }];
- 
-     
-      $(stimeline.con).timeline('destroy');
-      $(stimeline.con).html('');
-      window.shivaTimeline =  $(stimeline.con).timeline({
-          "min_zoom":stimeline.options.min_zoom * 1, 
-          "max_zoom":stimeline.options.max_zoom * 1, 
-          "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
-          "data_source":stldata,
-          "show_footer":Boolean(stimeline.options.show_footer),
-          "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
-          "constrain_to_data":false,
-          "image_lane_height":60,
-          "loaded":function (args, data) { 
-            $(stimeline.con).timeline('setOptions', stimeline.options, true);
-            $(stimeline.con).timeline('registerEvents', stimeline.events);
-            setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
-            if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            shivaLib.SendReadyMessage(true); 
-          }
-      });
-      
-      // Make event modal windows draggable
-      window.stlInterval = setInterval(function() {
-        $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
-      }, 500);
-      
-      function ConvertTimelineDate(dateTime) {
-        dateTime=Date.parse(dateTime)+50000000;
-        var dt = new Date(dateTime);
-        var mn = padZero(dt.getMonth() + 1);
-        var dy = padZero(dt.getDate());
-        var hrs = padZero(dt.getHours());
-        var mns = padZero(dt.getMinutes());
-        var scs = padZero(dt.getSeconds());
-        var dtstr = dt.getFullYear() + "-" + mn + "-" + dy + " " + hrs + ":" + mns + ":" + scs;
-        return dtstr;
-      }
-      
-      function padZero(n) {
-        if(n < 10) { n = '0' + n; }
-        return n;
-      }
-    }
-  } 
 }

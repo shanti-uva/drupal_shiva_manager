@@ -4797,11 +4797,9 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
 
     };
     
-
   this.timelineInfoModal = Backbone.View.extend({
 
-    
-      tagName: "div",
+    tagName: "div",
     
     model:tg.TG_Timeline,
     
@@ -4813,7 +4811,6 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     },
     
     template: function () {
-      
       return "<h4>${title}</h4>"
       + "<div class='tg-timeline-description jscroll'>{{html description}}</div>"
       + "<ul><li class='tg-close'>close</li><li data-timeline_id='" + this.model.get("id") + "' class='tg-timeline-start'>start</li></ul>";
@@ -4821,7 +4818,6 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
       },
     
     timelineStart: function() {
-      
       MED.focusTimeline(this.model.get("id"));
       this.remove();
     },
@@ -4839,13 +4835,10 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
       $(this.el).fadeOut();
     }
   });
-  
-  
-  
-  
+
   this.presInfoModal = Backbone.View.extend({
     
-      tagName: "div",
+    tagName: "div",
     
     model:tg.TG_Timeline,
     
@@ -4857,7 +4850,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     },
     
     template: function () {
-      
+
       return "<div class='tg-timeline-description jscroll'>{{html description}}</div>"
       + "<ul><li class='tg-close'>close</li><li class='tg-pres-start'>start</li></ul>"
       + "<div class='tg-modal-corner tg-modal-corner-north'></div>";
@@ -4870,6 +4863,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     },
 
     render: function() {
+      console.info('in 2nd render');
       $(this.el).html($.tmpl(this.template(), this.model)).attr("id", "presInfoModal");
       return this;
     },
@@ -7625,7 +7619,6 @@ tg.TG_TimelinePlayer.prototype = {
       tl = MED.timelineCollection.get(id);
 
     if (tl.get("description")) {
-      
       var ch = me.dimensions.container.height,
         modal = new this.timelineInfoModal({model:tl}),
         header_ht = me.dimensions.header.height;
@@ -10022,7 +10015,7 @@ tg.validateOptions = function (widget_settings) {
         // after timelinePlayer is created this stuff can be done
         MED.setFocusDate(new TG_Date(this.options.initial_focus));
         MED.loadTimelineData(this.options.data_source, this.options.loaded);
-      
+
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);
       }
@@ -10067,7 +10060,7 @@ tg.validateOptions = function (widget_settings) {
     // This function checks which options have been changed and if the options that have been changed are 'style' based options
     // it adjusts the page styles and returns true, indicating the timeline does not have to be rebuilt
     // otherwise returns false.
-    setOptions : function (tlopts, set) {
+    setOptions : function (tlopts, set, events) {
       var otemp = $.extend({},tlopts);
       // optsCheck is a function to check whether a style option is being set if so do not reload timeline, just change the styles
       // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
@@ -10111,7 +10104,7 @@ tg.validateOptions = function (widget_settings) {
       
       // Font Color
       //  1 = main area font, 2 = header fonts for timeline and modals, 3 = text of modals
-      var fstyles = [ '.timeglider-event-title', '.tg-widget-header h2, .tg-modal h4', '.tg-modal p'];
+      var fstyles = [ '.timeglider-event-title', '.tg-widget-header h2, .tg-modal h4', '.tg-modal p, .tg-modal td'];
       var fcolors = tlopts.font_colors.replace(/\,+$/g,'').split(','); // take out (replace(/\,#none/g,'').) '#none' and ending commas
 
       fcolors = fcolors.filter(function(val) {return val != "" && val != '#none'}); // filter out blanks and #none
@@ -10202,6 +10195,49 @@ tg.validateOptions = function (widget_settings) {
         return false;
       } else {
         return true;
+      }
+    },
+    
+    registerEvents : function(events) {
+      var etypes = new Object();
+      for (var i in events) {
+        var e = events[i];
+        if(typeof(e.type) == "string" && $.trim(e.type) != '') {
+          if(typeof(etypes[e.icon]) == "undefined") {
+            etypes[e.icon] = e.type;
+          }
+        }
+      }
+      
+      this.etypes = etypes;
+    },
+    
+    eventList : function() {
+      
+  
+      var list = '<div id="etypelist" class="tg-modal timeglider-ev-modal ui-draggable" style="width: 200px; z-index: 1002; top: 40px; left: 260px; color: white; display: none;">' +
+      '<div id="typesclose" class="tg-close-button tg-close-button-remove">x</div><div class="dateline"><span class="timeglider-dateline-startdate">Event Types</span></div><div class="tg-ev-modal-description"><table>';
+      
+      var evals = [];
+      var p = 0;
+      for(var i in this.etypes) {
+        p++;
+        evals.push([this.etypes[i],i]);
+      }
+      evals.sort();
+
+      if( p > 0 ) {
+        for(var n in evals) {
+           list += '<tr><td><img src="' + this.options.icon_folder + evals[n][1] + 
+              '" height="15" style="vertical-align: middle;"/></td><td>' + evals[n][0] + 
+              '</td><td><input type="checkbox" checked="checked" onclick="toggleIcon($(this).parents(\'tr\'));"/></td></tr>';
+        }
+        list += '</table></div></div>';
+        $('.tg-single-timeline-header ul').append('<li><a onclick="$(\'#etypelist\').toggle();">types</a></li>');
+        $('body').append(list);
+        $('#typesclose').click(function() {
+          $('#etypelist').hide();
+        });
       }
     },
     
@@ -10414,3 +10450,9 @@ function propsToString(o) {
   return out.substr(0, out.length - 2);
 }
 
+function toggleIcon(el) {
+  var src = el.find('img').attr('src');
+  var pts = src.split('/');
+  var img = pts.pop();
+  $('img[src*="' + img + '"]').parents('.timeglider-timeline-event').toggle();
+}
