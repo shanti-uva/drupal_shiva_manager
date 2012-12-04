@@ -1173,7 +1173,7 @@
 .tg-timeline-modal .tg-timeline-description {
 	font-size:14px;
 	margin:16px;
-	color:#FCFCFC;
+	color:black; /*#FCFCFC;*/
 	line-height:18px;
 	overflow-y:auto;	
 	max-height:330px;
