@@ -43,6 +43,9 @@ define('SHIVA_SUBWAY_EDITOR', 'subway.htm');
 // default URL for Timeline Editor
 define('SHIVA_TIMELINE_EDITOR', 'timeline.htm');
 
+// default URL for Timeline Editor
+define('SHIVA_TIMEGLIDER_EDITOR', 'timeglider.htm');
+
 // default URL for Video Editor
 define('SHIVA_VIDEO_EDITOR', 'video.htm');
 

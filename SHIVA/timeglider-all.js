@@ -10064,7 +10064,8 @@ tg.validateOptions = function (widget_settings) {
       var otemp = $.extend({},tlopts);
       // optsCheck is a function to check whether a style option is being set if so do not reload timeline, just change the styles
       // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
-      if ((this.optsCheck(otemp) && set != true) && $('#cp_colorbar').is(":visible") == false) {
+      if ((this.optsCheck(otemp) && set != true) && $('#cp_colorbar').is(":visible") == false 
+            && $('#cp_colormap').is(":visible") == false) {
         return false;
       }
 
@@ -10104,59 +10105,134 @@ tg.validateOptions = function (widget_settings) {
       
       // Font Color
       //  1 = main area font, 2 = header fonts for timeline and modals, 3 = text of modals
-      var fstyles = [ '.timeglider-event-title', '.tg-widget-header h2, .tg-modal h4', '.tg-modal p, .tg-modal td'];
-      var fcolors = tlopts.font_colors.replace(/\,+$/g,'').split(','); // take out (replace(/\,#none/g,'').) '#none' and ending commas
+      if(tlopts.fontColors != '') {
+        var fstyles =  {
+          'main': '.timeglider-event-title',
+          'head': '.tg-widget-header h2, .tg-modal h4', 
+          'popup': '.tg-ev-modal-description, .tg-modal p, .tg-modal td',
+          'links': '.tg-single-timeline-header ul li, .timeglider-ev-modal ul.timeglider-ev-modal-links li a'
+        };
 
-      fcolors = fcolors.filter(function(val) {return val != "" && val != '#none'}); // filter out blanks and #none
-      if (fcolors.length > 0) {
-        tg.fcolors = fcolors.join(':');
-        for (var n in fstyles) {
-          var color = fcolors.shift();
-          if(typeof(color) == "string") {
-            if(color.substr(0,1) != '#') { color = '#' + color; }
-            var css = $(fstyles[n].split(',')[0]).css('color');
-            if(typeof(color) == "string" && (typeof(css) == "undefined" || (css + "").colorToHex() != color)) {
-              $(fstyles[n]).css({ 'color' : color });
-              tg.updatePageStyles(fstyles[n], { 'color' : color });
-            } else if (typeof(color) == "undefined" && typeof(css) == "string") {
-              $(fstyles[n]).css({ 'color' : '' });
-              tg.updatePageStyles(fstyles[n], '');
-            }
-          }
+        var fcolors = tlopts.fontColors.replace(/,$/,'').split(',');
+        for (var i in fcolors) {
+          var pts = fcolors[i].split('=');
+          var type = pts[0];
+          var sel = fstyles[type];
+          var newcolor = ('#' + pts[1]).replace('##','#');
+          var prescolor = $(sel.split(',')[0]).css('color');
+          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) {
+            $(sel).css({ 'color' : newcolor });
+            tg.updatePageStyles(sel, { 'color' : newcolor });
+            fstyles[type] = 'done';
+          } 
         }
-      } 
-
-      // Background Color
-      // 1 = main background, 2 = event spans, 3 = header, footer, and zoom controls, 4 = modal boxes, 4 =  image lange, 6 = tick lane
-      var bstyles = [ '#tg-truck', '.timeglider-event-spanner', '.tg-widget-header, .timeglider-footer, .timeglider-slider-container', '.tg-modal', '.tg-image-lane-bg', '.tg-tick-body'];
-      var bcolors = tlopts.background_color.replace(/\,#none/g,'').replace(/\,+$/g,'').split(','); // take out '#none' and ending commas
       
-      bcolors = bcolors.filter(function(val) { return val != '' && val != '#none'});
-
-      if(bcolors.length > 0) {
-        tg.bcolorCount = bcolors.length;
-        for (var n in bstyles) {
-          var bcolor = bcolors.shift();
-          if(typeof(bcolor) == "string") {
-            if(bcolor.substr(0,1) != '#') { bcolor = '#' + bcolor; }
-            var css = $(bstyles[n].split(',')[0]).css('background-color');
-            if(bcolor != '' && typeof(css) == "string" && css.colorToHex() != bcolor) {
-              if(n == 0 ) {
-                $(bstyles[n]).css({ 'background-color' : bcolor, 'background-image' : 'none' });
-                $('.timeglider-container').css({ 'background-color' : bcolor, 'background-image' : 'none' });
-                //tg.updatePageStyles('.timeglider-event-spanner', {'background' : 'transparent'});
-              } else if (bstyles[n] == ".tg-modal" || bstyles[n] == ".timeglider-event-spanner") { // use this condition is $element.css() doesn't work
-                tg.updatePageStyles(bstyles[n], { 'background-color' : bcolor });
-              } else {
-                $(bstyles[n]).css({ 'background-color' : bcolor });
-                tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
-              } 
-            } 
-          } else if (typeof(bcolor) == "undefined" && typeof(css) == "string") {
-            $(bstyles[n]).css({ 'background-color' : ''});
+        for (var t in fstyles) {
+          if(fstyles[t] != 'done') {
+            $(fstyles[t]).css({ 'color' : '' });
+            tg.updatePageStyles(fstyles[t], '');
           }
         }
       }
+      
+      // old
+      /*
+      var fstyles = [ '.timeglider-event-title', '.tg-widget-header h2, .tg-modal h4', '.tg-modal p, .tg-modal td'];
+            var fcolors = tlopts.fontColors.replace(/\,+$/g,'').split(','); // take out (replace(/\,#none/g,'').) '#none' and ending commas
+      
+            fcolors = fcolors.filter(function(val) {return val != "" && val != '#none'}); // filter out blanks and #none
+            if (fcolors.length > 0) {
+              tg.fcolors = fcolors.join(':');
+              for (var n in fstyles) {
+                var color = fcolors.shift();
+                if(typeof(color) == "string") {
+                  if(color.substr(0,1) != '#') { color = '#' + color; }
+                  var css = $(fstyles[n].split(',')[0]).css('color');
+                  if(typeof(color) == "string" && (typeof(css) == "undefined" || (css + "").colorToHex() != color)) {
+                    $(fstyles[n]).css({ 'color' : color });
+                    tg.updatePageStyles(fstyles[n], { 'color' : color });
+                  } else if (typeof(color) == "undefined" && typeof(css) == "string") {
+                    $(fstyles[n]).css({ 'color' : '' });
+                    tg.updatePageStyles(fstyles[n], '');
+                  }
+                }
+              }
+            } */
+      
+      // Background Color
+      // 1 = main background, 2 = event spans, 3 = header, footer, and zoom controls, 
+      // 4 = modal boxes, 5 =  image lange, 6 = tick lane
+      // E.g. "main=ff0000,eventspan=ff6000,head=ffbf00,popup=20ff00,imagelane=0040ff,ticklane=8000ff,"
+      if (tlopts.backgroundColors != '') {
+        var bstyles = {
+          'main': '#tg-truck', 
+          'eventspan': '.timeglider-event-spanner', 
+          'head': '.tg-widget-header, .tg-widget-header h2, .timeglider-footer, .timeglider-slider-container', 
+          'popup': '.tg-ev-modal, .tg-timeline-modal', 
+          'imagelane': '.tg-image-lane-bg', 
+          'ticklane': '.tg-tick-body',
+          'popuplink': '.timeglider-ev-modal-links li a',
+          'none': ''
+        };
+        
+        var bcolors = tlopts.backgroundColors.replace(/,$/,'').split(',');
+        for (var i in bcolors) {
+          var pts = bcolors[i].split('=');
+          var type = pts[0];
+          var sel = bstyles[type];
+          var newcolor = ('#' + pts[1]).replace('##','#');
+          var prescolor = $(sel.split(',')[0]).css('background-color');
+          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) {
+            if(type == 'main') {
+              $(sel).css({ 'background-color' : newcolor, 'background-image' : 'none' });
+              $('.timeglider-container').css({ 'background-color' : newcolor, 'background-image' : 'none' });
+            } else if (type == 'eventspan' || type == 'popup' || type == 'ticklane') {
+              tg.updatePageStyles(sel, { 'background-color' : newcolor });
+            } else {
+              $(sel).css({ 'background-color' : newcolor });
+              //tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
+            }
+            bstyles[type] = 'done';
+          }
+        }
+        
+        for (var t in bstyles) {
+          if(bstyles[t] != 'done') {
+            $(bstyles[t]).css({ 'background-color' : ''});
+          }
+        }
+      }
+      // old
+      /*
+      var bcolors = tlopts.background_color.replace(/\,#none/g,'').replace(/\,+$/g,'').split(','); // take out '#none' and ending commas
+            
+            bcolors = bcolors.filter(function(val) { return val != '' && val != '#none'});
+      
+            if(bcolors.length > 0) {
+              tg.bcolorCount = bcolors.length;
+              for (var n in bstyles) {
+                var bcolor = bcolors.shift();
+                if(typeof(bcolor) == "string") {
+                  if(bcolor.substr(0,1) != '#') { bcolor = '#' + bcolor; }
+                  var css = $(bstyles[n].split(',')[0]).css('background-color');
+                  if(bcolor != '' && typeof(css) == "string" && css.colorToHex() != bcolor) {
+                    if(n == 0 ) {
+                      $(bstyles[n]).css({ 'background-color' : bcolor, 'background-image' : 'none' });
+                      $('.timeglider-container').css({ 'background-color' : bcolor, 'background-image' : 'none' });
+                      //tg.updatePageStyles('.timeglider-event-spanner', {'background' : 'transparent'});
+                    } else if (bstyles[n] == ".tg-modal" || bstyles[n] == ".timeglider-event-spanner") { // use this condition is $element.css() doesn't work
+                      tg.updatePageStyles(bstyles[n], { 'background-color' : bcolor });
+                    } else {
+                      $(bstyles[n]).css({ 'background-color' : bcolor });
+                      tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
+                    } 
+                  } 
+                } else if (typeof(bcolor) == "undefined" && typeof(css) == "string") {
+                  $(bstyles[n]).css({ 'background-color' : ''});
+                }
+              }
+            }*/
+      
       
       // Adjust number of Modals
       tlopts.max_modals = parseInt(tlopts.max_modals);
@@ -10183,7 +10259,7 @@ tg.validateOptions = function (widget_settings) {
     // checks the options sent and returns true if they are the same as previously set
     optsCheck : function(o) {
       // the name of the options to be checked. All others ignored
-      var optionsChecked = "title:description:width:height:display_zoom_level:font_name:font_colors:background_color:max_modals:show_footer:";
+      var optionsChecked = "title:description:width:height:display_zoom_level:font_name:fontColors:backgroundColors:max_modals:show_footer:";
       for(var p in o) {
         if(optionsChecked.indexOf(p + ":") == -1) {
           delete o[p];

@@ -3,8 +3,8 @@
 <head>
 	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
-	<title>SHIVA Timeglider</title>
-	<link rel="stylesheet" type="text/css" href="css/timeglider/jquery-ui-1.8.5.timeglider.css">
+	<title>SHIVA Timeline maker</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
   <link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -52,21 +52,21 @@
   var items=new Array();
   var shivaGroup="Timeglider"
   var curAtt=null;
-  var iconFolder = window.location.pathname.replace('timeglider.htm','') + 'images/timeglider/icons/';
+  var iconFolder = window.location.pathname.replace('timeline.htm','') + 'images/timeglider/icons/';
   var props={
       dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
       title:                { def:'History of Javascript',       opt:'string',       des:'Title of timeline'}, 
       description:          { def:'A timeline showing a brief history of the Javascript\'s development and its evolution into a key player in Web Technologies.',      opt:'string',     des:'Description'}, 
-      height:               { def:'500',     	opt:'number',     des:'Height of timeline'},
-      width:                { def:'1000',    	opt:'number',     des:'Width of timeline'},
-      focus_date:           { def:'6/1/1994',   opt:'number',     des:'Center date of timeline'},
+      height:               { def:'500',     opt:'number',     des:'Height of timeline'},
+      width:                { def:'1000',     opt:'number',     des:'Width of timeline'},
+      focus_date:           { def:'6/1/1994',      opt:'number',     des:'Center date of timeline'},
       //timezone:             { def:'-04:00',      opt:'string',      des:'Timezone of timeline'},
-      initial_zoom:         { def:'40',    		opt:'number',  	 	des:'Initial zoom of timeline'}, 
-      min_zoom:             { def:'10',       	opt:'number',        des:'Minumum zoom of timeline'}, 
-      max_zoom:             { def:'70', 		 opt:'number',     des:'Maximum zoom of timeline'}, 
+      initial_zoom:         { def:'40',    opt:'number',   des:'Initial zoom of timeline'}, 
+      min_zoom:             { def:'10',       opt:'number',        des:'Minumum zoom of timeline'}, 
+      max_zoom:             { def:'70',  opt:'number',     des:'Maximum zoom of timeline'}, 
       font_name:            { def:'Arial',   opt:'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',     des:'Font' },
-      font_colors:           { def:'',   opt:'colors',     des:'Font colors' },
-      background_color:     { def:'',     opt:'colors',    des:'Background colors'},
+      fontColors:           { def:'',   opt:'advanced',     des:'Font colors' },
+      backgroundColors:     { def:'',     opt:'advanced',    des:'Background colors'},
       //icon_folder:          { def: window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/', opt:'string', des:'Icon image folder'},
       max_modals:           { def: '1', opt: 'number', des: 'Maximum # of Popups'},
       show_desc:            { def:'false', opt:'true|false', des:'Show the description?'},
@@ -157,7 +157,7 @@
   function ShowHelp(att)
   {
     if (att == "startup") 
-      $("#helpDiv").html("<br/><p class='pb'>Powered by Timeglider JS<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+      $("#helpDiv").html("<br/><p class='pb'>Powered by <a href=\"http://timeglider.com/jquery/\" target=\"_blank\">Timeglider JS</a><br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
     else
       shivaLib.ShowHelp(att,helpText);
   } 

@@ -227,6 +227,7 @@ function _shivanode_element_typelist() {
     10 => t('Network'),
     4 => t('Subway'),
     5 => t('Timeline'),
+    13 => t('Timeglider'),
     6 => t('Video'),
     /*
     8 => 'Control',
@@ -255,6 +256,7 @@ function _shivanode_options_list($option = NULL) {
       10 => t('Network'),
       4 => t('Subway'),
       5 => t('Timeline'),
+      13 => t('Timeglider'),
       6 => t('Video'),
     ),
    /*
@@ -593,6 +595,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
     
+  $form['shivanode_url_settings']['shivanode_timeglider_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Timeglider Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR),
+    '#required' => TRUE,
+  );
+      
   $form['shivanode_url_settings']['shivanode_video_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Video Editor File:'),
@@ -681,6 +691,7 @@ function _shivanode_settings_default_values(&$form_state) {
   $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
   $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
   $form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
+  $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
   $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
   $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
   $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
@@ -1445,6 +1456,9 @@ function _get_shivaframe_url($opt) {
       break;
     case 12:  // Earth
       $player = variable_get('shivanode_earth_editor', SHIVA_EARTH_EDITOR); 
+      break;
+    case 13: // Timeglider
+      $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
       break;
   }
   if (strpos($player, 'http://') === FALSE) {

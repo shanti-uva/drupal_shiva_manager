@@ -2579,7 +2579,26 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 						slantedText:	{ opt:'string',	 des:'Slanted text'}
 						}			
 			break;
-			}
+		case "backgroundColors":
+		  aProps= {   main:     { opt:'color',  des:'Main Background'},   // Sub-items
+            eventspan:  { opt:'color',   des:'Event Span Background'},
+            head:    { opt:'color',  des:'Header, Footer and Zoom Background'},
+            popup:     { opt:'color',  des:'Popup Background'},
+            imagelane:    { opt:'color',  des:'Image Lane Background'},
+            ticklane:   { opt:'color',  des:'Time Ticks Background'},
+            popuplink:  { opt:'color',  des:'Popup Link Background'}
+            }     
+		  break;
+		case "fontColors":
+      aProps= {   main:     { opt:'color',  des:'Main Font Color'},   // Sub-items
+            head:    { opt:'color',  des:'Header Font Color'},
+            popup:   { opt:'color',  des:'Popup Font Color'},
+            links:   { opt:'color',  des:'Link Font Color'}
+            }  
+    default:
+       console.info(baseVar);
+       break;
+    }
 		for (o in aProps) {													// For each sub-item
 			str+="<tr style='height:26px' onClick='ShowHelp(\""+aProps[o].des+"\")'><td>"+aProps[o].des+"</td><td>";	// Add title
 			if (aProps[o].opt == "color") { 									// If a color
@@ -4625,7 +4644,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
 	var sel = "";
-	console.log(isNaN(attr));
 	if (isNaN(attr)) 
 		sel="#"+attr.replace(/___/g,"");
 	else if (attr < 0) 
@@ -4634,7 +4652,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
 	else sel = "#propInput" + attr;
 		
-	console.log(sel);
     var inputBox = $(sel);
     var inputBoxChip = $(sel+"C");
 
@@ -5870,7 +5887,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
      
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-      window.shivaTimeline =  $(stimeline.con).timeline({
+	  window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
@@ -5886,8 +5903,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
             shivaLib.SendReadyMessage(true); 
           }
-      });
-      
+      });     
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
         $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
