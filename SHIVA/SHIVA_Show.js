@@ -2596,7 +2596,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
             links:   { opt:'color',  des:'Link Font Color'}
             }  
     default:
-       console.info(baseVar);
+       //console.info(baseVar);
        break;
     }
 		for (o in aProps) {													// For each sub-item
