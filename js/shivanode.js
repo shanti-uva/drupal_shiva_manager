@@ -718,11 +718,13 @@
 	Drupal.Shivanode.setHelpLink = function(sntype) {
 	  if(sntype == 'Chart') { sntype = 'Pie Chart'; }
 	  if(sntype != '' && typeof(Drupal.Shivanode.helplinks[sntype]) != 'undefined') {
-      $('#sn-helplink .charttype').text(sntype);
-      $('#sn-helplink a').attr('href', Drupal.Shivanode.helplinks[sntype]);
-      $('#sn-helplink').show();
+      //$('#sn-helplink .charttype').text(sntype);
+      $('#iframe_container legend a.sn-helplink').attr({
+        'href' : Drupal.Shivanode.helplinks[sntype],
+        'title' : sntype + " help"
+      }).show();
     } else {
-      $('#sn-helplink').hide(); // if help URL not defined, hide the link
+      $('#iframe_container legend a.sn-helplink').hide(); // if help URL not defined, hide the link
     }
 	};
 	

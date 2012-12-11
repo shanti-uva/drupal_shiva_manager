@@ -88,6 +88,7 @@ define('SHIVA_RECENT_ENTRIES', 5);
 // Whether to show JSON in Edit Form  
 define('SHIVA_SHOW_JSON', FALSE);
 
+
 /**
  * Implements hook_init.
  *   This hook is run at the beginning of the page request. 
@@ -897,6 +898,7 @@ function shivanode_add_og_user_role($form, &$form_state) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
+    
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
@@ -994,11 +996,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
         l(t('Create a Data Listing from Google Spreadsheet'), 'node/data-elements') . '</div>';
  
-  $form['shivanode_help'] = array(
+  /*$form['shivanode_help'] = array(
     '#type' => 'markup',
     '#markup' => '<div id="sn-helplink"><a href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank"><span class="charttype">Pie Chart</span> Help</a></div>',
     '#weight' => 3,
-  );
+  );*/
   
   // The upper Save/Update button
   $form['upperbuttons'] = array(
@@ -1127,9 +1129,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
   } 
 
-  $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']); 
-  $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' .
-        $eltype . '</span></legend>' .
+  $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']);  //<span class="charttype">Pie Chart</span> Help</a>
+  $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $eltype . '</span>'
+        . '<a class="sn-helplink" href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank" title="Pie Chart Help"><img src="' .
+        $base_path . 'misc/help.png" /></legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" style="overflow: auto;" frameborder="0" onmouseout="Drupal.Shivanode.getJSON();"> </iframe></fieldset>' .
@@ -1166,11 +1169,41 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
  * 
  */
 function shivanode_element_change($form, $form_state) {
+  global $base_path;
+  
+  $helpurls = array(
+      'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
+      'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+      'Bar Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+      'Candlestick Chart' => 'https://wiki.shanti.virginia.edu/x/MgLLAQ',
+      'Column Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+      'Combo Chart' => 'https://wiki.shanti.virginia.edu/x/WQLLAQ',
+      'Gauge' => 'https://wiki.shanti.virginia.edu/x/EADLAQ',
+      'Geo Chart' => 'https://wiki.shanti.virginia.edu/x/XALLAQ',
+      'Line Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+      'Motion Chart' => 'https://wiki.shanti.virginia.edu/x/fgLLAQ',
+      'Org Chart' => 'https://wiki.shanti.virginia.edu/x/dQDAAQ',
+      'Pie Chart' => 'https://wiki.shanti.virginia.edu/x/ZQHLAQ',
+      'Scatter Chart' => 'https://wiki.shanti.virginia.edu/x/ZgDGAQ',
+      'Table' => 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
+      'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
+      'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
+      'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
+      'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
+      'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
+      'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
+      'Timeline' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
+      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ'
+  );
+  
   $typeVal = $form_state['values']['shivanode_element_type']['und'][0]['value'];
   setcookie('Drupal.Shivanode.lastElementType',$typeVal, time() + 300,'/','');
   $typeStr = _shivanode_options_list($typeVal);
+  $helpStr = ($typeStr == "Chart") ? 'Pie Chart' : $typeStr;
   $iframeUrl = _get_shivaframe_url($typeVal);
-  $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span></legend>' .
+  $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span>' .
+        '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help"><img src="' .
+        $base_path . 'misc/help.png" /></legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .

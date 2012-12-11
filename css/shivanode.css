@@ -14,14 +14,32 @@ div.shivanode_display {
   padding: 6px;
 }
 
-/* Help button in edit form */
+/* Help button in edit form
 div#sn-helplink {
-  float: left;
-  margin-top: 22px;
+  /*float: left;
+  margin-top: 22px;*/
+  /*display: block;
+position: absolute;
+top: 200px;
+z-index: 1000;
+left: 0px;
+font-size: small;
+font-style: italic;
 }
 
 div#sn-helplink a {
-  padding-left: 12px;
+  padding: 4px;
+  background: silver;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+} */
+
+a.sn-helplink {
+  padding-left: 6px;
+}
+
+a.sn-helplink img {
+  vertical-align: middle;
 }
 
 /* Upper Action buttons in Edit Form */

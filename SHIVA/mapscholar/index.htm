@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,7 +7,7 @@
 	<title>MapScholar</title>
 	<link rel="stylesheet" type="text/css" href="http://www.viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
  	<script type="text/javascript" src="http://www.viseyes.org/shiva/SHIVA_Show.js"></script>
@@ -15,12 +16,15 @@
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
 		p.pb { text-align:right; color:#fff; }
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:3px;width:192px;background-color:#999;height:14px;padding:3px;color:#fff}
+		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
+		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:12px;-khtml-border-radius:12px;border-radius:12px;background-color:#999;border:1px solid #ccc;color:#eee}
+		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;opacity:.6;margin:0px;padding:0px}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
 				  	 border-collapse: collapse;
-				  	 width:278px;
 				  	 }
 	</style>
 </head>
@@ -39,6 +43,7 @@
 	function ShivaPostInit()
  	{
 		mps.dr.InitEvents();
+		mps.AddMapBoxes();
 	}
 	
      $(document).ready(function() {
@@ -47,30 +52,8 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);	
-		
-		$(function() {
-		    $("#address").autocomplete({
-		      source: function(request, response) {
-		        geocoder.geocode( {'address': request.term }, function(results, status) {
-		          response($.map(results, function(item) {
-		            return {
-		              label:  item.formatted_address,
-		              value: item.formatted_address,
-		              latitude: item.geometry.location.lat(),
-		              longitude: item.geometry.location.lng()
-		            }
-		          }));
-		        })
-		      },
-	     	select: function(event, ui) {
-				var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
-				shivaLib.options.mapcenter=(Math.floor(ui.item.latitude*1000)/1000+","+Math.floor(ui.item.longitude*1000)/1000);
-				shivaLib.Draw(shivaLib.options);
-		      	}
-		    });
-  		});
+});
 
-	});
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +63,7 @@
 function MapScholar()													// CONSTRUCTOR
 {
 	mps=this;																// Point to this
+	this.showBoxes=true;													// Show boxes
 	shivaLib=new SHIVA_Show("containerDiv");								// Alloc SHIVA_Show
 	shivaLib.options={ 	shivaGroup:"Earth", height:"600", width:"800", 
  						mapcenter:"29.36,-80.49", range:"1000000", tilt:"42", heading:"0",
@@ -96,20 +80,25 @@ function MapScholar()													// CONSTRUCTOR
 
 MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 {
-//		atlas[
-//			name, desc, id,
-//			type (tour|collection)
-//			mids[]
-//			]
-//		mobs[
-//			name, src, title, citation, id,
-//			flyto (true|false)
-//			type (map|layer|goto)
-//			metadata{
-//				title,desc,start,end,tags,citation
-//				}
-//			] 
+/*	
+ 
+  atlas[
+			name, desc, id, author
+			type (tour|collection)
+			mids[]
+			]
+		mobs[
+			title, desc, id, dur, author
+			small, med, large, kml
+			status (open|closed|flyto)
+			type (map|layer|goto|chapter|header)
+			start, end, tags, citation
+			north, south, east, west, rotation
+			]            
 
+*/
+			
+	var o,i,j,v;
 	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
 
@@ -119,57 +108,25 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				mids:[],
 				id:0
 				};
-
 	this.AddNewAtlas(atlas);
 
-	var meta={	start:1754,
-				end:0,
-				tags:"England, empire",
-				citation:"John Smythe, 1754 LOC"
-				};
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[0].id);
-	
-	var mob={ 	type:"layer", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"The dividing line",
-				desc:"This is is a KML of the dividing line",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[1].id);
-
-	var mob={ 	type:"goto", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"Central London",
-				desc:"This is is the center of London's business district in the eighteenth century",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[2].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[3].id);
+	var mobs=shivaLib.GetTextFile("default.txt");							// Load data
+	mobs.replace(/\n\r/g,"\n");												// \n\r -> \n
+	mobs.replace(/\r\n/g,"\n");												// \r\n -> \n
+	mobs.replace(/\r/g,"");													// Remove \r's
+	mobs=mobs.split("\n");													// Split into rows
+	var fields=mobs[0].split("\t");											// Get field names
+	for (i=1;i<mobs.length;++i) {											// For each row
+		o={};																// Fresh object
+		v=mobs[i].split("\t");												// Split into fields
+		if (v.length < 4)													// Not enough fields
+			continue;														// Skip it
+		for (j=0;j<=fields.length;++j)										// For each field 
+			if ((fields[j]) && (fields[j].length > 1))						// If a real field
+				o[fields[j]]=v[j];											// Set it
+		this.mobs.push(o);													// Add new mob to project
+		this.AddMobToAtlas(this.atlas[0].id,this.mobs[i-1].id);				// Add to atlas
+		}
 }
 
 MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
@@ -180,7 +137,6 @@ MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJEC
 
 MapScholar.prototype.AddNewMob=function(mob)							// ADD NEW MAP OBJECT TO PROJECT
 {
-	mob.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
 	this.mobs.push($.extend(true,{},mob));									// Copy new mob  to project
 }
 
@@ -219,6 +175,204 @@ MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY 
 	return -1;																// Not found
 }
 
+MapScholar.prototype.ShowHelp=function(context)							// SHOW HELP
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// EARTH CONTROL
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
+{
+	var x,y,cx,cy,x1,y1,lx,ly,ar,sin,cos;
+	var i,j,coords,seg,m,sty;
+	var ge=shivaLib.map;													// Point to earth												
+    var folder=ge.createFolder("wireframes");								// Create folder
+    ge.getFeatures().appendChild(folder);									// Add folder to EDOM
+ 	for (i=0;i<this.mobs.length;++i) {										// For each seg
+		m=this.mobs[i];														// Point at mob
+		ar=m.rotation*(Math.PI/180);										// Angle to radians
+		sin=Math.sin(ar);													// Get sine
+		cos=Math.cos(ar);													// Get cosine
+		if (m.type != "map")												// If not a map
+			continue;														// Continue
+		m.gid="WIRE-"+Math.floor(Math.random()*99999999);					// Make random #
+		coords=ge.createLineString('');										// Holds coords
+		seg=ge.createPlacemark(m.gid);										// Create holder
+		seg.setStyleSelector(ge.createStyle(''));							// Create style
+		seg.setGeometry(coords);											// Set coords in seg
+		folder.getFeatures().appendChild(seg);								// Add seg to folder
+		cx=((m.east-m.west)/2)+(m.west-0);									// Center x
+		cy=((m.south-m.north)/2)+(m.north-0);								// Center y
+		lx=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		ly=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		x=cx+(m.east-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		y=cy+(m.east-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		for (j=0;j<=8;++j) {												// Bisect line
+			x1=lx+(x-lx)/8*j;												// Center x
+			y1=ly+(y-ly)/8*j;												// Center y
+			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
+			}
+		lx=x1;	ly=y1;														// Then is now
+		x=cx+(m.east-cx)*cos-(m.south-cy)*sin;								// Rotate x
+		y=cy+(m.east-cx)*sin+(m.south-cy)*cos;								// Rotate y
+		for (j=0;j<=8;++j) {												// Bisect line
+			x1=lx+(x-lx)/8*j;												// Center x
+			y1=ly+(y-ly)/8*j;												// Center y
+			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
+			}
+		lx=x1;	ly=y1;														// Then is now
+		x=cx+(m.west-cx)*cos-(m.south-cy)*sin;								// Rotate x
+		y=cy+(m.west-cx)*sin+(m.south-cy)*cos;								// Rotate y
+		for (j=0;j<=8;++j) {												// Bisect line
+			x1=lx+(x-lx)/8*j;												// Center x
+			y1=ly+(y-ly)/8*j;												// Center y
+			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
+			}
+		lx=x1;	ly=y1;														// Then is now
+		x=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		y=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		for (j=0;j<=8;++j) {												// Bisect line
+			x1=lx+(x-lx)/8*j;												// Center x
+			y1=ly+(y-ly)/8*j;												// Center y
+			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
+			}
+		sty=seg.getStyleSelector().getLineStyle();							// Get line style
+		sty.setWidth(1);													// Set width	
+		sty.getColor().set("ff00ffff");  									// Set color in aabbggrr format
+		}
+	this.AddMapImages();													// Add images
+	this.ShowMapBoxes(-1,"on");												// Show only open ones											
+
+//shivaLib.ShowIframe(150,95,610,450,"http://www.viseyes.org/shiva/go.htm?e=247","iframe22")
+
+}
+
+MapScholar.prototype.AddMapImages=function()								// ADD MAP IMAGES
+{
+	var i,seg,m;
+	var latLonBox,icon;
+	var n=this.mobs.length;
+	var ge=shivaLib.map;														// Point to earth												
+	for (i=0;i<n;++i) {															// For each seg
+		m=this.mobs[i];															// Point at mob
+		if (m.type != "map")													// If not a map
+			continue;															// Continue
+		m.mid="MAP-"+Math.floor(Math.random()*99999999);						// Make random #
+		seg=ge.createGroundOverlay(m.mid);										// Create holder
+		latLonBox=ge.createLatLonBox('');										// Create box
+		latLonBox.setBox(m.north-0,m.south-0,m.east-0,m.west-0,m.rotation-0);	// Set coords
+		seg.setLatLonBox(latLonBox);											// Set geometry
+		icon=ge.createIcon('');													// Create icon
+		if (m.med)																// If a medium available
+			icon.setHref(m.med);												// Set url
+		else if (m.large)														// If a large
+			icon.setHref(m.large);												// Set url
+		else if (m.small)														// If a small
+			icon.setHref(m.small);												// Set url
+		seg.setDrawOrder(-1);													// Allow overlays on it
+		seg.setIcon(icon);														// Attach to seg
+		ge.getFeatures().appendChild(seg);										// Add seg to EDOM
+		}
+}
+
+MapScholar.prototype.SetHiResMapImage=function(num)							// ADD HI-RES MAP
+{
+	var ge=shivaLib.map;														// Point to earth												
+	var	m=this.mobs[num];														// Point at mob
+	if (!m)																		// Not there
+		return;																	// Quit
+	var img=m.large;															// Get large map
+	if (!img)																	// If exists
+		return;																	// Quit
+	var seg=ge.getElementById(m.mid);											// Get object
+		seg.getIcon().setHref(img);												// Set url
+}
+
+MapScholar.prototype.ShowMapImages=function(num)							// HIDE/SHOW MAPS
+{
+	var i,seg,m,sty;
+	var ge=shivaLib.map;														// Point to earth												
+	var start=num,end=num-0+1;													// Assume one
+	if (num < 0)																// If doing all
+		start=0,end=this.mobs.length;											// Whole list
+	for (i=start;i<end;++i) {													// For each seg
+		m=this.mobs[i];															// Point at mob
+		if ((m.type != "map") || !(m.mid))										// If not a map
+			continue;															// Continue
+		seg=ge.getElementById(m.mid);											// Get object
+		if (mps.sh.mobVis[i]) {													// If active
+			seg.setOpacity(mps.sh.mobVis[i]/100);								// Set alpha
+			seg.setVisibility(true);											// Show it
+			} 
+		else																	// Not visible
+			seg.setVisibility(false);											// Hide it
+		}
+}
+
+MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAMES
+{
+	var i,seg,m,sty;
+	var ge=shivaLib.map;													// Point to earth												
+	var start=num,end=num-0+1;												// Assume one
+	if (num < 0)															// If doing all
+		start=0,end=this.mobs.length;										// Whole list
+	this.ShowMapImages(num);												// Control images
+	if (!mps.showBoxes)														// If not showing wireframes
+		mode="off";															// Force mode off
+	for (i=start;i<end;++i) {												// For each seg
+		m=this.mobs[i];														// Point at mob
+		if (m.type != "map")												// If not a map
+			continue;														// Continue
+		seg=ge.getElementById(m.gid);										// Get object
+		if ((!$("#mobPos"+i).position()) || (mode == "off"))	{			// If it's chapter is not open
+			seg.setVisibility(false);										// Hide it
+			continue;														// Next map
+			}
+		seg.setVisibility(true);											// Show it 
+		sty=seg.getStyleSelector().getLineStyle();							// Get line style
+		if (mode == "select")												// If selecting
+			sty.getColor().set("ff0000ff");  								// Red
+		else																// Regular
+			sty.getColor().set("ff00ffff");  								// Yellow
+		}
+}
+
+MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
+{
+	var m=this.mobs[num];													// Point at mob
+	if (mode)																// If showing
+		shivaLib.ShowIframe(m.north-0,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num);	// Show iframe
+	else
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
+}
+
+MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
+{
+	var m=this.mobs[num];													// Point at mob
+	if (mode) {																// If showing
+		if (!m.west)														// If no position defined
+			m.north=40,m.south=580,m.east=760,m.west=24;					// Set at bottom
+		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num,"black");	// Show iframe
+		}
+	else
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num),trace(22);						// Hide iframe
+}
+
+MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
+{
+	var i;
+	var id=e.getTarget().getId();											// Find id
+	if (id.indexOf("WIRE-") == 0) {											// If a wireframe
+		for (i=0;i<mps.mobs.length;++i) 									// For each seg
+			if (id == mps.mobs[i].gid) {									// A match
+				shivaLib.Sound("click");									// Click
+				mps.sh.HighlightMob(i,e.getShiftKey(),true);				// Highlight mob
+				}
+			}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // SHELF 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,93 +381,348 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 {
 	this.curAtlas=0;														// Default to all
 	this.curMob=-1;															// Default to none
+    this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
+	
+	$("body").keydown(function(e) {										// KEY DOWN HANDLER
+		if (e.keyCode == 40) {												// Down arrow
+			mps.sh.HighlightMob("next",false,true);							// Next mob
+			shivaLib.Sound("click");										// Click
+			}
+		else if (e.keyCode == 38) {											// Up arrow
+			mps.sh.HighlightMob("last",false,true);							// Previous mob
+			shivaLib.Sound("click");										// Click
+			}
+		});
 }
+
+MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLIGHT MOB OBJECT
+{
+	var j;
+	var i=Math.max(this.curMob,0);											// Start point
+	var n=mps.mobs.length-1;												// Last mob
+	if (which == "next") {													// Going forward										
+		i=Math.min(i+1,n);													// Cap at end
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n)) // Skip over nav mobs
+			i++;															// Inc
+		}
+	else if (which == "last") {												// Going backward										
+		i=Math.max(i-1,0);													// Cap at end
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i > 0)) // Skip over nav mobs
+			i--;															// Inc
+		}
+	else																	// Absolute
+		i=Number(which);													// Get number
+	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
+	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
+	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {	// If not visible
+		for (j=i;j>=0;--j) {												// Walk backwards													
+			if (mps.mobs[j].status == "closed") {							// If a closed header/chapter
+				mps.mobs[j].status="open";									// Open it
+				this.FillShelf();											// Fill it
+				break;
+				}
+			}
+		}
+	if ($("#mobPos"+i).position()) {										// If a pos element
+		var y=$("#mobPos"+i).position().top+$("#contentShelf").scrollTop();	// Get pos
+		if (scroll)															// If scrolling
+			$("#contentShelf").scrollTop(y);								// Scroll
+		}
+	if (o.status == "open")			o.status="closed";						// If open, close
+	else if (o.status == "closed")	o.status="open";						// If closed, open
+	if (!multi) {															// If not setting multiples
+		for (j=0;j<n+1;++j)	{												// For each mob
+			if ((this.mobVis[j]) && (mps.showBoxes))						// If selected
+				mps.ShowMapBoxes(j,"on");									// Reset box
+			if (j != this.curMob)											// If not this one
+				this.mobVis[j]=0;											// Hide mob
+			}
+		}
+	if (this.mobVis[i] < 50)												// If off
+		this.mobVis[i]=100;													// Turn it on
+	else																	// If on
+		this.mobVis[i]=0;													// Turn it off
+	this.FillShelf();														// Redraw shelf
+	mps.ShowMapBoxes(-1,"on");												// Show visible boxes
+	if (mps.showBoxes)														// If showing boxes
+		mps.ShowMapBoxes(i,"select");										// Highlight box
+	if (o.type == "link")													// If a link
+		mps.ShowLink(i,this.mobVis[i] > 0);									// Show/hide iframe
+	else if (o.type == "sound")												// If a link
+		mps.ShowSound(i,this.mobVis[i] > 0);								// Show/hide audio iframe
+}
+
 
 MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 {
 	var i;
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
-	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
-	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
-	$("#controlBarDiv").html(str+"</p>")										// Add to DOM
-	str="<div id='contentShelf' style='width:228px;height:598px;background-color:#fff;border:1px solid #999;margin:0px;padding:0px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
-    str+="<p align='center'><select id='tourSelect' style='font-size:x-small'>";
-    str+="<option>All maps</option>";       str+="<option>Ceded Islands</option>";
-    str+="<option>Florida</option>";
-
+	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:80px' type='text'/>";
+	str+="<div id='timeline' style='position:absolute;left:150px;width:858px;top:7px;height:20px' class='timelinebar'></div>";
+	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
+	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
+	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
+	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
+	if (this.expandAll)														// If expand
+		str+="expand2.gif'> Expand all";									// Expand all button
+	else																	// Collaspe
+		str+="collapse2.gif'> Collapse all";								// Collapse all button
+	str+="<img src='img/settingsbut.png' style='position:absolute;left:215px;top:613px' onclick='mps.sh.Settings()'></p>";		
+	$("#shelfDiv").html(str);												// Add div
+	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
+	this.mobVis=[];															// Remove old array
+	for (i=0;i<n;++i)														// For each mob
+		this.mobVis.push(0);												// Make it hidden                                       
+	this.FillShelf();														// Draw shelf
 	
-	$("#shelfDiv").html(str+"</table></div>");
-    var n=mps.atlas[this.curAtlas].mids.length;                                 // Number of mobs to add
-    this.mobVis=[];                                                             // Remove old array
-    for (i=0;i<n;++i)                                                           // For each mob
-	   this.mobVis.push(0);                                                     // Make it hidden                                       
-	this.FillShelf();                                                           // Drawshelf
- }
+	$("#expandAll").click(function(e) {									// EXPAND/COLLAPSE ALL
+		shivaLib.Sound("click");											// Click
+		mps.sh.ToggleExpandCollapse();										// Expand or collapse
+		});
 
-MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
+    $("#mpsFind").autocomplete({										// FIND ON EARTH
+      source: function(request, response) {
+        geocoder.geocode( {'address': request.term }, function(results, status) {
+          response($.map(results, function(item) {
+            return {
+              label:  item.formatted_address,
+              value: item.formatted_address,
+              latitude: item.geometry.location.lat(),
+              longitude: item.geometry.location.lng()
+            }
+          }));
+        })
+      },
+ 	select: function(event, ui) {										// GOTO
+		var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+		shivaLib.options.mapcenter=(Math.floor(ui.item.latitude*1000)/1000+","+Math.floor(ui.item.longitude*1000)/1000);
+		shivaLib.Draw(shivaLib.options);
+      	}
+    });
+	
+}
+
+MapScholar_Shelf.prototype.Settings=function()							// SETTINGS
 {
-	var i,o,pic;
-	var n=mps.atlas[this.curAtlas].mids.length;									// Number of mobs to add
-	str="<table cellspacing='0' cellpadding='8'>";
-	for (i=0;i<n;++i) {															// For each mob
-		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];			// Point at mob
-		if (o.type == "map") {													// A map													
-			if (o.thumb)														// If a thumb defined															
-				pic=o.thumb; 													// Use it
-			else if (o.med)														// Else if a med defined															
-				pic=o.med; 														// Use it
-			else if (o.large)													// Else if a large defined															
-				pic=o.med; 														// Use it
-			}
-		else if (o.type == "layer") 											// A layer													
-	        if (o.thumb)                                                        // If a thumb defined                                                           
-                pic=o.thumb;                                                    // Use it
-			else                                                                // Use icon
-			 pic="img/layericon.png";											// Set
-		else if (o.type == "goto") 												// A goto													
-			pic="img/gotoicon.png";												// Use icon
-	    str+="<tr id='mob"+i+"'";                                               // Row start
-        str+="><td width='68'><img width='64' src='"+pic+"'>";	                // Add pic
-        str+="<br/></td><td align='top'><span";
-       if (this.mobVis[i] > 0)                                                  // If showing
-            str+=" style='color:#990000'";                                      // Color it
-        str+="><b>"+o.title+"</b></span><br/>";			                        // Add title
- 		str+=o.desc;												            // Add desc
- 		str+="<br/><br/</td></tr>";												// Close entry
-        if ((this.curMob == i) && (this.mobVis[i] > 0) && (o.type != "goto"))  // If current and visible layer or map
-            str+="<tr style='border-collapse:collapse;border-spacing:0px;'><td align='center'>Visibility</td><td><input type='range' style='width:80px;height:14px;vertical-align:middle'; id='mobVis'/></td></tr>";   
+	var str="<br/<table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
+	str+="<tr><td width='25%'>Show map boxes?</td><td><input type='checkbox'";
+	if (mps.showBoxes)														// If set
+		str+=" checked='checked'"											// Check it			
+	str+=" style='vertical-align:middle' id='wireframes'></td></tr>";		// End box
+	str+="</table><div align='right' style='font-size:x-small'><br/>";				
+	str+=" <button id='OKBut'>OK</button>";									// OK
+	shivaLib.ShowLightBox(-350,20,"MapScholar settings",str)				// Create light box
+
+	$("#OKBut").button().click(function() { $("#shivaLightBoxDiv").remove();});  // OK
+
+	$("#wireframes").click(function(e) {								// SHOW BOXES?
+		shivaLib.Sound("click");											// Click
+		mps.showBoxes=e.target.checked;										// Set var
+		if (e.target.checked)												// If checked
+			mps.ShowMapBoxes(-1,"on");										// Show them
+		else																// If unchecked
+			mps.ShowMapBoxes(-1,"off");										// Hide
+		});
+}
+
+MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE ALL
+{
+	var i,o,n;
+	this.expandAll=!this.expandAll;											// Toggle state
+	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+	for (i=0;i<n;++i) {                                                     // For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		if ((o.type == "chapter") || (o.type == "header")) 					// A header													
+			o.status=this.expandAll?"closed":"open";						// Set status
 		}
-	$("#contentShelf").html("</table>"+str);                                    // Add mobs
-    if (this.curMob != -1) {                                                    // If a current
-        $("#visControl").show();                                                // Show it
-        $("#mobVis").val(this.mobVis[this.curMob]);                             // Set value
-        }
-	for (i=0;i<n;++i) {															// For each mob
-		$("#mob"+i).click( function(e) {										// Add click handler
-	        if (!e.shiftKey)                                                    // If not setting multiples
-	           for (j=0;j<n;++j)                                                // For each mob
-	               mps.sh.mobVis[j]=0;                                          // Hide them all
-			shivaLib.Sound("click");                                            // Click
-			var id=this.id.substr(3);                                           // Get id
-			mps.sh.curMob=id;								                    // Set curmob
-			if (mps.sh.mobVis[id] < 50)                                         // If off
-                mps.sh.mobVis[id]=100;                                          // Turn it on
-            else                                                                // If on
-                mps.sh.mobVis[id]=0;                                            // Turn it off
-			mps.sh.FillShelf();                                                 // Redraw shelf
+	this.Draw();															// Draw shelf
+	mps.ShowMapBoxes(-1,"on");												// Show visible boxes
+}
+
+MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
+{
+	var tim="";
+	var i,j,o,x,y,pic;
+	var min=3000,max=0;
+	var dates=new Array();
+ 	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+	var str="<table cellspacing='0'>";                                      // Table start
+	for (i=0;i<n;++i) {                                                     // For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+ 		if (o.start && !isNaN(o.start))	{									// A valid year
+			min=Math.min(o.start,min);										// Find min
+			max=Math.max(o.start,max);										// Find max
+			}
+		}
+	var pixPerYear=($("#timeline").width()-24)/(max-min);					// Pixels per year
+	i=min;																	// Start at  min
+	while (i < max-10) {													// While not max
+ 		i=(i-i%10)-0+10;													// Next decade
+		x=Math.round((i-min)*pixPerYear)+8;									// X pos
+   		tim+="<div style='position:absolute;left:"+(x+3)+"px;top:4px'><i>"+i+"</i></div>";
+   		tim+="<div style='position:absolute;left:"+x+"px;height:17px;width:1px;top:2px;background-color:#ccc'/>";
+		}
+	for (i=0;i<n;++i) {                                                     // For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
+			str+="<tr valign='top' height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
+			str+="<img id='mob"+i+"' src='img/";							// Img base
+			if (o.status == "closed")										// If open
+				str+="expand";												// Expand
+			else															// If closed
+				str+="collapse";											// Collapse
+			if (o.type == "header")											// If a header
+				str+="2";													// Use dark icons
+			str+=".gif'><b>"+o.title+"</div>";								// Title
+			str+="</td><tr>";												// End 
+			if ((o.desc)&& (o.status != "closed"))							// If a description
+				str+="<tr><td colspan='2'><i>"+o.desc+"</i><br/><br/></td></tr>";	// Add it
+			if (o.status == "closed")	{									// If closed
+				var type=o.type;											// Search type
+				for (j=i+1;j<n;++j) {										// For each mob
+					o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[j])];   // Point at mob
+					if (o.type == type)										// If a match
+						break;												// Quit
+					if ((type == "header") && (o.type == "chapter"))		// Quit on chapter if a header
+						break;												// Quit
+					}
+				i=j-1;														// Set next index
+				}
+			continue;
+			}
+		if (o.type == "map") { 												// A map													
+			if (o.small)                                                    // If a small defined															
+				pic=o.small;												// Use it
+			else if (o.med)													// Else if a med defined															
+				pic=o.med;													// Use it
+			else if (o.large)												// Else if a large defined															
+			pic=o.med;														// Use it
+			tim+=AddMapToTimeline(o,i);										// Add map to timeline
+			}
+		else if (o.type == "layer") {										// A layer													
+			if (o.small)													// If a thumb defined                                                           
+				pic=o.small;												// Use it
+			else															// Use icon
+				pic="img/layericon.png";									// Set
+			}
+		else if (o.type == "goto")											// A goto													
+			pic="img/gotoicon.png";											// Use icon
+		else if (o.type == "link")											// A shiva element													
+			pic="img/linkicon.png";											// Use icon
+		else if (o.type == "sound")											// A sound													
+			pic="img/audioicon.png";										// Use icon
+		str+="<tr id='mob"+i+"'";											// Row start
+		if (this.mobVis[i] > 0) 											// If visible
+			str+="' style='background-color:#ccccff'";						// Color background
+		str+="><td valign='top' width='70'><img "; 							// Img start								
+			if (o.type == "map")											// If a map                                                    
+            str+=" style='border: 1px solid #999' ";						// Add border
+		str+=" width='64' src='"+pic+"'>&nbsp;&nbsp;</td>";					// Add pic
+		str+="<td valign='top'><span id='mobPos"+ i+"'><b>"+o.title+"</b><br/></span>";	// Add title
+		if ((o.type == "map") && (o.start))									// If a map and a date
+			str+="<span style='color:#770000'><b>"+o.start+"</b></span> ";	// Add date
+		if (o.desc)															// If desc spec'd
+			str+=o.desc+"<br/>";											// Add desc
+		str+="<br/></td></tr>";												// Close entry
+		if ((this.curMob == i) && (this.mobVis[i] > 0) && ((o.type == "map") || (o.type == "layer"))){	// If selected and visible
+			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
+			str+="<div id='mobVis' style='width:60%;display:inline-block'></div>";		// Add div for vis
+			str+="&nbsp;&nbsp;&nbsp;&nbsp;<img id='mobInfo' title='See citation' src='img/infobutton.gif'/>";
+			if (o.large)
+				str+="&nbsp;&nbsp;<img id='hiresmap' title='See hi-res map' src='img/viewdot.gif'/>";
+			str+="<br/><br/></td></tr>";
+			str+="<tr><td colspan='2' id='mobCite'></td></tr>";
+			}
+		}
+	$("#timeline").html(tim);												// Add timeline data
+	$("#contentShelf").html("</table>"+str);								// Add mobs
+	if (this.curMob != -1) {												// If a current
+		$("#visControl").show();											// Show it
+		$("#mobVis").val(this.mobVis[this.curMob]);							// Set value
+		}
+  	for (i=0;i<dates.length;++i){											// For each map
+		if (dates[i].part > 1) {											// If multi
+	  		a=1;
+	  		for (j=i;j<dates.length;++j)									// For each map
+				if (dates[i].date == dates[j].date) {						// One of the set
+					$("#timedot"+dates[j].index).height(Math.max(1,8/dates[j].part));	// Shrink it
+					$("#timedot"+dates[j].index).css("top",a++*Math.max(1,8/dates[j].part-0+2)+"px");	// Position it
+					dates[j].part=1;										// Skip it
+					}
+			}
+		}
+	for (i=0;i<n;++i) {														// For each mob
+		$("#timedot"+i).click( function(e) {								// Add click handler
+			var id=this.id.substr(7);										// Get id
+			shivaLib.Sound("click");										// Click
+			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
 			});
-          }
-  
-    $("#mobVis").change(function(e){                                         // SET VISIBILITY
-         mps.sh.mobVis[mps.sh.curMob]=$("#mobVis").val();                        // Set vis factor
-         });
+		$("#mob"+i).click( function(e) {									// Add click handler
+			shivaLib.Sound("click");										// Click
+			var id=this.id.substr(3);										// Get id
+			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
+			});
+		}
+ 
+ 
+  	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
+  		var j,p=1,a=1;
+  		var x=Math.round((o.start-min)*pixPerYear)+8;						// X pos
+   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+7+"px;";
+   		if (mps.sh.mobVis[i] > 0)											// If selected
+  			str+='background-color:#000099';								// Make it blue
+   		str+=" ' title='"+o.start+"'></div>";								// Tooltip
+	  	for (j=0;j<dates.length;++j)										// For each map
+			if (dates[j].date == o.start) ++p;								// If it matches this date, inc
+	 	dates.push({date: o.start, part: p, index:i});						// Save the date
+	  	for (j=0;j<dates.length;++j)										// For each map
+			if (dates[j].date == o.start) dates[j].part=p;					// If it matches this date, set part
+    	return str;															// Return div
+ 		}	
+   
+	$("#mobInfo").click( function(e) {									// CLICK ON INFO BUTTON
+		shivaLib.Sound("click");											// Click
+		var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])];	// Point at mob
+		if ($("#mobCite").html()) {											// If something there already
+			$("#mobCite").html("");											// Clear it
+			$("#mobCite").css("padding","0px");								// No padding
+			}
+		else{																// Nothing there yet
+			var str="<hr/><b>";
+			str+=o.type.substr(0,1).toUpperCase()+o.type.substr(1)+" ";		// Set type
+			str+=o.id+"</b>";												// Add map id
+			if (o.start) {													// If a start set
+				str+="&nbsp;&nbsp;&nbsp;("+o.start;							// Add it
+				if (o.end)													// If an end set
+					str+=" - "+o.end;										// Add it
+				str+=")";													// Close date paren
+				}
+			if (o.citation)													// If a citation set
+				str+="<br/>"+o.citation;									// Add it
+			$("#mobCite").html(str);										// Set text
+			$("#mobCite").css("background-color","#ccccff");				// Color
+			$("#mobCite").css("padding","6px");								// Add padding
+			}
+		});
 
-	}
-	
+	$("#hiresmap").click( function(e) {									// CLICK ON HIRES MAP
+		shivaLib.Sound("click");											// Click
+		mps.SetHiResMapImage(mps.sh.curMob);								// Srt hi-res map
+		});
 
-
+	if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {			// If selected and visible
+		var val=this.mobVis[this.curMob];									// Get def
+		var ops={ min:0, max:100, value:val,								// Slider options
+			slide:function(event,ui) {										// Slide cb
+				mps.sh.mobVis[mps.sh.curMob]=ui.value;						// Set vis factor
+				mps.ShowMapImages(mps.sh.curMob);							// Set alpha
+				}
+			}    
+		$("#mobVis" ).slider(ops);											// Init slider
+		}
+}
 	
 
 

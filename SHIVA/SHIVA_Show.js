@@ -87,7 +87,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js"; //http://mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
+			lib="timeglider-all.js";
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -2579,26 +2579,24 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 						slantedText:	{ opt:'string',	 des:'Slanted text'}
 						}			
 			break;
-		case "backgroundColors":
-		  aProps= {   main:     { opt:'color',  des:'Main Background'},   // Sub-items
-            eventspan:  { opt:'color',   des:'Event Span Background'},
-            head:    { opt:'color',  des:'Header, Footer and Zoom Background'},
-            popup:     { opt:'color',  des:'Popup Background'},
-            imagelane:    { opt:'color',  des:'Image Lane Background'},
-            ticklane:   { opt:'color',  des:'Time Ticks Background'},
-            popuplink:  { opt:'color',  des:'Popup Link Background'}
-            }     
-		  break;
-		case "fontColors":
-      aProps= {   main:     { opt:'color',  des:'Main Font Color'},   // Sub-items
-            head:    { opt:'color',  des:'Header Font Color'},
-            popup:   { opt:'color',  des:'Popup Font Color'},
-            links:   { opt:'color',  des:'Link Font Color'}
-            }  
-    default:
-       //console.info(baseVar);
-       break;
-    }
+		 case "backgroundColors":
+		          aProps= {   main:     { opt:'color',  des:'Main Background'},   // Sub-items
+		            eventspan:  { opt:'color',   des:'Event Span Background'},
+		            head:    { opt:'color',  des:'Header, Footer and Zoom Background'},
+		            popup:     { opt:'color',  des:'Popup Background'},
+		            imagelane:    { opt:'color',  des:'Image Lane Background'},
+		            ticklane:   { opt:'color',  des:'Time Ticks Background'},
+		            popuplink:  { opt:'color',  des:'Popup Link Background'}
+		            }     
+		          break;
+		        case "fontColors":
+		      aProps= {   main:     { opt:'color',  des:'Main Font Color'},   // Sub-items
+		            head:    { opt:'color',  des:'Header Font Color'},
+		            popup:   { opt:'color',  des:'Popup Font Color'},
+		            links:   { opt:'color',  des:'Link Font Color'}
+		            }  
+			}
+
 		for (o in aProps) {													// For each sub-item
 			str+="<tr style='height:26px' onClick='ShowHelp(\""+aProps[o].des+"\")'><td>"+aProps[o].des+"</td><td>";	// Add title
 			if (aProps[o].opt == "color") { 									// If a color
@@ -2707,6 +2705,30 @@ SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET G
  			}
 		callback(theData);
      }
+}
+
+SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
+{
+	$("#"+id).remove();															
+	$("#CL-"+id).remove();															
+	if ((hgt == 0) || (wid == 0))
+		return;
+	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
+	if (mode == "black")
+		str+="border:none;background-color:black;"
+	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:+"+left+"px;top:"+top+"px;'/>";
+	$("body").append(str);	
+	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
+	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
+	if (mode != "black")
+		$("body").append(str);	
+
+	$("#CL-"+id).bind("load",function(e) {
+		this.contentWindow.document.body.onclick=function(e) {
+     	shivaLib.Sound("delete");
+		$("#"+id).remove();															
+		$("#CL-"+id).remove();															
+      }});
 }
 
 SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
@@ -4644,6 +4666,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
 	var sel = "";
+	console.log(isNaN(attr));
 	if (isNaN(attr)) 
 		sel="#"+attr.replace(/___/g,"");
 	else if (attr < 0) 
@@ -4652,6 +4675,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
 	else sel = "#propInput" + attr;
 		
+	console.log(sel);
     var inputBox = $(sel);
     var inputBoxChip = $(sel+"C");
 
