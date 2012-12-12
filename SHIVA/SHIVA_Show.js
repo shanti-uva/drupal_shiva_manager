@@ -5905,7 +5905,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         eventData.events.push(o);
       }
       
-      stimeline.events = eventData.events;
+      stimeline.events = normalizeEvents(eventData.events);
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -5956,6 +5956,36 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       function padZero(n) {
         if(n < 10) { n = '0' + n; }
         return n;
+      }
+      
+      // Adapts simile timeline data to timeglider requirements
+      function normalizeEvents(events) {
+        for(var n in events) {
+          var ev = events[n];
+          if(typeof(ev.id) == "undefined") {
+            ev.id = "event" + (parseInt(n) + 1);
+          }
+          if (typeof(ev.start) != "undefined" && typeof(ev.startdate) == "undefined") {
+            ev.startdate = ConvertTimelineDate(ev.start);
+          }
+          if (typeof(ev.end) != "undefined" && typeof(ev.enddate) == "undefined") {
+            ev.enddate = ConvertTimelineDate(ev.end);
+          }
+          if(typeof(ev.high_threshold) == "undefined") {
+            ev.high_threshold = 50;
+          }
+          if(typeof(ev.importance) == "undefined") {
+            ev.importance = 50;
+          }
+          if(typeof(ev.date_display) == "undefined") {
+            ev.date_display = "ye";
+          }
+          if(typeof(ev.icon) == "undefined") {
+            ev.icon = "none"
+          }
+        }
+        console.info(events);
+        return events;
       }
     }
   } 
