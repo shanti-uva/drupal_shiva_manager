@@ -217,6 +217,7 @@
     'Network': 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
     'Subway': 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
     'Timeline': 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
+    'Timeglider': 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
     'Video': 'https://wiki.shanti.virginia.edu/x/upy1AQ'
   };
 	
