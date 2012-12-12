@@ -48,6 +48,7 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="<tr><td>Image URL&nbsp;</td><td><input type='text' style='width:130px;font-size:x-small' id='annUrl'/></td></tr>";
 		str+="<tr><td valign='bottom'>Rotation&nbsp;</td><td><div id='annRot' style='width:100px;display:inline-block'</div>";
 		str+="<input type='text' style='font-size:xx-small;vertical-align:top;border:none;background:none' id='annRot2'/></td></tr>";
+		str+="<tr><td>Coords&nbsp;</td><td><textarea rows='5' style='width:130px;font-size:x-small' id='annPos'></textarea></td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="Drag corner dots to resize image. If Shift key is pressed, the image will be stretched. Drag the center of image to move the image.<br/><br/>";
 		str+="You can fine-tune the rotation by dragging a corner point and pressing the Alt or Option key. Dragging point left of center rotates CCW, right rotates CW.";
@@ -135,6 +136,8 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 		$("#annUrl").val(url);													// Set url
 		$("#annRot").val(rot);													// Show cur rot
 		$("#annRot2").val(rot);													// Set rot text
+		if ((type == "Image") && (this.curSeg != -1))
+			$("#annPos").val(s.lats[0]+"\t"+s.lats[1]+"\t"+s.lons[0]+"\t"+s.lons[1]+"\t"+s.rot);		// Show cur pos for images
 		}
 	else{
 		this.curSeg=-1;															// Not editing

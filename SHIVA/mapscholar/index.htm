@@ -18,8 +18,8 @@
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:3px;width:192px;background-color:#999;height:14px;padding:3px;color:#fff}
 		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
-		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:12px;-khtml-border-radius:12px;border-radius:12px;background-color:#999;border:1px solid #ccc;color:#eee}
-		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;opacity:.6;margin:0px;padding:0px}
+		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:12px;-khtml-border-radius:12px;border-radius:12px;background-color:#999;color:#eee}
+		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;margin:0px;padding:0px}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
@@ -244,70 +244,75 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		}
 	this.AddMapImages();													// Add images
 	this.ShowMapBoxes(-1,"on");												// Show only open ones											
-
-//shivaLib.ShowIframe(150,95,610,450,"http://www.viseyes.org/shiva/go.htm?e=247","iframe22")
-
 }
 
-MapScholar.prototype.AddMapImages=function()								// ADD MAP IMAGES
+MapScholar.prototype.AddMapImages=function()							// ADD MAP IMAGES
 {
 	var i,seg,m;
 	var latLonBox,icon;
 	var n=this.mobs.length;
-	var ge=shivaLib.map;														// Point to earth												
-	for (i=0;i<n;++i) {															// For each seg
-		m=this.mobs[i];															// Point at mob
-		if (m.type != "map")													// If not a map
-			continue;															// Continue
-		m.mid="MAP-"+Math.floor(Math.random()*99999999);						// Make random #
-		seg=ge.createGroundOverlay(m.mid);										// Create holder
-		latLonBox=ge.createLatLonBox('');										// Create box
+	var ge=shivaLib.map;													// Point to earth												
+	for (i=0;i<n;++i) {														// For each seg
+		m=this.mobs[i];														// Point at mob
+		if (m.type == "layer") {											// If a layer
+			var link=ge.createLink('');										// Create link object	
+			link.setHref(m.url);											// Set url
+			m.mid="LAYER-"+Math.floor(Math.random()*99999999);				// Make random #
+			seg=ge.createNetworkLink(m.mid);								// Create layer object
+			seg.set(link,true,m.status == "goto"); 							// Sets link and flyToView
+			ge.getFeatures().appendChild(seg);								// Add it to display list
+			}
+		if (m.type != "map")												// If not a map
+			continue;														// Continue
+		m.mid="MAP-"+Math.floor(Math.random()*99999999);					// Make random #
+		seg=ge.createGroundOverlay(m.mid);									// Create holder
+		latLonBox=ge.createLatLonBox('');									// Create box
 		latLonBox.setBox(m.north-0,m.south-0,m.east-0,m.west-0,m.rotation-0);	// Set coords
-		seg.setLatLonBox(latLonBox);											// Set geometry
-		icon=ge.createIcon('');													// Create icon
-		if (m.med)																// If a medium available
-			icon.setHref(m.med);												// Set url
-		else if (m.large)														// If a large
-			icon.setHref(m.large);												// Set url
-		else if (m.small)														// If a small
-			icon.setHref(m.small);												// Set url
-		seg.setDrawOrder(-1);													// Allow overlays on it
-		seg.setIcon(icon);														// Attach to seg
-		ge.getFeatures().appendChild(seg);										// Add seg to EDOM
+		seg.setLatLonBox(latLonBox);										// Set geometry
+		icon=ge.createIcon('');												// Create icon
+		if (m.med)															// If a medium available
+			icon.setHref(m.med);											// Set url
+		else if (m.url)														// If a large
+			icon.setHref(m.url);											// Set url
+		else if (m.small)													// If a small
+			icon.setHref(m.small);											// Set url
+		seg.setDrawOrder(-1);												// Allow overlays on it
+		seg.setIcon(icon);													// Attach to seg
+		ge.getFeatures().appendChild(seg);									// Add seg to EDOM
 		}
 }
 
-MapScholar.prototype.SetHiResMapImage=function(num)							// ADD HI-RES MAP
+MapScholar.prototype.SetHiResMapImage=function(num)						// ADD HI-RES MAP
 {
-	var ge=shivaLib.map;														// Point to earth												
-	var	m=this.mobs[num];														// Point at mob
-	if (!m)																		// Not there
-		return;																	// Quit
-	var img=m.large;															// Get large map
-	if (!img)																	// If exists
-		return;																	// Quit
-	var seg=ge.getElementById(m.mid);											// Get object
-		seg.getIcon().setHref(img);												// Set url
+	var ge=shivaLib.map;													// Point to earth												
+	var	m=this.mobs[num];													// Point at mob
+	if ((!m)|| (m.type != "map"))											// Not there
+		return;																// Quit
+	var img=m.url;															// Get large map
+	if (!img)																// If exists
+		return;																// Quit
+	var seg=ge.getElementById(m.mid);										// Get object
+		seg.getIcon().setHref(img);											// Set url
 }
 
-MapScholar.prototype.ShowMapImages=function(num)							// HIDE/SHOW MAPS
+MapScholar.prototype.ShowMapImages=function(num)						// HIDE/SHOW MAPS
 {
 	var i,seg,m,sty;
-	var ge=shivaLib.map;														// Point to earth												
-	var start=num,end=num-0+1;													// Assume one
-	if (num < 0)																// If doing all
-		start=0,end=this.mobs.length;											// Whole list
-	for (i=start;i<end;++i) {													// For each seg
-		m=this.mobs[i];															// Point at mob
-		if ((m.type != "map") || !(m.mid))										// If not a map
-			continue;															// Continue
-		seg=ge.getElementById(m.mid);											// Get object
-		if (mps.sh.mobVis[i]) {													// If active
-			seg.setOpacity(mps.sh.mobVis[i]/100);								// Set alpha
-			seg.setVisibility(true);											// Show it
+	var ge=shivaLib.map;													// Point to earth												
+	var start=num,end=num-0+1;												// Assume one
+	if (num < 0)															// If doing all
+		start=0,end=this.mobs.length;										// Whole list
+	for (i=start;i<end;++i) {												// For each seg
+		m=this.mobs[i];														// Point at mob
+		if (((m.type != "map") && (m.type != "layer")) || !(m.mid))			// If not a map or layer
+			continue;														// Continue
+		seg=ge.getElementById(m.mid);										// Get object
+		if (mps.sh.mobVis[i]) {												// If active
+			seg.setOpacity(mps.sh.mobVis[i]/100);							// Set alpha
+			seg.setVisibility(true);										// Show it
 			} 
-		else																	// Not visible
-			seg.setVisibility(false);											// Hide it
+		else																// Not visible
+			seg.setVisibility(false);										// Hide it
 		}
 }
 
@@ -323,10 +328,14 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 		mode="off";															// Force mode off
 	for (i=start;i<end;++i) {												// For each seg
 		m=this.mobs[i];														// Point at mob
+		if (m.type == "link")												// If a link
+			this.ShowLink(i,mps.sh.mobVis[i] > 0);							// Show/hide iframe
+		else if (m.type == "sound")											// If a sound
+			mps.ShowSound(i,mps.sh.mobVis[i] > 0);							// Show/hide audio iframe
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		seg=ge.getElementById(m.gid);										// Get object
-		if ((!$("#mobPos"+i).position()) || (mode == "off"))	{			// If it's chapter is not open
+		if ((!$("#mobPos"+i).position()) || (mode == "off")) {				// If it's chapter is not open
 			seg.setVisibility(false);										// Hide it
 			continue;														// Next map
 			}
@@ -339,11 +348,27 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 		}
 }
 
+MapScholar.prototype.Goto=function(pos)									// SET EARTH VIEWPOINT
+{
+	if ((!pos) || (pos.length < 5))											// No where to go
+		return;																// Quit
+	var ge=shivaLib.map;													// Point to earth												
+	pos=pos.replace(/"/g,"");												// Remove quotes
+	var v=pos.split(",");													// Split up
+	var lookAt=ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
+	lookAt.setLatitude(v[0]-0);												// Set lat
+	lookAt.setLongitude(v[1]-0);											// Set lon
+	lookAt.setRange(v[2]-0);												// Set range
+	lookAt.setTilt(v[3]-0);													// Set tilt
+	lookAt.setHeading(v[4]-0);												// Set heading
+	ge.getView().setAbstractView(lookAt);									// Go there
+}
+
 MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
 {
 	var m=this.mobs[num];													// Point at mob
 	if (mode)																// If showing
-		shivaLib.ShowIframe(m.north-0,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num);	// Show iframe
+		shivaLib.ShowIframe(m.north-0,m.south-0,m.east-0,m.west-0,m.url,"iframe-"+num);	// Show iframe
 	else
 		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
@@ -351,13 +376,19 @@ MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
 MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
 {
 	var m=this.mobs[num];													// Point at mob
+	var url="http://www.viseyes.org/shiva/go.htm?shivaGroup=Video&dataSourceUrl="
+	url+=m.url+"&volume=50&height=30&width=290";
+	url+="&start="+(m.start?m.start:0)+"&end="+(m.end?m.end:"");			// Start, end
+	url+="&autoplay="+(m.status == "play")+"&volume="+(m.rotation?m.rotation:50);		// Autoplay, volume
+	if ($.browser.mozilla)													// Firefox
+		url=url.replace(/\.mp3/g,".ogg");									// Needs oggs
 	if (mode) {																// If showing
 		if (!m.west)														// If no position defined
-			m.north=40,m.south=580,m.east=760,m.west=24;					// Set at bottom
-		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num,"black");	// Show iframe
+			m.north=270,m.south=579,m.east=302,m.west=32;					// Set at bottom
+		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,url,"iframe-"+num,"black");	// Show iframe
 		}
-	else
-		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num),trace(22);						// Hide iframe
+	else																	// If hiding
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
 
 MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
@@ -403,18 +434,19 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	var n=mps.mobs.length-1;												// Last mob
 	if (which == "next") {													// Going forward										
 		i=Math.min(i+1,n);													// Cap at end
-		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n)) // Skip over nav mobs
-			i++;															// Inc
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n))  // Skip over nav mobs
+			mps.Goto(mps.mobs[i++].goto);										// Set position
 		}
 	else if (which == "last") {												// Going backward										
 		i=Math.max(i-1,0);													// Cap at end
-		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i > 0)) // Skip over nav mobs
-			i--;															// Inc
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i > 0))  // Skip over nav mobs
+			mps.Goto(mps.mobs[i--].goto);									// Set position
 		}
 	else																	// Absolute
 		i=Number(which);													// Get number
 	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
 	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
+	mps.Goto(o.goto);														// Position
 	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {	// If not visible
 		for (j=i;j>=0;--j) {												// Walk backwards													
 			if (mps.mobs[j].status == "closed") {							// If a closed header/chapter
@@ -447,10 +479,6 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	mps.ShowMapBoxes(-1,"on");												// Show visible boxes
 	if (mps.showBoxes)														// If showing boxes
 		mps.ShowMapBoxes(i,"select");										// Highlight box
-	if (o.type == "link")													// If a link
-		mps.ShowLink(i,this.mobVis[i] > 0);									// Show/hide iframe
-	else if (o.type == "sound")												// If a link
-		mps.ShowSound(i,this.mobVis[i] > 0);								// Show/hide audio iframe
 }
 
 
@@ -460,7 +488,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
 	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:80px' type='text'/>";
-	str+="<div id='timeline' style='position:absolute;left:150px;width:858px;top:7px;height:20px' class='timelinebar'></div>";
+	str+="<div id='timeline' style='position:absolute;left:149px;width:861px;top:7px;height:22px' class='timelinebar'></div>";
 	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
 	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
@@ -469,7 +497,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		str+="expand2.gif'> Expand all";									// Expand all button
 	else																	// Collaspe
 		str+="collapse2.gif'> Collapse all";								// Collapse all button
-	str+="<img src='img/settingsbut.png' style='position:absolute;left:215px;top:613px' onclick='mps.sh.Settings()'></p>";		
+	str+="<img src='img/settingsbut.png' style='position:absolute;left:214px;top:613px' onclick='mps.sh.Settings()'></p>";		
 	$("#shelfDiv").html(str);												// Add div
 	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
 	this.mobVis=[];															// Remove old array
@@ -506,15 +534,18 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 
 MapScholar_Shelf.prototype.Settings=function()							// SETTINGS
 {
-	var str="<br/<table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
-	str+="<tr><td width='25%'>Show map boxes?</td><td><input type='checkbox'";
+	var la=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+	var pos=Math.floor(la.getLatitude()*10000)/10000+","+Math.floor(la.getLongitude()*10000)/10000+",";
+	pos+=Math.floor(la.getRange())+","+Math.floor(la.getTilt()*100)/100+","+Math.floor(la.getHeading()*100)/100;
+	var str="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
+	str+="<tr><td>Show map boxes? </td><td><input type='checkbox'";			// Boxes
 	if (mps.showBoxes)														// If set
 		str+=" checked='checked'"											// Check it			
 	str+=" style='vertical-align:middle' id='wireframes'></td></tr>";		// End box
-	str+="</table><div align='right' style='font-size:x-small'><br/>";				
+	str+="<tr><td>Current position:</td><td><input type='text' style='width:130px' value='"+pos+"'/></td></tr>";	// Current pos
+	str+="</table><div align='right' style='font-size:x-small'><br/>";		// End table			
 	str+=" <button id='OKBut'>OK</button>";									// OK
 	shivaLib.ShowLightBox(-350,20,"MapScholar settings",str)				// Create light box
-
 	$("#OKBut").button().click(function() { $("#shivaLightBoxDiv").remove();});  // OK
 
 	$("#wireframes").click(function(e) {								// SHOW BOXES?
@@ -551,7 +582,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	var str="<table cellspacing='0'>";                                      // Table start
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
- 		if (o.start && !isNaN(o.start))	{									// A valid year
+ 		if (o.start && !isNaN(o.start) && o.type == "map")	{				// A valid year
 			min=Math.min(o.start,min);										// Find min
 			max=Math.max(o.start,max);										// Find max
 			}
@@ -567,7 +598,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
-			str+="<tr valign='top' height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
+			str+="<tr id='heading"+i+"' valign='top' height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
 			str+="<img id='mob"+i+"' src='img/";							// Img base
 			if (o.status == "closed")										// If open
 				str+="expand";												// Expand
@@ -597,7 +628,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 				pic=o.small;												// Use it
 			else if (o.med)													// Else if a med defined															
 				pic=o.med;													// Use it
-			else if (o.large)												// Else if a large defined															
+			else if (o.url)												// Else if a large defined															
 			pic=o.med;														// Use it
 			tim+=AddMapToTimeline(o,i);										// Add map to timeline
 			}
@@ -630,7 +661,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
 			str+="<div id='mobVis' style='width:60%;display:inline-block'></div>";		// Add div for vis
 			str+="&nbsp;&nbsp;&nbsp;&nbsp;<img id='mobInfo' title='See citation' src='img/infobutton.gif'/>";
-			if (o.large)
+			if ((o.url) && (o.type == "map"))
 				str+="&nbsp;&nbsp;<img id='hiresmap' title='See hi-res map' src='img/viewdot.gif'/>";
 			str+="<br/><br/></td></tr>";
 			str+="<tr><td colspan='2' id='mobCite'></td></tr>";
@@ -664,10 +695,13 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			var id=this.id.substr(3);										// Get id
 			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
 			});
+		$("#heading"+i).click( function(e) {								// Add click handler
+			var id=this.id.substr(7);										// Get id
+			mps.Goto(mps.mobs[id].goto);									// Set pos
+			});
 		}
  
- 
-  	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
+   	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
   		var j,p=1,a=1;
   		var x=Math.round((o.start-min)*pixPerYear)+8;						// X pos
    		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+7+"px;";

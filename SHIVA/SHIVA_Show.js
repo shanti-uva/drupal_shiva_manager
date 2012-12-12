@@ -199,7 +199,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	if (t == "auto")	t="0px";											// Turn auto into 0
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
-		i-=40;																// Don't hide controls
+		i=Math.max(0,i-=40);												// Don't hide controls, cap at 0
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
 		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
 		str+=";width:"+$(con).css("width");									// Make div
@@ -618,7 +618,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				this.map.getFeatures().appendChild(obj);				// Add it to display list
 				}
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
-				obj.set(link,true,fly); 								// Sets the flyToView
+			obj.set(link,true,fly); 									// Sets the flyToView
 			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity
@@ -2555,7 +2555,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 			aProps= { 	left: 	{ opt:'string',	 des:'Left'},				// Sub-items
 						top: 	{ opt:'string',	 des:'Top'},
 						height: { opt:'string',	 des:'Height'},
-						width: 	{ opt:'string',	 des:'Width'}
+						width: 	{ opt:'strinh',	 des:'Width'}
 						}			
 			break;
 		case "backgroundColor": 																				
@@ -2716,11 +2716,19 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
 	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
 	if (mode == "black")
 		str+="border:none;background-color:black;"
-	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:+"+left+"px;top:"+top+"px;'/>";
-	$("body").append(str);	
+	else if (mode == "transparent")
+		str+="border:none;background-color:transparent;"
+	else
+		str+="background-color:white;"
+	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:"+left+"px;top:"+top+"px;'";
+	if (mode == "black")
+		str+=" scrolling='no'";
+	else if (mode == "transparent")
+		str+=" allowtransparency='true'";
+	$("body").append(str+"/>");	
 	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
 	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
-	if (mode != "black")
+	if (!mode)
 		$("body").append(str);	
 
 	$("#CL-"+id).bind("load",function(e) {
