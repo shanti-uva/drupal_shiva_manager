@@ -2040,6 +2040,7 @@ function _shivanode_node_embed_page($nid) {
       '#description' => t('Choose the format you would like to use and copy the resulting code to your site.'),
       '#options' => array(
         'none' => t('-- Select --'),
+        'cf' => t('Confluence'),
         'wp' => t('Word Press'),
         'if' => t('IFrame'),
         'link' => t('Link'),
