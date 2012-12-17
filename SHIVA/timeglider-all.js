@@ -4863,7 +4863,6 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     },
 
     render: function() {
-      console.info('in 2nd render');
       $(this.el).html($.tmpl(this.template(), this.model)).attr("id", "presInfoModal");
       return this;
     },
@@ -8833,6 +8832,7 @@ tg.TG_Mediator = function (wopts, $el) {
        *
       */
       addEvent: function(new_event) {
+        
       
       new_event.startdateObj = new tg.TG_Date(new_event.startdate);
       
@@ -8850,7 +8850,6 @@ tg.TG_Mediator = function (wopts, $el) {
       }
       
       var new_model = new tg.TG_Event(new_event);
-      
       this.eventCollection.add(new_model);
       
       // incorporates TG_Event into hashes, re-evaluates

@@ -920,7 +920,7 @@ VIZ.prototype.Init = {
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			console.log(node.data);
+			//console.log(node.data);
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
@@ -4674,7 +4674,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
 	var sel = "";
-	console.log(isNaN(attr));
+	//console.log(isNaN(attr));
 	if (isNaN(attr)) 
 		sel="#"+attr.replace(/___/g,"");
 	else if (attr < 0) 
@@ -4683,7 +4683,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
 	else sel = "#propInput" + attr;
 		
-	console.log(sel);
+	//console.log(sel);
     var inputBox = $(sel);
     var inputBoxChip = $(sel+"C");
 
@@ -5852,7 +5852,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
   stimeline.options=this.options;
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
-
   if($(stimeline.con).find('*').length > 0) {
     // Sets timeline options. If the options that are different can be set on the fly, returns try
     // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
@@ -5933,6 +5932,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             $(stimeline.con).timeline('registerEvents', stimeline.events);
             setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
             if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+            // could also set span colors and text colors here from simile data
             shivaLib.SendReadyMessage(true); 
           }
       });     
@@ -5969,7 +5969,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             ev.startdate = ConvertTimelineDate(ev.start);
           }
           if (typeof(ev.end) != "undefined" && typeof(ev.enddate) == "undefined") {
-            ev.enddate = ConvertTimelineDate(ev.end);
+            ev.enddate = (ev.end == null)? '' : ConvertTimelineDate(ev.end);
           }
           if(typeof(ev.high_threshold) == "undefined") {
             ev.high_threshold = 50;
@@ -5984,7 +5984,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             ev.icon = "none"
           }
         }
-        console.info(events);
         return events;
       }
     }
