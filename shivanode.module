@@ -1188,12 +1188,13 @@ function shivanode_element_change($form, $form_state) {
       'Table' => 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
       'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
       'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
+      'Earth' => 'https://wiki.shanti.virginia.edu/x/J5XRAQ',
       'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
       'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
       'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
       'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
       'Timeline' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
-      'Timeglider' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
+      'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
       'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ'
   );
   
