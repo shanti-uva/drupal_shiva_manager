@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
- 	<script type="text/javascript" src="//www.viseyes.org/shiva/SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src="../SHIVA_Show.js"></script>
  	<script type="text/javascript" src="MapScholar_Draw.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
@@ -18,8 +18,9 @@
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:3px;width:192px;background-color:#999;height:14px;padding:3px;color:#fff}
 		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
-		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:12px;-khtml-border-radius:12px;border-radius:12px;background-color:#999;color:#eee}
+		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:2px;-khtml-border-radius:2px;border-radius:2px;background-color:#999}
 		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;margin:0px;padding:0px}
+		.playerbar { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;background-color:#ccc;color:#fff}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
@@ -60,6 +61,8 @@
 // MAIN 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+var lastClick=0;
+
 function MapScholar()													// CONSTRUCTOR
 {
 	mps=this;																// Point to this
@@ -76,28 +79,11 @@ function MapScholar()													// CONSTRUCTOR
 	this.dr=new MapScholar_Draw();											// Alloc draw module
 	this.sh=new MapScholar_Shelf();											// Alloc shelf module
 	this.dr.DrawControlBar(false);											// Draw control bar and shelf
+
 }	
 
 MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 {
-/*	
- 
-  atlas[
-			name, desc, id, author
-			type (tour|collection)
-			mids[]
-			]
-		mobs[
-			title, desc, id, dur, author
-			small, med, large, kml
-			status (open|closed|flyto)
-			type (map|layer|goto|chapter|header)
-			start, end, tags, citation
-			north, south, east, west, rotation
-			]            
-
-*/
-			
 	var o,i,j,v;
 	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
@@ -332,6 +318,8 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 			this.ShowLink(i,mps.sh.mobVis[i] > 0);							// Show/hide iframe
 		else if (m.type == "sound")											// If a sound
 			mps.ShowSound(i,mps.sh.mobVis[i] > 0);							// Show/hide audio iframe
+		else if (m.type == "text")											// If a text
+			mps.ShowText(i,mps.sh.mobVis[i] > 0);							// Show/hide text iframe
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		seg=ge.getElementById(m.gid);										// Get object
@@ -358,10 +346,47 @@ MapScholar.prototype.Goto=function(pos)									// SET EARTH VIEWPOINT
 	var lookAt=ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
 	lookAt.setLatitude(v[0]-0);												// Set lat
 	lookAt.setLongitude(v[1]-0);											// Set lon
-	lookAt.setRange(v[2]-0);												// Set range
-	lookAt.setTilt(v[3]-0);													// Set tilt
-	lookAt.setHeading(v[4]-0);												// Set heading
+	if (v[2])																// If set
+		lookAt.setRange(v[2]-0);											// Set range
+	if (v[3] != undefined)													// If set
+		lookAt.setTilt(v[3]-0);												// Set tilt
+	if (v[4] != undefined)													// If set
+		lookAt.setHeading(v[4]-0);											// Set heading
 	ge.getView().setAbstractView(lookAt);									// Go there
+}
+
+MapScholar.prototype.ShowText=function(num, mode)						// HIDE/SHOW TEXT
+{
+	var l,t,h,w;
+	var m=this.mobs[num];													// Point at mob
+	if (m.east) 															// If spec'ing pos												
+		l=m.north,t=m.south,w=m.east,h=m.west;								// Use it		
+	else{ 
+		switch(m.north) {													// Rounte on north
+			case "1":	l=220;	t=170;	w=400;		h=300;		break;		// Half centered
+			case "2":	l=320;	t=245;	w=200;		h=150;		break;		// Quarter centered
+			case "3":	l=40;	t=40;	w=750;		h=120;		break;		// Top
+			case "4":	l=40;	t=470;	w=750;		h=120;		break;		// Bottom
+			case "5":	l=40;	t=40;	w=400;		h=300;		break;		// Half top left
+			case "6":	l=390;	t=40;	w=400;		h=300;		break;		// Half top right
+			case "7":	l=40;	t=290;	w=400;		h=300;		break;		// Half bot left
+			case "8":	l=390;	t=290;	w=400;		h=300;		break;		// Half bot right
+			default:	l=20;	t=20;	w=794;		h=594;		break;		// Full
+			}
+		}
+
+	if (mode) {																// If showing
+		str="<div style='font-family:sans-serif;font-size:small'>";			// Div
+		str+="<p style='text-align:center;font-weight:bold'>"+m.title+"<br/>";	// Add title
+		if (m.small)														// If an image spec's
+			str+="<br/><img style='border:1px solid #999' src='"+m.small+"' width='"+w/3+"'><br/>";		// Add it		
+		str+="</p>"+m.desc+"<div>";											// Add desc
+		if (m.url)															// If a link
+			str+="<br/>Click <a href='"+m.url+" ' target='_blank'>here</a> for more information";	// Add it		
+		shivaLib.ShowIframe(l,t,w,h,"blank.htm","iframe-"+num,"white",str);	// Show iframe
+		}
+	else																	// If hiding
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
 
 MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
@@ -414,6 +439,8 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 	this.curMob=-1;															// Default to none
     this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
+	this.playSpeed=50;														// Player speed 
+	this.inPlay=false;														// Playing?
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
 		if (e.keyCode == 40) {												// Down arrow
@@ -424,28 +451,46 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 			mps.sh.HighlightMob("last",false,true);							// Previous mob
 			shivaLib.Sound("click");										// Click
 			}
+		else if (e.keyCode == 36) {											// Home
+			mps.sh.HighlightMob(0,false,true);								// First mob
+			shivaLib.Sound("click");										// Click
+			}
+		else if (e.keyCode == 35) {											// End
+			mps.sh.HighlightMob(mps.mobs.length-1,false,true);				// Last mob
+			shivaLib.Sound("click");										// Click
+			}
 		});
 }
 
 MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLIGHT MOB OBJECT
 {
-	var j;
+	var j,o;
 	var i=Math.max(this.curMob,0);											// Start point
 	var n=mps.mobs.length-1;												// Last mob
 	if (which == "next") {													// Going forward										
 		i=Math.min(i+1,n);													// Cap at end
 		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n))  // Skip over nav mobs
-			mps.Goto(mps.mobs[i++].goto);										// Set position
+			mps.Goto(mps.mobs[i++].goto);									// Set position
 		}
 	else if (which == "last") {												// Going backward										
 		i=Math.max(i-1,0);													// Cap at end
 		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i > 0))  // Skip over nav mobs
 			mps.Goto(mps.mobs[i--].goto);									// Set position
 		}
-	else																	// Absolute
+	else{																	// Absolute
+		if (which < 0) {
+			which=-which;
+			o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[which])];   // Point at mob
+			var cy=o.north-0+(o.south-o.north)/2;							// Lat				
+			var cx=o.east-0+(o.west-o.east)/2;								// Lon
+			if (o.type == "map")											// If a map
+				mps.Goto(cy+","+cx+","+",0,0");								// Got to center of map
+			this.mobVis[which]=0;											// Turn off (toggle)
+			}
 		i=Number(which);													// Get number
+		}
 	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
-	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
+	o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   		// Point at mob
 	mps.Goto(o.goto);														// Position
 	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {	// If not visible
 		for (j=i;j>=0;--j) {												// Walk backwards													
@@ -488,8 +533,19 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
 	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:80px' type='text'/>";
-	str+="<div id='timeline' style='position:absolute;left:149px;width:861px;top:7px;height:22px' class='timelinebar'></div>";
-	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
+	str+="<div id='timeline' style='position:absolute;left:152px;width:646px;top:5px;height:26px'></div></p>";
+
+	str+="<div style='position:absolute;left:887px;top:24px;font-size:8px;width:80px;color:#999'>Play speed</div>";
+	str+="<div id='playSpeed' style='position:absolute;left:874px;top:12px;width:70px'></div>";
+	str+="<img id='playbut' style='position:absolute;left:954px;top:8px'"; 
+	if (this.inPlay)
+		str+="src='img/stopbut.gif' title='Stop'";
+	else
+	 	str+="src='img/playbut.gif' title='Play'";
+	str+="onclick='mps.sh.Play()'>";		
+	str+="<img src='img/againbut.gif' style='position:absolute;left:850px;top:9px' title='Start over' onclick='mps.sh.Play(0)'>";		
+  
+	$("#controlBarDiv").html(str+"");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
 	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
 	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
@@ -497,7 +553,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		str+="expand2.gif'> Expand all";									// Expand all button
 	else																	// Collaspe
 		str+="collapse2.gif'> Collapse all";								// Collapse all button
-	str+="<img src='img/settingsbut.png' style='position:absolute;left:214px;top:613px' onclick='mps.sh.Settings()'></p>";		
+	str+="<img src='img/settingsbut.gif' style='position:absolute;left:196px;top:7px' onclick='mps.sh.Settings()'></p>";		
 	$("#shelfDiv").html(str);												// Add div
 	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
 	this.mobVis=[];															// Remove old array
@@ -505,6 +561,11 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		this.mobVis.push(0);												// Make it hidden                                       
 	this.FillShelf();														// Draw shelf
 	
+	var ops={ min:0, max:100, value:mps.sh.playSpeed,						// Slider options
+		slide:function(event,ui) {											// Slide cb
+		}};    
+	$("#playSpeed" ).slider(ops);											// Init slider
+
 	$("#expandAll").click(function(e) {									// EXPAND/COLLAPSE ALL
 		shivaLib.Sound("click");											// Click
 		mps.sh.ToggleExpandCollapse();										// Expand or collapse
@@ -574,7 +635,7 @@ MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE
 
 MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 {
-	var tim="";
+	var tim="<div style='position:absolute;width:"+$("#timeline").width()+"px;height:1px;top:10px;' class='timelinebar'/>";
 	var i,j,o,x,y,pic;
 	var min=3000,max=0;
 	var dates=new Array();
@@ -592,8 +653,8 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	while (i < max-10) {													// While not max
  		i=(i-i%10)-0+10;													// Next decade
 		x=Math.round((i-min)*pixPerYear)+8;									// X pos
-   		tim+="<div style='position:absolute;left:"+(x+3)+"px;top:4px'><i>"+i+"</i></div>";
-   		tim+="<div style='position:absolute;left:"+x+"px;height:17px;width:1px;top:2px;background-color:#ccc'/>";
+   		tim+="<div style='position:absolute;text-align:center;color:#aaa;left:"+(x-17)+"px;width:30px;top:18px'><i>"+i+"</i></div>";
+   		tim+="<div style='position:absolute;left:"+x+"px;height:16px;width:1px;top:2px;background-color:#999'/>";
 		}
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
@@ -644,6 +705,8 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			pic="img/linkicon.png";											// Use icon
 		else if (o.type == "sound")											// A sound													
 			pic="img/audioicon.png";										// Use icon
+		else if (o.type == "text")											// A text													
+			pic="img/texticon.png";											// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
 		if (this.mobVis[i] > 0) 											// If visible
 			str+="' style='background-color:#ccccff'";						// Color background
@@ -654,7 +717,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		str+="<td valign='top'><span id='mobPos"+ i+"'><b>"+o.title+"</b><br/></span>";	// Add title
 		if ((o.type == "map") && (o.start))									// If a map and a date
 			str+="<span style='color:#770000'><b>"+o.start+"</b></span> ";	// Add date
-		if (o.desc)															// If desc spec'd
+		if ((o.desc)&& ((o.type == "map") || (o.type == "chapter") || (o.type == "header"))) // If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry
 		if ((this.curMob == i) && (this.mobVis[i] > 0) && ((o.type == "map") || (o.type == "layer"))){	// If selected and visible
@@ -675,11 +738,10 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		}
   	for (i=0;i<dates.length;++i){											// For each map
 		if (dates[i].part > 1) {											// If multi
-	  		a=1;
+	  		a=0;
 	  		for (j=i;j<dates.length;++j)									// For each map
 				if (dates[i].date == dates[j].date) {						// One of the set
-					$("#timedot"+dates[j].index).height(Math.max(1,8/dates[j].part));	// Shrink it
-					$("#timedot"+dates[j].index).css("top",a++*Math.max(1,8/dates[j].part-0+2)+"px");	// Position it
+					$("#timedot"+dates[j].index).css("top",a++*7+"px");		// Position it
 					dates[j].part=1;										// Skip it
 					}
 			}
@@ -691,20 +753,26 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
 			});
 		$("#mob"+i).click( function(e) {									// Add click handler
-			shivaLib.Sound("click");										// Click
 			var id=this.id.substr(3);										// Get id
+			var now=new Date().getTime();									// Get cur time
+			if (now-lastClick < 500)										// Within double-click time
+				id=-id;
+			else
+				shivaLib.Sound("click");									// Click once
 			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
+			lastClick=now;													// Then is now	
 			});
 		$("#heading"+i).click( function(e) {								// Add click handler
 			var id=this.id.substr(7);										// Get id
 			mps.Goto(mps.mobs[id].goto);									// Set pos
 			});
+
 		}
  
    	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
   		var j,p=1,a=1;
   		var x=Math.round((o.start-min)*pixPerYear)+8;						// X pos
-   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+7+"px;";
+   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+6+"px;";
    		if (mps.sh.mobVis[i] > 0)											// If selected
   			str+='background-color:#000099';								// Make it blue
    		str+=" ' title='"+o.start+"'></div>";								// Tooltip
@@ -743,7 +811,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 
 	$("#hiresmap").click( function(e) {									// CLICK ON HIRES MAP
 		shivaLib.Sound("click");											// Click
-		mps.SetHiResMapImage(mps.sh.curMob);								// Srt hi-res map
+		mps.SetHiResMapImage(mps.sh.curMob);								// Set hi-res map
 		});
 
 	if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {			// If selected and visible
@@ -758,7 +826,20 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		}
 }
 	
-
+MapScholar_Shelf.prototype.Play=function(start)							// PLAY
+{
+	this.inPlay=!this.inPlay;												// Toggle state
+	if (this.inPlay) {														// If playing
+		shivaLib.Sound("click");											// Click
+		$("#playbut").attr("src","img/stopbut.gif");						// Change icon
+		$("#playbut").attr("title","Stop");									// Change title
+		}
+	else{																	// If stopped
+		shivaLib.Sound("delete");											// Click
+		$("#playbut").attr("src","img/playbut.gif");						// Change icon
+		$("#playbut").attr("title","Play");									// Change title
+		}
+}
 
 </script>
 </body>

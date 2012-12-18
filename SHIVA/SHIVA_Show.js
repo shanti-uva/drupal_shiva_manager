@@ -83,15 +83,15 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
  	switch(which) {															// Route on type
 		case "Timeline": 													// Simile			
 			obj="Timeline.DefaultEventSource";								// Object to test for
-			lib="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
+			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js";
+			lib="timeglider-all.js"; 
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
+			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
@@ -103,7 +103,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
            	break;
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for
-        	lib="http://maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
+        	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
 		}
 	if (lib) {																// If a lib to load
@@ -2674,10 +2674,13 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 
 SHIVA_Show.prototype.Sound=function(sound)
 {	
-	var clickSound=new Audio(sound+".mp3");
-	if (!clickSound.canPlayType("audio/mpeg"))
-		clickSound=new Audio(sound+".ogg");
-	clickSound.play();
+	
+	var snd=new Audio();
+	if (!snd.canPlayType("audio/mpeg"))
+		snd=new Audio(sound+".ogg");
+	else	
+		snd=new Audio(sound+".mp3");
+	snd.play();
 }
 
 SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET
@@ -2707,32 +2710,39 @@ SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET G
      }
 }
 
-SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
+SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, content)
 {
 	$("#"+id).remove();															
 	$("#CL-"+id).remove();															
 	if ((hgt == 0) || (wid == 0))
 		return;
-	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
+	var	str="<iframe id='"+id+"' ";
+	if (url)
+		str+="src='"+url+"' ";
+	str+="style='position:absolute;"; 					
 	if (mode == "black")
-		str+="border:none;background-color:black;"
+		str+="border:none;background:black;"
 	else if (mode == "transparent")
-		str+="border:none;background-color:transparent;"
+		str+="border:none;background:transparent;"
 	else
-		str+="background-color:white;"
+		str+="background:white;"
 	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:"+left+"px;top:"+top+"px;'";
 	if (mode == "black")
 		str+=" scrolling='no'";
 	else if (mode == "transparent")
 		str+=" allowtransparency='true'";
-	$("body").append(str+"/>");	
-	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
-	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
+	$("body").append(str+"></iframe>");	
+	str="<iframe marginwidth='0' marginheight='0' src='closedot.gif' id='CL-"+id+"' style='position:absolute;margin:0px;padding:0px;border:none;"; 					
+	str+="width:17px;height:18px;left:"+(wid-13+left)+"px;top:"+(top+3)+"px'/>";
 	if (!mode)
 		$("body").append(str);	
 
+	$("#"+id).bind("load",function(e) {
+    	if (content)
+    		this.contentWindow.document.body.innerHTML=content;
+      });
 	$("#CL-"+id).bind("load",function(e) {
-		this.contentWindow.document.body.onclick=function(e) {
+  		this.contentWindow.document.body.onclick=function(e) {
      	shivaLib.Sound("delete");
 		$("#"+id).remove();															
 		$("#CL-"+id).remove();															
@@ -5843,7 +5853,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
 {
   var i;
   var stimeline = new Object();
-  
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
@@ -5852,6 +5861,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
   stimeline.options=this.options;
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
+
   if($(stimeline.con).find('*').length > 0) {
     // Sets timeline options. If the options that are different can be set on the fly, returns try
     // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
@@ -5904,7 +5914,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         eventData.events.push(o);
       }
       
-      stimeline.events = normalizeEvents(eventData.events);
+      stimeline.events = normalizeEventData(eventData.events);
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -5918,7 +5928,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
      
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-	  window.shivaTimeline =  $(stimeline.con).timeline({
+	     window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
@@ -5932,7 +5942,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             $(stimeline.con).timeline('registerEvents', stimeline.events);
             setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
             if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            // could also set span colors and text colors here from simile data
             shivaLib.SendReadyMessage(true); 
           }
       });     
@@ -5958,18 +5967,20 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         return n;
       }
       
-      // Adapts simile timeline data to timeglider requirements
-      function normalizeEvents(events) {
-        for(var n in events) {
-          var ev = events[n];
+      function normalizeEventData(events) {
+        //console.info(events);
+        var ct = 0;
+        for(var i in events) {
+          ct++;
+          var ev = events[i];
           if(typeof(ev.id) == "undefined") {
-            ev.id = "event" + (parseInt(n) + 1);
+            ev.id = "event" + ct;
           }
-          if (typeof(ev.start) != "undefined" && typeof(ev.startdate) == "undefined") {
+          if(typeof(ev.startdate) == "undefined" && typeof(ev.start) != "undefined") {
             ev.startdate = ConvertTimelineDate(ev.start);
           }
-          if (typeof(ev.end) != "undefined" && typeof(ev.enddate) == "undefined") {
-            ev.enddate = (ev.end == null)? '' : ConvertTimelineDate(ev.end);
+          if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
+            ev.enddate = ConvertTimelineDate(ev.end);
           }
           if(typeof(ev.high_threshold) == "undefined") {
             ev.high_threshold = 50;
@@ -5981,7 +5992,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             ev.date_display = "ye";
           }
           if(typeof(ev.icon) == "undefined") {
-            ev.icon = "none"
+            ev.icon = "none";
           }
         }
         return events;

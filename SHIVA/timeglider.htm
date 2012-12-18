@@ -48,7 +48,9 @@
   <!--<script src="timeglider/timeglider-all.js" type="text/javascript" charset="utf-8"></script> -->
 
   <script type='text/javascript'>
-
+  
+  setTimeout(function() { Draw();}, 2200); // Needed to load data after initial draw and callback is finished.
+  
   var items=new Array();
   var shivaGroup="Timeglider"
   var curAtt=null;

@@ -2995,7 +2995,7 @@ timeglider.TG_Date = {};
     19    YyYyYyY-MM-DDTHH:MM:SS
     25    YyYyYyY-MM-DD HH:MM:SS-ZH:ZM
     */
-    
+
     var ye, mo, da, ho, mi, se, bce, bce_ye, tz_pm, tz_ho, tz_mi,
       mo_default = 1,
       da_default = 1,
@@ -4411,7 +4411,7 @@ timeglider.TG_Date = {};
             ev.enddate = TG_Date.tzOffsetStr(ev.enddate, tdata.timeOffset.string);
             }
           }
-          
+
           ev.startdateObj = new TG_Date(ev.startdate, ev.date_display);
           
           // !TODO: only if they're valid!
@@ -10067,7 +10067,6 @@ tg.validateOptions = function (widget_settings) {
             && $('#cp_colormap').is(":visible") == false) {
         return false;
       }
-
       // Header
       if ($('.tg-widget-header h2').eq(0).text() != tlopts.title) {
         $('.tg-widget-header h2').text(tlopts.title);
