@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Mixer</title>
+ 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+
+	<script type="text/javascript" src="seamixer.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+	</style>
+</head>
+<body>
+	<iframe id="timelineCon" style="position:absolute;top:35px;left:0px;width:90%;height:420px;border:none"></iframe>
+	<iframe id="mapCon" style="position:absolute;top:460px;left:0px;width:90%;height:520px;border:none"></iframe>
+	<input type="button" onclick="test()" value="test" >
+<script >
+
+	var events=[{ on:"init",		do:"load",   src:"t=138",  id:"timelineCon" },
+		{ on:"init",				do:"load",   src:"t=139",  id:"mapCon" },
+		{ on:"init",				do:"data",   src:"0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E",  id:"myData",  preload:"true" },
+		{ on:"init", 				do:"action", id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
+		{ on:"timelineCon.time",  	do:"query",  src:"myData", id:"mySubset", query:"age LT 20" },
+		{ on:"timelineCon.time",  	do:"fill",   src:"mySubset", id:"mapCon" },
+		{ on:"mapCon.move",       	do:"call",   id:"SetMap" }
+		];
+	
+	var mix=new seaMixer();
+	mix.Run(events);
+	 
+	function SetMap(lat, lon, zoom)
+	{
+//	     	...Do something in JavaScript...
+		mix.RunOnDo({ on:"init", do:"action", id:"mapCon", type:"ShivaActMap=show" });     	// Add a new event on the queue      	
+	}
+	
+	
+	function test()
+	{
+		mix.data.myData[3][2]+=10
+		
+		mix.RunOnDo({ on:"init", do:"fill", id:"timelineCon", src:"myData" });     	    	
+	}
+	
+	function trace(str) 
+		{ 
+			console.log(str) 
+		}
+		
+
+</script>
+</body></html>

@@ -1474,11 +1474,35 @@ function _get_shivaframe_url($opt) {
  * 		Returned in jsonp format for the new viewer.
  */
 function _shivanode_node_json($nid) {
+  $pwd = '';
+  if(strpos($nid,'-') > -1) {
+    $pts = explode('-',$nid);
+    $nid = $pts[0];
+    $pwd = $pts[1];
+  }
   $node = node_load($nid);
-  $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
-  $json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
-  drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
-  echo $json;
+  if(_shivanode_get_access($node) == '4' || $pwd == md5(_shivanode_get_element_type($node))) { 
+    $json = '';
+    drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
+    $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
+    $json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
+    echo $json;
+  } else {
+    echo 'shivaDataWrapper( "noaccess" : true)';
+  }
+}
+
+function _shivanode_json_access($nid) {
+  $rtval = FALSE;
+  if(strpos($nid,'-') > -1) {
+    $pts = explode('-',$nid);
+    if($pts[1] == 'inhouse') {
+      $rtval = TRUE;
+    }
+  } else {
+    
+  }
+  return $rtval;
 }
 
 function _shivanode_search_json($q) {
@@ -2168,6 +2192,20 @@ function _shivanode_add_share_meta($node) {
      ),
   );
   drupal_add_html_head($element, 'og_url');
+}
+
+function _shivanode_get_access($node) {
+  if(isset($node->shivanode_access)) {
+    $access = $node->shivanode_access;
+    if(isset($access['und'])) {
+      if(isset($access['und'][0])) {
+        if(isset($access['und'][0]['value'])) {
+          return $access['und'][0]['value'];
+        }
+      }
+    }
+  }
+  return null;
 }
 
 function _get_thumb_image($node) {

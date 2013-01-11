@@ -48,9 +48,7 @@
   <!--<script src="timeglider/timeglider-all.js" type="text/javascript" charset="utf-8"></script> -->
 
   <script type='text/javascript'>
-  
-  setTimeout(function() { Draw();}, 2200); // Needed to load data after initial draw and callback is finished.
-  
+
   var items=new Array();
   var shivaGroup="Timeglider"
   var curAtt=null;
@@ -76,23 +74,23 @@
       display_zoom_level:   { def:'false', opt:'true|false', des:'Show zoom bar?'}
   };
     
-  var helpText=new Array();
-  helpText['Source of events']="Type the URL in the text box to the right for the Google Docs timeline spreadsheet that contains data formatted for creating a timeline. You can find out more information about all the possible data formats you can use to create a timeline <a href='http://timeglider.com/widget/index.php?p=json' target='_blank'> here</a>.<br><br><a href='https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE' target='_blank'> Here</a> is a sample timeline you can use to test the timeline tools features and attributes.";
-  helpText['Title of timeline']="Title to display in the header of the timeline.";
-  helpText['Description']="A short description of the data represented in the timeline";
-  helpText['Height of timeline']="The height of the whole timeline";
-  helpText['Width of timeline']="The width of the whole timeline";
-  helpText['Center date of timeline']="The date on which the timeline is initially centered";
-  helpText['Initial zoom of timeline']="A number representing the initial zoom factor of the timeline (1 - 100)";
-  helpText['Minumum zoom of timeline']="A number representing the minimum zoom factor of the timeline (1 - 100)";
-  helpText['Maximum zoom of timeline']="A number representing the maximum zoom factor of the timeline (1 - 100)";
-  helpText['Font']="The font to use for the text of the timeline";
-  helpText['Font colors']="A list of multiple font colors of the timeline in the following order: <ol><li>main area font</li><li>header fonts for timeline and popups</li><li>text of modals</li></ol>";
-  helpText['Background colors']="A list of multiple background colors for the following areas of the timeline: <ol><li>main background of the timeline</li><li>event spans</li><li>background for the header, footer, and zoom controls</li><li>background of popup boxes,</li><li>background  for the image lane at the top of the timeline</li><li>\'tick\' lane at the bottome of the timeline</li></ol>";
-  helpText['Maximum # of Popups']="Maximum number of popups to keep open. After this number is reached, the first opened popup will automatically close.";
-  helpText['Show the description?']="Whether or not to show the description box upon loading timeline.";
-  helpText['Show the footer?']="Whether or not to show the footer of the timeline.";
-  helpText['Show zoom bar?']="Whether or not to show the zoom bar of the timeline. In edit mode, you may have to scroll horizontally to see the zoom bar on timelines that horizontally go off the page.";
+	var helpText=new Array();
+	helpText['Source of events']="Click on the spreadsheet icon to the right of 'Data source url' to access a list of your Google Docs Spreadsheets from within SHIVA. You may be prompted to authorize access (read-only) to your Google account. You should then be able to select a spreadsheet from the provided list.<br/> <br/>Alternately, you can paste the URL provided through the Share link of your Google Doc. Note you have to change the Share settings for the Spreadsheet to either 'Public' or 'Anyone with the link'. You can find out more information about all the possible data formats you can use to create a timeline <a href='http://code.google.com/p/simile-widgets/wiki/Timeline_EventSources' target='_blank'> here</a>.<br><br><a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AohdE1_3ZElJdF9rYjdZdV9hVDJJT2tYakx3Ml84Tmc' target='_blank'> Here</a> is a sample timeline you can use to test the timeline tools features and attributes.";
+	helpText['Title of timeline']="Title to display in the header of the timeline.";
+	helpText['Description']="Click on the text box to the right and enter a short description of the data represented in the timeline";
+	helpText['Height of timeline']="Click on the text box to the right and enter a number that sets the height of the whole timeline";
+	helpText['Width of timeline']="Click on the text box to the right and enter a number that sets the width of the whole timeline";
+	helpText['Center date of timeline']="Click on the text box to the right and enter a date that sets the date on which the timeline is initially centered";
+	helpText['Initial zoom of timeline']="Click on the text box to the right and enter a number representing the initial zoom factor of the timeline (1 - 100)";
+	helpText['Minumum zoom of timeline']="Click on the text box to the right and enter a number representing the minimum zoom factor of the timeline (1 - 100)";
+	helpText['Maximum zoom of timeline']="Click on the text box to the right and enter a number representing the maximum zoom factor of the timeline (1 - 100)";
+	helpText['Font']="Use the drop-down menu to the right to choose a font to use for the text of the timeline. It is best to use standard fonts, such as Arial, Courier, and Times Roman, to ensure that the font will display on all computers.";
+	helpText['Font colors']="Click on the text box to the right to open a dialog that allows you to set multiple font colors of the timeline in the following order: <ol><li>main area font</li><li>header fonts for timeline and popups</li><li>text of popups</li></ol><br /> When setting colors either click on the square color chip icon in the relevant text box to launch the color picker and select  a color, or enter a hexadecimal color value in the text box.";
+	helpText['Background colors']="Click on the text box to the right to open a dialog that allows you to set multiple background colors for the following areas of the timeline: <ol><li>main background of the timeline</li><li>event spans</li><li>background for the header, footer, and zoom controls</li><li>background of popup boxes,</li><li>background  for the image lane at the top of the timeline</li><li>\'tick\' lane at the bottome of the timeline</li></ol><br />When setting colors either click on the square color chip icon in the relevant text box to launch the color picker and select  a color, or enter a hexadecimal color value in the text box.";
+	helpText['Maximum # of Popups']="Click on the text box to the right and enter a number that sets the maximum number of popups to keep open. After this number is reached, the first opened popup will automatically close.";
+	helpText['Show the description?']="Use the drop-down menu to the right to choose whether or not to display the description popup upon loading the timeline. If set to 'false', the description box will not initially display but can be seen by clicking the 'info' link in the header of the timeline.";
+	helpText['Show the footer?']="Use the drop-down menu to the right to choose whether or not to show the footer of the timeline.";
+	helpText['Show zoom bar?']="Use the drop-down menu to the right to choose whether or not to show the zoom bar of the timeline. In edit mode, you may have to scroll horizontally to see the timeline";
   
 	$(function () { 
 	  
@@ -117,7 +115,7 @@
       str+="</select>"; 
       $("#saveAsDiv").html(str);
     }
-		
+		shivaLib.ShivaEventHandler("init");                   // Init shivaevent listener
 	});
 	
   function shivaEventHandler(e)

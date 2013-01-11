@@ -52,7 +52,16 @@
 	    		}
 			});
 		$(document).bind("shivaMessage",shivaMessageHandler);
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
 		}
+
+	function shivaEventHandler(e)
+	{
+//		console.log(e.data)
+	}
 	
 	function shivaMessageHandler(e,o)
 	{	

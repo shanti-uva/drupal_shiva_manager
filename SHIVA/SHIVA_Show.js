@@ -12,8 +12,10 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.g=null;
 	this.qe=null;
 	this.ev=null;
-	this.jit=null
-	this.cvs=null
+	this.jit=null;
+	this.cvs=null;
+	this.group=null;
+	this.msgAction=new Array();
 	if (options)
 		this.Draw(options);
 }
@@ -29,7 +31,7 @@ SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 {
 	var _this=this;
-	var group=ops.shivaGroup;
+	this.group=group=ops.shivaGroup;
 	if (group == 'Visualization') 
 		this.DrawChart();
 	else if (group == 'Map')
@@ -87,7 +89,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js"; 
+			lib="timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -149,6 +151,40 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
+}
+
+SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE 
+{
+	if (window.parent)														// If has a parent
+		window.parent.postMessage(msg,"*");									// Send message to parent wind
+	else																	// Local	
+		window.postMessage(msg,"*");										// Send message to wind
+}
+
+SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
+{
+	if (e == "init") {														// If installing listener
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaLib.ShivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaLib.ShivaEventHandler);	
+		return;
+		}
+	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
+		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
+			shivaLib.msgAction[i].do(i);									// Run callback
+	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
+		if (e.data.indexOf("ShivaActMap=") != -1)							// If a map action
+			shivaLib.MapActions(e.data);									// Route to map actions
+		else if (e.data.indexOf("ShivaActEarth=") != -1)					// If an earth action
+			shivaLib.EarthActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActVideo=") != -1)					// If a video action
+			shivaLib.VideoActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActTime=") != -1)						// If a timeline action
+			shivaLib.TimeActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActChart=") != -1)					// If a chart action
+			shivaLib.ChartActions(e.data);									// Route to chart actions
+		}
 }
 
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
@@ -553,7 +589,6 @@ SHIVA_Show.prototype.DrawEarth=function()
 	ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,ops.borders);	// Show borders?
 	ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,ops.roads);		// Show roads?
 	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);			// Show terrain
-	
 	this.DrawEarthOverlays();											// Draw overlays
 	this.DrawLayerControlBox(this.items,ops.controlbox);				// Draw control box
 	
@@ -563,6 +598,16 @@ SHIVA_Show.prototype.DrawEarth=function()
 		this.DrawEarth();												// Draw it
 		if (typeof(ShivaPostInit) == "function") 						// If called from earth.htm
 			ShivaPostInit();											// Do any post-init actions					
+		google.earth.addEventListener(this.map.getGlobe(),'click', function(e) {	 // Click event
+			var str=e.getLatitude()+"|"+e.getLongitude()+"|"+e.getClientX()+"|"+e.getClientY();
+	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+str);			// Send shiva message
+ 			});
+		google.earth.addEventListener(shivaLib.map.getView(),'viewchangeend', function() { 
+			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+			var view=Math.floor(lookAt.getLatitude()*10000)/10000+"|"+Math.floor(lookAt.getLongitude()*10000)/10000+"|";
+			view+=Math.floor(lookAt.getRange())+"|"+Math.floor(lookAt.getTilt()*100)/100+"|"+Math.floor(lookAt.getHeading()*100)/100;
+ 			shivaLib.SendShivaMessage("ShivaEarth=move|"+view);			// Send shiva message
+			});
 		}
 	this.SendReadyMessage(true);										// Send ready message									
 }
@@ -600,6 +645,8 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				obj=this.map.createGroundOverlay("Layer-"+(i+1));		// Alloc overlay obj
 				this.map.getFeatures().appendChild(obj);				// Add it to display list
 				}
+			if (items[i].listener)										// If exist
+				google.earth.removeEventListener(obj,'click', null)		// Click event
 			v=items[i].layerOptions.split(",");							// Split dest pos
 			var icon=this.map.createIcon('');							// Create icon
 			icon.setHref(items[i].layerSource);							// Set url
@@ -619,6 +666,10 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				}
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
 			obj.set(link,true,fly); 									// Sets the flyToView
+			items[i].listener=google.earth.addEventListener(obj,'click', function(e) {		 // Click event
+				var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();		// Get lon and lat
+		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+str);		// Send shiva message
+	 			});
 			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity
@@ -627,6 +678,26 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 		}
 	this.map.getView().setAbstractView(lookAt);							// Go there
 }
+
+SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActEarth=goto") {									// GOTO
+		var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+		if (v[1] != undefined)	lookAt.setLatitude(Number(v[1]));		// Set lat
+		if (v[2] != undefined)	lookAt.setLongitude(Number(v[2]));		// Set lon
+		if (v[3] != undefined)	lookAt.setRange(Number(v[3]));			// Set range
+		if (v[4] != undefined)	lookAt.setTilt(Number(v[4]));			// Set tilt
+		if (v[5] != undefined)	lookAt.setHeading(Number(v[5]));		// Set heading
+		shivaLib.map.getView().setAbstractView(lookAt);					// Go there
+		}
+	else if ((v[0] == "ShivaActEarth=show") || (v[0] == "ShivaActEarth=hide")) {	// SHOW/SHOW
+		if (this.items[v[1]]) 											// If valid item	
+			this.items[v[1]].visible=(v[0] == "ShivaActEarth=show").toString();	// Set visibility 
+		this.DrawEarthOverlays();											// Redraw
+		}
+}
+
 
 //  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -821,6 +892,7 @@ VIZ.prototype.Init = {
 			domElement.className = 'shiva-node-label';
 			domElement.innerHTML = node.name;
 			domElement.onclick = function(){
+				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
 				rgraph.onClick(node.id,{});
 			};
 			var style = domElement.style;
@@ -897,6 +969,9 @@ VIZ.prototype.Init = {
 			style.left = (left - w / 2) + 'px';
 			style.top = (top + 10) + 'px';
 			style.display = '';
+			domElement.onclick = function(){
+				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
+			};
 		};
 
 		config.onPlaceLabel = function(domElement, node) { };
@@ -920,7 +995,6 @@ VIZ.prototype.Init = {
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			//console.log(node.data);
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
@@ -979,6 +1053,7 @@ VIZ.prototype.Init = {
 			$jit.util.addEvent(domElement, 'click', function () {
 				ht.onClick(node.id, {
 					onComplete: function() {
+						shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
 						ht.controller.onComplete();
 					}
 				});
@@ -1143,6 +1218,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 			else
 				str+=lab;
 			$("#textLayer").append(str+"</div>");
+			$("#shivaSubtx"+j).click(function(){shivaLib.SendShivaMessage("ShivaSubway="+this.id.substr(10))});
 			if (tp == "t") 	
 				$("#shivaSubtx"+j).css("top",(y2-$("#shivaSubtx"+j).height()+4)+"px");
 			else if ((tp == "r") || (tp == "l")) 	
@@ -1278,8 +1354,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				which=0;														// Set name
 				val=ui.values[1];												// Use 2nd val
 				}
-			RunGlue(con.substr(1),which,val,"") 
-			});
+			shivaLib.SendShivaMessage("ShivaSlider="+(which+1)+"|"+val);		// Send message
+ 			});
 		DrawSliderTicks();
 	}
 
@@ -1354,11 +1430,11 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			nChars+=o.label.length+5;
 			if (items[i].type)	nChars+=4;
 			if (options.style == "Button") 
-				str+="<input type='button' id='sel"+i+"' onclick='RunGlue(\""+container+"\","+i+",\"Checked\")' value='"+o.label+"'>"; 
+				str+="<input type='button' id='sel"+i+"' value='"+o.label+"'>"; 
 			else if (options.style == "Toggle") 
-				str+="<input type='checkbox' id='sel"+i+"' onclick='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\")'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
+ 				str+="<input type='checkbox' id='sel"+i+"'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
 			else{
-				str+="<input type='radio' id='sel"+i+"' name='selector' onclick='RunGlue(\""+container+"\","+i+",\"Checked\",this.name)'"; 
+				str+="<input type='radio' id='sel"+i+"' name='selector'";				
 				if (o.def == "true")
 					str+=" checked='sel"+i+"'";
 				if (!items[i].label)
@@ -1369,10 +1445,19 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			}
 		str+="</span>";
 		$(con).html(str);		
+		for (i=0;i<items.length;++i) { 
+			if (options.style == "Toggle")
+				$("#sel"+i).click(function(){
+					var ch=this.checked?"checked":"unchecked"
+					var id=this.id.substr(3)
+					shivaLib.SendShivaMessage("ShivaSelect="+id+"|"+ch)
+					});
+			else
+				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+this.id.substr(3)+"|checked")});
+			} 
+ 		
 		$(con).css("text-align","left");		
 		$("#"+dd).buttonset();
-		if (options.style == "Radio") 
-			$("#"+dd).change=function() { RunGlue(container,i,this.checked?"Checked":"Unchecked",this.name) };
 		$(con).css("width",(nChars*6)+"px");		
 		for (i=0;i<items.length;++i)  
 			if (items[i].type != "Button")	{
@@ -1407,7 +1492,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				if (o.def)
 					str+=" checked=checked";
-				str+=" onClick='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\")'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
@@ -1417,28 +1501,24 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+=" name='"+o.group+"' id='"+o.name+"'";
 				if (o.def)
 					str+=" checked=checked";
-				str+=" onChange='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\",this.name)'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
 				}
-			else if ((sty == 'input')  || (sty == 'range') || (sty == 'button')) {
+			else if ((sty == 'input') || (sty == 'button')) {
 				str+="<input type='"+sty+"' size='23'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
 				if (o.def)
 					str+=" value='"+o.def+"'";
-				if (sty == 'button')
-					str+=" onClick='RunGlue(\""+container+"\","+i+",\"Clicked\")'";
-				else
-					str+=" onChange='RunGlue(\""+container+"\","+i+",this.value)'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
 				}
+			else if  (sty == 'range')
+				str+="<div style='width:120px;display:inline-block' id='"+o.name+"'></div> "+o.label;
 			else if (sty == 'combo') {
 				str+="<select ";
-				str+=" onChange='RunGlue(\""+container+"\","+i+",this.value)'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
 				str+=">";
@@ -1461,12 +1541,40 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+="<input type='"+sty+"' src='"+o.def+"'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
-				str+=" onClick='RunGlue(\""+container+"\","+i+",\"Clicked\")'";
 				str+="/>";
 				}
 			str+="<br/> ";
 			}
 		$(dd).html(str);
+		for (i=0;i<items.length;++i) {
+			o=items[i];
+			if (o.type)
+				sty=o.type.toLowerCase();
+			if ((sty == "radio") || (sty == "image") || (sty == "button")) 
+				$("#"+o.name).click(function(){ 
+					var id=this.id.substr(5)
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|checked")
+					});
+			else if (sty == "checkbox") 
+				$("#"+o.name).click(function(){ 
+					var id=this.id.substr(5)
+					var ch=this.checked?"checked":"unchecked"
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					});
+			else if ((sty == "input") || (sty == "combo"))				
+				$("#"+o.name).change(function(){ 
+					var id=this.id.substr(5)
+					var ch=this.value;
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					});
+			else if (sty == "range") {
+					var ops={ min:0, max:100, value:o.def, slide:function(event,ui) {											
+					var id=this.id.substr(5)
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ui.value)
+					}};    
+				$("#"+o.name).slider(ops);	
+				}										
+			}
 	}
 	
 	function DrawInfoBox(items)
@@ -1508,10 +1616,15 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		else 							$(content).css("overflow","hidden");
 		if (options.closer) {
 			var x=$(dd).width()-2;							
-			str="<img id='Clo"+dd+"' src='closedot.gif' style='position:absolute;left:"+x+"px;top:5px' onclick='$(\"#\"+this.id.substr(4)).hide()'/>";
+			str="<img id='Clo"+dd.substr(1)+"' src='closedot.gif' style='position:absolute;left:"+x+"px;top:5px'/>" 
 			$(dd).append(str);
+			$("#Clo"+dd.substr(1)).click(function(){
+				var id=this.id.substr(3);
+				$("#"+id).hide();
+				shivaLib.SendShivaMessage("ShivaDialog="+options.title+"|closed");
+				});
 			}
-	}
+		}
 		
 }	// Dialog closure end
 
@@ -1526,6 +1639,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$("#stp"+num).attr("checked",true);
 		$("#shiva_stepq").remove();
 		var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";
+		shivaLib.SendShivaMessage("ShivaStep="+num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);
 		if (obj.items[num].ques.indexOf("|") != -1) {
 			str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";
 			var v=obj.items[num].ques.split("|");
@@ -1546,10 +1660,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$("#shiva_stepa").val(obj.items[num].ans);
 			}			
 		$("#"+obj.container).append(str);
-		if (obj.items[num].ques) 
-			RunGlue(obj.container,num,obj.items[num].ans);
-		else
-			RunGlue(obj.container,num,"checked");
 		if ($("#accord").length)
 			$("#accord").accordion({ active: num });
 	}
@@ -1578,7 +1688,6 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
-		$("#"+this.container).click( function() { _this.RunGlue(_this.container,-1,"clicked"); });
 		this.SendReadyMessage(true);											
 		}
 	else
@@ -1672,10 +1781,16 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		v=options.end.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
-    	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { this.pause()} );
+    	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { 
+     		this.pause()
+			shivaLib.SendShivaMessage("ShivaPlayer=done");
+    		});
     	}
 	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
+	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaPlayer=done")});
+	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaPlayer=play")});
+	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaPlayer=pause")});
 
 	if (this.ev) 
 		t=this.ev.events;
@@ -1696,12 +1811,29 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	else
      		shivaLib.player.pause();
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
+ 		shivaLib.SendShivaMessage("ShivaPlayer=ready");
    	}
 
   	function drawOverlay()	{
    		shivaLib.DrawOverlay();
    		}		
 	this.SendReadyMessage(true);											
+}
+  
+SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActVideo=play") {									// PLAY
+		this.player.play();												// Play from current spot
+		if (v[1] != undefined)											// If a time set
+				this.player.play(v[1]);									// Play from then
+			}
+	else if (v[0] == "ShivaActVideo=pause")								// PAUSE
+		this.player.pause();											// Pause
+	else if (v[0] == "ShivaActVideo=load") {							// LOAD
+		this.player.media.src=v[1];										// Set new source
+		this.player.load(); 											// Load
+		}
 }
   
 //  TIMELINE   /////////////////////////////////////////////////////////////////////////////////////////// 
@@ -1803,6 +1935,16 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
   	}
 }
 
+SHIVA_Show.prototype.TimeActions=function(msg) {
+  var v=msg.split("|");
+  if (v[0] == "ShivaActTime=goto") {
+   // Code to scroll timeline to time set by v[1]
+  }
+  else if (v[0] == "ShivaActTime=show") {
+   // Code to open event popup for spreadsheet row set by v[1]
+  }
+}
+
 //  MAP   /////////////////////////////////////////////////////////////////////////////////////////// 
 
 SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
@@ -1853,9 +1995,20 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 		};
 	this.map=new google.maps.Map(document.getElementById(container),ops);
 	this.AddClearMapStyle(this.map);
+	this.AddBlankMapStyle(this.map);
 	this.DrawMapOverlays();
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
+	google.maps.event.addListener(this.map,'click', function(e) {
+	 	var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
+	 	var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
+	 	shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);
+ 		});
+	google.maps.event.addListener(this.map,'center_changed', function(e) {
+	 	var map=shivaLib.map;
+	 	var lat=map.getCenter();
+	 	shivaLib.SendShivaMessage("ShivaMap=move|"+lat.Ya+"|"+lat.Za+"|"+map.getZoom());
+ 		});
 }
 
 SHIVA_Show.prototype.AddInternalOptions=function(options, newOps) 							//	PARSE ITEMS
@@ -1883,6 +2036,8 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 	curLatlng=new google.maps.LatLng(v[0],v[1]);
 	curZoom=v[2];
 	for (i=0;i<items.length;++i) {
+		if (items[i].listener)
+			google.maps.event.removeListener(items[i].listener);
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);
@@ -1899,6 +2054,9 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				ops["icon"]=v[3]
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+	 			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za);
+	 			});
 			}
 		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
@@ -1908,6 +2066,10 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			if (items[i].layerSource)
 				items[i].obj=new google.maps.GroundOverlay(items[i].layerSource,imageBounds,ops);
 //	38.07,-78.55,37.99,-78.41
+//	//www.viseyes.org/shiva/map.jpg
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+this.url+"|"+e.latLng.Ya+"|"+e.latLng.Za);
+ 				});
 			}
 		else if (items[i].layerType == "KML") {
 			if (items[i].layerOptions) {	
@@ -1916,6 +2078,10 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 					ops[v[j].split("=")[0]]=v[j].split("=")[1];
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+	  			var str=this.url+"|"+e.featureData.name+"|"+e.latLng.Ya+"|"+e.latLng.Za;
+		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+str);
+	 			});
 			}
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
 			v=items[i].layerSource.split(",");							// Split into parts
@@ -1924,13 +2090,27 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			if (v.length > 2)											// If set
 				curZoom=v[2];											// Set zoom
 			}
-		if ((items[i].visible == "true") && (items[i].obj))
-			items[i].obj.setMap(this.map);	
-		if ((items[i].obj) && (!items[i].listener))
-			items[i].listener=google.maps.event.addListener(items[i].obj,'click',function(e) { _this.RunGlue(_this.container,i-1,"clicked"); });
+		if ((items[i].visible == "true") && (items[i].obj))				// If showing
+			items[i].obj.setMap(this.map);								// Add to map
 		}
 	this.map.setCenter(curLatlng);										// Center map
 	this.map.setZoom(Number(curZoom));									// Zoom map
+}
+
+
+SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActMap=goto") {									// GOTO
+		var curLatlng=new google.maps.LatLng(v[1],v[2]);				// Set lat/lon
+		this.map.setCenter(curLatlng);									// Center map
+		this.map.setZoom(Number(v[3]));									// Zoom map
+		}
+	else if ((v[0] == "ShivaActMap=show") || (v[0] == "ShivaActMap=hide")) {	// SHOW/SHOW
+		if (this.items[v[1]]) 											// If valid item	
+			this.items[v[1]].visible=(v[0] == "ShivaActMap=show").toString();	// Set visibility 
+		this.DrawMapOverlays();											// Redraw
+		}
 }
 
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX
@@ -2053,7 +2233,7 @@ ShivaCustomMapOverlay.prototype.onRemove=function()							// REMOVE HANDLER
 
 SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 {
-	var clearStyle=[
+	var style=[
 		{ featureType:"road", 	        elementType:"all",      stylers: [ { visibility:"off"} ] },
 		{ featureType:"transit",        elementType:"all",      stylers: [ { visibility:"off"} ] },
 		{ featureType:"poi",            elementType:"all",      stylers: [ { visibility:"off"} ] },
@@ -2062,8 +2242,24 @@ SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 		{ featureType:"all", 			elementType:"labels",   stylers: [ { visibility:"off"} ] },
 		{ featureType:"all", 			elementType:"geometry", stylers: [ { lightness:-20}    ] }
 		];
-	var clearMap=new google.maps.StyledMapType(clearStyle,{name:"Land"});
-	map.mapTypes.set("LAND",clearMap);
+	var type=new google.maps.StyledMapType(style,{name:"Land"});
+	map.mapTypes.set("LAND",type);
+}
+
+SHIVA_Show.prototype.AddBlankMapStyle=function(map)						// SET BLANK MAP STYLE
+{
+	var style=[
+		{ featureType:"road", 	        elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"transit",        elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"poi",            elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"administrative", elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"landscape",      elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"water",      	elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"all", 			elementType:"labels",   stylers: [ { visibility:"off"} ] },
+		{ featureType:"all", 			elementType:"geometry", stylers: [ { lightness:-20}    ] }
+		];
+	var type=new google.maps.StyledMapType(style,{name:"Blank"});
+	map.mapTypes.set("BLANK",type);
 }
 
 //  CHART   /////////////////////////////////////////////////////////////////////////////////////////// 
@@ -2160,11 +2356,25 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  	wrap.setOptions(ops);
     wrap.draw();
   	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
+  	google.visualization.events.addListener(wrap,"select", function(r) { 
+  		var o=wrap.getChart().getSelection()[0];
+   		var row="-", col="-";
+   		if ((o) && (o.row != undefined))
+   			row=o.row;
+   		if ((o) && (o.column != undefined))
+   			col=o.column;
+  		_this.SendShivaMessage("ShivaChart="+row+"|"+col); 
+   		});
 }
 
-SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE
+SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
-	RunGlue(con,item,val,group);														// Call global function
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActChart=data") {									// DATA
+		var data=google.visualization.arrayToDataTable($.parseJSON(v[1]));	// Convert to table format
+		this.map.setDataTable(data);									// Set data
+		this.map.draw();												// Redraw chart
+		}
 }
 
 SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SAVE DATA FROM FROM TO JSON, ETC
@@ -2363,8 +2573,6 @@ SHIVA_Show.prototype.ShowHelp=function(att, helpText, chartType)
 			str+="<b>How to set "+v[0]+"</b><br/><br/>";
 			if (helpText[v[0]])
 				str+=helpText[v[0]];
-			if (att.toLowerCase().indexOf("(s)") != -1) 
-				str+="<br><br><input type='button' onClick='shivaLib.ColorPicker(-1,-1)' value='Click to get a color number'/><div id='colorDiv'>&nbsp;<i>(Color will appear here)</i></div>";
 			}
 		else
 			str+="Click on a label to show help."
@@ -2672,15 +2880,15 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 	return pos;
 }
 
-SHIVA_Show.prototype.Sound=function(sound)
+SHIVA_Show.prototype.Sound=function(sound, mode)									// PLAY SOUND
 {	
-	
 	var snd=new Audio();
 	if (!snd.canPlayType("audio/mpeg"))
 		snd=new Audio(sound+".ogg");
 	else	
 		snd=new Audio(sound+".mp3");
-	snd.play();
+	if (mode != "init")
+		snd.play();
 }
 
 SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET
@@ -2734,7 +2942,7 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, con
 	$("body").append(str+"></iframe>");	
 	str="<iframe marginwidth='0' marginheight='0' src='closedot.gif' id='CL-"+id+"' style='position:absolute;margin:0px;padding:0px;border:none;"; 					
 	str+="width:17px;height:18px;left:"+(wid-13+left)+"px;top:"+(top+3)+"px'/>";
-	if (!mode)
+	if (mode != "black")
 		$("body").append(str);	
 
 	$("#"+id).bind("load",function(e) {
@@ -2761,8 +2969,10 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	else
 		width=400;
 	var x=($("#shivaLightBoxDiv").width()-width)/2;
-	if (width < 0)
-		x=830;
+	if (width < 0) {												// EARTH KLUDGE!!
+		x=$("#"+this.container).css("left").replace(/px/,"");
+		x=x-0+$("#"+this.container).width()-0+20;
+		}
 	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
 	str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";								
@@ -2927,8 +3137,9 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 	if (type != "all")
 		str+=" <button id='linkBut'>Link</button>";	
 	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	if (type == "KML") w=-350;												// Force to right of Earth (KLUDGE)																
+	if ((type == "KML") || (this.group == "Earth")) w=-350;					// Force to right of Earth (KLUDGE)																
 	this.ShowLightBox(w,20,"SHIVA eStore",str)								// Create light box
+
 	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
 	$("#saveBut").button().click(function() {								// SAVE
 		var _email=$("#email").val();										// Get email
@@ -3686,23 +3897,6 @@ SHIVA_QueryEditor.prototype.SetQueryString=function()
 //	OTHER
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function RunGlue(con, item, val, group)
-{
-	if (group) {
-		var g=$("input[name="+group+"]");
-		var j=g[0].id.substr(5);
-		for (var i=0;i<g.length;++i) {
-			if (j != item+1)
-				window.postMessage("ShivaTrigger="+con.substr(4)+","+j+",Unchecked","*");
-			++j;
-			}
-		}
-	if (typeof(con) == "object") {
-		}	
-	else
-		window.postMessage("ShivaTrigger="+con.substr(4)+","+(++item)+","+val,"*");
-}
-
 function trace(msg)
 {
 	console.log(msg);
@@ -3852,31 +4046,30 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='shivaLib.dr.SetTool(-1)'/>";
 	str+="<table style='font-size:xx-small'>"
 	if (tool < 3) {
-		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		if (tool == 2)
-			str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+			str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
 		else if (tool == 0) {
-			str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-			str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";
+			str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+			str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td><input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";
 			}		
-		str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Line width</td><td>&nbsp;<input style='width:85px;height:12px;background-color:transparent;' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
 		}
 	else if (tool == 3) {
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Text size</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"textSize\",this.value)' type='range' id='textSize'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Text size</td><td><div style='width:82px;margin-left:6px' id='textSize'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";
 		}
 	else if (tool == 4) {
-		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
 	else if (tool == 6) {
@@ -3914,6 +4107,13 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	$("#sdtb5").button({text: false, icons: { primary: "ui-icon-image"}});
 	$("#sdtb6").button({text: false, icons: { primary: "ui-icon-arrowthick-1-nw"}}).css("width","100");
 	$("#sdtb7").button({text: false, icons: { primary: "ui-icon-lightbulb"}}).css("width","100");
+
+	$("#alpha").slider({slide:function(event, ui) {shivaLib.dr.SetVal("alpha",ui.value);}});	
+	$("#edgeWidth").slider({slide:function(event, ui) {shivaLib.dr.SetVal("edgeWidth",ui.value);}});	
+	$("#textSize").slider({slide:function(event, ui) {shivaLib.dr.SetVal("textSize",ui.value);}});	
+	$("#alpha .ui-slider-handle").css("border","1px solid #888");
+	$("#edgeWidth .ui-slider-handle").css("border","1px solid #888");
+	$("#textSize .ui-slider-handle").css("border","1px solid #888");
 	this.SetMenuProperties();												// Set menu properties
 }
 
@@ -3944,9 +4144,9 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#snap").attr("checked",this.snap);									// Check it
 	$("#curve").attr("checked",this.curve);									// Check it
 	$("#arrow").attr("checked",this.arrow);									// Check it
-	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
-	$("#alpha").val(this.alpha); 											// Set alpha
-	$("#textSize").val(this.textSize); 										// Set text size
+	$("#edgeWidth").slider("value",this.edgeWidth); 						// Set edge width
+	$("#alpha").slider("value",this.alpha); 								// Set alpha
+	$("#restSize").slider("value",this.textSize); 							// Set edge width
 	$("#textAlign").val(this.textAlign); 									// Set text align
 	$("#imageURL").val(this.imageURL); 										// Set image url
 	$("#startEndTime").text(this.startTime+" -> "+this.endTime);			// Set times
@@ -4212,7 +4412,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		this.DrawWireframes(false);											// Show wireframes
 		}
-	else (this.curTool != -1)												// If not closed
+	else if (this.curTool != -1)											// If not closed
 		this.DrawMenu();													// Draw menu
 }
 
@@ -4684,7 +4884,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
 	var sel = "";
-	//console.log(isNaN(attr));
+	console.log(isNaN(attr));
 	if (isNaN(attr)) 
 		sel="#"+attr.replace(/___/g,"");
 	else if (attr < 0) 
@@ -4693,7 +4893,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
 	else sel = "#propInput" + attr;
 		
-	//console.log(sel);
+	console.log(sel);
     var inputBox = $(sel);
     var inputBoxChip = $(sel+"C");
 
@@ -5853,6 +6053,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
 {
   var i;
   var stimeline = new Object();
+  
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
@@ -5914,7 +6115,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         eventData.events.push(o);
       }
       
-      stimeline.events = normalizeEventData(eventData.events);
+      stimeline.events = eventData.events;
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -5928,7 +6129,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
      
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-	     window.shivaTimeline =  $(stimeline.con).timeline({
+	  window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
@@ -5945,6 +6146,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             shivaLib.SendReadyMessage(true); 
           }
       });     
+      
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
         $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
@@ -5981,9 +6183,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
           }
           if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
             ev.enddate = ConvertTimelineDate(ev.end);
-          }
-          if(typeof(ev.high_threshold) == "undefined") {
-            ev.high_threshold = 50;
           }
           if(typeof(ev.importance) == "undefined") {
             ev.importance = 50;

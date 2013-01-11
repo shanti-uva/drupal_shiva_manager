@@ -269,6 +269,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	else																	// Default
 		i=100;																// To 100%
 	$("#frame-opacity").val(i);												// Set value
+	this.SetEventHelp();													// Set help's
 }
 
 SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL CONTROLS
@@ -404,7 +405,10 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 	var o=this.events[num];													// Point at event
 	if (!o.start)															// If no start defined
 		return;																// Don't add to cue
-	this.player.cue(o.start,function() 	 { _this.Draw(num,true);  });		// Add start cue
+	this.player.cue(o.start,function() 	{ 									// A cue
+		_this.Draw(num,true); 												// Add start cue
+		shivaLib.SendShivaMessage("ShivaPlayer=Event-"+num);				// Send message
+ 		 });		
 	if (o.end)																// If an end set
 		this.player.cue(o.end,function() { _this.Draw(num,false); });		// Add end cue
 }
@@ -566,7 +570,6 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 	var i,v;
 	mustBeCorrect=false;
 	var num=id.substr(id.lastIndexOf("-")+1);								// Get id number
-	
 	var o=this.events[num];													// Point at event
 	var lines=o.text.split(">>");											// Split into lines
 	for (i=1;i<lines.length;++i) 											// For each line
@@ -583,11 +586,13 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 					$("#shivaEvent-"+num).hide();							// Hide it
 					this.EventRouter(o.done,"");							// Run events(s)
 					this.modalEvent=-1;										// Clear modal event flag
+					shivaLib.SendShivaMessage("ShivaPlayer=Menu-right");	// Send message
 					break;													// Stop looking
 					}
 				}
 			}
 		if (i >= lines.length-1) {											// Wrong answer
+			shivaLib.SendShivaMessage("ShivaPlayer=Menu-wrong");			// Send message
 			if (!mustBeCorrect) {											// If any answer will do to move on
 				$("#shivaEvent-"+num).hide();								// Hide it
 				this.EventRouter(o.done,"");								// Run events(s)
@@ -838,3 +843,48 @@ function trace(msg)
 	console.log(msg);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   HELP  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_Event.prototype.SetEventHelp=function()
+{
+	var helpText=new Array();
+	helpText['shapes']="The 'Shape' tab allows for configuring the dimensions of your event as well as some of the basic behavior of that event on the page.";
+	helpText['frame-top']="Click on the text box to the right and enter a number that will set the where the top of your event dialog box begins. This is a pixel value the establishes an offset relative to the top of the video player.";
+	helpText['frame-left']="Click on the text box to the right and enter a number that will set the where the left side of your event dialog box begins. This is a pixel value the establishes an offset relative to the left side of the video player.";
+	helpText['frame-width']="Click on the text box to the right and enter a number that sets the width of your event dialog box.";
+	helpText['frame-height']="Click on the text box to the right and enter a number that sets the height of your event dialog box.";
+	helpText['frame-radius']="Click on the text box to the right and enter a value that sets the amount that your event dialog box's corners are rounded. This is a value in pixels that represents the radius of the circle that determines the curve of your box's corners.";
+	helpText['frame-draggable']="Use the check-box to the right to choose whether or not your event dialog box is draggable.";
+	helpText['colors']="The 'Colors' tab allows for configuring text color, border color, background color, and the opacity of the event dialog box.";
+	helpText['frame-color']="Click on the text box to the right to set the font color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
+	helpText['frame-background-color']="Click on the text box to the right to set the background color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
+	helpText['frame-border']="Click on the text box to the right to set the border color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
+	helpText['frame-opacity']="Use the slider-bar to the right to set the opacity of your event dialog box. A value of 0 (left) will be totally transparent, and a value of 100 (right) will be fully opaque.";
+	helpText['actions']="The 'Action' tab allows for configuring how your event dialog box responds to various kinds of user actions.";
+	helpText['click']="Click on the text box to the right and enter a value that determines what action to trigger when a user clicks on your event dialog box.";
+	helpText['hover']="Click on the text box to the right and enter a value that determines what action to trigger when a user hovers over your event dialog box.";
+	helpText['done']="Click on the text box to the right and enter a value that determines what action to trigger when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
+	helpText['response']="Click on the text box to the right and enter a value that determines how to store user input when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
+	helpText['player']="Click on the text box to the right and enter a value that determines the behavior of the video player when the event first opens. Use 'pause' to pause the video player or leave the box blank to allow the video player to keep playing.";
+	helpText['times']="The 'Time' tab allows for configuring various aspects of the timing for your video event.";
+	helpText['start']="Click on the text box to the right and enter a value that determines the starting time for your video event. This should be in the form mm:ss, e.g. 00:05.";
+	helpText['end']="Click on the text box to the right and enter a value that determines the ending time for your video event. This should be in the form mm:ss, e.g. 00:05.";
+	helpText['fadein']="Click on the text box to the right and enter a value that sets the duration of the fade in for your video event. This should be a number of seconds.";
+	helpText['fadeout']="Click on the text box to the right and enter a value that sets the duration of the fade out for your video event. This should be a number of seconds.";
+	helpText['content']="The 'Content' tab allows for configuring what text, images, and other content to display in your video event.";
+	helpText['type']="Use the drop-down menu to the right to choose what type of event you would like to use. ";
+	helpText['id']="Click on the text box to the right and enter a value that determines the id of this video event.";
+	helpText['title ']="Click on the text box to the right and enter a title for your video event.";
+	helpText['url']="Click on the text box to the right and enter a the web URL of an image to optionally add an image to your video event.";
+	helpText['frame-scroller']="Use the check-box to the right to choose whether or not your event dialog box has scrollbars.";
+	helpText['frame-closer']="Use the check-box to the right to choose whether or not your event dialog box has a close button.";
+	helpText['text']="Click on the text box to the right and enter a value that sets the text in the body of your video event.";
+	
+	var id;
+	for (id in helpText) {
+		$("#"+id).attr("title",helpText[id]);
+	}
+
+}

@@ -5032,7 +5032,6 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     cancel:".tg-modal",
     
     drag: function(event, ui) {
-      
       t1Left = Math.floor($(this).position().left);
       
       MED.setTicksOffset(t1Left);
@@ -9476,7 +9475,6 @@ tg.TG_Mediator = function (wopts, $el) {
   // incoming: {name:"dblclick", event:e, dimensions:me.dimensions}
   registerUIEvent: function (info) {
     var me = this;
-    
     switch(info.name) {
       case "dblclick": case "dbltap":
       // info comes with 
@@ -10014,7 +10012,19 @@ tg.validateOptions = function (widget_settings) {
         // after timelinePlayer is created this stuff can be done
         MED.setFocusDate(new TG_Date(this.options.initial_focus));
         MED.loadTimelineData(this.options.data_source, this.options.loaded);
-
+        
+        // binds drag of timeline to messaging, ndg added for SHIVA
+        //Need to give center|start| and end of timeline window on drag
+       $('.timeglider-ticks').bind('drag',function() {
+          var newtime = MED._focusDate.dateStr;
+          shivaLib.SendShivaMessage("ShivaTime=time|" + newtime);
+        });
+        // binds opening event modals to messaging ndg added for SHIVA
+        $('.timeglider-timeline-event').live('click', function() {
+           var teid = $(this).attr('id');
+           console.info("event " + teid + " clicked!");
+         });
+       
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);
       }

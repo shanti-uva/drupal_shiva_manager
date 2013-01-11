@@ -55,18 +55,15 @@
 	var props={
 		rgraph:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			query: 						{	def:'', 		opt:'string',		 des:'Data filter'}, 
 			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_strokeStyle: {	def:'555555', 		opt:'color',		 des:'Background ring color'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
 			Navigation_zooming: 		{	def:'100', 		opt:'number',		 des:'Zoom speed'},
-//			levelDistance:				{	def:'75', 		opt:'number',		 des:'Level distance'},
 			Node_overridable: 			{	def:'true', 	opt:'false|true',	 des:'Use node styles from data source'},
 			Node_type: 					{	def:'circle', 	opt:'circle|square|triangle|star',		 des:'Node shape'},
 			Node_dim:					{	def:'5', 		opt:'number',		 des:'Node size'},
 			Node_color:					{	def:'ff0066', 	opt:'color',		 des:'Node color'},
-			//Node_alpha:				{	def:'1', 		opt:'number',		 des:'Node alpha'},  // When set to < 1, loses labels
 			Edge_overridable: 			{	def:'true', 	opt:'false|true',	 des:'Use edge styles from data source'},
 			Edge_type:					{	def:'line', 	opt:'line|arrow',	 des:'Link style'},
 			Edge_dim:					{	def:'15', 		opt:'number',		 des:'Link arrow head size'},
@@ -79,17 +76,14 @@
 			Label_family: 				{	def:'sans-serif', opt:'sans-serif|serif|monospace',		 des:'Font family'}},
 		forcedir:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			query: 						{	def:'', 		opt:'string',		 des:'Data filter'}, 
 			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
 			Navigation_zooming: 		{	def:'100', 		opt:'number',		 des:'Zoom speed'},
-			//levelDistance:				{	def:'75', 		opt:'number',		 des:'Level distance'},
 			Node_overridable: 			{	def:'true', 	opt:'false|true',	 des:'Use node styles from data source'},
 			Node_type: 					{	def:'circle', 	opt:'circle|square|triangle|star',		 des:'Node shape'},
 			Node_dim:					{	def:'5', 		opt:'number',		 des:'Node size'},
 			Node_color:					{	def:'ff0066', 	opt:'color',		 des:'Node color'},
-			//Node_alpha:				{	def:'1', 		opt:'number',		 des:'Node alpha'},  // When set to < 1, loses labels
 			Edge_overridable: 			{	def:'true', 	opt:'false|true',	 des:'Use edge styles from data source'},
 			Edge_dim:					{	def:'15', 		opt:'number',		 des:'Link arrow head size'},
 			Edge_type:					{	def:'line', 	opt:'line|arrow',	 des:'Link style'},
@@ -102,12 +96,10 @@
 			Label_family: 				{	def:'sans-serif', opt:'sans-serif|serif|monospace',		 des:'Font family'}},
 		hypertree:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			query: 						{	def:'', 		opt:'string',		 des:'Data filter'}, 
 			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
 			Navigation_zooming: 		{	def:'100', 		opt:'number',		 des:'Zoom speed'},
-			//levelDistance:				{	def:'75', 		opt:'number',		 des:'Level distance'},
 			Node_overridable: 			{	def:'true', 	opt:'false|true',	 des:'Use node styles from data source'},
 			Edge_dim:					{	def:'15', 		opt:'number',		 des:'Link arrow head size'},
 			Node_type: 					{	def:'circle', 	opt:'circle|square|triangle|star',		 des:'Node shape'},
@@ -126,32 +118,31 @@
 		};
 		
 	var helpText=new Array();
-	helpText['Data source URL']="A link to a published Google Spreadsheet that contains a list of links and nodes. See <a href='https://wiki.shanti.virginia.edu/x/o5S1AQ' target='_blank'>the Knowledge Base</a> for more information about how to create and link to network data for use in these visualizations.";
-	helpText['Data filter']="This field defines conditions to query the Data Source to refine the data obtained from the spreadsheet. You can choose the rows and columns to include based on their values, to sort the data, and to sum it. You can find out more information on how to construct queries <a href='http://code.google.com/apis/chart/interactive/docs/querylanguage.html' target='_blank'> here</a>..";
-	helpText['Height']="The height of the visualization.";
-	helpText['Width']="The width of the visualization.";
+	helpText['Data source URL']="Click on the spreadsheet icon to the right of 'Data source url' to access a list of your Google Docs Spreadsheets from within SHIVA. You may be prompted to authorize access (read-only) to your Google account. You should then be able to select a spreadsheet from the provided list.<br/> <br/>Alternately, you can paste the URL provided through the Share link of your Google Doc. Note you have to change the Share settings for the Spreadsheet to either 'Public' or 'Anyone with the link'. <br/><br/>See <a href='https://wiki.shanti.virginia.edu/x/o5S1AQ' target='_blank'>the Knowledge Base</a> for more information about how to create and link to network data for use in these visualizations.";
+	helpText['Height']="Enter a value in the text box to the right to set the height of the visualization.";
+	helpText['Width']="Enter a value in the text box to the right to set the width of the visualization.";
 	helpText['Level distance']="The distance between levels, or circles, in pixels.";
-	helpText['Zoom speed']="Determines the zoom speed. Set this to a number if you want to turn mouse-scroll zooming on, or just set it to 0 to turn off zooming.  The number will be proportional to the mouse-scroll sensitivity. Try 100 for a rapid zooming experience, or 10 for a more moderate speed.";
-	helpText['Background ring color']="The color of the concentric rings in the background of the visualization.";
-	helpText['Background color']="The color of the background of the visualization.";
-	helpText['Use node styles from data source']="You can override the settings for nodes that appear in this form and use the ones in your data source spreadsheet. See the help documentation for more information.";
-	helpText['Node size']="The default radius or height of each node.";
-	helpText['Node shape']="The default shape of each node.";
-	helpText['Node color']="The default background color of each node.";
+	helpText['Zoom speed']="In the text box to the right enter a value that will determine the zoom sensitivity of the scrollwheel. Higher values will increase the zoom speed, and lower values will decrease the zoom speed. Enter a value 0 to 500; note a value of 0 disables zooming.";
+	helpText['Background ring color']="In the text box to the right enter a color value that will set the color of the concentric rings in the background of the visualization. Click on the square color chip icon in the text box to the right to launch the color picker and select a color, or type a hexadecimal color value in the text box.";
+	helpText['Background color']="In the text box to the right enter a color value that will set the color of the background of the visualization. Click on the square color chip icon in the text box to the right to launch the color picker and select a color, or type a hexadecimal color value in the text box.";
+	helpText['Use node styles from data source']="Use the drop-down menu to the right to choose whether or not to use the node style information specified in your source spreadsheet, or to set the node style using the options below.";
+	helpText['Node size']="In the text box to the right enter a value that sets the default radius or height of each node.";
+	helpText['Node shape']="Use the drop-down menu to the right to set the default shape of each node.";
+	helpText['Node color']="In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
 	helpText['Node alpha']="The default alpha, or transparency, setting of each node. Set to some decimal value between 0 and 1, where 1 is opaque and 0 completely transparent.";
-	helpText['Link arrow head size']="The default radius or height of each node.";
-	helpText['Node transform']="Whether to resize the nodes based on their distance from the center.";
-	helpText['Use edge styles from data source']="You can override the settings for links that appear in this form and use the ones in your data source spreadsheet. See the help documentation for more information.";
-	helpText['Link color']="The default color of link lines.";
-	helpText['Link line width']="The default width of link lines in pixels. Used only by some node shapes.";
-	helpText['Link style']="The default type or style of link, including 'line,' 'hyperline,' and 'arrow'.  The options and default might vary in each visualization.";
-	helpText['Link arrow head size']="The default size of the edge arrow head, when using an edge type like 'arrow'.";
-	helpText['Label type']="The system used to render the labels. HTML labels can be clicked on, but Normal labels render more quickly. SVG does not currently display"; 	
-	helpText['Font style']="The style of the font label.";
-	helpText['Font size']="The size of node labels in pixels.";
-	helpText['Font color']="The color of node labels.";
-	helpText['Font family']="The font family of node labels.";
-
+	helpText['Link arrow head size']="In the text box to the right enter a value that sets the default size of link arrow heads. Note this only applies if the 'Link style' option is set to 'arrow'.";
+	helpText['Node transform']="Use the drop-down menu to right to choose whether to resize nodes based on their position relative to the center. Note this only applies if you choose not to specify style data in your source spreadsheet.";
+	helpText['Use edge styles from data source']="Use the drop-down menu to the right to choose whether or not to use the link style information specified in your source spreadsheet, or to set the linknode style using the options below.";
+	helpText['Link color']="In the text box to the right enter a value that sets the default color of link lines. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
+	helpText['Link line width']="In the text box to the right enter a value that sets the default link line width in pixels.";
+	helpText['Link style']="Use the drop-down menu to the right to choose the default type or style of link, including 'line,' 'hyperline,' and 'arrow'.  The options and default might vary in each visualization.";
+	helpText['Link arrow head size']="The default size of the edge arrow head, when using the 'Link style' 'arrow'.";
+	helpText['Label type']="Use the drop-down menu to choose the system used to render the labels. HTML labels can be clicked on, but Normal labels render more quickly. SVG does not currently display"; 	
+	helpText['Font style']="Use the drop-down menu to the right to choose the the style of the font label. Choose 'normal', 'italic' or 'bold'";
+	helpText['Font size']="Click on the text box to the right and enter a number that sets the font size of node labels in pixels.";
+	helpText['Font color']="In the text box to the right enter a value that will determine the font color of node labels. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color code in the text box.";
+	helpText['Font family']="Use the drop-down menu to the right to choose the font-family for node labels. Choose 'sans-serif', 'serif', or 'monospace'";
+	
 	///////// INIT  /////////////
 	
 	$(document).ready(function() 

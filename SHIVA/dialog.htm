@@ -109,46 +109,49 @@
 			}
 	
 	var helpText=new Array();
-	helpText['Dialog title']="Title of dialog box.";
-	helpText['Draggable?']="Whether the dialog box can be dragged with a mouse.";
-	helpText['Modal?']="Whether the dialog is the only active element when it is open and it is not possible to click or any other option on the page.<br/><br/><b>NOTE:</b> If you make the dialog modal, you will need to close it by clicking in the 'X' to change anything";
-	helpText['Position']="Where the control will be positioned. Can be center, top-left, top-center, top-right, bot-left, bot-center, bot-right, or [100,200], (the horizontal, vertical position in pixels).";
-	helpText['<b>Choose item to edit</b>']="Select the item to edit in this pull-down, or click and/or change the item in the dialog box to bring up its attributes."
-	helpText['Item label']="Label of item. For combo menus, separate the options by a | (i.e., true|false).";
-	helpText['Item type']="Type of item. Can be Button, Checkbox, Combo, Image, Line, Radio, Range, or Text";
-	helpText['Item default']="The default state of the item. Radio and Checkbox can be set to true, Combo can be set with initial option name, Image has the full URL of the image to show, Range can have its initial position from 0-100, and Text can show default value.";
+	helpText['Dialog title']="Click the text box to the right and type in the title of your dialog box.";
+	helpText['Draggable?']="Click on the drop-down menu to the right to choose 'true' or 'false' to determine whether the dialog box can be dragged with a mouse. ";
+	helpText["Show scroll bars?"]="Click the drop-down menu to the right to view and choose options for whether or not your infobox will show a scroll bar.";
+	helpText['Modal?']="Click on the drop-down menu to the right to choose 'true' or 'false' to determine whether the dialog is the only active element when it is open and it is not possible to click or any other option on the page. <br/><br/><b>NOTE:</b>  If you make the dialog modal, you will need to close it by clicking in the 'X' to change anything";
+	helpText['Position']="Click the text box to the right and type in where the control will be positioned. Can be center, top-left, top-center, top-right, bot-left, bot-center, bot-right, or [100,200], (the horizontal, vertical position in pixels).";
+	helpText['<b>Choose item to edit</b>']="Select the item to edit in this drop-down, or click and/or change the item in the dialog box to bring up its attributes."
+	helpText['Item label']="Click on the dialog box to the right and type in the item label.  For combo menus, separate the options by a | (i.e., true|false). ";
+	helpText['Item type']="Click on the drop-down menu to the right to determine whether your item will be a Button, Checkbox, Combo, Image, Line, Radio, Range, or Text";
+	helpText['Item default']="Click on the text box to the right to type in the default state of the item.  Radio and Checkbox can be set to true, Combo can be set with initial option name, Image has the full URL of the image to show, Range can have its initial position from 0-100, and Text can show default value.";
 	helpText['Button label']="Label of button. If an icon, the label will appear to the right of the icon";
 	helpText['Button default']="The default state of the button. Can be set to true, or left blank.";
-	helpText['Button type']="Type of item. Can be Button, or one of these built-in icons: <br/><br/><image src='icons.gif' width='390' height='418'>";
-	helpText['Selector type']="Choose to add a Button or Radio. Then click the + button.";
-	helpText['Button label']="Enter text that will appear on the button.";
-	helpText['Checked?']="Set this button to true if you have more than one button and you would like one to be the default checked button.";
-	helpText['Group']="Radio buttons need to be associated as a group, so that only one in that group will be checked at any given time. Put a name here for each radio button in a given group that identifies the group, such as 'group1', or 'styles'. You can have as many group as you want.";
-	helpText['Minimum value']="Sets the value of the start of the slider.  The default is 0.";
-	helpText['Maximum value']="Sets the value of the end of the slider.  The default is 100.";
-	helpText['Orientation']="Choose whether you want your slider to be horizontal or vertical.";
-	helpText['Size of time slider']="Determines the size of the time slider in pixels.";
-	helpText['Snap increment']="Determines at what increment your slider box will jump or snap to as it travels along the slider.  If the maximum value of your slider is set to 10 and your snap increment is set to 1, then the button will snap 10 times before reaching the end of the slider.  If however the snap increment is set to 2, then the button will only snap 5 times before reaching the end of the slider.";
-	helpText['Slider type']="Choose from the available slider types.  Choose the Bar option if you wish to have the slider turn grey as the box moves up the slider.  Choose the Range option if you want the slider to start at the maximum point and snap down.  Choose the Single option to leave the slider color unchanged as the box moves up the slider.";
-	helpText['Start time']="Enter a number from along your slider if you wish the box to begin from that point rather than from the minimum point on the slider.";
-	helpText['Title']="You have the option of adding a title to your slider or leaving this blank.";
-	helpText['Number of tick marks']="Determines the number of tick marks displayed under your slider.  If your slider has a range of 0-10 and you want the box to snap in 1 tick increments to the end, then set this number to 9.  Likewise, if your slider has a range of 0-100 and you want the box to snap in 1 tick increments to the end, then set this number to 99.  And, if your slider has a range of 0-100 and you want the box to snap in increments of 10 to the end, then set this number to 9.";
-	helpText['Show tick values?']="Choose false to hide the number value of the tick marks or true to show the number value of the tick marks.";
-	helpText['Tick value suffix']="You have the option to add a suffix that will be displayed with the maximum value.  For example, if you enter enter % in this box and the Show tick values? box is set to true the the maximum value for the slider will be 100%.";
+	helpText['Button type']="Click on the drop-down menu to the right to view and choose from the button types available.  Can be Button, or one of these built-in icons: <br/><br/><image src='icons.gif' width='390' height='418'>";
+	helpText['Selector type']="Click on the drop-down menu to the right to view your options and choose to add a Button or Radio. Then click the + button.";
+	helpText['Button label']="Enter text in the box to the right that will appear on the button.";
+	helpText['Checked?']="Click on the drop-down menu to the right to view and choose from your options.  Set this button to true if you have more than one button and you would like one to be the default checked button.";
+	helpText['Group']="Radio buttons need to be associated as a group, so that only one in that group will be checked at any given time. Click on the text box to the right to type in a name for each radio button in a given group that identifies the group, such as 'group1', or 'styles'. You can have as many group as you want.";
+	helpText['Minimum value']="Sets the value of the start of the slider.  The default is 0.  Click the text box to the right and enter a numerical value of your choosing.";
+	helpText['Maximum value']="Sets the value of the end of the slider.  The default is 100.  Click the text box to the right and enter a numerical value of your choosing.";
+	helpText['Orientation']="Click on the drop-down menu to the right to view and choose whether you want your slider to be horizontal or vertical.";
+	helpText['Size of time slider']="Determines the size of the time slider in pixels.  Click on the text box to the right to type in a number as small as .1 or as large as 70000.";
+	helpText['Snap increment']="Determines at what increment your slider box will jump or snap to as it travels along the slider.  Click the text box to the right and type in a numerical value.  If the maximum value of your slider is set to 10 and your snap increment is set to 1, then the button will snap 10 times before reaching the end of the slider.  If however the snap increment is set to 2, then the button will only snap 5 times before reaching the end of the slider.";
+	helpText['Slider type']="Click on the drop-down menu to the right to view and choose from the available slider types.  Choose the Bar option if you wish to have the slider turn grey as the box moves up the slider.  Choose the Range option if you want the slider to start at the maximum point and snap down.  Choose the Single option to leave the slider color unchanged as the box moves up the slider.";
+	helpText['Start time']="Click on the text box to the right and enter a number from along your slider if you wish the box to begin from that point rather than from the minimum point on the slider.";
+	helpText['Title']="Click on the text box to the right to type in a title for your slider or you may leave this box blank.";
+	helpText['Number of tick marks']="Click on the text box to the right and enter the number of tick marks you want to display under your slider.  If your slider has a range of 0-10 and you want the box to snap in 1 tick increments to the end, then set this number to 9.  Likewise, if your slider has a range of 0-100 and you want the box to snap in 1 tick increments to the end, then set this number to 99.  And, if your slider has a range of 0-100 and you want the box to snap in increments of 10 to the end, then set this number to 9.";
+	helpText['Show tick values?']="Click on the drop-down menu to the right to view and choose false to hide the number value of the tick marks or true to show the number value of the tick marks.";
+	helpText['Tick value suffix']="You have the option to add a suffix that will be displayed with the maximum value by clicking on the text box to the right and entering typing in a suffix for your ticks.  For example, if you enter enter % in this box and the Show tick values? box is set to true the the maximum value for the slider will be 100%.";
 	helpText['Step label']="Label for a step that will appear across the top.";
 	helpText['Step default']="The default value for a question if not actually changed.";
 	helpText['Step question']="The kind of question that will be asked at this step:<br/><br/><b>color</b> will bring up a color picker.<br/><b>text</b> where text can be typed<br/><b>option1|option2</b>, where a pulldown menu of options, separated by |'s, such as <i>true|false</i> or <i>left|right|center.</i><br/><br/>The response to the question is sent as a message. If no question is set, the step sends the step number as a message when step clicked.";
 	helpText['OVERVIEW']="Create Dialog Boxes, Selector buttons, Time Sliders, Time Steppers, and InfoBoxes for your project.<br/><br/>";
-	helpText['OVERVIEW']+="To get started use the drop down menu to choose what kind of control you would like to create.  Or take a look at the sample control provided for the Dialog control.  Click the + sign to to add buttons or elements to your controls.  Customize the controls to your needs.<br/><br/>";
-	helpText['Type of InfoBox']="The kind of InfoBox. <br/><br/><b>Text</b> is a simple text display, formattable using HTML and can use $$ replaceable parameters.<br/><b>Table</b> is a tabular display, filled using data from an Action in the Canvas panel.<br/><b>DocViewer</b> is a document viewer display (i.e. 2 columns with image and facing text and multiple pages. It is filled using data from an Action in the Canvas panel.";
+	helpText['OVERVIEW']+="To get started use the drop-down menu to choose what kind of control you would like to create.  Or take a look at the sample control provided for the Dialog control.  Click the + sign to to add buttons or elements to your controls.  Customize the controls to your needs.<br/><br/>";
+	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
+	helpText['OVERVIEW']+="For more information and detailed instructions for utilizing this tool please visit the UVa Knowledge Base documentation for the <a href='https://wiki.shanti.virginia.edu/x/cJ_1AQ' target='_blank'> Control Tool</a>.<br/><br/>";
+	helpText['Type of InfoBox']="Click on the drop-down menu on the right to choose the kind of InfoBox you want to display. <br/><br/><b>Text</b> Is a simple text display, formattable using HTML and can use $$ replaceable parameters.<br/><b><br/><b>DocViewer</b> Is a document viewer display (i.e. 2 columns with image and facing text and multiple pages. It is filled using data from an Action in the Canvas panel.";
 	helpText['Resizable?']="Whether the dialog box can be resized with a mouse.";
-	helpText['Closable?']="Whether the dialog box has a closing button.";
-	helpText['Width']="The width of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.";
-	helpText['Height']="The height of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.";
-	helpText['Background color']="The color of the background.If set to -1, the box, frame, and titlebar will be transparent.";
-	helpText['Frame color']="The color of the background. If set to -1, the frame will not be drawn.";
-	helpText['Content']="The text template if a Text box. If a Table, the phrase 'grid=true' can be added to draw a grid between the data members.";
-	
+	helpText['Width']="The width of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.  Click on the text box to the right to type in a number between .1 and 70000.";
+	helpText['Height']="The height of the dialog, in pixels. If set to 'auto' the box will expand to fit the contents.  Click on the text box to the right to type in a number between 1 and 40000.";
+	helpText['Background color']="Click on the color box in the text box to choose the color of the background.  If set to -1, the box, frame, and titlebar will be transparent.";
+	helpText['Frame color']="Click on the color box in the text box to choose the color of the background. If set to -1, the frame will not be drawn.";
+	helpText['Content']="Click on the text box to the right to enter the text that will appear in the Text box if the Type of info box is set to Text..";
+	helpText['Closable?']="Whether the dialog box has a closing button.";	
+
 ///////// INIT  /////////////
 
     $(document).ready(function() {
@@ -182,6 +185,11 @@
 
 	function shivaEventHandler(e)
 	{
+		if (e.data.indexOf("ShivaDialog=") == 0) {
+			var num=e.data.indexOf("|");
+			num=e.data.substring(12,num);
+			$("#accord").accordion("activate",num-1);
+			}
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetType") == 0) 

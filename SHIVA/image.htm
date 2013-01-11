@@ -63,7 +63,7 @@
 	var inSearch=false;
 	
 	var props={
-		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/doc'}, 
+		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/spreadsheet'}, 
 		width: 						{	def:'600', 			opt:'number',			des:'Width of image'}, 
 		transition: 				{	def:'fade', 		opt:'none|fade|resize|slide-hori|slide-vert',		des:'Transition style'},
 		showImage: 					{	def:'true', 		opt:'true|false',		des:'Show full image?'}, 
@@ -73,16 +73,17 @@
 		}
 	
 	var helpText=new Array();
-	helpText['URL of image/doc']="Source URL of the image, if a showing a single image.<br/><br/>If using google docs for image gallery, type the URL for the Google Docs spreadsheet, or simply cut and paste the URL from the Google Docs site for the spreadsheet to use that contains data formatted for the images.<br/><br/>Each row is an image, with the image URL, the title (optional) and description (optional) in the first 3 columns.<br/><br/><a href='https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdGxVdFJtYVlkNkt2MHJzWEJMRkVSWWc' target='_blank'> Here</a> is a sample spreadsheet for an image gallery.";
-	helpText['Orientation of timeline']="Choose whether you want the timeline to be displayed horizontally or vertically. Choose the horizontal display to display more detail on your timeline. NOTE: Not implemented yet."
-	helpText['Title of image']="Title of image.";
-	helpText['Thumbnail height']="The height of the thumbnail images if an image gallery.";
-	helpText['Width of image']="The width of the image or gallery.";
-	helpText['Transition style']="How images transition if an image gallery, i.e. fade, slide, etc.";
-	helpText['Show full image?']="Show full image above thumbnails if an image gallery.";
-	helpText['Show slideshow?']="Show slideshow controls if an image gallery.";
-	helpText['OVERVIEW']="This can add one image by specifying its URL, or display an image gallery containing many images by specifying a URL to a Google doc with a list of images. Captions and titles can also be added in the doc.</br></br>The gallery has a scrollable set of thumbnails, with a large image above it. An automated sideshow with various transitions can be specified";
-	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";	
+	helpText['URL of image/spreadsheet']="In the text box to the right enter a value that will set your Image source. If showing a single image use the web URL of that image.<br/><br/>If using google docs for image gallery, type the URL for the Google Docs spreadsheet, or simply cut and paste the URL from the Google Docs site for the spreadsheet to use that contains data formatted for the images. For this to work, the Share setting of the Google Doc must be set to either Public or Anyone With The Link.<br/><br/>The format for an image gallery is as follows: each row is an image, with the image URL, the title (optional) and description (optional) in the first 3 columns.<br/><br/><a href='https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdGxVdFJtYVlkNkt2MHJzWEJMRkVSWWc' target='_blank'> Here</a> is a sample spreadsheet for an image gallery.";
+	helpText['Title of image']="Click on the text box to the right and type in a title for your image or image gallery.";
+	helpText['Thumbnail height']="This setting only applies if using an image gallery rather than a single image. Click on the text box to the right and enter a value that will determine the thumbnail height of images in your image gallery.  For images the height and width are linked and cannot be changed independently.  The width of the image will adjust automatically keeping the ratio of height to width consistent.  This number can be as small as 1 or as large as into the millions.";
+	helpText['Width of image']="The width of the image or gallery.  For images the height and width are linked and cannot be changed independently.  Click on the text box to the right to enter a numerical value for the height of your image.  The height of the image will adjust automatically keeping the ratio of height to width consistent.  This number can be as small as 1 or as large as into the millions.";
+	helpText['Transition style']="This setting only applies if using an image gallery rather than a single image. Use the drop-down menu to the right to choose how images transition if an image gallery, i.e. fade, slide, etc.";
+	helpText['Show full image?']="This setting only applies if using an image gallery rather than a single image. Use the drop-down menu to the right to choose whether or not to show full image above thumbnails if an image gallery. If this option is set to ‘false’ only image thumbnails will be displayed."; 
+	helpText['Show slideshow?']="This setting only applies if using an image gallery rather than a single image. Use the drop-down menu to the right to choose whether or not slideshow start/stop controls should be included in your image gallery.";
+	helpText['OVERVIEW']="This can add one image by specifying its URL, or display an image gallery containing many images by specifying a URL to a Google doc with a list of images. Captions and titles can also be added in the doc.</br></br>The gallery has a scrollable set of thumbnails, with a large image above it. An automated sideshow with various transitions can be specified.</br></br>The <a href='https://wiki.shanti.virginia.edu/x/VZ21AQ' target='_blank'> UVa Knowledge Base</a> contains additional information about customizing your SHIVA Images Tool.<br/><br/>";
+	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
+	helpText['OVERVIEW']+="For more information and detailed instructions for utilizing this tool please visit the UVa Knowledge Base documentation for the <a href='https://wiki.shanti.virginia.edu/x/VZ21AQ' target='_blank'> Images Tool</a>."
+	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
 ///// INIT  /////////////
 	
