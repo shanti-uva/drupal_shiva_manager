@@ -1482,7 +1482,7 @@ function _shivanode_node_json($nid) {
   }
   $node = node_load($nid);
   // only return JSON if private, or Drupal has added key for embedded visualizations
-  if(_shivanode_get_access($node) == '4' || $pwd == md5(_shivanode_get_element_type($node))) { 
+  if(_shivanode_get_access($node) == '4' || $pwd == md5($node->title)) { 
     $json = '';
     drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
     $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string

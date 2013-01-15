@@ -624,7 +624,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
       $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $base_root . $base_path . 'data/json/' . $object->nid;
       if(_shivanode_get_access($object) == "1") {
-        $iframeurl .= '-' . md5(_shivanode_get_element_type($object));
+        $iframeurl .= '-' . md5($object->title);
       }
       //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
       $disStr = '';
