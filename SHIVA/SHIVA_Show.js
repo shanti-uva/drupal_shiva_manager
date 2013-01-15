@@ -1934,16 +1934,17 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
  	     }
   	}
 }
-
-SHIVA_Show.prototype.TimeActions=function(msg) {
-  var v=msg.split("|");
-  if (v[0] == "ShivaActTime=goto") {
-   // Code to scroll timeline to time set by v[1]
+  
+  SHIVA_Show.prototype.TimeActions=function(msg) {
+    var v=msg.split("|");
+    if (v[0] == "ShivaActTime=goto") {
+      $('#' + shivaLib.container).timeline('setFocusDate', v[1]);
+    }
+    else if (v[0] == "ShivaActTime=show") {
+      $('#' + shivaLib.container).timeline('focusToEvent', v[1]);
+      $('#' + v[1] + " .timeglider-event-title").click();
+    }
   }
-  else if (v[0] == "ShivaActTime=show") {
-   // Code to open event popup for spreadsheet row set by v[1]
-  }
-}
 
 //  MAP   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -6105,9 +6106,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             continue;
         if ((key == "startdate") || (key == "enddate")) {
           if (data.getFormattedValue(i,j))
-            //o[key]=data.getFormattedValue(i,j).replace(/\//g,'-');
             o[key]=ConvertTimelineDate(data.getValue(i,j));
-            //console.log(o[key]);
           }
         else  
           o[key]=data.getValue(i,j);
@@ -6123,13 +6122,13 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         "focus_date": ConvertTimelineDate(stimeline.options.focus_date),
         "timezone":stimeline.options.timezone,
         "initial_zoom":stimeline.options.initial_zoom * 1,
-        "events": stimeline.events
+        "events": normalizeEventData(stimeline.events)
       }];
  
      
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-	  window.shivaTimeline =  $(stimeline.con).timeline({
+	    window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
@@ -6170,7 +6169,6 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       }
       
       function normalizeEventData(events) {
-        //console.info(events);
         var ct = 0;
         for(var i in events) {
           ct++;

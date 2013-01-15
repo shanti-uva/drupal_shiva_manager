@@ -1481,6 +1481,7 @@ function _shivanode_node_json($nid) {
     $pwd = $pts[1];
   }
   $node = node_load($nid);
+  // only return JSON if private, or Drupal has added key for embedded visualizations
   if(_shivanode_get_access($node) == '4' || $pwd == md5(_shivanode_get_element_type($node))) { 
     $json = '';
     drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
@@ -1488,21 +1489,8 @@ function _shivanode_node_json($nid) {
     $json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
     echo $json;
   } else {
-    echo 'shivaDataWrapper( "noaccess" : true)';
+    echo 'shivaDataWrapper("private" : true)';
   }
-}
-
-function _shivanode_json_access($nid) {
-  $rtval = FALSE;
-  if(strpos($nid,'-') > -1) {
-    $pts = explode('-',$nid);
-    if($pts[1] == 'inhouse') {
-      $rtval = TRUE;
-    }
-  } else {
-    
-  }
-  return $rtval;
 }
 
 function _shivanode_search_json($q) {

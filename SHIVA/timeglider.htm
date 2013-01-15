@@ -93,7 +93,6 @@
 	helpText['Show zoom bar?']="Use the drop-down menu to the right to choose whether or not to show the zoom bar of the timeline. In edit mode, you may have to scroll horizontally to see the timeline";
   
 	$(function () { 
-	  
     shivaLib=new SHIVA_Show("containerDiv");
     shivaLib.drupalMan=(""+window.location).match(/pr=d/);
     shivaLib.SetAttributes(props,items,false);
@@ -130,6 +129,10 @@
       e.source.postMessage("GetType="+shivaGroup,"*");
     else if (e.data.indexOf("PutJSON") == 0) 
       ReEdit($.parseJSON(e.data.substr(8)));
+    else if(e.data.indexOf("GoTo=") == 0) 
+      GoTo(e.data.substr(5));
+    else if(e.data.indexOf("Event=") == 0) 
+      ShowEvent(e.data.substr(6));
   }
  
   function Draw(mode)
@@ -162,5 +165,13 @@
       shivaLib.ShowHelp(att,helpText);
   } 
   
+  function GoTo(adate) {
+    $('#' + shivaLib.container).timeline('setFocusDate', adate);
+  }
+  
+  function ShowEvent(eid) {
+    $('#' + shivaLib.container).timeline('focusToEvent',eid);
+    $('#' + eid + " .timeglider-event-title").click();
+  }
 </script>
 </body></html>

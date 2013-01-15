@@ -1014,11 +1014,9 @@
 }
 
 
-.tg-event-selected {
+.tg-event-selected .timeglider-event-title {
   background-color:yellow;
 }
-
-
 
 .tg-legend-all {
   font-size:12px;
@@ -1027,8 +1025,6 @@
   margin-left:20px;
   margin-top:8px;
 }
-
-
 
 .timeglider-filter-box {
   width:200px;

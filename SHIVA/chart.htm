@@ -31,7 +31,6 @@
 			<option>Bar Chart</option>
 			<option>Candlestick Chart</option>
 			<option>Column Chart</option>
-			<option>Combo Chart</option>
 			<option>Gauge</option>
 			<option>Geo Chart</option>
 			<option>Line Chart</option>
@@ -198,7 +197,6 @@
 			legend: 					{	def:'right', 	opt:'bottom|in|none|right|top', des:'Legend position'},
 			legendTextStyle:			{	def:'', 		opt:'advanced',		 des:'Legend text setting(s)'},
 			chartArea: 					{	def:'', 		opt:'advanced',		 des:'Chart area setting(s)'},
-			series: 					{	def:'', 		opt:'array',		 des:'Series setting(s)'},
 			title: 						{	def:'', 		opt:'string',		 des:'Title above chart'},
 			titleTextStyle: 			{	def:'', 		opt:'advanced',		 des:'Title text setting(s)'},
 			tooltipTextStyle:			{	def:'', 		opt:'advanced',		 des:'Tool tip setting(s)'},
@@ -308,8 +306,7 @@
 	function SaveData(mode)
 	{
 		var chartProp=chartType;
-		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') || 	(chartProp == 'ColumnChart') || 
-		   (chartProp == 'ComboChart') || (chartProp == 'LineChart'))
+		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') || 	(chartProp == 'ColumnChart') || (chartProp == 'LineChart'))
 			chartProp="BasicLine";
 		return shivaLib.SaveData(mode,shivaGroup,null,props[chartProp],chartType);
 	}	
@@ -328,8 +325,7 @@
 					chartType=query.substring(s+11,e);
 			}
 		var chartProp=chartType;
-		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') || 	(chartProp == 'ColumnChart') || 
-		   (chartProp == 'ComboChart') || (chartProp == 'LineChart'))
+		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') || 	(chartProp == 'ColumnChart') || (chartProp == 'LineChart'))
 			chartProp="BasicLine";
 		SetAttributes(chartType,false);
 		shivaLib.ReEdit(jsonData,props[chartProp]);
@@ -371,7 +367,7 @@
 		ShowHelp("");
 		var chartProp=chartType;
 		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') ||
-			(chartProp == 'ColumnChart') || (chartProp == 'ComboChart') || (chartProp == 'LineChart'))
+			(chartProp == 'ColumnChart') || (chartProp == 'LineChart'))
 			chartProp="BasicLine";
 		shivaLib.SetAttributes(props[chartProp]);
 		if (drawIt)

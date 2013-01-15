@@ -2238,6 +2238,8 @@ jQuery.global = Globalization;
 
 })();
 
+// BEGINNING OF TIMEGLIDER CODE
+
 /*
  * Timeglider for Javascript / jQuery 
  * http://timeglider.com/jquery
@@ -2254,7 +2256,7 @@ jQuery.global = Globalization;
 timeglider = window.timeglider || {mode:"publish", version:"0.1.0"};
 
 
-
+// TG_DATE
 
 /*
 *  TG_Date
@@ -3487,6 +3489,8 @@ timeglider.TG_Date = {};
   
 })(timeglider);
 
+// TG_ORG
+
 /*
  * Timeglider for Javascript / jQuery 
  * http://timeglider.com/jquery
@@ -3991,7 +3995,7 @@ timeglider.TG_Date = {};
  *
  */
 
-
+// BACKBONE MODEL
 
 /*
 *
@@ -4040,7 +4044,7 @@ timeglider.TG_Date = {};
   };
   
   
-  
+  // EVENT MODEL
   
   // map model onto larger timeglider namespace
   /////////////////////////////////////////////
@@ -4263,6 +4267,7 @@ timeglider.TG_Date = {};
   });
   
   
+  // TIMEGLIDER TIMELINE MODEL
   
   // map model onto larger timeglider namespace
   /////////////////////////////////////////////
@@ -4576,6 +4581,7 @@ timeglider.TG_Date = {};
 
 })(timeglider);
 
+// TIMELINE VIEW
 
 /*
  * Timeglider for Javascript / jQuery 
@@ -4623,6 +4629,8 @@ timeglider.TimelineView
     if (!somethingPx) return false;
     return parseInt(somethingPx.replace("px", ""), 10);
   }
+
+// TIMELINE PLAYER
 
 /*
 *  timeglider.TG_TimelineView
@@ -4876,7 +4884,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
 
 
   
-
+// SOME CLICK EVENTS
 
   $(CONTAINER)
     .delegate(".timeline-info-bt", CLICKORTOUCH, function () {
@@ -5091,7 +5099,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     }
     
   }) // end draggable
-  .delegate(CONTAINER + " .timeglider-timeline-event", CLICKORTOUCH, function () { 
+  .delegate(CONTAINER + " .timeglider-timeline-event", CLICKORTOUCH, function () {  // EVENT CLICK
     // Code added by ndg for Shanti
     // If max # of open modals is reached, close the first one before opening a new one
     var openModals = $('.timeglider-ev-modal');
@@ -10016,15 +10024,14 @@ tg.validateOptions = function (widget_settings) {
         // binds drag of timeline to messaging, ndg added for SHIVA
         //Need to give center|start| and end of timeline window on drag
        $('.timeglider-ticks').bind('drag',function() {
-          var newtime = MED._focusDate.dateStr;
-          shivaLib.SendShivaMessage("ShivaTime=time|" + newtime);
+          var scope = MED.getScope();
+          shivaLib.SendShivaMessage("ShivaTime=time|" + scope.focusMS + "|" + scope.leftMS + "|" + scope.rightMS);
         });
         // binds opening event modals to messaging ndg added for SHIVA
         $('.timeglider-timeline-event').live('click', function() {
            var teid = $(this).attr('id');
-           console.info("event " + teid + " clicked!");
+           shivaLib.SendShivaMessage("ShivaTime=event|"+teid);
          });
-       
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);
       }

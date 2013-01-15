@@ -138,7 +138,7 @@
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
-			ReEdit($.parseJSON(e.data.substr(8)));
+			ReEdit($.parseJSON(e.data.substr(5)));
 	}
  
 	function Draw(mode)
@@ -212,7 +212,8 @@
 	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 	}
-
+  
+  
 	function trace(str) { console.log(str) };
 	
 </script>
