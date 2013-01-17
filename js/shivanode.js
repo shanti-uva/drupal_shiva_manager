@@ -392,9 +392,6 @@
         Drupal.Shivanode.putFile(pts[0],pts[1]);
     }
 		
-		if (e.data.indexOf("ShivaTime") > -1) {
-		  console.info(e.data);
-		}
 	};
 
 	// checkPrivacyValue(val): Checking the privacy value and not allowing any but public and private
