@@ -6174,7 +6174,9 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
           ct++;
           var ev = events[i];
           if(typeof(ev.id) == "undefined") {
-            ev.id = "event" + ct;
+            ev.id = "event-" + ct;
+          } else {
+            ev.id = ev.id + "-" + ct;
           }
           if(typeof(ev.startdate) == "undefined" && typeof(ev.start) != "undefined") {
             ev.startdate = ConvertTimelineDate(ev.start);

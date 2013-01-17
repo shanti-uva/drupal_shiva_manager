@@ -392,6 +392,9 @@
         Drupal.Shivanode.putFile(pts[0],pts[1]);
     }
 		
+		if (e.data.indexOf("ShivaTime") > -1) {
+		  console.info(e.data);
+		}
 	};
 
 	// checkPrivacyValue(val): Checking the privacy value and not allowing any but public and private
@@ -871,12 +874,7 @@
 	Drupal.Shivanode.testShibAuth = function() {
 		 // if shibstatus variable is undefined, don't check, because they haven't logged in yet
 		jQuery.getJSON(Drupal.settings.basePath + 'shib/auth/check', function(data) { 
-			var status = JSON.parse(data).status;
-/*
-			if(typeof(console) == "object") { 
-					console.info('testing shibboleth authentication: present status = ' + status + ', past = ' + Drupal.Shivanode.shibstatus); 
-			}
-*/
+			var status = data.status;
 			if(Drupal.Shivanode.shibstatus == "ok" && status != "ok") {
 				alert(Drupal.t("Your Netbadge session has expired!"));
 				Drupal.Shivanode.shibstatus = null; // so message only appears once

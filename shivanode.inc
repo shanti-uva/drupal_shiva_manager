@@ -1540,7 +1540,7 @@ function _shivanode_search_json($q) {
 function _shivanode_shib_check() {
   $status = (!empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired";
   $json = '{ "status": "' . $status . '"}';
-  drupal_json_output($json);
+  drupal_json_output(json_decode($json));
 }
 
 /* code initially copied from node_search_execute */

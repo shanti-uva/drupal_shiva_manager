@@ -1222,6 +1222,9 @@ function shivanode_element_change($form, $form_state) {
  * 
  *  Implements hook_services_resources from the Services Module
  *  Defines Shivanode resource with a retrieve (for getting one Shivanode) and index (for getting a list of qualified Shivanodes) methods
+ * 
+ *  URL for REST call to get JSON is: http://shantivis.org/api/rest/shivanode/### where ### is the node number (contains all Drupal fields)
+ *  URL for just SHIVA json is http://shantivis.org/data/json/### where ### is the node number (only contains SHIVA fields)
  */
 
 function shivanode_services_resources() {

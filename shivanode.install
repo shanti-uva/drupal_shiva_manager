@@ -163,6 +163,11 @@ function shivanode_enable() {
   }
 }
 
+/**
+ *  Creates a REST api for http://shantivis.org/api/rest/shivanode/### where ### is the node number (shows all Druapl fields)
+ * 
+ *    FYI: URL for just SHIVA json is http://shantivis.org/data/json/### where ### is the node number (only contains SHIVA info fields)
+ */
 function shivanode_create_service() {
   $service_name = SHIVA_SERVICE;
   $endpoint = services_endpoint_load($service_name);
