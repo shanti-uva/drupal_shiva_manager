@@ -3784,10 +3784,21 @@ timeglider.TG_Date = {};
                 
                 // possible customized class
                 css_class = b.css_class || '';
-               
+                
+                // create classes for event types, added by ndg (etype code to add type class) 
+                var etype = "";
+                if (typeof(b.type) == "string" && b.type != "") {
+                  var events = b.type.split(/,\s*/);
+                  for(var n in events) {
+                    if(events[n] != "") {
+                      etype += " etype-" + events[n].toLowerCase().replace(/\s/g,'-');
+                    }
+                  }
+                }
+                
                 // TODO: function for getting "standard" event shit
                 html += "<div class='timeglider-timeline-event " 
-                  + css_class + " " + span_selector_class 
+                  + css_class + " " + span_selector_class + etype
                   + "' id='" + b.id + "' "
                   + "style='width:" + b.width  + "px;"
                   + "height:" + b.height + "px;"
@@ -7922,7 +7933,6 @@ tg.TG_TimelinePlayer.prototype = {
               
       
           } // eof switch
-          
   }, // eof eventModal
   
   
@@ -10150,30 +10160,6 @@ tg.validateOptions = function (widget_settings) {
         }
       }
       
-      // old
-      /*
-      var fstyles = [ '.timeglider-event-title', '.tg-widget-header h2, .tg-modal h4', '.tg-modal p, .tg-modal td'];
-            var fcolors = tlopts.fontColors.replace(/\,+$/g,'').split(','); // take out (replace(/\,#none/g,'').) '#none' and ending commas
-      
-            fcolors = fcolors.filter(function(val) {return val != "" && val != '#none'}); // filter out blanks and #none
-            if (fcolors.length > 0) {
-              tg.fcolors = fcolors.join(':');
-              for (var n in fstyles) {
-                var color = fcolors.shift();
-                if(typeof(color) == "string") {
-                  if(color.substr(0,1) != '#') { color = '#' + color; }
-                  var css = $(fstyles[n].split(',')[0]).css('color');
-                  if(typeof(color) == "string" && (typeof(css) == "undefined" || (css + "").colorToHex() != color)) {
-                    $(fstyles[n]).css({ 'color' : color });
-                    tg.updatePageStyles(fstyles[n], { 'color' : color });
-                  } else if (typeof(color) == "undefined" && typeof(css) == "string") {
-                    $(fstyles[n]).css({ 'color' : '' });
-                    tg.updatePageStyles(fstyles[n], '');
-                  }
-                }
-              }
-            } */
-      
       // Background Color
       // 1 = main background, 2 = event spans, 3 = header, footer, and zoom controls, 
       // 4 = modal boxes, 5 =  image lange, 6 = tick lane
@@ -10217,37 +10203,6 @@ tg.validateOptions = function (widget_settings) {
           }
         }
       }
-      // old
-      /*
-      var bcolors = tlopts.background_color.replace(/\,#none/g,'').replace(/\,+$/g,'').split(','); // take out '#none' and ending commas
-            
-            bcolors = bcolors.filter(function(val) { return val != '' && val != '#none'});
-      
-            if(bcolors.length > 0) {
-              tg.bcolorCount = bcolors.length;
-              for (var n in bstyles) {
-                var bcolor = bcolors.shift();
-                if(typeof(bcolor) == "string") {
-                  if(bcolor.substr(0,1) != '#') { bcolor = '#' + bcolor; }
-                  var css = $(bstyles[n].split(',')[0]).css('background-color');
-                  if(bcolor != '' && typeof(css) == "string" && css.colorToHex() != bcolor) {
-                    if(n == 0 ) {
-                      $(bstyles[n]).css({ 'background-color' : bcolor, 'background-image' : 'none' });
-                      $('.timeglider-container').css({ 'background-color' : bcolor, 'background-image' : 'none' });
-                      //tg.updatePageStyles('.timeglider-event-spanner', {'background' : 'transparent'});
-                    } else if (bstyles[n] == ".tg-modal" || bstyles[n] == ".timeglider-event-spanner") { // use this condition is $element.css() doesn't work
-                      tg.updatePageStyles(bstyles[n], { 'background-color' : bcolor });
-                    } else {
-                      $(bstyles[n]).css({ 'background-color' : bcolor });
-                      tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
-                    } 
-                  } 
-                } else if (typeof(bcolor) == "undefined" && typeof(css) == "string") {
-                  $(bstyles[n]).css({ 'background-color' : ''});
-                }
-              }
-            }*/
-      
       
       // Adjust number of Modals
       tlopts.max_modals = parseInt(tlopts.max_modals);
@@ -10289,13 +10244,18 @@ tg.validateOptions = function (widget_settings) {
       }
     },
     
+    // Creates a hash of event types normalizing the name into a lowercase key with dashes instead of spaces
     registerEvents : function(events) {
       var etypes = new Object();
       for (var i in events) {
         var e = events[i];
         if(typeof(e.type) == "string" && $.trim(e.type) != '') {
-          if(typeof(etypes[e.icon]) == "undefined") {
-            etypes[e.icon] = e.type;
+          var types = e.type.split(/,\s*/);
+          for(var i in types) {
+            var typeid = $.trim(types[i]).toLowerCase().replace(/\s/g,'-');
+            if(typeof(etypes[typeid]) == "undefined") {
+              etypes[typeid] = types[i];
+            }
           }
         }
       }
@@ -10303,12 +10263,13 @@ tg.validateOptions = function (widget_settings) {
       this.etypes = etypes;
     },
     
+    // Writes the control box for turning on and off events by their type. 
+    // checkboxes toggle events on and off based on type-classes added on line 3788
+    // calls toggleEvents() function
     eventList : function() {
       
-  
       var list = '<div id="etypelist" class="tg-modal timeglider-ev-modal ui-draggable" style="width: 200px; z-index: 1002; top: 40px; left: 260px; color: white; display: none;">' +
       '<div id="typesclose" class="tg-close-button tg-close-button-remove">x</div><div class="dateline"><span class="timeglider-dateline-startdate">Event Types</span></div><div class="tg-ev-modal-description"><table>';
-      
       var evals = [];
       var p = 0;
       for(var i in this.etypes) {
@@ -10316,12 +10277,11 @@ tg.validateOptions = function (widget_settings) {
         evals.push([this.etypes[i],i]);
       }
       evals.sort();
-
+  
       if( p > 0 ) {
         for(var n in evals) {
-           list += '<tr><td><img src="' + this.options.icon_folder + evals[n][1] + 
-              '" height="15" style="vertical-align: middle;"/></td><td>' + evals[n][0] + 
-              '</td><td><input type="checkbox" checked="checked" onclick="toggleIcon($(this).parents(\'tr\'));"/></td></tr>';
+           list += '<tr><td>' + evals[n][0] + 
+              '</td><td><input id="etype-' + evals[n][1] + '" type="checkbox" checked="checked" onclick="toggleEvents(\'' + evals[n][1] + '\');"/></td></tr>';
         }
         list += '</table></div></div>';
         $('.tg-single-timeline-header ul').append('<li><a onclick="$(\'#etypelist\').toggle();">types</a></li>');
@@ -10541,9 +10501,21 @@ function propsToString(o) {
   return out.substr(0, out.length - 2);
 }
 
-function toggleIcon(el) {
-  var src = el.find('img').attr('src');
-  var pts = src.split('/');
-  var img = pts.pop();
-  $('img[src*="' + img + '"]').parents('.timeglider-timeline-event').toggle();
+// Toggle events based on classes with event type (classes created line 3788)
+function toggleEvents(type) {
+  var tstr = '.etype-' + type;
+  $(tstr).each(function() {
+    if(typeof($(this).attr('class')) == "string") {
+      var classes = $(this).attr('class').split(/\s/);
+      var hidden = true;
+      for(var n in classes) {
+        if(classes[n].indexOf('etype-') > -1) {
+          if($('#' + classes[n]).attr('checked') == "checked") {
+            hidden = false;
+          }
+        }
+      }
+      if(hidden) { $(this).hide(); } else { $(this).show(); }
+    }
+  });
 }
