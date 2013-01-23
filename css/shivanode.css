@@ -360,7 +360,7 @@ html.lightpop #content {
 #bottomNavClose {
   display: block;
   z-index: 200;
-  background: url(../../lightbox2/images/close.gif) left no-repeat;
+  background: url(../images/close.gif) left no-repeat;
   position: relative !important;
   top: 0px;
   left: 775px !important;
@@ -409,7 +409,7 @@ div#sninsert-popup .closeBtn {
 	top: 10px;
 	width: 25px;
 	height: 25px;
-	background: url(../../lightbox2/images/close.gif) left no-repeat;
+	background: url(../images/close.gif) left no-repeat;
 	border: 3px outset;
 }
 

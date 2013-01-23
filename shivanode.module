@@ -240,7 +240,6 @@ function shivanode_node_info() {
   );
 }
 
-
 /**
  * Implements hook_help.
  *
