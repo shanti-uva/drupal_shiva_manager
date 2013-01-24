@@ -9,7 +9,7 @@
  *
  * This is factored into this function so it can be used in both
  * node_example_install() and node_example_uninstall().
- * TEST
+ * 
  * @return
  *  An associative array specifying the fields we wish to add to our
  *  new node type.
