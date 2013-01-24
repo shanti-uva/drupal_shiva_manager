@@ -1943,10 +1943,11 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
     else if (v[0] == "ShivaActTime=show") {
       $('#' + shivaLib.container).timeline('focusToEvent', v[1]);
       $('#' + v[1] + " .timeglider-event-title").click();
-    } else if (v[0] == "ShivaActTime=data") {
+    } 
+    else if (v[0] == "ShivaActTime=data") {
       var center_date = (typeof(v[2]) == "undefined")? "":v[2]; // if you want to reset center date add a second pipe (|) and the date
       $('#' + shivaLib.container).timeline('updateEventData', v[1], center_date);
-    }
+    }  
   }
 
 //  MAP   /////////////////////////////////////////////////////////////////////////////////////////// 

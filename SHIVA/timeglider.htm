@@ -135,9 +135,6 @@
       GoTo(e.data.substr(5));
     else if(e.data.indexOf("Event=") == 0) 
       ShowEvent(e.data.substr(6));
-    else if(e.data.indexOf("GetMediator") == 0)  {
-      var med = $('#' + shivaLib.container).timeline('getMediator');
-      console.info(med);
     }
       
   }

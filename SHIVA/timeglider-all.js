@@ -10333,7 +10333,11 @@ tg.validateOptions = function (widget_settings) {
       return MED.updateEvent(model_object);
     },
     
-    /* Added by ndg on (1/24/2013) to update event data with a json object sent by html 5 messaging */
+    /**
+     * Added by ndg on (1/24/2013) to update event data with a json object sent by html 5 messaging 
+     * 
+     *  Not yet tested
+     **/
     updateEventData: function(data, center_date) {
       // Process data which is an array of arrays (table-model with header row) into a JSON object
         events = {}
