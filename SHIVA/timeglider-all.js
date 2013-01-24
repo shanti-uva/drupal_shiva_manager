@@ -10336,6 +10336,26 @@ tg.validateOptions = function (widget_settings) {
       return MED.updateEvent(model_object);
     },
     
+    /**
+     * Added by ndg on (1/24/2013) to update event data with a json object sent by html 5 messaging 
+     * 
+     *  Not yet tested
+     **/
+    updateEventData: function(data, center_date) {
+      // Process data which is an array of arrays (table-model with header row) into a JSON object
+        events = {}
+        var cols=data[0].length;   // Number of fields
+        for (i=1;i<data.length;++i) {  // For each event
+          o={};        // Fresh obj
+          for (j=0;j<cols;++j)       // For each value
+            o[data[0][j]]=data[i][j];  // Key value pair
+          events[i]=o;       // Add to array
+        }
+        if (typeof(center_date) != "undefined" && center_date != "") {
+          MED.setFocusDate(new TG_Date(center_date));
+        }
+        MED.loadTimelineData(events, this.options.loaded);
+    },
     
     /*
      * focusToEvent
