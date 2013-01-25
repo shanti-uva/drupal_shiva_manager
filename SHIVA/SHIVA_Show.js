@@ -89,7 +89,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
+			lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -172,7 +172,7 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 		}
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
-			shivaLib.msgAction[i].do(i);									// Run callback
+			shivaLib.msgAction[i].Do(i);									// Run callback
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
 		if (e.data.indexOf("ShivaActMap=") != -1)							// If a map action
 			shivaLib.MapActions(e.data);									// Route to map actions
@@ -472,7 +472,6 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 {
 	var i;
 	var group=this.options.shivaGroup;										// Get group
-
 	if (this.items) {														// If items
 		if (type == "GoTo")	{												// If a goto 
 			for (i=0;i<this.items.length;++i) {								// For each item
@@ -696,8 +695,15 @@ SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION ME
 			this.items[v[1]].visible=(v[0] == "ShivaActEarth=show").toString();	// Set visibility 
 		this.DrawEarthOverlays();											// Redraw
 		}
+	else if (v[0] == "ShivaActEarth=data")  {							// FILL MARKERS
+		if (v[1]) 														// If valid item	
+			this.EarthAddMarkers(v[1]);									// Add markers
+		}
 }
 
+SHIVA_Show.prototype.EarthAddMarkers=function(json)				// ADD MARKERS FROM JSON
+{
+}
 
 //  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -760,8 +766,8 @@ function VIZ(container)
 			Tips:		{ enable: true	},
 			Events: 	{ enable: true,	enableForEdges: true },
 			NodeStyles: { enable: true	},
-			CanvasStyles: {},
-			},	
+			CanvasStyles: {}
+			}	
 	}
 }
 
@@ -1089,7 +1095,7 @@ VIZ.prototype.Init = {
 		ht.loadJSON(data);
 		ht.refresh();
 		ht.controller.onComplete();
-	},	
+	}	
 }
 
 
@@ -1576,6 +1582,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				}										
 			}
 	}
+
 	
 	function DrawInfoBox(items)
 	{
@@ -2034,17 +2041,24 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 {
  	if (!this.items)
   		return;
-	var i,j,latlng,v,ops,curZoom,curLatLon;
+ 	var i,j,latlng,v,ops,curZoom,curLatLon;
 	var _this=this;
  	var items=this.items; 
     v=this.options.mapcenter.split(",")
 	curLatlng=new google.maps.LatLng(v[0],v[1]);
 	curZoom=v[2];
 	for (i=0;i<items.length;++i) {
+		ops=new Object();
 		if (items[i].listener)
 			google.maps.event.removeListener(items[i].listener);
-		ops=new Object();
-		if (items[i].obj) 
+		if ((items[i].obj) && (items[i].layerType == "MarkerSet")) {
+			for (j=0;j<items[i].obj.length;++j) {						
+				google.maps.event.removeListener(items[i].obj[j].listener);	
+				items[i].obj[j].obj.setMap(null);
+				}
+			items[i].obj=null;
+			}
+		else if (items[i].obj)
 			items[i].obj.setMap(null);
 		if (items[i].layerType == "Drawn") {
 			items[i].obj=new ShivaCustomMapOverlay()
@@ -2060,8 +2074,22 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za);
+				var j,v;
+ 				for (j=0;j<_this.items.length;++j)	{				
+					v=_this.items[j].layerSource.split(",")
+					if (v[2] == this.title)					
+ 						break;											
+  					}
+   				shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
 	 			});
+			}
+		else if (items[i].layerType == "MarkerSet") {
+			if (items[i].visible == "true") {
+				this.items[i].obj=[];
+				this.markerData=i;
+				this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});
+				}
+			continue;
 			}
 		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
@@ -2102,7 +2130,6 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 	this.map.setZoom(Number(curZoom));									// Zoom map
 }
 
-
 SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
@@ -2115,6 +2142,58 @@ SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESS
 		if (this.items[v[1]]) 											// If valid item	
 			this.items[v[1]].visible=(v[0] == "ShivaActMap=show").toString();	// Set visibility 
 		this.DrawMapOverlays();											// Redraw
+		}
+	else if (v[0] == "ShivaActMap=data")  {								// FILL MARKERS
+		if (v[1]) 														// If valid item	
+			this.MapAddMarkers(v[1]);									// Add markers
+		}
+	else if (v[0] == "ShivaActMap=marker") { 							// SHOW/HIDE MARKERS
+		if (v[1] < this.markerData.length) 								// If valid
+			this.markerData[v[1]].obj.setMap(v[2]=="true"?this.map:null);	// Hide/show
+		}
+}
+
+SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP FROM JSON
+{
+	var i,j,o,mark,list,ops;
+	var _this=shivaLib;
+	if (typeof(json) == "string") {										// If it came from shivaEvent
+		json=$.parseJSON(json);											// Objectify
+		var cols=json[0].length;										// Number of fields
+		for (i=1;i<json.length;++i) {									// For each event
+			o={};														// Fresh obj
+			for (j=0;j<cols;++j)  										// For each value
+				o[json[0][j]]=json[i][j];								// Key value pair
+			json[i]=o;													// Add to array
+			}
+		json=json.slice(1);												// Remove header
+		mData=this.markerData;											// Point at markerdata
+		if (mData) {													// If data
+			for (i=0;i<mData.length;++i) {								// For each old maker
+				google.maps.event.removeListener(mData[i].listener);	// Remove listener
+				mData[i].obj.setMap(null);								// Remove marker
+				}
+			}
+		this.markerData=mData=[];										// Clear data 
+		}
+	for (i=0;i<json.length;++i) {										// For each marker
+		mark=new google.maps.Marker();									// Create marker obj
+		ops={};															// New obj
+		if (json[i].title)												// If a title
+			ops["title"]=json[i].title;									// Set title
+		ops["position"]=new google.maps.LatLng(json[i].lat-0,json[i].lon-0); // Set position
+		if (json[i].icon)												// If an icon
+			ops["icon"]=json[i].icon;									// Set icon
+		mark.setOptions(ops);											// Set options
+		mark.setMap(shivaLib.map);										// Add to map
+		list=google.maps.event.addListener(mark,'click', function(e) {	// Add listener
+ 			var j;
+ 			for (j=0;j<mData.length;++j)								// Look thru data	
+ 				if (mData[j].title == this.title)						// If titles match
+ 						break;											// Quit looking
+  			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
+			});
+		mData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
 		}
 }
 
@@ -2368,7 +2447,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    			row=o.row;
    		if ((o) && (o.column != undefined))
    			col=o.column;
-  		_this.SendShivaMessage("ShivaChart="+row+"|"+col); 
+  		_this.SendShivaMessage("ShivaChart=data"+row+"|"+col); 
    		});
 }
 
@@ -3605,6 +3684,9 @@ SHIVA_Graphics.prototype.SetDrag=function(id, mode) 													// START/STOP D
 		}
 }
 
+
+
+
 ///////// DEBUG   //////////
 
 SHIVA_Graphics.prototype.EnumObject=function(obj) 														// DEBUG TOOL
@@ -3902,9 +3984,17 @@ SHIVA_QueryEditor.prototype.SetQueryString=function()
 //	OTHER
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function trace(msg)
+function trace(msg, p1, p2, p3)
 {
+	if (p3)
+		console.log(msg,p1,p2,p3);
+	else if (p2)
+		console.log(msg,p1,p2);
+	else if (p1)
+		console.log(msg,p1);
+	else
 	console.log(msg);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -4456,7 +4546,6 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 	return (shivaLib.dr.curTool == 6);										// Set propagation
 }
 
-
 SHIVA_Draw.prototype.onMouseDown=function(e)							// MOUSE DOWN HANDLER
 {
 	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
@@ -4523,6 +4612,16 @@ SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 				}
 			}
 		}
+}
+
+SHIVA_Draw.prototype.isTouchDevice=function() 							// IS THIS A TOUCH DEVICE?
+{
+	var el=document.createElement('div');									// Make div
+	el.setAttribute('ongesturestart', 'return;');							// Try to set gesture
+	if (typeof el.ongesturestart == "function")								// If supports touch		
+		return true;														// Return true
+	else 																	// Doesn't support touch
+		return false;														// Return false
 }
 
 SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
@@ -5052,8 +5151,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 	var z = ($('.ui-widget-overlay').length > 0)?($('.ui-widget-overlay').css('z-index')+1):'auto';
     $('body').append($("<div>", {
         id : 'shiva_dialogDiv',
-        class : 'propTable',
-        css : {
+         css : {
         	zIndex: z,
             position : 'absolute',
             right : '100px',
@@ -5063,9 +5161,9 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             marginRight : '2px',
             padding : '5px',
             paddingBottom : '30px',
-            paddingTop : '10px',
-        },
-    }).draggable());
+            paddingTop : '10px'
+        }
+    }).draggable().addClass("propTable"));
     //TABS
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_colorbar',
@@ -5076,12 +5174,11 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '244px',
             height : '22px',
             borderTopLeftRadius : '8px',
-            borderTopRightRadius : '8px',
+            borderTopRightRadius : '8px'
         }
     }));
-    $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
-        css : {
+   $("#cp_colorbar").append($("<a>", {
+      css : {
             width : '30px',
             height : '20px',
             position : 'relative',
@@ -5091,21 +5188,20 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             borderRadius : '0',
             borderTopLeftRadius : '8px',
             borderRight : '1px solid gray',
-            borderBottom : '1px solid gray',
-        },
+            borderBottom : '1px solid gray'
+        	},
         click : function() {
             if (cp_first > 0)
                 cp_first--;
             self.position_bar();
-        },
-    }).button({
-        icons : {
-            primary : 'ui-icon-arrowthick-1-w'
-        },
-        text : false
-    }));
+        	}
+	    }).button({
+	        icons : {
+	            primary : 'ui-icon-arrowthick-1-w'
+	        	},
+	        text : false
+	 }).addClass("cbar_control"));
     $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
         css : {
             width : '28px',
             height : '20px',
@@ -5116,7 +5212,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             borderRadius : '0',
             borderTopRightRadius : '8px',
             borderLeft : '1px solid gray',
-            borderBottom : '1px solid gray',
+            borderBottom : '1px solid gray'
         },
         click : function() {
             if (cp_first < $(".tab").length - 5)
@@ -5128,10 +5224,9 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             primary : 'ui-icon-arrowthick-1-e'
         },
         text : false
-    }));
+    }).addClass("cbar_control"));
     $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
-        css : {
+         css : {
             width : '18.5px',
             height : '20px',
             position : 'absolute',
@@ -5140,7 +5235,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             border : '0',
             borderRadius : '0',
             borderLeft : '1px solid gray',
-            borderBottom : '1px solid gray',
+            borderBottom : '1px solid gray'
         },
         click : function() {
             cp_first++;
@@ -5151,7 +5246,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             primary : 'ui-icon-plusthick'
         },
         text : false
-    }));
+    }).addClass("cbar_control"));
     $("#cp_colorbar a").hover(function() {
         $(this).css("cursor", "pointer");
     });
@@ -5162,7 +5257,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             position : 'absolute',
             top : '25px',
             left : 
-            '186px',
+            '186px'
         }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
@@ -5172,14 +5267,14 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '20px',
             width : '150px',
             padding : '2px',
-            height : '150px',
+            height : '150px'
         }
     }));
     $("#cp_colormap").append($("<img>", {
         src : 'hsv_wheel.png',
         click : function(e) {
             self.position((e.pageX - $(this).parent().offset().left), (e.pageY - $(this).parent().offset().top));
-        },
+        }
     }))
     $("#shiva_dialogDiv").append($("<input>", {
         id : 'cp_current',
@@ -5192,7 +5287,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             height : '20px',
             border : '0',
             textAlign : 'center',
-            backgroundColor : 'transparent',
+            backgroundColor : 'transparent'
         },
         change : function() {
             var val = $(this).attr("value");
@@ -5217,7 +5312,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     //SLIDERS
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_brightness',
-        class : 'slider',
         title : 'brightness',
         css : {
             width : '5px',
@@ -5227,16 +5321,15 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '-120px',
             float : 'right',
             borderRadius : '8px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }).slider({
         value : 100,
         orientation : 'vertical'
-    }));
+    }).addClass("slider"));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_saturation',
         title : 'saturation',
-        class : 'slider',
         css : {
             width : '5px',
             height : '85px',
@@ -5245,12 +5338,12 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '-120px',
             float : 'right',
             borderRadius : '8px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }).slider({
         value : 100,
         orientation : 'vertical'
-    }));
+    }).addClass("slider"));
     $(".slider a").css("width", '20px');
     $(".slider a").css("height", '10px');
     $(".slider a").css("left", "-8px");
@@ -5269,15 +5362,15 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             height : '30px',
             position : 'relative',
             left : '172px',
-            top: '-25px',
-        },
+            top: '-25px'
+        }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_basic',
         css : {
             width : '216px',
             position : 'relative',
-            left : '10px',
+            left : '10px'
         }
     }));
     $("#cp_basic").append($("<div>", {
@@ -5286,7 +5379,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             position : 'absolute',
             width : '216px',
             height : '20px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }))
     $("#cp_basic").append($("<div>", {
@@ -5296,7 +5389,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '20px',
             width : '216px',
             height : '20px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }))
     var form = [16, 16];
@@ -5327,36 +5420,35 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '216px',
             height : '30px',
             position : 'relative',
-            top : '50px',
+            top : '50px'
         }
     }));
 
     //SCHEMES
     $("#cp_control").append($("<button>", {
         id : 'cp_schemes',
-        class : 'button',
         html : 'Schemes',
         css : {
-            left : '18px',
+            left : '18px'
         },
         click : function() {
             $("#cp_schemediv").toggle();
         }
-    }))
+    }).addClass("button"));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_schemediv',
         css : {
             height : '160px',
             position : 'relative',
             top : '60px',
-            paddingBottom : '30px',
+            paddingBottom : '30px'
 
         }
     }));
     $("#cp_schemediv").hide();
 
     $("#cp_schemediv").append($("<div>", {
-        id : 'cp_schemebox',
+        id : 'cp_schemebox'
     }));
     for (var i = 0; i < 4; i++) {
         $("#cp_schemebox").append($("<div>", {
@@ -5366,7 +5458,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 position : 'relative',
                 top : '-5px',
                 paddingBottom : '2px',
-                paddingTop : '2px',
+                paddingTop : '2px'
             }
         }));
     };
@@ -5383,7 +5475,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                     left : (((92 / form[i].length) + 2) * j) + 2 + "%",
                     fontSize : '10px',
                     width : 92 / form[i].length + "%",
-                    height : '100%',
+                    height : '100%'
                 }
             }));
             for (var k = 0; k < form[i][j]; k++) {
@@ -5393,7 +5485,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                         position : 'relative',
                         top : '1px',
                         width : 100 / form[i][j] + "%",
-                        height : '50%',
+                        height : '50%'
                     }
                 }));
             }
@@ -5413,36 +5505,34 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 
     $("#cp_control").append($("<button>", {
         id : 'cp_nocolor',
-        class : 'button',
-        html : "No color",
+         html : "No color",
         css : {
-            left : '22px',
+            left : '22px'
         },
         click : function() {
             self.update("none");
         }
-    }));
+    }).addClass("button"));
 
     $("#cp_control").append($("<button>", {
         id : 'cp_OK',
-        class : 'button',
         html : "OK",
         css : {
             width : '60px',
-            left : '35px',
+            left : '35px'
         },
         click : function() {
             $("#shiva_dialogDiv").remove();
             return;
         }
-    }))
+    }).addClass("button"));
     $(".button").button();
     $(".button").css({
         position : 'relative',
         borderRadius : '8px',
         float : 'left',
         fontSize : '9px',
-        top : '3px',
+        top : '3px'
     });
 
     this.scheme = function() {    //Dynamically builds the schemes                                      
@@ -5508,7 +5598,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     this.add = function(color_HEX) {                //Adds a new chip to the tabs
         cp_current = $(".tab").length;
         $("#cp_colorbar a:eq(1)").before($("<div>", {
-            class : 'tab',
             css : {
                 height : '16px',
                 width : '28px',
@@ -5517,18 +5606,18 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 padding : '2px',
                 position : 'relative',
                 left : '-6px',
-                float : 'left',
+                float : 'left'
             },
             click : function() {
                 $(".tab:not(:eq(" + $(this).index(".tab") + "))").css("borderBottom", '1px solid gray');
                 $(this).css("borderBottom", '0');
                 cp_current = $(this).index(".tab");
             }
-        }).append($("<div>", {
+        }).addClass("tab").append($("<div>", {
             css : {
                 fontSize : '10px',
                 width : "100%",
-                height : '100%',
+                height : '100%'
             }
         })).append($("<img>", {
             src : 'cpclose.png',
@@ -5536,16 +5625,16 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 width : '4px',
                 position : 'absolute',
                 top : '2.5px',
-                right : '2.5px',
+                right : '2.5px'
             },
             mouseenter : function() {
                 $(this).css({
-                    width : '10px',
+                    width : '10px'
                 })
             },
             mouseleave : function() {
                 $(this).css({
-                    width : '4px',
+                    width : '4px'
                 })
             },
             click : function() {
@@ -5838,48 +5927,48 @@ function CSV(inputID, mode, output_type, callback) {
 							top : '2%',
 							bottom : '76%',
 							width : '86%',
-							borderRadius : '5px',
+							borderRadius : '5px'
 						}
 					}))));
 					$("#csvControl").append($("<p>", {
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						}
 					}).append($("<span>", {
-						html : "Title: ",
+						html : "Title: "
 					})).append($("<input>", {
 						id : 'titleInput',
 						value: CSV_title,
 						css : {
 							position : 'relative',
 							left : '5px',
-							marginRight : '40px',
+							marginRight : '40px'
 						},
 						change: function(){
 							CSV_title = $(this).val();
 						}
 					})).append($("<span>", {
-						html : 'Data has header row?',
+						html : 'Data has header row?'
 					})).append($("<input>", {
 						id : 'dataHasHeader',
 						type : 'checkbox',
 						checked : (csvHasHeader) ? true : false,
 						css : {
 							position : 'relative',
-							left : '5px',
-						},
+							left : '5px'
+							},
 						change : function() {
 							csvHasHeader = ($(this).is(":checked")) ? true : false;
 							self.show()
-						}
+							}
 					}))).append($("<p>", {
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						}
 					}).append($("<span>", {
-						html : "Cell delimiter: ",
+						html : "Cell delimiter: "
 					})).append($("<select>", {
 						id : 'cellDelimInput',
 						html : '<option value=0>Comma (,)</option><option value=1>Tab (\\t)</option><option value=2> Other </option>',
@@ -5887,7 +5976,7 @@ function CSV(inputID, mode, output_type, callback) {
 							width : '100px',
 							position : 'relative',
 							left : '5px',
-							marginRight : '40px',
+							marginRight : '40px'
 						},
 						change : function() {
 							if ($(this).val() == 2) {
@@ -5899,13 +5988,13 @@ function CSV(inputID, mode, output_type, callback) {
 							}
 						}
 					})).append($("<span>", {
-						html : 'Text delimitier: ',
+						html : 'Text delimitier: '
 					})).append($("<select>", {
 						id : 'textDelimInput',
 						html : "<option value=0>Double quote (\")</option><option value=1>Single quote (\')</option>",
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						},
 						change : function() {
 							quote = textopts[$(this).val()];
@@ -5932,7 +6021,7 @@ function CSV(inputID, mode, output_type, callback) {
 						css : {
 							position : 'absolute',
 							bottom : '15px',
-							left : '350px',
+							left : '350px'
 						},
 						click : function() {
 							$(input).val("");
@@ -5943,7 +6032,7 @@ function CSV(inputID, mode, output_type, callback) {
 						css : {
 							position : 'absolute',
 							bottom : '15px',
-							right : '391px',
+							right : '391px'
 						},
 						click : function() {
 							self.done();
@@ -5965,28 +6054,26 @@ function CSV(inputID, mode, output_type, callback) {
 					for (var i = 0; i < 10; i++) {
 						var odd = (i % 2 == 0) ? 'lightgray' : 'transparent';
 						$("#CSV_preview_table").append($("<div>", {
-							class : 'row',
 							css : {
 								height : $('#CSV_preview_table').height() / 10 + 'px',
-								backgroundColor : odd,
+								backgroundColor : odd
 							}
-						}));
+						}).addClass("row"));
 						for (var j = 0; j < CSV_data[i].length; j++) {
 							var alignment = 'right';
 							if (isNaN(CSV_data[i][j]))
 								alignment = 'left';
 							$("#CSV_preview_table").children().eq(i).append($("<div>", {
 								html : (i === 0 && csvHasHeader) ? '<center><strong>' + CSV_data[i][j] + '</strong></center>' : CSV_data[i][j],
-								class : 'col' + j,
 								align : alignment,
 								css : {
 									paddingLeft : '2px',
 									paddingRight : '2px',
 									height : $('#CSV_preview_table').height() / 10 + 'px',
 									float : 'left',
-									outline : '1px solid black',
+									outline : '1px solid black'
 								}
-							}));
+							}).addClass("col"+j));
 							if ($('.col' + j).length > 1 && $('.col' + j).last().width() > $('.col' + j).eq($('.col' + j).last().index('.col' + j) - 1).width()) {
 								$('.col' + j).css('width', $('.col' + j).last().width() + 'px');
 							} else {
@@ -6058,11 +6145,11 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
 {
   var i;
   var stimeline = new Object();
-  
+
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
-  
+
   stimeline.events=null;
   stimeline.options=this.options;
   stimeline.container=this.container;
@@ -6075,24 +6162,24 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
     if(ret) {
       $(stimeline.con).timeline('resize');
       return;
-    } 
-  } 
+    }
+  }
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
-  
+
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
-      
-  function GetSpreadsheetData(file, conditions) 
+
+  function GetSpreadsheetData(file, conditions)
   {
     lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
       query.send(handleQueryResponse);
- 
+
     function handleQueryResponse(response) {
-      
+
       var i,j,key,s=0;
       var data=response.getDataTable();
       var rows=data.getNumberOfRows();
@@ -6112,12 +6199,12 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
           if (data.getFormattedValue(i,j))
             o[key]=ConvertTimelineDate(data.getValue(i,j));
           }
-        else  
+        else
           o[key]=data.getValue(i,j);
         }
         eventData.events.push(o);
       }
-      
+
       stimeline.events = eventData.events;
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
@@ -6128,13 +6215,13 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         "initial_zoom":stimeline.options.initial_zoom * 1,
         "events": normalizeEventData(stimeline.events)
       }];
- 
-     
+
+
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-	    window.shivaTimeline =  $(stimeline.con).timeline({
-          "min_zoom":stimeline.options.min_zoom * 1, 
-          "max_zoom":stimeline.options.max_zoom * 1, 
+        window.shivaTimeline =  $(stimeline.con).timeline({
+          "min_zoom":stimeline.options.min_zoom * 1,
+          "max_zoom":stimeline.options.max_zoom * 1,
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
           "data_source":stldata,
           "show_footer":Boolean(stimeline.options.show_footer),
@@ -6146,15 +6233,15 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             $(stimeline.con).timeline('registerEvents', stimeline.events);
             setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
             if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            shivaLib.SendReadyMessage(true); 
+            shivaLib.SendReadyMessage(true);
           }
-      });     
-      
+      });
+
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
         $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
       }, 500);
-      
+
       function ConvertTimelineDate(dateTime) {
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
@@ -6166,12 +6253,12 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         var dtstr = dt.getFullYear() + "-" + mn + "-" + dy + " " + hrs + ":" + mns + ":" + scs;
         return dtstr;
       }
-      
+
       function padZero(n) {
         if(n < 10) { n = '0' + n; }
         return n;
       }
-      
+
       function normalizeEventData(events) {
         var ct = 0;
         for(var i in events) {
@@ -6201,5 +6288,5 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         return events;
       }
     }
-  } 
+  }
 }
