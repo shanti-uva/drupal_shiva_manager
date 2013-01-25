@@ -10019,6 +10019,8 @@ tg.validateOptions = function (widget_settings) {
       // validateOptions should come out as empty string
       var optionsCheck = timeglider.validateOptions(this.options);
       
+      console.info(this.options);
+      
       if (optionsCheck == "") {
       
         tg.TG_Date.setCulture(this.options.culture);
