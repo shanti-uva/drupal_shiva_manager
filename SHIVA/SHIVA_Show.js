@@ -6179,9 +6179,14 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       query.send(handleQueryResponse);
 
     function handleQueryResponse(response) {
-
+      // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
+      if(response.isError()) {
+        alert("The Google spreadsheet that holds the data for this visualization has not been shared.\n" +
+          "Please ask the owner set permissions to 'Anyone with Link' or 'Public'.");
+          return;
+      }
       var i,j,key,s=0;
-      var data=response.getDataTable();
+      var data=response.getDataTable(); 
       var rows=data.getNumberOfRows();
       var cols=data.getNumberOfColumns();
       eventData={ events:new Array() };
