@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=320" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>ClassPoll</title>
+	<link rel="stylesheet" type="text/css" href="//viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small;align:center }
+		.knob {
+		   	width:250px;
+		   	height:250px;
+		   	top:55px;
+		   	left:25px;
+		   	overflow:hidden;
+		   	position:absolute;
+			}
+		.knob img {
+		   	position:relative;
+		   	top:-1500px;
+			}
+		.shadedBack { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 }
+		.noSelect {	
+			-webkit-touch-callout: none;-webkit-user-select:none;-khtml-user-select: none;
+			-moz-user-select: none;-ms-user-select: none;user-select: none;
+			}	  	 
+		.noDrag {
+			 -webkit-user-drag: none; -moz-user-drag: none; user-drag: none;
+			}	
+				  	 
+	</style>
+</head>
+<body>
+	<div id='back' class="shadedBack" style='position:absolute;width:300px;height:345px;left:50%;margin:0 0 0 -150px'>
+		<div style='font-size:xx-large;text-shadow:1px 1px #ccc;text-align:center'>ClassPoll</div>
+		<div id="slider" style='position:absolute;top:320px;left:33px;width:250px'></div>
+		<div class="knob"><img id='dial' src="VolumeKnob.png" class="noDrag"></div>
+	</div>
+<script>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   INIT  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$(document).ready(function() {
+		var pair,i;
+		var query=window.location.search.substring(1);						// Get query string
+		var vars=query.split("&");											// Split into vars
+		if (vars.length) {													// If vars on command line
+			for (var i=0;i<vars.length;i++) {								// For each var
+				pair=vars[i].split("=");									// Split into key/value pairs
+				if (pair[0] == "e")											// If email
+					email=pair[1];											// Set it
+				if (pair[0] == "i")											// If id
+					projectID=pair[1];										// Set it
+				}
+			}
+
+		if (vars.length < 2)												// If not provided
+			GetEmail();														// Ask for email
+		var ops={ min:0, max:10, value:5,									// Slider options
+		slide:function(event,ui) {											// Slide cb
+			NewPollValue(ui.value);											// Set value
+			}};    
+		$("#slider" ).slider(ops);											// Init slider
+		$("#slider .ui-slider-handle").css("border","2px solid #888");		// Darker border
+		$("#back").click(function(e) {										// On screen click
+			var val=Math.floor(e.offsetX/28);								// Calc vlaue
+			$("#slider" ).slider( "value",val);								// Move slider
+			NewPollValue(val);												// Set value
+			});
+		$("#back").addClass("noSelect");									// Don't select
+		});
+
+
+	var email="guest";														// Email saved to db
+	var projectID=123;														// Project id
+	var touch=isTouchDevice();												// Is it a touch device?
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   LOGIN  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function GetEmail()
+{
+	var str;
+	str="<div id='lightBoxDiv' style='position:fixed;width:100%;height:100%;";	
+	str+="background:url(overlay.png) repeat;top:0px;left:0px';</div>";
+	$("body").append(str);														
+	str="<div id='lightBoxIntDiv' style='position:absolute;padding:10px;width:250px";
+	var x=($("#lightBoxDiv").width()-272)/2;
+	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
+	str+="border:1px solid; left:"+x+"px;top:150px;background-color:#f8f8f8'>";
+	str+="<img src='CurryLogo.gif' style='vertical-align:-80%'/>&nbsp;&nbsp;";								
+	str+="<span style='font-size:large;text-shadow:1px 1px #ccc'><b>&nbsp;&nbsp; Please log in</b></span>";
+	str+="<div id='lightContentDiv'>";					
+	str+="<br>Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='text' id='email' value='"+email+"'>"
+	str+="<br>Project id&nbsp;&nbsp;<input type='text' id='pid' value='"+projectID+"'>"
+	str+="<br><br><div style='text-align:center'><button id='OKBut'>Start</button></div>";	
+	
+	$("#lightBoxDiv").append(str+"</div>");	
+	$("#lightBoxDiv").css("z-index",2500);						
+	$("#OKBut").button().click(function() {									// OK
+		email=$("#email").val();											// Get email
+		projectID=$("#pid").val();											// Get id
+		$("#lightBoxDiv").remove();											// Close box						
+		});
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   POLLING  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+function SavePollValue(value)											// SAVE POLL VALUE
+{
+		var d=new Date();
+		var str=projectID+"\t"+email+"\t"+d.getTime()+"."+d.getMilliseconds()+"\t"+value;	// Make data point
+		console.log(str);
+}
+
+function NewPollValue(val) 												// REACT TO DIAL
+{
+	if (!touch)																// If desktop
+		Sound("detent");													// Click sound
+	$("#dial").css('top',val*-250);											// Set on proper image
+	SavePollValue(val);														// Save poll value
+}	
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   HELPERS  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function isTouchDevice() 												// IS THIS A TOUCH DEVICE?
+{
+	var el=document.createElement('div');									// Make div
+	el.setAttribute('ongesturestart', 'return;');							// Try to set gesture
+	if (typeof el.ongesturestart == "function")								// If supports touch		
+		return true;														// Return true
+	else 																	// Doesn't support touch
+		return false;														// Return false
+}
+
+function Sound(sound, mode)												// PLAY SOUND
+{	
+	var snd=new Audio();													// New audio obj
+	if (!snd.canPlayType("audio/mpeg"))										// Doesn't support mp3
+		snd=new Audio(sound+".ogg");										// Use ogg
+	else																	// Supports mp3
+		snd=new Audio(sound+".mp3");										// Use mp3
+	snd.play();																// Play sound
+}
+	
+function trace(str) { console.log(str) };
+	
+</script>
+</body></html>
+
