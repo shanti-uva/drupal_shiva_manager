@@ -10088,9 +10088,10 @@ tg.validateOptions = function (widget_settings) {
     // otherwise returns false.
     setOptions : function (tlopts, set, events) {
       var otemp = $.extend({},tlopts);
-      // optsCheck is a function to check whether a style option is being set if so do not reload timeline, just change the styles
+      // optsEqual is a function to check whether a style option is being set if so do not reload timeline, just change the styles
       // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
-      if ((this.optsCheck(otemp) && set != true) && $('#cp_colorbar').is(":visible") == false 
+      var optsTheSame = this.optsEquals(otemp);
+      if (optsTheSame && set != true && $('#cp_colorbar').is(":visible") == false 
             && $('#cp_colormap').is(":visible") == false) {
         return false;
       }
@@ -10115,6 +10116,7 @@ tg.validateOptions = function (widget_settings) {
       // Whether or not to Show Zoom
       if(tlopts.display_zoom_level == 'true' && $('.timeglider-slider-container').is(':hidden')) {
         $('.timeglider-slider-container').show();
+        shivaLib.SendShivaMessage('ScrollLeft');
       } 
       if (tlopts.display_zoom_level == 'false' && !$('.timeglider-slider-container').is(':hidden')) { 
         $('.timeglider-slider-container').hide();
@@ -10215,21 +10217,24 @@ tg.validateOptions = function (widget_settings) {
       if(tlopts.show_footer) {
         setTimeout(function() {
           $('.timeglider-footer').show();
+         /* var ch = $('.timeglider-container').height();
+          $('.timeglider-container').height(ch + 25);*/
         }, 200);
       } else {
         setTimeout(function() {
           $('.timeglider-footer').hide();
-          var ch = $('.timeglider-container').height();
-          $('.timeglider-container').height(ch - 30)
+          var ch = $('#containerDiv').height();
+          $('.timeglider-container').height(ch - 25);
         }, 200);
       }
       return true;  // return true that an on-the-fly option has been changed so timeline is not redrawn.
     },
     
-    // checks the options sent and returns true if they are the same as previously set
-    optsCheck : function(o) {
+    // checks the the style options subset of options sent and returns true if they are the same as previously set
+    //  so if this returns true, it means one of the style options has changes and we should NOT reload timeline
+    optsEquals : function(o) {
       // the name of the options to be checked. All others ignored
-      var optionsChecked = "title:description:width:height:display_zoom_level:font_name:fontColors:backgroundColors:max_modals:show_footer:";
+      var optionsChecked = "title:description:width:height:display_zoom_level:fontColors:backgroundColors:max_modals:show_desc:show_footer:display_zoom_level:";
       for(var p in o) {
         if(optionsChecked.indexOf(p + ":") == -1) {
           delete o[p];

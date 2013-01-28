@@ -36,10 +36,11 @@
 				$('iframe#shivaEditFrame').load(function() {
 				  Drupal.Shivanode.ShivaMessage("shivaEditFrame", "GetType"); // once edit frame is loaded send GetType message just to register this page as parent frame
 					var json = $('#edit-shivanode-json-und-0-value').val();
-					if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
+					//  No longer used. See line 378 or so where ShivaReady message is received
+					//if(typeof(Drupal.Shivanode.loadJS) == "boolean" && Drupal.Shivanode.loadJS == true) {
 						//setTimeout(function() { Drupal.Shivanode.putJSON('shivaEditFrame',json); }, 2000);
 						// Drupal.Shivanode.loadJS = false;
-					}
+					//}
 					/*
 					if(json.length > 10 ) { // if json exists it's an edit frame and load that json value into iframe'
 						Drupal.Shivanode.putJSON('shivaEditFrame',json);
@@ -390,6 +391,16 @@
       var pts = e.data.substr(8).split("=");
       if(pts.length == 2)
         Drupal.Shivanode.putFile(pts[0],pts[1]);
+        
+    // ScrollLeft : scroll Iframe to left and then ease back (For Timeglider to show zoombar in edit view)
+    } else if (e.data.indexOf("ScrollLeft") == 0) {
+      if($('#shivaEditFrame').length == 1) {
+        //  For Timeglider Scrolls left to show zoombar
+        $('#shivaEditFrame').contents().find("html, body").animate({ scrollLeft: 1000 }, { duration: 'medium', easing: 'swing' });
+        setTimeout(function() {
+          $('#shivaEditFrame').contents().find("html, body").animate({ scrollLeft: 0 }, { duration: 'slow', easing: 'swing' });
+        }, 1000);
+      }
     }
 		
 	};

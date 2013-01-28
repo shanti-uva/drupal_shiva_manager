@@ -89,7 +89,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
+			lib="timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -6145,29 +6145,29 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
 {
   var i;
   var stimeline = new Object();
-
+  
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
-
+  
   stimeline.events=null;
   stimeline.options=this.options;
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
-
+  
   if($(stimeline.con).find('*').length > 0) {
     // Sets timeline options. If the options that are different can be set on the fly, returns try
     // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
-    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
+    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), true);
     if(ret) {
       $(stimeline.con).timeline('resize');
-      return;
+      //return;
     }
   }
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
-
+  
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
 
   function GetSpreadsheetData(file, conditions)
@@ -6220,27 +6220,43 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         "initial_zoom":stimeline.options.initial_zoom * 1,
         "events": normalizeEventData(stimeline.events)
       }];
-
-
-      $(stimeline.con).timeline('destroy');
-      $(stimeline.con).html('');
+      
+      if(typeof(window.shivaTimeline) == "undefined") {
         window.shivaTimeline =  $(stimeline.con).timeline({
-          "min_zoom":stimeline.options.min_zoom * 1,
-          "max_zoom":stimeline.options.max_zoom * 1,
-          "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
-          "data_source":stldata,
-          "show_footer":Boolean(stimeline.options.show_footer),
-          "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
-          "constrain_to_data":false,
-          "image_lane_height":60,
-          "loaded":function (args, data) { 
-            $(stimeline.con).timeline('setOptions', stimeline.options, true);
-            $(stimeline.con).timeline('registerEvents', stimeline.events);
-            setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
-            if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            shivaLib.SendReadyMessage(true);
-          }
-      });
+            "min_zoom":stimeline.options.min_zoom * 1,
+            "max_zoom":stimeline.options.max_zoom * 1,
+            "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
+            "data_source":stldata,
+            "show_footer":Boolean(stimeline.options.show_footer),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "constrain_to_data":false,
+            "image_lane_height":60,
+            "loaded":function (args, data) { 
+              $(stimeline.con).timeline('setOptions', stimeline.options, true);
+              $(stimeline.con).timeline('registerEvents', stimeline.events);
+              setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+              if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+              shivaLib.SendReadyMessage(true);
+            }
+        });
+     } else {
+        var callbackObj = {
+          fn : function (args, data) { 
+              $(stimeline.con).timeline('setOptions', stimeline.options, true);
+              $(stimeline.con).timeline('registerEvents', stimeline.events);
+              setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+              if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+          },
+          args : {
+            "min_zoom":stimeline.options.min_zoom * 1,
+            "max_zoom":stimeline.options.max_zoom * 1,
+            "show_footer":Boolean(stimeline.options.show_footer),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level)
+          },
+          display : true
+        };
+        $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
+      }
 
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {

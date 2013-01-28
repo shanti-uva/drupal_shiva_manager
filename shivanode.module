@@ -1132,7 +1132,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
   } 
 
-  $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']);  //<span class="charttype">Pie Chart</span> Help</a>
+  $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']);  
   $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $eltype . '</span>'
         . '<a class="sn-helplink" href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank" title="Pie Chart Help"><img src="' .
         $base_path . 'misc/help.png" /></legend>' .
@@ -1147,6 +1147,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   );
   
   // if it is not a new node, then the json is defined. So, reload that json by setting Drupal.Shivanode.loadJS to true
+  //  tested once the editor page sends the ShivaReady Message which is received at shivanode.js line 377
   if (!$is_new_el) {
     $form['snload_script'] = array(
       '#type' => 'markup',

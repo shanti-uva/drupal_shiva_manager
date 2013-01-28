@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
-	<script type="text/javascript" src="shivalib-min.js"></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
 		
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
@@ -128,8 +128,9 @@
       e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
     else if (e.data.indexOf("GetType") == 0) 
       e.source.postMessage("GetType="+shivaGroup,"*");
-    else if (e.data.indexOf("PutJSON") == 0) 
+    else if (e.data.indexOf("PutJSON") == 0) {
       ReEdit($.parseJSON(e.data.substr(8)));
+    } 
   }
  
   function Draw(mode)
@@ -148,9 +149,10 @@
   function ReEdit(jsonData)
   {
     var it=shivaLib.ReEdit(jsonData,props);
-    if (it)
+    if (it) {
       items=it;
       shivaLib.SetAttributes(props,items,true);
+    } 
     Draw();
   } 
 
