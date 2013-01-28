@@ -19,15 +19,17 @@
 	<input type="button" onclick="test()" value="test">
 <script>
 
-	var ondos=[{ on:"init",			do:"load",   src:"e=263",  id:"timelineCon" },
-		{ on:"init",				do:"load",   src:"m=779",  id:"mapCon" },
-		{ on:"init",				do:"data",   src:"0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E",  id:"myData",  preload:"true" },
-		{ on:"init", 				do:"action", id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
-		{ on:"init",       			do:"call",   id:"Callback", p1:"Hello", p2:" world" },
+	var ondos=[{ on:"init",			Do:"load",   src:"e=263",  id:"timelineCon" },
+		{ on:"init",				Do:"load",   src:"e=264",  id:"mapCon" },
+		{ on:"init",				Do:"data",   src:"0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E",  id:"myData",  preload:"true" },
+		{ on:"init", 				Do:"action", id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
+		{ on:"init",       			Do:"call",   id:"Callback", p1:"Hello", p2:" world" },
+		{ on:"init",				Do:"data",   src:"0AohdE1_3ZElJdFRRaFk1TE1nUURzNkFsNm5DWV9DQ3c",  id:"markerData",  preload:"true" },
 
-		{ on:"ShivaChart=data",  	do:"query",  src:"myData", id:"mySubset", query:"Gold GT 150 AND Silver LT 150", fields:"Team+Gold", sort:"Gold" },
-		{ on:"timelineCon.time",  	do:"fill",   src:"mySubset", id:"mapCon" },
-		{ on:"ShivaMap=click",     	do:"call",   id:"SetMap", script:"MyScript" }
+
+		{ on:"ShivaChart=data",  	Do:"query",  src:"myData", id:"mySubset", query:"Gold GT 150 AND Silver LT 150", sort:"Gold" },
+		{ on:"timelineCon.time",  	Do:"fill",   src:"mySubset", id:"mapCon" },
+		{ on:"ShivaMap=click",     	Do:"call",   id:"SetMap", script:"MyScript" }
 		];
 	
 	var mix=new seaMixer();
@@ -37,7 +39,7 @@
 	{
 //	     	...Do something in JavaScript...
 		mix.data.myData[3][2]=(lat-39)*100
-		mix.RunOnDo({ do:"fill", id:"timelineCon", src:"myData" });     	    	
+		mix.RunOnDo({ Do:"fill", id:"timelineCon", src:"myData" });     	    	
 	}
 	
 	function MyScript(ondo)
@@ -49,7 +51,9 @@
 	function test()
 	{
 		mix.data.myData[3][2]+=10
-		mix.RunOnDo({ do:"fill", id:"timelineCon", src:"myData" });     	    	
+		mix.RunOnDo({ Do:"fill", id:"timelineCon", src:"myData", type:"Chart" });     	    	
+		mix.RunOnDo({ Do:"fill", id:"mapCon", src:"markerData", type:"Map" });     	    	
+//		mix.RunOnDo({ Do:"action", id:"mapCon", type:"ShivaActMap=marker",  p1:"1", p2:"false" });     	    	
 	}
 	
 	function Callback(p1, p2, p3, p4)

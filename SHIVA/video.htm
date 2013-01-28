@@ -5,7 +5,7 @@
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHIVA Video</title>
  	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
-	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 	<script type="text/javascript" src="SHIVA_Event.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -103,6 +103,8 @@
 
 	function shivaEventHandler(e)
 	{
+		if (e.data.indexOf("ShivaVideo") != -1)
+			trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -175,17 +177,11 @@
 		shivaLib.ev.EventEditor();
 	}
 
-
 	function SetAttributes()
 	{
 		shivaLib.SetAttributes(props);
 	}	
 
-	function trace(str) 
-	{ 
-		console.log(str) 
-	}
-	
 	
 </script>
 </body></html>

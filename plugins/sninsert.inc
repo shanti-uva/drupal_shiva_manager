@@ -78,6 +78,7 @@ function shivanode_wysiwyg_editor_settings_alter(&$settings, $context) {
   // Each editor has its own collection of native settings that may be extended
   // or overridden. Please consult the respective official vendor documentation
   // for details.
+  dpm($context['profile']->editor ,'editor');
   if ($context['profile']->editor == 'tinymce') {
     // Supported values to JSON data types.
     $settings['cleanup_on_startup'] = TRUE;

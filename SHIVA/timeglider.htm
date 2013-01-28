@@ -5,11 +5,11 @@
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHIVA Timeline maker</title>
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
-  <link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  	<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
-	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 		
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
@@ -55,8 +55,8 @@
   var iconFolder = window.location.pathname.replace('timeline.htm','') + 'images/timeglider/icons/';
   var props={
       dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
-      title:                { def:'',       opt:'string',       des:'Title of timeline'}, 
-      description:          { def:'',      opt:'string',     des:'Description'}, 
+      title:                { def:'History of Javascript',       opt:'string',       des:'Title of timeline'}, 
+      description:          { def:'A timeline showing a brief history of the Javascript\'s development and its evolution into a key player in Web Technologies.',      opt:'string',     des:'Description'}, 
       height:               { def:'500',     opt:'number',     des:'Height of timeline'},
       width:                { def:'1000',     opt:'number',     des:'Width of timeline'},
       focus_date:           { def:'6/1/1994',      opt:'number',     des:'Center date of timeline'},
@@ -115,7 +115,7 @@
       str+="</select>"; 
       $("#saveAsDiv").html(str);
     }
-		shivaLib.ShivaEventHandler("init");                   // Init shivaevent listener
+		
 	});
 	
   function shivaEventHandler(e)
@@ -130,10 +130,6 @@
       e.source.postMessage("GetType="+shivaGroup,"*");
     else if (e.data.indexOf("PutJSON") == 0) 
       ReEdit($.parseJSON(e.data.substr(8)));
-    else if(e.data.indexOf("GoTo=") == 0) 
-      GoTo(e.data.substr(5));
-    else if(e.data.indexOf("Event=") == 0) 
-      ShowEvent(e.data.substr(6));
   }
  
   function Draw(mode)
@@ -166,13 +162,5 @@
       shivaLib.ShowHelp(att,helpText);
   } 
   
-  function GoTo(adate) {
-    $('#' + shivaLib.container).timeline('setFocusDate', adate);
-  }
-  
-  function ShowEvent(eid) {
-    $('#' + shivaLib.container).timeline('focusToEvent',eid);
-    $('#' + eid + " .timeglider-event-title").click();
-  }
 </script>
 </body></html>

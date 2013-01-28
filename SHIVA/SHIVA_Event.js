@@ -7,6 +7,7 @@ function SHIVA_Event(parent) 											// CONSTRUCTOR
 	this.events=new Array();												// Alloc array of events
 	this.modalEvent=-1;														// No modal event
 	this.scale=1;															// Scale of timeline
+	this.mouseDown=false;													// Tracks mouse status
 	this.container=parent.container;										// Container div
 	$("#shivaEventDiv").empty() 											// Clear it																																																																																																																																																																									// No div yet	
 	$("#shivaEventDiv").remove() 											// Clear it																																																																																																																																																																									// No div yet	
@@ -277,7 +278,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value))'";
-	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","shiva","webservice"],etype,chg)+"</td></tr>";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","poller","webservice"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
@@ -424,6 +425,7 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 		for (var j=0;j<p.length;++j)										// For each param
 			o[p[j].split(":")[0]]=p[j].split(":")[1];						// Set field
 		}
+	var _this=this;															// Context ptr
 	var left="50%",top="50%",wid="auto",hgt="auto",alpha=1;
 	var border="1px solid",tcol="black",rad=8,pad="8px";
 	if (o.frame) {															// If a frame
@@ -498,7 +500,58 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 			$("#shivaEvent-"+num).html(this.CreateEventBody(o.text,num));	// Set content								
 			$("#shivaContinue-"+num).click( function() { _this.CloseEvent(this.id) } );
 			break;
-		}		
+		case "poller": 														// Poller
+			if (params == undefined)										// If not just updating
+				$("#shivaEventDiv").append(str);							// Add to general event div								
+			$("#shivaEvent-"+num).css("padding","0px");						// No padding
+			$("#shivaEvent-"+num).css("top","8px");							// Set to top
+			$("#shivaEvent-"+num).css("border-radius",rad);					// Add corner style
+			$("#shivaEvent-"+num).css("-moz-border-radius",rad);			// Mozilla
+			$("#shivaEvent-"+num).css("background-color","#eee").css('border',"1px solid #ccc");
+			var x=$("#shivaEventDiv").width()-8;							// Edge
+			if ((o.frame) && (o.frame.width) && (o.frame.width != "auto")){	// If a frame width set
+				$("#shivaEvent-"+num).css("width",o.frame.width+"px");		// Set width
+				x-=o.frame.width;											// Set left
+				}
+			else{
+				$("#shivaEvent-"+num).css("width","16px");					// Set width
+				x-=16;														// Set left
+				}
+			$("#shivaEvent-"+num).css("left",x+"px");						// Set left
+			x=$("#shivaEventDiv").height()/2;								// Top pos
+			$("#shivaEvent-"+num).css("height",x+"px");						// Set height
+			$("#shivaEvent-"+num).css("top","32px");						// Set top
+			o.frame.draggable=false;										// Inhibit dragging
+			o.frame.closer=false;											// No closer
+			str="<div id='shivaPoller' style='width:100%;position:absolute;pointer-events:none'/>"; // Add poll bar div
+			$("#shivaEvent-"+num).html(str);								// Set content								
+			this.SetPoller(50);												// Set poller bar centered	
+			$("#shivaEvent-"+num).mouseup( function(e) {					// ON MOUSEUP HANDLER
+				var y=e.clientY-$("#shivaPoller").parent().css("top").replace(/px/,"");		// Get top
+				var val=1-(y/$("#shivaPoller").parent().height());			// Get value 1-0
+				_this.SetPoller(val*100)
+				_this.mouseDown=false;										// Set mouse status
+				});
+			$("#shivaEvent-"+num).mousedown( function(e) {					// ON MOUSEDOWN HANDLER
+				_this.mouseDown=true;										// Set mouse status
+				});
+			$("#shivaEvent-"+num).mousemove( function(e) {					// ON MOUSEMOVE HANDLER
+				if (_this.mouseDown) {										// If mouse down
+					var y=e.clientY-$("#shivaPoller").parent().css("top").replace(/px/,"");		// Get top
+					var val=1-(y/$("#shivaPoller").parent().height());		// Get value 1-0
+					_this.SetPoller(val*100);
+					}
+				});
+			$(document).keydown( function(e) {								// ON KEYUP HANDLER
+				var val=$("#shivaPoller").data("val");						// Get current val
+				if ((e.which == 38) ||(e.which == 39) || (e.which == 107))	// Increase
+					val=Math.min(100,val+10);								// Up 10
+				if ((e.which == 37) ||(e.which == 40) || (e.which == 109))	// Decrease
+					val=Math.max(0,val-10);									// Down 10
+				_this.SetPoller(val);										// Set val
+				});
+			break;
+		}
 	if (o.frame) {															// If a frame defined
 		if (o.frame.scroller)												// If set
 			$("#shivaEvent-"+num).css("overflow","auto").css("overflow-x","hidden"); // Enable v scrollbar
@@ -524,6 +577,23 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 		$("#shivaEvent-"+num).mouseout( function()  { _this.EventRouter(this.id,"hoverOut") } );
 		}
 	$("#shivaEvent-"+num).hide();											// Hide it
+}
+
+SHIVA_Event.prototype.SetPoller=function(val) 							// SET POLLER BAR
+{
+	val=Math.round(val/10)*10;												// Value by 10's
+	var h=$("#shivaPoller").parent().height()/2;							// Get height of bar
+	var t=$("#shivaPoller").parent().position().top-32;						// Get top of bar
+	var d=Math.max(Math.abs(val-50),2)/50*h;								// Poll bar hgt
+	$("#shivaPoller").height(d-1);											// Set bar height
+	if (val < 50)															// Negative
+		$("#shivaPoller").css("background-color","#990000").css("top",(t+h)+"px"); // Red, below middle
+	else																	// Positive
+		$("#shivaPoller").css("background-color","#009900").css("top",(t-d+h)+"px"); // Green, above middle
+	$("#shivaPoller").data("val",val);										// Save value
+	var	now=this.player.currentTime();										// Get time
+	now=Math.round(now*1000)/1000;											// Hundreths only
+	shivaLib.SendShivaMessage("ShivaVideo=poller|"+Math.round(val)+"|"+now);// Send message
 }
 
 SHIVA_Event.prototype.CreateEventBody=function(def, num) 				// CREATE EVENT BODY
@@ -836,11 +906,6 @@ SHIVA_Event.prototype.CSSPixel=function(size) 							//	ADD PX to SIZE IF NEEDED
 	if ((size+"").indexOf("%") != -1)		return size;					// Return %
 	if ((size+"").indexOf("px") == -1)		return size+"px";				// Return with added px
 	return size;															// Return original
-}
-
-function trace(msg)
-{
-	console.log(msg);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

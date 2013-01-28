@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
   	<script type="text/javascript" src="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true"></script>
-	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
@@ -138,7 +138,7 @@
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
-			ReEdit($.parseJSON(e.data.substr(5)));
+			ReEdit($.parseJSON(e.data.substr(8)));
 	}
  
 	function Draw(mode)
@@ -212,8 +212,7 @@
 	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 	}
-  
-  
+
 	function trace(str) { console.log(str) };
 	
 </script>

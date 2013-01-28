@@ -6248,6 +6248,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
+        //console.info(dateTime);
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
         var mn = padZero(dt.getMonth() + 1);
@@ -6279,6 +6280,9 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
           }
           if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
             ev.enddate = ConvertTimelineDate(ev.end);
+          }
+          if(typeof(ev.enddate) == "undefined" || ev.enddate == "") {
+            ev.enddate = ev.startdate;
           }
           if(typeof(ev.importance) == "undefined") {
             ev.importance = 50;
