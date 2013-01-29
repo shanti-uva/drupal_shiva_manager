@@ -166,7 +166,18 @@ function shivanode_menu() {
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
-  
+  /*
+  // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
+  $items['node/data-elements/simple'] = array(
+    'title' => 'Available Shiva Data Entries',
+    'description' => 'List of Available Shiva Data Entries',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_data_elements'),
+    'access callback' => 'is_auth_user',
+    'delivery callback' => '_shivanode_popup_page',
+    'file' => 'shivanode.inc',
+  );
+  */
    // Resets the guser login info stored in the session variable
   $items['node/guser/reset/confirm'] = array(
     'type' => MENU_CALLBACK,
@@ -187,17 +198,6 @@ function shivanode_menu() {
     'access callback' => TRUE,
     'file' => 'shivanode.inc',
   );
-    
-    // Started something here but never finished.
-  /*$items['shivanode/list/popup'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => '',
-    'description' => 'Return a form to obtain embed codes of a shivanode',
-    'page callback' => '_shivanode_node_list_popup',
-    'page arguments' => array(1),
-    'access callback' => TRUE,
-    'file' => 'shivanode.inc',
-  );*/
     
   // Return SHIVA jsaon of a single node 
   
@@ -274,6 +274,34 @@ function shivanode_permission() {
       'title' => t('Show the JSON text in uneditable div when editing node.'),
     ),
   ); 
+}
+
+/**
+ * Implements hook_preprocess_page () 
+ *   This code  and the registry alter code comes from 
+ * 
+ *            http://stackoverflow.com/questions/247991/displaying-a-drupal-view-without-a-page-template-around-it
+ *  
+ *   Popups need to be called with {path url}?format=simple, as in: 
+ * 
+ *           http://shantivis.org/node/data-elements?format=simple
+ * 
+ *   in lightbox you have to add a query object {'format' : 'simple' }
+ * 
+ */
+function shivanode_preprocess_page(&$vars) {
+    if ( isset($_GET['format']) && $_GET['format'] == 'simple' ) {
+        $vars['template_file'] = 'raw';
+    }
+} 
+
+function shivanode_theme_registry_alter(&$theme_registry) {
+   $modulepath = drupal_get_path('module','shivanode');
+   if(!isset($theme_registry['page']['theme paths']) || $theme_registry['page']['theme paths'] == null) {
+     $theme_registry['page']['theme paths']  = array($modulepath .'/templates');
+   } else if(is_array($theme_registry['page']['theme paths'])) {
+     array_unshift($theme_registry['page']['theme paths'], $modulepath .'/templates');
+   } 
 }
 
 /**
@@ -998,12 +1026,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
         l(t('Create a Data Listing from Google Spreadsheet'), 'node/data-elements') . '</div>';
- 
-  /*$form['shivanode_help'] = array(
-    '#type' => 'markup',
-    '#markup' => '<div id="sn-helplink"><a href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank"><span class="charttype">Pie Chart</span> Help</a></div>',
-    '#weight' => 3,
-  );*/
   
   // The upper Save/Update button
   $form['upperbuttons'] = array(
@@ -1131,11 +1153,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       _shivanode_add_datalink($form, $dataNodeId, $is_new_el);
     } 
   } 
-
-  $iframeUrl = _get_shivaframe_url($form['shivanode_element_type']['und']['#default_value']);  
-  $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $eltype . '</span>'
-        . '<a class="sn-helplink" href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank" title="Pie Chart Help"><img src="' .
-        $base_path . 'misc/help.png" /></legend>' .
+  
+  // Set typeVal to form_state value, if set, (meaning we are editing an existing node) or to the default value is not set (meaning new node)
+  $typeVal = isset($form_state['node']->shivanode_element_type['und'][0]['value']) ? 
+                  $form_state['node']->shivanode_element_type['und'][0]['value']:
+                  $form['shivanode_element_type']['und']['#default_value']; 
+  $iframeUrl = _get_shivaframe_url($typeVal);   
+  $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
+        $eltype . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" style="overflow: auto;" frameborder="0" onmouseout="Drupal.Shivanode.getJSON();"> </iframe></fieldset>' .
@@ -1159,12 +1184,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
-  /*
-  $form['actions']['submit']['#value'] = $submitVal; // Change text of submit button at bottom
-    $form['actions']['submit']['#attributes'] = array(
-      'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
-    );*/
-  
+ 
 }
 
 /*
@@ -1173,8 +1193,27 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
  * 
  */
 function shivanode_element_change($form, $form_state) {
-  global $base_path;
   
+  $typeVal = $form_state['values']['shivanode_element_type']['und'][0]['value'];
+  setcookie('Drupal.Shivanode.lastElementType',$typeVal, time() + 300,'/','');
+  
+  $typeStr = _shivanode_options_list($typeVal);
+  $iframeUrl = _get_shivaframe_url($typeVal);
+  $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
+        $typeStr  . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        '<iframe id="shivaEditFrame" src="' . $iframeUrl .
+        '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
+        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .
+        '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
+  return $iframe;
+}
+
+/**
+ * Function get Help link
+ *    Returns the html link code for the help page depending on the shivanode type value sent to function
+ */
+function shivanode_get_help_link($typeVal = 7) {
+  global $base_path;
   $helpurls = array(
       'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
       'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
@@ -1201,20 +1240,11 @@ function shivanode_element_change($form, $form_state) {
       'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
       'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ'
   );
-  
-  $typeVal = $form_state['values']['shivanode_element_type']['und'][0]['value'];
-  setcookie('Drupal.Shivanode.lastElementType',$typeVal, time() + 300,'/','');
   $typeStr = _shivanode_options_list($typeVal);
   $helpStr = ($typeStr == "Chart") ? 'Pie Chart' : $typeStr;
-  $iframeUrl = _get_shivaframe_url($typeVal);
-  $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . $typeStr . '</span>' .
-        '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help"><img src="' .
-        $base_path . 'misc/help.png" /></legend>' .
-        '<iframe id="shivaEditFrame" src="' . $iframeUrl .
-        '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
-        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .
-        '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
-  return $iframe;
+  $style = (1 == 2 && is_theme('seven')) ? ' style="margin-left: 85px !important; "' : '';
+  return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ' .
+             $style . '><img src="' . $base_path . 'misc/help.png" /></a>';
 }
 
 /*

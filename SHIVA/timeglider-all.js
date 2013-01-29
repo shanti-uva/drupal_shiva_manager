@@ -1044,6 +1044,14 @@ Globalization.format = function(value, format, culture) {
     else if ( value instanceof Date ) {
         value = formatDate( value, format, culture );
     }
+    // Added by ndg to add era to end of dates
+    if(typeof(culture.calendar.eras) != "undefined") {
+      if(value > 0 || culture.calendar.eras.length == 1) {
+        value += " " + culture.calendar.eras[0].name;
+      } else { 
+        value = Math.abs(value) + " " + culture.calendar.eras[1].name;
+      }
+    }
     return value;
 }
 Globalization.parseInt = function(value, radix, culture) {
@@ -1315,7 +1323,8 @@ var en = cultures["default"] = cultures.en = Globalization.extend(true, {
                 // name: the name of the era in this culture (e.g. A.D., C.E.)
                 // start: when the era starts in ticks (gregorian, gmt), null if it is the earliest supported era.
                 // offset: offset in years from gregorian calendar
-                { "name": "A.D.", "start": null, "offset": 0 }
+                { "name": "C.E.", "start": null, "offset": 0 },
+                { "name": "B.C.E.", "start": null, "offset": 0 }
             ],
             // when a two digit year is given, it will never be parsed as a four digit
             // year greater than this year (in the appropriate era for the culture)
@@ -2928,7 +2937,6 @@ timeglider.TG_Date = {};
                 
               } else {
                 jsDate = new Date(utcy, (fromUTC.mo-1), fromUTC.da, fromUTC.ho, fromUTC.mi, fromUTC.se, 0);
-          
           return $.global.format(jsDate, sig);
               }
           
@@ -10284,12 +10292,13 @@ tg.validateOptions = function (widget_settings) {
       evals.sort();
   
       if( p > 0 ) {
+        $('#etyplist, #typelistlinkitem').remove();
         for(var n in evals) {
            list += '<tr><td>' + evals[n][0] + 
               '</td><td><input id="etype-' + evals[n][1] + '" type="checkbox" checked="checked" onclick="toggleEvents(\'' + evals[n][1] + '\');"/></td></tr>';
         }
         list += '</table></div></div>';
-        $('.tg-single-timeline-header ul').append('<li><a onclick="$(\'#etypelist\').toggle();">types</a></li>');
+        $('.tg-single-timeline-header ul').append('<li id="typelistlinkitem"><a onclick="$(\'#etypelist\').toggle();">types</a></li>');
         $('body').append(list);
         $('#typesclose').click(function() {
           $('#etypelist').hide();
@@ -10544,3 +10553,5 @@ function toggleEvents(type) {
     }
   });
 }
+
+ 

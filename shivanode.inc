@@ -2007,7 +2007,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1]; //$(this).parent().click();
     $form['gdocinfo']['button_div']['edit_gdoc'] = array(
       '#type' => 'markup',
-      '#markup' =>  '&nbsp;' . l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" />', $gurl, array(
+      '#markup' =>  '&nbsp;' . l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" class="form-submit" />', $gurl, array(
         'attributes' => array(
           'target' => '_blank',
           'id' => 'datasheeturl'
@@ -2020,7 +2020,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $form['gdocinfo']['button_div']['insert_button'] = array(
       '#type' => 'markup',
       '#markup' => '<input type="button" value="' . t('Refresh Data') . '" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' .
-        'title="' . t('Insert the Data URL from this link in the form below.') . '" />',
+        'title="' . t('Insert the Data URL from this link in the form below.') . '" class="form-submit" />',
         '#suffix' => ' | ',
     );
     // The clear link to clear the link from shivanode to data entry.
@@ -2208,4 +2208,21 @@ function _get_thumb_image($node) {
     $imgurl = 'http://pagepeeker.com/thumbs.php?size=l&url=https://shiva.virginia.edu/node/' . $node->nid;
   }
   return $imgurl;
+}
+
+function is_theme($tk) {
+  global $theme_key;
+  return ($theme_key == $tk) ? TRUE : FALSE ;
+} 
+
+function get_theme_info($tk) {
+  global $theme_key;
+  $themes = list_themes();
+  return $themes[$theme_key];
+} 
+
+function _shivanode_popup_page($content) {
+  drupal_send_headers();
+  $out = drupal_render($content);
+  print '<html><body>' . $out . '</body></html>';
 }

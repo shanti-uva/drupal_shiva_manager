@@ -6176,13 +6176,14 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
-      query.send(handleQueryResponse);
+      query.send(handleQueryResponse);  
 
     function handleQueryResponse(response) {
       // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
       if(response.isError()) {
-        alert("The Google spreadsheet that holds the data for this visualization has not been shared.\n" +
-          "Please ask the owner set permissions to 'Anyone with Link' or 'Public'.");
+        alert("Either your internet connection is down or the Google spreadsheet that  \n" + 
+         + "holds the data for this visualization has not been properly shared.\n" +
+          "The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");
           return;
       }
       var i,j,key,s=0;
@@ -6264,9 +6265,10 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
-        //console.info(dateTime);
+        var sign = (dateTime < 0) ? -1 : 1;  // account for BC (or minus) years
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
+        dt.setFullYear(dt.getFullYear() * sign);
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());
         var hrs = padZero(dt.getHours());

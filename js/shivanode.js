@@ -50,6 +50,11 @@
 					if($('#iframe_container legend .form-required').length == 0) {
 						$('#iframe_container legend span').append('<span title="This field is required." class="form-required">*</span>');
 					}
+					
+					// Make Edit frame as wide as fieldset
+					var pw = $('#shivaEditFrame').parent().width();
+					var w = $('#shivaEditFrame').width();
+					if(pw > w) {$('#shivaEditFrame').width(pw);}
 					// after 3 seconds wait, start getting JSON from iframe every sec
 					//setTimeout('Drupal.Shivanode.monitorEditFrame(true)',3000);
 				});
@@ -447,7 +452,7 @@
 				'<strong>Data Used: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
 				'<span id= "chosen_data_element_url" class="hidden">' + url + '</span>' +
 				'<input type="button" value="Refresh Data" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' +
-            'title="Insert the Data URL from this link in the form below." /> | ' +
+            'title="Insert the Data URL from this link in the form below."  class="form-submit" /> | ' +
         '<input type="button" value="Remove Link to Data" title="Remove the association between this element and the data element that supplies its Data Source URL." ' +
             ' id="edit-remove-datanid" onclick="jQuery(\'#data_sheet_in_use\').html(\'\').hide(); return false;" class="form-submit ajax-processed" />');
 			$("#data_sheet_in_use").show();

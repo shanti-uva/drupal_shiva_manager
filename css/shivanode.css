@@ -35,11 +35,16 @@ div#sn-helplink a {
 } */
 
 a.sn-helplink {
-  padding-left: 6px;
+  margin-left: 5px;
+  position: relative;
 }
 
 a.sn-helplink img {
+  padding: 0px !important;
   vertical-align: middle;
+  background: transparent !important;
+  box-shadow: 0 !important;
+  border: none !important;
 }
 
 /* Upper Action buttons in Edit Form */
@@ -56,7 +61,7 @@ div#otherbuttons {
 div.sn-share-button {
 	display: inline !important;
 	float:right;
-	margin-top: -8px;
+	margin-top: 5px;
 	padding-bottom: 6px;
 }
 
