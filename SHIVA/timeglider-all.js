@@ -1045,7 +1045,7 @@ Globalization.format = function(value, format, culture) {
         value = formatDate( value, format, culture );
     }
     // Added by ndg 2013-01-29 to add era to end of dates
-    if(typeof(culture.calendar.eras) != "undefined") {
+    if(typeof(culture.calendar.eras) != "undefined" && !isNaN(value)) {
       if(value > 0 || culture.calendar.eras.length == 1) {
         value += " " + culture.calendar.eras[0].name;
       } else { 
