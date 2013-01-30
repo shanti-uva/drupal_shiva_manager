@@ -1044,7 +1044,7 @@ Globalization.format = function(value, format, culture) {
     else if ( value instanceof Date ) {
         value = formatDate( value, format, culture );
     }
-    // Added by ndg to add era to end of dates
+    // Added by ndg 2013-01-29 to add era to end of dates
     if(typeof(culture.calendar.eras) != "undefined") {
       if(value > 0 || culture.calendar.eras.length == 1) {
         value += " " + culture.calendar.eras[0].name;
@@ -1323,8 +1323,8 @@ var en = cultures["default"] = cultures.en = Globalization.extend(true, {
                 // name: the name of the era in this culture (e.g. A.D., C.E.)
                 // start: when the era starts in ticks (gregorian, gmt), null if it is the earliest supported era.
                 // offset: offset in years from gregorian calendar
-                { "name": "C.E.", "start": null, "offset": 0 },
-                { "name": "B.C.E.", "start": null, "offset": 0 }
+                { "name": "CE", "start": null, "offset": 0 },
+                { "name": "BCE", "start": null, "offset": 0 }
             ],
             // when a two digit year is given, it will never be parsed as a four digit
             // year greater than this year (in the appropriate era for the culture)
