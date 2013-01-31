@@ -89,7 +89,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js"; // was //mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/
+			lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -6141,36 +6141,27 @@ function CSV(inputID, mode, output_type, callback) {
 			
 //  TIMEGLIDER   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIMEGLIDER
+SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 {
   if($('#cp_colorbar').is(":visible") == true || $('#cp_colormap').is(":visible") == true) {
     return;
   }
   var i;
   var stimeline = new Object();
-  
+
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
-  
+
   stimeline.events=null;
   stimeline.options=this.options;
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
   
-  /*if($(stimeline.con).find('*').length > 0) {
-    // Sets timeline options. If the options that are different can be set on the fly, returns try
-    // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
-    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
-    if(ret) {
-      $(stimeline.con).timeline('resize');
-      return;
-    }
-  }*/
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
-  $(stimeline.con).timeline('resize');
+  $(stimeline.con).timeline('resize');  // Resixe after setting height
 
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
 
@@ -6180,7 +6171,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
-      query.send(handleQueryResponse);  
+      query.send(handleQueryResponse);
 
     function handleQueryResponse(response) {
       // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
