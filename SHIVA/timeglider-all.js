@@ -8965,7 +8965,6 @@ tg.TG_Mediator = function (wopts, $el) {
   * !TODO: create option for XML?
   */
   loadTimelineData : function (src, callback) {
-      
     var M = this; // model ref
     // Allow to pass in either the url for the data or the data itself.
 
@@ -8976,7 +8975,7 @@ tg.TG_Mediator = function (wopts, $el) {
       
       
           if (typeof src === "object") {
-          
+
           // OBJECT (already loaded, created)
           M.parseTimelineData(src, callback);
             
@@ -9020,7 +9019,6 @@ tg.TG_Mediator = function (wopts, $el) {
     
     
     } else {
-      
       // NO INITIAL DATA:
       // That's cool. We still build the timeline
       // focusdate has been set to today
@@ -9115,7 +9113,6 @@ tg.TG_Mediator = function (wopts, $el) {
   runLoadedTimelineCallback: function(callback, data) {
     
     var args = callback.args || "";
-        
     callback.fn(args, data);
     
     if (callback.display) {
@@ -9160,7 +9157,7 @@ tg.TG_Mediator = function (wopts, $el) {
     } else {
       data = json;
     }
-    
+
     var M = this,
       ct = 0,
       dl = data.length, 
@@ -10099,8 +10096,7 @@ tg.validateOptions = function (widget_settings) {
       // optsEqual is a function to check whether a style option is being set if so do not reload timeline, just change the styles
       // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
       var optsTheSame = this.optsEquals(otemp);
-      if (optsTheSame && set != true && $('#cp_colorbar').is(":visible") == false 
-            && $('#cp_colormap').is(":visible") == false) {
+      if (optsTheSame && set != true) {
         return false;
       }
       // Header
@@ -10159,9 +10155,12 @@ tg.validateOptions = function (widget_settings) {
             $(sel).css({ 'color' : newcolor });
             tg.updatePageStyles(sel, { 'color' : newcolor });
             fstyles[type] = 'done';
-          } 
+          } else if (prescolor.colorToHex() == newcolor) {
+            fstyles[type] = 'done';
+          }
         }
-      
+        
+        // remove any colors newly eliminated from choices.
         for (var t in fstyles) {
           if(fstyles[t] != 'done') {
             $(fstyles[t]).css({ 'color' : '' });

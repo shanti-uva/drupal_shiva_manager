@@ -6143,6 +6143,9 @@ function CSV(inputID, mode, output_type, callback) {
 
 SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIMEGLIDER
 {
+  if($('#cp_colorbar').is(":visible") == true || $('#cp_colormap').is(":visible") == true) {
+    return;
+  }
   var i;
   var stimeline = new Object();
   
@@ -6155,19 +6158,20 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
   
-  if($(stimeline.con).find('*').length > 0) {
+  /*if($(stimeline.con).find('*').length > 0) {
     // Sets timeline options. If the options that are different can be set on the fly, returns try
     // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
-    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), true);
+    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
     if(ret) {
       $(stimeline.con).timeline('resize');
-      //return;
+      return;
     }
-  }
+  }*/
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
-  
+  $(stimeline.con).timeline('resize');
+
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
 
   function GetSpreadsheetData(file, conditions)
@@ -6212,6 +6216,8 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       }
 
       stimeline.events = eventData.events;
+      
+      
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -6243,20 +6249,28 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
      } else {
         var callbackObj = {
           fn : function (args, data) { 
-              $(stimeline.con).timeline('setOptions', stimeline.options, true);
-              $(stimeline.con).timeline('registerEvents', stimeline.events);
-              setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
-              if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+              setTimeout(function() {
+                $(stimeline.con).timeline('setOptions', stimeline.options, true);
+                $(stimeline.con).timeline('registerEvents', stimeline.events);
+                $(stimeline.con).timeline('eventList');
+                if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+              }, 500);
           },
           args : {
             "min_zoom":stimeline.options.min_zoom * 1,
             "max_zoom":stimeline.options.max_zoom * 1,
+            "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
+            "data_source": stldata,
             "show_footer":Boolean(stimeline.options.show_footer),
-            "display_zoom_level":Boolean(stimeline.options.display_zoom_level)
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "constrain_to_data":false,
+            "image_lane_height":60
           },
           display : true
         };
-        $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
+        setTimeout(function() {
+          $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
+        }, 300);
       }
 
       // Make event modal windows draggable

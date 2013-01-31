@@ -440,6 +440,7 @@ function shivanode_node_submit($node, $form, &$form_state) {
   $dest = drupal_get_destination();
   $dest = $dest['destination'];
   
+  // When the Save & Continue button is pressed
   if (strpos($trigger, 'continue') > -1) {
     node_save($node);
     $editurl = 'node/' . $node->nid . '/edit';
