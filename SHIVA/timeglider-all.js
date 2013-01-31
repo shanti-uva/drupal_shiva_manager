@@ -8791,7 +8791,7 @@ tg.TG_Mediator = function (wopts, $el) {
     isEventVisible: function(ev) {
       
       var z = this._zoomLevel;
-      if (z <= ev.get("high_threshold") && z >= ev.get("low_threshold")) {
+      if (z <= ev.get("high_threshold") && z >= ev.get("low_threshold") ) { 
         // debug.log("vis: ", ev.get("title")); // 
         return true;
       } else {
@@ -10302,6 +10302,8 @@ tg.validateOptions = function (widget_settings) {
         $('#typesclose').click(function() {
           $('#etypelist').hide();
         });
+        
+        window.checkevint = setInterval(checkEventVisibility, 10);
       }
     },
     
@@ -10535,9 +10537,18 @@ function propsToString(o) {
 }
 
 // Toggle events based on classes with event type (classes created line 3788)
+// Added by ndg for SHIVA 2013-01-31
 function toggleEvents(type) {
   var tstr = '.etype-' + type;
-  $(tstr).each(function() {
+  checkEventType(tstr);
+  // If showing a previously hidden event, need to refresh the timeline
+  if ($('#etype' + type).attr('checked') == "checked") {
+    $('#' + shivaLib.container).timeline("refresh");
+  }
+}
+
+function checkEventType(t) {
+  $(t).each(function() {
     if(typeof($(this).attr('class')) == "string") {
       var classes = $(this).attr('class').split(/\s/);
       var hidden = true;
@@ -10553,4 +10564,10 @@ function toggleEvents(type) {
   });
 }
 
- 
+// function to check event periodically initiated with setInterval when type list is created
+function checkEventVisibility() {
+ $("#etypelist input[type=checkbox]").each(function() {
+      var tpid = $(this).attr('id');
+      toggleEvents(tpid.replace('etype-',''));
+  });
+} 
