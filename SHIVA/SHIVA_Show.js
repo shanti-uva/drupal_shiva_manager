@@ -6260,8 +6260,9 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           display : true
         };
         setTimeout(function() {
+          if(typeof(console)=="object") { console.info(stldata); }
           $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
-        }, 300);
+        }, 500);
       }
 
       // Make event modal windows draggable
