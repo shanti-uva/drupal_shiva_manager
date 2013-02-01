@@ -12,6 +12,11 @@
  background-color: #363430;
 }
 
+/* added by ndg to not show titleBar*/
+.tg-timeline-envelope .titleBar {
+  display: none;
+}
+
 /* float clearing for IE6 */
 .timeglider-container .clearfix{
   height: 1%;
@@ -203,10 +208,6 @@
 }
 
 .tg-timeline-envelope .titleBar {
-  display: none; 
-  /* The following was removed by ndg 1-28-2013 : 
-      to hide the .titleBar which shows when you reload data through the widget's loadTimeline function
-      
 	background-color:#726d62;
 	color:#FFF;
 	height:4px;
@@ -219,8 +220,8 @@
 	
 	-webkit-border-radius: 2px;
 	-moz-border-radius: 2px;
-	border-radius: 2px;  
-	 */
+	border-radius: 2px;
+
 }
 
 .tg-timeline-envelope .titleBar .timeline-title {

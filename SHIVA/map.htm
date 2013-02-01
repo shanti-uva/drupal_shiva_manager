@@ -8,7 +8,8 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
- 	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
@@ -73,7 +74,7 @@
 		layerSource: 				{	def:'', 			opt:'string',		 	des:'Layer source'}, 
 		layerOptions: 				{	def:'', 			opt:'string',		 	des:'Layer options'}, 
 		visible:					{	def:'true', 		opt:'true|false',		des:'Layer visibility'}, 
-		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Marker|Overlay',des:'Layer type'} 
+		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Marker|MarkerSet|Overlay',des:'Layer type'} 
 		}
 		
 	var helpText=new Array();
@@ -377,9 +378,6 @@ shivaLib.ShivaEventHandler("init");										// Init shivaevent listener
 			$("#accord").accordion({ active: cur });
 	}
 
-	function trace(str) { console.log(str) };
-	
-	
 </script>
 </body>
 </html>

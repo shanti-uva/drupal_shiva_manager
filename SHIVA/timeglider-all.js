@@ -10230,9 +10230,9 @@ tg.validateOptions = function (widget_settings) {
       } else {
         setTimeout(function() {
           $('.timeglider-footer').hide();
-          var ch = $('#containerDiv').height();
-          $('.timeglider-container').height(ch - 25);
-        }, 200);
+          var ch = $('#containerDiv .timeglider-container').height();
+          $('#containerDiv .timeglider-container').height(ch - 25);
+        }, 800);
       }
       return true;  // return true that an on-the-fly option has been changed so timeline is not redrawn.
     },
@@ -10472,7 +10472,6 @@ tg.validateOptions = function (widget_settings) {
     * 
     */
     loadTimeline : function (src, callback_object) {
-      
       MED.loadTimelineData(src, callback_object);
       
       return this;

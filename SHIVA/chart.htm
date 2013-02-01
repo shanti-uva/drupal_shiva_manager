@@ -8,7 +8,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
-	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 	<style type="text/css">
 		body{ margin:8px; font-family:Verdana,Geneva,sans-serif; font-size:xx-small;	}
 		.h1 { font-size: larger; color: #666666; }
@@ -260,7 +260,7 @@
 			noColorValue: 				{	def:'auto', 	opt:'number',		 des:'No value color value'},
 			noHighlightColor: 			{	def:'FFFFFF', 	opt:'color',		 des:'No value highlight color'},
 			showTooltips: 				{	def:'true', 	opt:'false|true',	 des:'Show tooltips?'}},
-			ud: 						{	def:'false', 	opt:'true|false',	des:'Enable user draw?'}, 
+			ud: 						{	def:'false', 	opt:'true|false',	des:'Enable user draw?'} 
 		};	
 
 
@@ -375,8 +375,6 @@
 	}	
 
 ///////// GUI   //////////
-
-	function trace(msg) { console.log(msg); }
 
 	function InitHelp(file) 
 	{

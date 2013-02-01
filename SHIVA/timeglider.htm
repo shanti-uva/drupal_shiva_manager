@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
-	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
 		
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
@@ -54,14 +54,14 @@
   var curAtt=null;
   var iconFolder = window.location.pathname.replace('timeline.htm','') + 'images/timeglider/icons/';
   var props={
-      dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
-      title:                { def:'',       opt:'string',       des:'Title of timeline'}, 
+      dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dEVPbGc0N20zNndsQjE5MXFUdDVSYlE&usp=sharing',       opt:'string',     des:'Source of events'}, 
+      title:                { def:'Thomas Jefferson',       opt:'string',       des:'Title of timeline'}, 
       description:          { def:'',      opt:'string',     des:'Description'}, 
       height:               { def:'500',     opt:'number',     des:'Height of timeline'},
       width:                { def:'1000',     opt:'number',     des:'Width of timeline'},
-      focus_date:           { def:'6/1/1994',      opt:'number',     des:'Center date of timeline'},
+      focus_date:           { def:'6/1/1787',      opt:'number',     des:'Center date of timeline'},
       //timezone:             { def:'-04:00',      opt:'string',      des:'Timezone of timeline'},
-      initial_zoom:         { def:'40',    opt:'number',   des:'Initial zoom of timeline'}, 
+      initial_zoom:         { def:'49',    opt:'number',   des:'Initial zoom of timeline'}, 
       min_zoom:             { def:'10',       opt:'number',        des:'Minumum zoom of timeline'}, 
       max_zoom:             { def:'70',  opt:'number',     des:'Maximum zoom of timeline'}, 
       font_name:            { def:'Arial',   opt:'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',     des:'Font' },
@@ -128,9 +128,8 @@
       e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
     else if (e.data.indexOf("GetType") == 0) 
       e.source.postMessage("GetType="+shivaGroup,"*");
-    else if (e.data.indexOf("PutJSON") == 0) {
+    else if (e.data.indexOf("PutJSON") == 0) 
       ReEdit($.parseJSON(e.data.substr(8)));
-    } 
   }
  
   function Draw(mode)
@@ -149,10 +148,9 @@
   function ReEdit(jsonData)
   {
     var it=shivaLib.ReEdit(jsonData,props);
-    if (it) {
+    if (it)
       items=it;
       shivaLib.SetAttributes(props,items,true);
-    } 
     Draw();
   } 
 

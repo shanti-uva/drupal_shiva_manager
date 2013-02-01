@@ -2,8 +2,14 @@
 //  SHIVALIB TIMELINE
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+//  TIMEGLIDER /////////////////////////////////////////////////////////////////////////////////////////// 
+//  From Than 1/31/13
+
 SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 {
+  if($('#cp_colorbar').is(":visible") == true || $('#cp_colormap').is(":visible") == true) {
+    return;
+  }
   var i;
   var stimeline = new Object();
 
@@ -16,18 +22,10 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
   stimeline.container=this.container;
   stimeline.con="#"+stimeline.container;
 
-  if($(stimeline.con).find('*').length > 0) {
-    // Sets timeline options. If the options that are different can be set on the fly, returns try
-    // and the timeline is resized and this function returns. Otherwise, the whole timeline needs to be redrawn.
-    var ret = $(stimeline.con).timeline('setOptions', jQuery.extend(true, {}, stimeline.options), false);
-    if(ret) {
-      $(stimeline.con).timeline('resize');
-      return;
-    }
-  }
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
+  $(stimeline.con).timeline('resize');  // Resixe after setting height
 
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
 
@@ -40,7 +38,13 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
       query.send(handleQueryResponse);
 
     function handleQueryResponse(response) {
-
+      // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
+      if(response.isError()) {
+        alert("Either your internet connection is down or the Google spreadsheet that  \n" +
+         + "holds the data for this visualization has not been properly shared.\n" +
+          "The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");
+          return;
+      }
       var i,j,key,s=0;
       var data=response.getDataTable();
       var rows=data.getNumberOfRows();
@@ -67,6 +71,8 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
       }
 
       stimeline.events = eventData.events;
+
+
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -77,26 +83,51 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
         "events": normalizeEventData(stimeline.events)
       }];
 
-
-      $(stimeline.con).timeline('destroy');
-      $(stimeline.con).html('');
+      if(typeof(window.shivaTimeline) == "undefined") {
         window.shivaTimeline =  $(stimeline.con).timeline({
-          "min_zoom":stimeline.options.min_zoom * 1,
-          "max_zoom":stimeline.options.max_zoom * 1,
-          "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
-          "data_source":stldata,
-          "show_footer":Boolean(stimeline.options.show_footer),
+            "min_zoom":stimeline.options.min_zoom * 1,
+            "max_zoom":stimeline.options.max_zoom * 1,
+            "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
+            "data_source":stldata,
+            "show_footer":Boolean(stimeline.options.show_footer),
 "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
-          "constrain_to_data":false,
-          "image_lane_height":60,
-          "loaded":function (args, data) {
-            $(stimeline.con).timeline('setOptions', stimeline.options, true);
-            $(stimeline.con).timeline('registerEvents', stimeline.events);
-            setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
-            if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            shivaLib.SendReadyMessage(true);
-          }
-      });
+            "constrain_to_data":false,
+            "image_lane_height":60,
+            "loaded":function (args, data) {
+              $(stimeline.con).timeline('setOptions', stimeline.options, true);
+              $(stimeline.con).timeline('registerEvents', stimeline.events);
+              setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+              if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+              shivaLib.SendReadyMessage(true);
+            }
+        });
+     } else {
+        var callbackObj = {
+          fn : function (args, data) {
+              setTimeout(function() {
+                $(stimeline.con).timeline('setOptions', stimeline.options, true);
+                $(stimeline.con).timeline('registerEvents', stimeline.events);
+                $(stimeline.con).timeline('eventList');
+                if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
+              }, 500);
+          },
+          args : {
+            "min_zoom":stimeline.options.min_zoom * 1,
+            "max_zoom":stimeline.options.max_zoom * 1,
+            "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
+            "data_source": stldata,
+            "show_footer":Boolean(stimeline.options.show_footer),
+"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "constrain_to_data":false,
+            "image_lane_height":60
+          },
+          display : true
+        };
+        setTimeout(function() {
+          if(typeof(console)=="object") { console.info(stldata); }
+          $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
+        }, 500);
+      }
 
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
@@ -104,8 +135,10 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
+        var sign = (dateTime < 0) ? -1 : 1;  // account for BC (or minus) years
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
+        dt.setFullYear(dt.getFullYear() * sign);
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());
         var hrs = padZero(dt.getHours());
@@ -126,13 +159,18 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
           ct++;
           var ev = events[i];
           if(typeof(ev.id) == "undefined") {
-            ev.id = "event" + ct;
+            ev.id = "event-" + ct;
+          } else {
+            ev.id = ev.id + "-" + ct;
           }
           if(typeof(ev.startdate) == "undefined" && typeof(ev.start) != "undefined") {
             ev.startdate = ConvertTimelineDate(ev.start);
           }
           if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
             ev.enddate = ConvertTimelineDate(ev.end);
+          }
+          if(typeof(ev.enddate) == "undefined" || ev.enddate == "") {
+            ev.enddate = ev.startdate;
           }
           if(typeof(ev.importance) == "undefined") {
             ev.importance = 50;
