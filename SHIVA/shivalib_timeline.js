@@ -46,7 +46,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
           return;
       }
       var i,j,key,s=0;
-      var data=response.getDataTable();
+      var data=new google.visualization.DataView(response.getDataTable());
       var rows=data.getNumberOfRows();
       var cols=data.getNumberOfColumns();
       eventData={ events:new Array() };
@@ -64,8 +64,9 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
           if (data.getFormattedValue(i,j))
             o[key]=ConvertTimelineDate(data.getValue(i,j));
           }
-        else
-          o[key]=data.getValue(i,j);
+        else {
+            o[key]=data.getValue(i,j);
+          }
         }
         eventData.events.push(o);
       }
@@ -90,7 +91,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source":stldata,
             "show_footer":Boolean(stimeline.options.show_footer),
-"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
             "image_lane_height":60,
             "loaded":function (args, data) {
@@ -117,7 +118,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source": stldata,
             "show_footer":Boolean(stimeline.options.show_footer),
-"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
             "image_lane_height":60
           },
@@ -135,6 +136,16 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
+        // First deal with dates that only have month/year, as these break the date object
+        // Add the day to be 15th of the month (TO DO: make it into a span if no end date or if there is then use the first of the month)
+        if( typeof(dateTime) == 'string' ) {
+          var m = dateTime.match(/\//g);
+          if(m != null && m.length == 1) {
+            var dp = dateTime.split('/');
+            dp.splice(1,0,"15");
+            dateTime = dp.join('/');
+          }
+        }
         var sign = (dateTime < 0) ? -1 : 1;  // account for BC (or minus) years
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
