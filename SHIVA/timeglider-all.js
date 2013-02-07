@@ -2332,7 +2332,6 @@ timeglider.TG_Date = {};
    // MAIN CONSTRUCTOR
         
   tg.TG_Date = function (strOrNum, date_display, offSec) {
-
     var dateStr, isoStr, gotSec,
         offsetSeconds = offSec || 0;
    
@@ -2357,6 +2356,8 @@ timeglider.TG_Date = {};
       dateStr = isoStr = strOrNum;
     }
   
+    if(typeof(dateStr) == "undefined") { return {error:"invalid date"}; }
+    
       if (VALID_DATE_PATTERN.test(dateStr)) {
 
       // !TODO: translate strings like "today" and "now"
@@ -3005,7 +3006,7 @@ timeglider.TG_Date = {};
     19    YyYyYyY-MM-DDTHH:MM:SS
     25    YyYyYyY-MM-DD HH:MM:SS-ZH:ZM
     */
-
+   
     var ye, mo, da, ho, mi, se, bce, bce_ye, tz_pm, tz_ho, tz_mi,
       mo_default = 1,
       da_default = 1,

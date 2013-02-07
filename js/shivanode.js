@@ -13,6 +13,7 @@
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
 			setTimeout(function () {$('body').css('padding-top', '0px');}, 50);
 			
+			
 			Drupal.Shivanode.shibstatus = null;
 			
 			setInterval(function () { Drupal.Shivanode.testShibAuth(); }, 120000); // Test Shibolleth Authentication every 2 mins
@@ -27,6 +28,11 @@
 			
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
+			  setTimeout(function() {
+			    setInterval(function() { 
+            Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
+          }, 500);
+			  }, 5000);
 				// When there's a validation error, reload the type of iframe
 				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
 					$('#shivaEditFrame').attr('src', Drupal.Shivanode.IframeSrcUrl);
@@ -717,6 +723,21 @@
 		}
   	// Otherwise, it's the Shiva Manager asking for the JSON of an visualization to store
 		var jobj = JSON.parse(json); 
+		// Set IFrame height and width corresponding to the visualization if it is larger
+		if(typeof(jobj.width) == "string" && !isNaN(jobj.width)) {
+		  vwidth = jobj.width * 1
+		  if (vwidth > 900) {
+		    $('#shivaEditFrame').css('width','');
+        $('#shivaEditFrame').width(vwidth + 350);
+		  }
+		}
+		if(typeof(jobj.height) == "string" && !isNaN(jobj.height)) {
+      vheight = jobj.height * 1
+      if (vheight > 900) {
+        $('#shivaEditFrame').css('height','');
+        $('#shivaEditFrame').height(vheight +  150);
+      }
+    }
 		Drupal.Shivanode.checkKMLUrls(jobj);
 		var jdurl = jobj.dataSourceUrl;
 		// if there's no dataSourceUrl and a data entry is linked with the present edit form, then add that info

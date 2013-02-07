@@ -136,6 +136,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
+        var dt = dateTime;
         // First deal with dates that only have month/year, as these break the date object
         // Add the day to be 15th of the month (TO DO: make it into a span if no end date or if there is then use the first of the month)
         if( typeof(dateTime) == 'string' ) {
@@ -145,19 +146,19 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             dp.splice(1,0,"15");
             dateTime = dp.join('/');
           }
+          // Parse Date piece by piece to account for BC or - years
+          var dt = new Date();
+          var dp = dateTime.split('/');
+          var y = dp[dp.length - 1];
+          dt.setFullYear(y);
+          var m = (dp.length > 1)? dp[dp.length - 2] : 1;
+          dt.setMonth((m * 1) - 1);
+          var d = (dp.length > 2)? dp[dp.length - 3] : 15;
+          dt.setDate(d)
         }
         
-        // Parse Date piece by piece to account for BC or - years
-        var dt = new Date();
-        var dp = dateTime.split('/');
-        var y = dp[dp.length - 1];
-        dt.setFullYear(y);
-        var m = (dp.length > 1)? dp[dp.length - 2] : 1;
-        dt.setMonth((m * 1) - 1);
-        var d = (dp.length > 2)? dp[dp.length - 3] : 15;
-        dt.setDate(d)
         // Adjust positive years to match the tick (doesn't work with BCE years)
-        if(y > 0) {
+        if(typeof(dt.getFullYear()) == "number" && dt.getFullYear() > 0) {
           dateTime=Date.parse(dt)+50000000;
           dt = new Date(dateTime);
         }
