@@ -31,7 +31,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 
   function GetSpreadsheetData(file, conditions)
   {
-lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+    lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
@@ -146,10 +146,21 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
             dateTime = dp.join('/');
           }
         }
-        var sign = (dateTime < 0) ? -1 : 1;  // account for BC (or minus) years
-        dateTime=Date.parse(dateTime)+50000000;
-        var dt = new Date(dateTime);
-        dt.setFullYear(dt.getFullYear() * sign);
+        
+        // Parse Date piece by piece to account for BC or - years
+        var dt = new Date();
+        var dp = dateTime.split('/');
+        var y = dp[dp.length - 1];
+        dt.setFullYear(y);
+        var m = (dp.length > 1)? dp[dp.length - 2] : 1;
+        dt.setMonth((m * 1) - 1);
+        var d = (dp.length > 2)? dp[dp.length - 3] : 15;
+        dt.setDate(d)
+        // Adjust positive years to match the tick (doesn't work with BCE years)
+        if(y > 0) {
+          dateTime=Date.parse(dt)+50000000;
+          dt = new Date(dateTime);
+        }
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());
         var hrs = padZero(dt.getHours());
@@ -261,8 +272,8 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 		
 	function GetSpreadsheetData(file, conditions, _this) 
 	{
-  		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
-  		var query=new google.visualization.Query(lastDataUrl);
+		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+		var query=new google.visualization.Query(lastDataUrl);
 		if (conditions)
 			query.setQuery(conditions);
    		query.send(handleQueryResponse);
