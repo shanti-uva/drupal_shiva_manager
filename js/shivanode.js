@@ -32,7 +32,7 @@
 			    setInterval(function() { 
             Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
           }, 500);
-			  }, 5000);
+			  }, 10000);
 				// When there's a validation error, reload the type of iframe
 				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
 					$('#shivaEditFrame').attr('src', Drupal.Shivanode.IframeSrcUrl);
