@@ -978,4 +978,14 @@
 	    jQuery('#datasheeturl').click();
 	  }
 	};
+	
+	Drupal.Shivanode.hideViewDuringPopups = function() {
+	  jQuery('#shivaViewFrame, #shivaEditFrame').hide(); 
+	  Drupal.Shivanode.sntempint = setInterval(function() {
+	    if(!jQuery('#lightbox').is(':visible')) { 
+	      jQuery('#shivaViewFrame, #shivaEditFrame').show(); 
+	      clearInterval(Drupal.Shivanode.sntempint);
+	    }
+	  }, 500);
+	}
 }) (jQuery);
