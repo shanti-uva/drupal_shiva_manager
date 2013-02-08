@@ -465,6 +465,7 @@ function shivanode_view($node, $view_mode) {
 function shivanode_node_view_alter(&$build) {
   global $base_path;
   $node = $build['#node'];
+
   if (_shivanode_get_access($node) == 4) {
     // If viewing a node that is a shivanode, show the Share button
     if ($build['#bundle'] == "shivanode") {
@@ -1051,6 +1052,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
           'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
           'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
           'title' => 'Share this visualization!',
+          'onclick' => (_shivanode_get_element_type($form['#node']) == 'Earth')?'javascript: Drupal.Shivanode.hideViewDuringPopups();':'',
         ),
         'html' => true,
         'query' => array(
