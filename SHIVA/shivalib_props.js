@@ -525,6 +525,7 @@ function SHIVA_QueryEditor(source, query, returnID,fieldNames)
 	this.query=query.replace(/  /g," ");
 	this.curFields=["A","B","C"];
 	var thisObj=this;
+	
 	var ops={ 
 		width:'auto',height:'auto',modal:true,title:'Data filter',position:[330,40],
 		buttons: {
@@ -532,8 +533,11 @@ function SHIVA_QueryEditor(source, query, returnID,fieldNames)
 				if (thisObj.advancedMode)
 					thisObj.query="  "+$("#curQuery").val();
 				if (!fieldNames) {
-					for (i=0;i<thisObj.curFields.length;++i)
-						thisObj.query=thisObj.query.replace(RegExp(thisObj.curFields[i],"g"),String.fromCharCode(i+65));
+					var i,f;
+					for (i=0;i<thisObj.curFields.length;++i) {
+						f=thisObj.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");						
+						thisObj.query=thisObj.query.replace(RegExp(f,"g"),String.fromCharCode(i+65));
+						}
 					}
 				if (!thisObj.query.match(/\?/)) {
 					thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");
@@ -638,11 +642,13 @@ SHIVA_QueryEditor.prototype.DrawQuery=function()
 
 SHIVA_QueryEditor.prototype.TestQuery=function() 
 {
-	var q=this.query;
+	var f,q=this.query;
 	if (q.match(/\?/)) 
 		q="";
-	for (i=0;i<this.curFields.length;++i)
-		q=q.replace(RegExp(this.curFields[i],"g"),String.fromCharCode(i+65));
+	for (i=0;i<this.curFields.length;++i) {
+		f=this.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");						
+		q=q.replace(RegExp(f,"g"),String.fromCharCode(i+65));
+		}
 	q=q.replace(/ORDER BY none/g,"");
 	if (this.advancedMode)
 		q=$("#curQuery").val();

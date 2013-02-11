@@ -142,7 +142,8 @@ SHIVA_Show.prototype.DrawWebpage=function()
 {$("#"+this.container+"IF").remove();var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawImage=function()
 {var options=this.options;var container=this.container;var con="#"+container;var h=$(con).css('height');var w=$(con).css('width');var _this=this;if(options.dataSourceUrl.indexOf("//docs.google.com")!=-1)
-GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);else if(options.dataSourceUrl){$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");this.SendReadyMessage(true);}
+GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);else if(options.dataSourceUrl){$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");if(options.height)
+$(con).css('height',options.height);this.SendReadyMessage(true);}
 else
 this.SendReadyMessage(true);function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid){var query=new google.visualization.Query(file);query.send(handleQueryResponse);function handleQueryResponse(response){var a,i,j;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var rowData=new Array();for(i=0;i<rows;++i){a=new Array()
 for(j=0;j<cols;++j)
@@ -445,8 +446,7 @@ this.advancedMode=true,query=query.substr(2);else if(!query)
 query="SELECT * WHERE A = ? ORDER BY none"
 if(query.indexOf(" ORDER BY ")==-1)
 query+=" ORDER BY none";this.source=source;this.query=query.replace(/  /g," ");this.curFields=["A","B","C"];var thisObj=this;var ops={width:'auto',height:'auto',modal:true,title:'Data filter',position:[330,40],buttons:{OK:function(){if(thisObj.advancedMode)
-thisObj.query="  "+$("#curQuery").val();if(!fieldNames){for(i=0;i<thisObj.curFields.length;++i)
-thisObj.query=thisObj.query.replace(RegExp(thisObj.curFields[i],"g"),String.fromCharCode(i+65));}
+thisObj.query="  "+$("#curQuery").val();if(!fieldNames){var i,f;for(i=0;i<thisObj.curFields.length;++i){f=thisObj.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");thisObj.query=thisObj.query.replace(RegExp(f,"g"),String.fromCharCode(i+65));}}
 if(!thisObj.query.match(/\?/)){thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");if(returnID=="curQueryDiv")
 $("#"+returnID).html(thisObj.query);else if(returnID)
 $("#"+returnID).val(thisObj.query);window.postMessage("ShivaDraw","*");}
@@ -467,9 +467,9 @@ var q=this.query.replace(/WHERE /g,"<br/>WHERE ").replace(/ORDER BY /g,"<br/>ORD
 str+="<tr height='12'></tr>";str+="</div><tr><td><b>SHOW&nbsp;&nbsp;</b></td><td align='middle'>&nbsp;";str+="<select multiple='multiple' size='3'id='sel' onchange='shivaLib.qe.SetQueryString()'>";str+="<option>all</option>";for(i=0;i<this.curFields.length;++i)str+="<option>"+this.curFields[i]+"</option>";str+="</select></td><td>&nbsp;&nbsp;<b>ORDER BY</B> &nbsp;<select id='ord' onchange='shivaLib.qe.SetQueryString()'>";str+="<option>none</option>";for(i=0;i<this.curFields.length;++i)str+="<option>"+this.curFields[i]+"</option>";str+="</select></td></tr>";str+="</table><p><input type='checkbox' id='advedit' onclick='shivaLib.qe.AdvancedMode(true)'/> Advanced editing mode</p>";str+="<div id='curQuery' style='overflow:auto'><span style='color:#999'><b>"+q+"</b></span></div>";str+="<br/><div id='testShowDiv'/>"
 $("#dataDialogDiv").html(str);$("#sel").val(select.split(","));$("#ord").val(order);this.TestQuery();}
 SHIVA_QueryEditor.prototype.TestQuery=function()
-{var q=this.query;if(q.match(/\?/))
-q="";for(i=0;i<this.curFields.length;++i)
-q=q.replace(RegExp(this.curFields[i],"g"),String.fromCharCode(i+65));q=q.replace(/ORDER BY none/g,"");if(this.advancedMode)
+{var f,q=this.query;if(q.match(/\?/))
+q="";for(i=0;i<this.curFields.length;++i){f=this.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");q=q.replace(RegExp(f,"g"),String.fromCharCode(i+65));}
+q=q.replace(/ORDER BY none/g,"");if(this.advancedMode)
 q=$("#curQuery").val();var tbl={"chartType":"Table","dataSourceUrl":this.source,"query":q,"shivaGroup":"Data"};$("#testShowDiv").empty();$("#testShowDiv").css("width",$("#dataDialogDiv").css("width"));$("#testShowDiv").css("height","200px");$("#testShowDiv").css("overflow","auto");new SHIVA_Show("testShowDiv",tbl);}
 SHIVA_QueryEditor.prototype.AdvancedMode=function(mode)
 {this.advancedMode=mode;if(!mode)
@@ -1090,7 +1090,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems)
 items=oldItems;else
 for(var key in options){if(key.indexOf("item-")!=-1){var o=new Object;var v=options[key].split(';');for(i=0;i<v.length;++i)
 o[v[i].split(':')[0]]=v[i].split(':')[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");items.push(o);}}
-this.items=items;$(con).html("");g.CreateCanvas("subwayCanvas",container);var ctx=$("#subwayCanvas")[0].getContext('2d');$("#subwayCanvas").attr("width",options.cols*options.gridSize+30);$("#subwayCanvas").attr("height",options.rows*options.gridSize+30);$("#textLayer").remove();$(con).append("<div id='textLayer'></div>");ctx.clearRect(0,0,1000,1000);DrawBack();DrawTracks();DrawStations();DrawLegend();this.SendReadyMessage(true);function DrawLegend()
+this.items=items;$(con).html("");g.CreateCanvas("subwayCanvas",container);var ctx=$("#subwayCanvas")[0].getContext('2d');$("#subwayCanvas").attr("width",options.cols*options.gridSize+30);$("#subwayCanvas").attr("height",options.rows*options.gridSize+30);$("#propInput1").val(options.cols*options.gridSize+30);$("#propInput0").val(options.rows*options.gridSize+30);$("#textLayer").remove();$(con).append("<div id='textLayer'></div>");ctx.clearRect(0,0,1000,1000);DrawBack();DrawTracks();DrawStations();DrawLegend();this.SendReadyMessage(true);function DrawLegend()
 {var i,str;var x=Number(options.gridSize*5)+8;var y=Number(options.gridSize*options.rows);for(i=0;i<items.length;++i)
 if(items[i].title)
 y-=16;for(i=0;i<items.length;++i)

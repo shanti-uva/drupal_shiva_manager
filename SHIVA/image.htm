@@ -63,6 +63,7 @@
 	var inSearch=false;
 	
 	var props={
+		height: 					{	def:'', 			opt:'hidden',			des:'hgt'},
 		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/spreadsheet'}, 
 		width: 						{	def:'600', 			opt:'number',			des:'Width of image'}, 
 		transition: 				{	def:'fade', 		opt:'none|fade|resize|slide-hori|slide-vert',		des:'Transition style'},
@@ -134,6 +135,10 @@
 
 	function SaveData(mode)
 	{
+		if ($("#propInput1").val().indexOf("//docs.google.com") == -1)
+			$("#propInput0").val($("#containerDivImg").height());
+		else
+			$("#propInput0").val(600);
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 

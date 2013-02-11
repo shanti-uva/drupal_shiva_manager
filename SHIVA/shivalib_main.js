@@ -561,6 +561,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
+		if (options.height)
+			$(con).css('height',options.height);
 		this.SendReadyMessage(true);											
 		}
 	else

@@ -27,6 +27,8 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 	var ctx=$("#subwayCanvas")[0].getContext('2d');
 	$("#subwayCanvas").attr("width",options.cols*options.gridSize+30);
 	$("#subwayCanvas").attr("height",options.rows*options.gridSize+30);
+	$("#propInput1").val(options.cols*options.gridSize+30);
+	$("#propInput0").val(options.rows*options.gridSize+30);
 	$("#textLayer").remove();
 	$(con).append("<div id='textLayer'></div>");
 	ctx.clearRect(0,0,1000,1000);
