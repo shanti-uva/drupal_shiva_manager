@@ -226,7 +226,7 @@ function _shivanode_element_typelist() {
     3 => t('Map'),
     10 => t('Network'),
     4 => t('Subway'),
-    5 => t('Timeline'),
+    //5 => t('Timeline'),
     13 => t('Timeglider'),
     6 => t('Video'),
     /*
@@ -587,13 +587,13 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
     
-  $form['shivanode_url_settings']['shivanode_timeline_editor'] = array(
+  /*$form['shivanode_url_settings']['shivanode_timeline_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Timeline Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR),
     '#required' => TRUE,
-  );
+  );*/
     
   $form['shivanode_url_settings']['shivanode_timeglider_editor'] = array(
     '#type' => 'textfield',
@@ -690,7 +690,7 @@ function _shivanode_settings_default_values(&$form_state) {
   $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
   $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
   $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
-  $form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
+  //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
   $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
   $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
   $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
@@ -1099,7 +1099,8 @@ function _shivanode_check_google_login($authenticate = TRUE) {
         }
         // Display link to generate single-use token
         $gdocs = 'http://spreadsheets.google.com/feeds/';
-        $source_page = 'http://' . $base_root . $base_path . request_uri();
+        $pref = (strpos($base_root, 'http:') == -1)? "http://":"";
+        $source_page = $pref . $base_root . $base_path . request_uri();
         $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
             $source_page,
             $gdocs, 0, 1);
@@ -1434,7 +1435,9 @@ function _get_shivaframe_url($opt) {
       $player =  variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR);
       break;
     case 5: // Timelines
-      $player =  variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR);
+      // removing ability to add simile timelines but calling timeglider editor for any existing ones
+      $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
+      //$player =  variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR);
       break;
     case 6: // Videos
       $player =  variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR);
