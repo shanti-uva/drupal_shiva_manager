@@ -149,7 +149,19 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           // Parse Date piece by piece to account for BC or - years
           var dt = new Date();
           var dp = dateTime.split('/');
-          var y = dp[dp.length - 1];
+          var y = $.trim(dp[dp.length - 1]);
+          if(y.indexOf(' ')> -1) {
+            pts = y.split(' ');
+            y = pts[0];
+            if (pts[1].indexOf(':') > -1) {
+              tpts = pts[1].split(":");
+              if (tpts.length == 3) {
+                dt.setHours(tpts[0]);
+                dt.setMinutes(tpts[1]);
+                dt.setSeconds(tpts[2]);
+              }
+            }
+          }
           dt.setFullYear(y);
           var m = (dp.length > 1)? dp[dp.length - 2] : 1;
           dt.setMonth((m * 1) - 1);
