@@ -1283,12 +1283,7 @@ function _shivanode_data_elements_submit($form, &$form_state) {
       date('D, j F Y') . '","shivaGroup":"Data"}';
   node_save($newel);
   $form_state['redirect'] = array(
-    'node/' . $newel->nid,
-    array(
-      'query' => array(
-        'insert' => $newel->nid,
-      ),
-    ),
+    'node/add/shivanode/' . $newel->nid,
   );
 }
 
