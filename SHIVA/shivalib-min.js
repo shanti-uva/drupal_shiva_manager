@@ -139,7 +139,7 @@ SHIVA_Show.prototype.Annotate=function()
 {if(!this.dr){this.Draw({shivaGroup:"Draw"});this.dr=new SHIVA_Draw(this.container);}
 else this.dr.DrawPalette();this.Sound("click");}
 SHIVA_Show.prototype.DrawWebpage=function()
-{$("#"+this.container+"IF").remove();var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
+{$("#"+this.container+"IF").remove();var h=this.options.height;var w=this.options.width;if(!isNaN(h))h+="px";if(!isNaN(w))w+="px";h=h.replace(/%25/,"%");w=w.replace(/%25/,"%");$("#"+this.container).css("height",h);$("#"+this.container).css("width",w);var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+w+";height:"+h+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawImage=function()
 {var options=this.options;var container=this.container;var con="#"+container;var h=$(con).css('height');var w=$(con).css('width');var _this=this;if(options.dataSourceUrl.indexOf("//docs.google.com")!=-1)
 GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);else if(options.dataSourceUrl){$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");if(options.height)

@@ -91,13 +91,13 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			obj="Timeline.DefaultEventSource";								// Object to test for
 			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
-		case "Timeglider": 													 // Time glider			
-			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js";
+		case "Timeglider": 													// Time glider			
+			obj="timeglider";								    			// Object to test for
+			lib="timeglider-all.js";										// Lib to load
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
+			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  		// Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
@@ -538,8 +538,16 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
 {
 	$("#"+this.container+"IF").remove();													// Remove old one
+	var h=this.options.height;																// Get height
+	var w=this.options.width;																// Get width
+	if (!isNaN(h))	h+="px";																// Add px
+	if (!isNaN(w))	w+="px";																// Add px
+	h=h.replace(/%25/,"%");																	// Unencode
+	w=w.replace(/%25/,"%");																	// Unencode
+	$("#"+this.container).css("height",h);													// Container height
+	$("#"+this.container).css("width",w);													// Container width
 	var	str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='"; 		// Iframe
-	str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";
+	str+="width:"+w+";height:"+h+"'>";														// Dimensions
 	$("#"+this.container).append(str);														// Add to container
 	this.SendReadyMessage(true);															// Send ready message									
 }

@@ -191,32 +191,32 @@
 		return shivaLib.SaveData(mode,shivaGroup,null,props[chartType],chartType);
 	}	
 
-	function ReEdit(jsonData) 
-	{
-		if (jsonData) {
-			if (jsonData.chartType)
-				chartType=jsonData.chartType;
-			}
-		else{
-			var s,e;
-			var query=window.location.search.substring(1);
-			if ((s=query.indexOf("&chartType=")) != -1)
-				if ((e=query.indexOf("&",s+1)) != -1)
-					chartType=query.substring(s+11,e);
-			}
-		SetAttributes(chartType,false);
-		shivaLib.ReEdit(jsonData,props[chartType]);
-		$("#chartType option").each(function() {
-		  optval = $(this).val();
+    function ReEdit(jsonData) 
+    {
+        if (jsonData) {
+            if (jsonData.chartType)
+                chartType=jsonData.chartType;
+            }
+        else{
+            var s,e;
+            var query=window.location.search.substring(1);
+            if ((s=query.indexOf("&chartType=")) != -1)
+                if ((e=query.indexOf("&",s+1)) != -1)
+                    chartType=query.substring(s+11,e);
+            }
+        SetAttributes(chartType,false);
+        shivaLib.ReEdit(jsonData,props[chartType]);
+        $("#chartType option").each(function() {
+          optval = $(this).val();
       if (optval == chartType) {
           chartType=optval;
           $("select#chartType").val(chartType);
         }
     });
     chartType=chartType.replace(/ /g,"");
-		Draw();
-	}	
-
+        Draw();
+	}
+	
 	function ChangeChart(type)
 	{
 		if (shivaLib.drupalMan)

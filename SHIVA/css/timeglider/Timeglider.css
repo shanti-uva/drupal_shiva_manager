@@ -12,11 +12,6 @@
  background-color: #363430;
 }
 
-/* added by ndg to not show titleBar*/
-.tg-timeline-envelope .titleBar {
-  display: none;
-}
-
 /* float clearing for IE6 */
 .timeglider-container .clearfix{
   height: 1%;
