@@ -5989,7 +5989,6 @@ tg.TG_TimelinePlayer.prototype = {
       var me = this;
       
       if (MED.presentation.description) {
-      
       var ch = me.dimensions.container.height,
         modal = new this.presInfoModal({model:MED.presentation});
 
@@ -8970,10 +8969,8 @@ tg.TG_Mediator = function (wopts, $el) {
     // Allow to pass in either the url for the data or the data itself.
 
     if (src) {
-      
       // if we've not loaded it already!
       if (_.indexOf(M.loadedSources, src) == -1) {
-      
       
           if (typeof src === "object") {
 
@@ -9136,7 +9133,6 @@ tg.TG_Mediator = function (wopts, $el) {
       
     var data = "",
       me = this;
-    
     if (typeof json.presentation == "string") {
       
       timeglider.mode = "presentation";
@@ -10097,21 +10093,23 @@ tg.validateOptions = function (widget_settings) {
       // optsEqual is a function to check whether a style option is being set if so do not reload timeline, just change the styles
       // if #cp_colorbar is visible then colorpicker is open and an option is being set so do the same
       var optsTheSame = this.optsEquals(otemp);
+      
       if (optsTheSame && set != true) {
         return false;
       }
+      
       // Header
       if ($('.tg-widget-header h2').eq(0).text() != tlopts.title) {
         $('.tg-widget-header h2').text(tlopts.title);
       }
 
       // Description
-      if ($('.tg-timeline-description p').eq(0).text() != tlopts.description) {
-        $('.tg-timeline-description p').text(tlopts.description);
+      if ($('.tg-timeline-description').eq(0).text() != tlopts.description) {
+        $('.tg-timeline-description').eq(0).text(tlopts.description);
       }
+           
       
       // Height and width 
-   
       if(tlopts.width != $(this.element).eq(0).width() || tlopts.height != $(this.element).eq(0).height() ) {
         var con = '#' + $(this.element).attr('id');
         $(this.element).css('width', tlopts.width + "px");
@@ -10473,6 +10471,8 @@ tg.validateOptions = function (widget_settings) {
     * 
     */
     loadTimeline : function (src, callback_object) {
+      MED.loadedSources = [];
+      MED.options.data_source[0].description = src[0].description;
       MED.loadTimelineData(src, callback_object);
       
       return this;

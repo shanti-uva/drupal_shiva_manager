@@ -72,8 +72,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       }
 
       stimeline.events = eventData.events;
-
-
+      
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -83,7 +82,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         "initial_zoom":stimeline.options.initial_zoom * 1,
         "events": normalizeEventData(stimeline.events)
       }];
-
+      
       if(typeof(window.shivaTimeline) == "undefined") {
         window.shivaTimeline =  $(stimeline.con).timeline({
             "min_zoom":stimeline.options.min_zoom * 1,
@@ -139,7 +138,8 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         var dt = dateTime;
         // First deal with dates that only have month/year, as these break the date object
         // Add the day to be 15th of the month (TO DO: make it into a span if no end date or if there is then use the first of the month)
-        if( typeof(dateTime) == 'string' ) {
+        if(typeof(dateTime) == "number") { dateTime = dateTime.toString(); }
+        if( typeof(dateTime) == 'string') {
           var m = dateTime.match(/\//g);
           if(m != null && m.length == 1) {
             var dp = dateTime.split('/');
@@ -153,6 +153,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           if(y.indexOf(' ')> -1) {
             pts = y.split(' ');
             y = pts[0];
+            // Test and account for times in dates
             if (pts[1].indexOf(':') > -1) {
               tpts = pts[1].split(":");
               if (tpts.length == 3) {
@@ -193,7 +194,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         for(var i in events) {
           ct++;
           var ev = events[i];
-          if(typeof(ev.id) == "undefined") {
+          if(typeof(ev.id) == "undefined" || ev.id == null) {
             ev.id = "event-" + ct;
           } else {
             ev.id = ev.id + "-" + ct;
@@ -204,16 +205,16 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
             ev.enddate = ConvertTimelineDate(ev.end);
           }
-          if(typeof(ev.enddate) == "undefined" || ev.enddate == "") {
+          if(typeof(ev.enddate) == "undefined" || ev.enddate == "" || ev.enddate == null) {
             ev.enddate = ev.startdate;
           }
-          if(typeof(ev.importance) == "undefined") {
+          if(typeof(ev.importance) == "undefined" || ev.importance == "" || ev.importance == null) {
             ev.importance = 50;
           }
-          if(typeof(ev.date_display) == "undefined") {
+          if(typeof(ev.date_display) == "undefined" || ev.date_display == "" || ev.date_display == null) {
             ev.date_display = "ye";
           }
-          if(typeof(ev.icon) == "undefined") {
+          if(typeof(ev.icon) == "undefined" || ev.icon == "" || ev.icon == null)  {
             ev.icon = "none";
           }
         }

@@ -25,7 +25,7 @@
 </head>
 <body>
 	<div style="width:279px;position:absolute;top:0px;left:0px">		
-		<p><select id="chartType" onchange="SetAttributes(this.value)">
+		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option value="rgraph">Radial Graph</option>
 			<option value="forcedir">Force Directed</option>
 			<option value="hypertree">Hyper Tree</option>
@@ -55,7 +55,7 @@
 	var props={
 		rgraph:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
+			height: 					{	def:'800', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_strokeStyle: {	def:'555555', 		opt:'color',		 des:'Background ring color'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
@@ -75,7 +75,7 @@
 			Label_family: 				{	def:'sans-serif', opt:'sans-serif|serif|monospace',		 des:'Font family'}},
 		forcedir:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
+			height: 					{	def:'800', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
 			Navigation_zooming: 		{	def:'100', 		opt:'number',		 des:'Zoom speed'},
@@ -94,7 +94,7 @@
 			Label_family: 				{	def:'sans-serif', opt:'sans-serif|serif|monospace',		 des:'Font family'}},
 		hypertree:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt', 		opt:'string',		 des:'Data source URL'}, 
-			height: 					{	def:'600', 		opt:'number',		 des:'Height'},
+			height: 					{	def:'800', 		opt:'number',		 des:'Height'},
 			width: 						{	def:'800', 		opt:'number',		 des:'Width'},
 			background_CanvasStyles_fillStyle: {	def:'000000', 		opt:'color',		 des:'Background color'},
 			Navigation_zooming: 		{	def:'100', 		opt:'number',		 des:'Zoom speed'},
@@ -193,10 +193,36 @@
 
 	function ReEdit(jsonData) 
 	{
-	  	SetAttributes(chartType); 
+		if (jsonData) {
+			if (jsonData.chartType)
+				chartType=jsonData.chartType;
+			}
+		else{
+			var s,e;
+			var query=window.location.search.substring(1);
+			if ((s=query.indexOf("&chartType=")) != -1)
+				if ((e=query.indexOf("&",s+1)) != -1)
+					chartType=query.substring(s+11,e);
+			}
+		SetAttributes(chartType,false);
 		shivaLib.ReEdit(jsonData,props[chartType]);
+		$("#chartType option").each(function() {
+		  optval = $(this).val();
+      if (optval == chartType) {
+          chartType=optval;
+          $("select#chartType").val(chartType);
+        }
+    });
+    chartType=chartType.replace(/ /g,"");
 		Draw();
 	}	
+
+	function ChangeChart(type)
+	{
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("ChartChanged="+type,"*");
+		SetAttributes(type,true);	
+	}
 
 	function ShowHelp(att) 
 	{
@@ -206,15 +232,13 @@
 			shivaLib.ShowHelp(att,helpText);
 	}	
 
-	function SetAttributes() 
+	function SetAttributes(type, drawIt)
 	{
-		chartType=$('#chartType').val();
-		var dsurl=$('#propInput0').val();
-		var newprops=props[chartType];
-		if ($.trim(dsurl).length > 5)
-			newprops.dataSourceUrl.def=dsurl;
-		shivaLib.SetAttributes(newprops);
-		Draw();
+		chartType=type.replace(/ /g,"");			
+		ShowHelp("");
+		shivaLib.SetAttributes(props[chartType]);
+		if (drawIt)
+			Draw();
 	}	
 
 	function trace(str) 
