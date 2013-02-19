@@ -203,6 +203,7 @@
 }
 
 .tg-timeline-envelope .titleBar {
+  display: none; /* Taking out title bar, ndg 2013-02-19  */
 	background-color:#726d62;
 	color:#FFF;
 	height:4px;

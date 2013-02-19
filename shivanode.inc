@@ -1282,6 +1282,7 @@ function _shivanode_data_elements_submit($form, &$form_state) {
   $newel->shivanode_json[$newel->language][0]['value'] = '{"dataSourceUrl":"' . $ssurl . '","title":"' . $sstitle . '","shivaId":"0","shivaMod":"' . 
       date('D, j F Y') . '","shivaGroup":"Data"}';
   node_save($newel);
+  // redirect from popup form. The query ?insert={new node id} is to close the popup and insert the data id
   $form_state['redirect'] = array(
     'node/' . $newel->nid,
     array(
