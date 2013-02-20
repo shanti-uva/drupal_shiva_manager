@@ -7,7 +7,7 @@
  *      This is called after every ajax call. Hence the use of context.
  * 			May have to detect context to run some of this only when major page loads.
  */
-	    
+	
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
@@ -160,7 +160,8 @@
 			if(typeof(srch) == "string" && srch.indexOf('insert=') > -1) {
 				$did = srch.substr(srch.indexOf('=') + 1);
 				$('body *').hide();
-				Drupal.Shivanode.setDataElement($did, false);
+				isnew = ($('#lightbox').length == 0) ? true : false;
+				Drupal.Shivanode.setDataElement($did, isnew);
 			}
 			
 			// Show popup is popup=dataurl is in url
@@ -666,6 +667,9 @@
 	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
 	 */
 	Drupal.Shivanode.setDataElement = function(did, isnew) {
+	  if(self == top && window.location.search.indexOf('insert=') > -1) {
+	    isnew = true;
+	  }
 		if(typeof(isnew) == "undefined") { isnew = false;}
 		var e = this.event;
 		if(self != top || $(this).parents('#lightbox').length > 0) {

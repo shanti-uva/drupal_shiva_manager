@@ -5120,10 +5120,10 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     
   }) // end draggable
   .delegate(CONTAINER + " .timeglider-timeline-event", CLICKORTOUCH, function () {  // EVENT CLICK
-    // Code added by ndg for Shanti
-    // If max # of open modals is reached, close the first one before opening a new one
+    // Code added by ndg8f for Shanti (2013-01)
+    // If open modals is greater than the maxnumber set, close the first one before opening a new one
     var openModals = $('.timeglider-ev-modal');
-    if(openModals.length == me.max_modals) {
+    if(openModals.length > me.max_modals) {
       $(openModals[0]).find('.tg-close-button').click();
     }
     var $ev = $(this);
