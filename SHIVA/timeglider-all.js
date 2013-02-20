@@ -4908,7 +4908,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
 
   $(CONTAINER)
     .delegate(".timeline-info-bt", CLICKORTOUCH, function () {
-      var id = $(this).data("timeline_id");
+      var id = MED.sole_timeline_id; //$(this).data("timeline_id"); // ndg, 2013-02-20, Changed to prevent using the default empty value
       me.timelineModal(id);
     })  
     .delegate(".tg-expcol-bt", CLICKORTOUCH, function () {
