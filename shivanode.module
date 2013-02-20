@@ -1161,7 +1161,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $typeVal = isset($form_state['node']->shivanode_element_type['und'][0]['value']) ? 
                   $form_state['node']->shivanode_element_type['und'][0]['value']:
                   $form['shivanode_element_type']['und']['#default_value']; 
-  $iframeUrl = _get_shivaframe_url($typeVal);   
+  $iframeUrl = _get_shivaframe_url($typeVal, $form['#node']->nid);   
   $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $eltype . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
@@ -1246,8 +1246,12 @@ function shivanode_get_help_link($typeVal = 7) {
   $typeStr = _shivanode_options_list($typeVal);
   $helpStr = ($typeStr == "Chart") ? 'Pie Chart' : $typeStr;
   $style = (1 == 2 && is_theme('seven')) ? ' style="margin-left: 85px !important; "' : '';
-  return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ' .
-             $style . '><img src="' . $base_path . 'misc/help.png" /></a>';
+  if ($helpStr == "Data") {
+    return '';
+  } else {
+    return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ' .
+      $style . '><img src="' . $base_path . 'misc/help.png" /></a>';
+  }
 }
 
 /*

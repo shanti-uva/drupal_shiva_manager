@@ -1415,16 +1415,23 @@ function _shivanode_greset_form_submit($form, &$form_state) {
   drupal_goto($base_root . $base_path . 'node/data-elements');
 }
 
-function _get_shivaframe_url($opt) {
+function _get_shivaframe_url($opt, $nid = '') {
   if (is_array($opt)) {
     $opt = $opt[0]; 
   } // if it's an array take first element value
   if (!is_numeric($opt)) {
     $opt = 7; 
   } // default is visualization
+  $player = '';
   switch ($opt) {
     case 1:  // Data
-      $player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
+      if ($nid != '') {
+        $njson = _shivanode_get_json($nid);
+        if(isset($njson['dataSourceUrl'])) {
+          $player = str_replace('https','http', $njson['dataSourceUrl']);
+        }
+      }
+       //$player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
       break;
     case 2:   // Image
       $player =  variable_get('shivanode_image_editor', SHIVA_IMAGE_EDITOR);
@@ -1465,10 +1472,10 @@ function _get_shivaframe_url($opt) {
       $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
       break;
   }
-  if (strpos($player, 'http://') === FALSE) {
+  if (strpos($player, 'http://') === FALSE && $opt > 1) {
     $player = variable_get('shivanode_root_url', SHIVA_ROOT) . $player; 
+    $player = $player . '?pr=d';
   }
-  $player = $player . '?pr=d';
   return $player;
 }
 
@@ -1865,6 +1872,9 @@ function _shivanode_get_element_type($node, $type = "string") {
 }
 
 function _shivanode_get_json($node, $as_obj = TRUE) {
+  if (gettype($node) != "object") {
+    $node = node_load($node);
+  }
   if (isset($node->shivanode_json)) {
     $eljson = $node->shivanode_json['und'][0]['value'];
     return ($as_obj) ? drupal_json_decode($eljson) : $eljson;
