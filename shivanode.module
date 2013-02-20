@@ -1162,7 +1162,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
                   $form_state['node']->shivanode_element_type['und'][0]['value']:
                   $form['shivanode_element_type']['und']['#default_value']; 
   $iframeUrl = _get_shivaframe_url($typeVal, $form['#node']->nid);   
-  $form['shivanode_json']['#prefix'] ='<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
+  $dataInst = ($typeVal == 1) ? '<p style="display: block; clear: both;">' . t("This data node stores the URL of your spreadsheet. ") . 
+       t("This page allows you to change the title by which this URL is referred to in the manager or delete this reference with the Delete button below. ") . 
+       t("You may be able to edit your spreadsheet in the frame below if you are logged in to Google. If not, you must go ") . 
+       l(t("here"), $iframeUrl, array('attributes' => array('target' => '_blank'))) . '.</p>':'';
+  $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $eltype . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
