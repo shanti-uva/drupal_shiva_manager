@@ -365,7 +365,7 @@ function shivanode_node_delete($node) {
         );
       }
       drupal_set_message(
-        check_plain( t('Deleted links to the following ' . $num_deleted . ' visualizations:')) . ' ' . implode(',', $relations)
+        check_plain( t('Deleted links to the following ' . $num_deleted . ' visualizations:')) . ' ' . implode(', ', $relations)
       );
     }
   }
