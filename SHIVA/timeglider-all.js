@@ -5123,7 +5123,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     // Code added by ndg8f for Shanti (2013-01)
     // If open modals is greater than the maxnumber set, close the first one before opening a new one
     var openModals = $('.timeglider-ev-modal');
-    if(openModals.length > me.max_modals) {
+    if(openModals.length == me.max_modals) {
       $(openModals[0]).find('.tg-close-button').click();
     }
     var $ev = $(this);
@@ -10216,6 +10216,18 @@ tg.validateOptions = function (widget_settings) {
       tlopts.max_modals = parseInt(tlopts.max_modals);
       if(timelinePlayer.max_modals != tlopts.max_modals) {
         timelinePlayer.max_modals = tlopts.max_modals;
+      }
+      
+      // Show Hide Descriptioni
+      tlopts.show_desc = (tlopts.show_desc == 'true'); // convert to boolean
+      if(tlopts.show_desc) {
+        setTimeout(function() {
+          $('li#info').click();
+        }, 100);
+      } else {
+        setTimeout(function() {
+          $('div.tg-timeline-modal li.tg-close').click();
+        }, 100);
       }
       
       // Show Hide Footer
