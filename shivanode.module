@@ -650,8 +650,12 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
         $height = variable_get('shivanode_teaser_height', (isset($display['settings']['height'])?$display['settings']['height']:SHIVA_IFRAME_HEIGHT_TEASER));
         $width = variable_get('shivanode_teaser_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH_TEASER));
       }
+      // Get url for the JSON api call
+      $jsonurl = $base_root . $base_path . 'data/json/' . $object->nid;
+      // remove distinct protocol https:// or http:// and replace with // so as to match current domain protocol
+      $jsonurl = preg_replace("/https?\:\/\//","//", $jsonurl); 
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
-      $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $base_root . $base_path . 'data/json/' . $object->nid;
+      $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $jsonurl;
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
@@ -1161,7 +1165,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $typeVal = isset($form_state['node']->shivanode_element_type['und'][0]['value']) ? 
                   $form_state['node']->shivanode_element_type['und'][0]['value']:
                   $form['shivanode_element_type']['und']['#default_value']; 
-  $iframeUrl = _get_shivaframe_url($typeVal, $form['#node']->nid);   
+  $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
+  $iframeUrl = _get_shivaframe_url($typeVal, $nid);   
   $dataInst = ($typeVal == 1) ? '<p style="display: block; clear: both;">' . t("This data node stores the URL of your spreadsheet. ") . 
        t("This page allows you to change the title by which this URL is referred to in the manager or delete this reference with the Delete button below. ") .
        t("(Note that deleting this reference will not affect your Google spreadsheet.) ") . 

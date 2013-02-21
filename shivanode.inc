@@ -255,7 +255,7 @@ function _shivanode_options_list($option = NULL) {
       3 => t('Map'),
       10 => t('Network'),
       4 => t('Subway'),
-      5 => t('Timeline'),
+      5 => t('Timeglider'), // was simile = "Timeline"
       13 => t('Timeglider'),
       6 => t('Video'),
     ),
@@ -346,6 +346,7 @@ function _get_shivanode_type($node, $mode = 'string') {
     $options = _shivanode_element_typelist();
     $typefield = $node->shivanode_element_type;
     $val = $typefield['und']['0']['value'] * 1;
+    if ($val == 5) { $val = 13; } // account for old simile 5 
     $type = ($mode == 'number')? $val : $options[$val];
   }
   return $type;
@@ -1863,7 +1864,8 @@ function _shivanode_resource_retrieve($nid) {
 function _shivanode_get_element_type($node, $type = "string") {
   if (isset($node->shivanode_element_type)) {
     $options = _shivanode_element_typelist();
-    $typenum = $node->shivanode_element_type['und'][0]['value'];
+    $typenum = intval($node->shivanode_element_type['und'][0]['value']);
+    if ($typenum == 5) { $typenum = 13; }
     return ($type == "number" || $type == "num") ? $typenum : $options[$typenum];
   } 
   else {
