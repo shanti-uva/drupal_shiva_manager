@@ -1090,7 +1090,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems)
 items=oldItems;else
 for(var key in options){if(key.indexOf("item-")!=-1){var o=new Object;var v=options[key].split(';');for(i=0;i<v.length;++i)
 o[v[i].split(':')[0]]=v[i].split(':')[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");items.push(o);}}
-this.items=items;$(con).html("");g.CreateCanvas("subwayCanvas",container);var ctx=$("#subwayCanvas")[0].getContext('2d');$("#subwayCanvas").attr("width",options.cols*options.gridSize+30);$("#subwayCanvas").attr("height",options.rows*options.gridSize+30);$("#propInput1").val(options.cols*options.gridSize+30);$("#propInput0").val(options.rows*options.gridSize+30);$("#textLayer").remove();$(con).append("<div id='textLayer'></div>");ctx.clearRect(0,0,1000,1000);DrawBack();DrawTracks();DrawStations();DrawLegend();this.SendReadyMessage(true);function DrawLegend()
+this.items=items;$(con).html("");g.CreateCanvas("subwayCanvas",container);var ctx=$("#subwayCanvas")[0].getContext('2d');$("#subwayCanvas").attr("width",options.cols*options.gridSize+30);$("#subwayCanvas").attr("height",options.rows*options.gridSize+30);$("#propInput8").val(options.cols*options.gridSize+30);$("#propInput7").val(options.rows*options.gridSize+30);$("#textLayer").remove();$(con).append("<div id='textLayer'></div>");ctx.clearRect(0,0,1000,1000);DrawBack();DrawTracks();DrawStations();DrawLegend();this.SendReadyMessage(true);function DrawLegend()
 {var i,str;var x=Number(options.gridSize*5)+8;var y=Number(options.gridSize*options.rows);for(i=0;i<items.length;++i)
 if(items[i].title)
 y-=16;for(i=0;i<items.length;++i)
