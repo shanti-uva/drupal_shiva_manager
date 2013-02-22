@@ -10177,7 +10177,7 @@ tg.validateOptions = function (widget_settings) {
           'main': '#tg-truck', 
           'eventspan': '.timeglider-event-spanner', 
           'head': '.tg-widget-header, .tg-widget-header h2, .timeglider-footer, .timeglider-slider-container', 
-          'popup': '.tg-ev-modal, .tg-timeline-modal', 
+          'popup': '.timeglider-ev-modal, .timeglider-ev-modal *, .tg-timeline-modal', 
           'imagelane': '.tg-image-lane-bg', 
           'ticklane': '.tg-tick-body',
           'popuplink': '.timeglider-ev-modal-links li a',
@@ -10185,24 +10185,24 @@ tg.validateOptions = function (widget_settings) {
         };
         
         var bcolors = tlopts.backgroundColors.replace(/,$/,'').split(',');
-        for (var i in bcolors) {
+        for (var i in bcolors) { 
           var pts = bcolors[i].split('=');
           var type = pts[0];
           var sel = bstyles[type];
           var newcolor = ('#' + pts[1]).replace('##','#');
           var prescolor = $(sel.split(',')[0]).css('background-color');
-          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) {
-            if(type == 'main') {
-              $(sel).css({ 'background-color' : newcolor, 'background-image' : 'none' });
-              $('.timeglider-container').css({ 'background-color' : newcolor, 'background-image' : 'none' });
-            } else if (type == 'eventspan' || type == 'popup' || type == 'ticklane') {
-              tg.updatePageStyles(sel, { 'background-color' : newcolor });
-            } else {
-              $(sel).css({ 'background-color' : newcolor });
-              //tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
-            }
-            bstyles[type] = 'done';
+          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) { 
+              if(type == 'main') {
+                $(sel).css({ 'background-color' : newcolor, 'background-image' : 'none' });
+                $('.timeglider-container').css({ 'background-color' : newcolor, 'background-image' : 'none' });
+              } else if (type == 'eventspan' || type == 'popup' || type == 'ticklane') {
+                tg.updatePageStyles(sel, { 'background-color' : newcolor });
+              } else {
+                $(sel).css({ 'background-color' : newcolor });
+                //tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
+              }
           }
+          bstyles[type] = 'done';  // register this "type" as being done. If not "done", then it's css color will be removed below
         }
         
         for (var t in bstyles) {
