@@ -104,7 +104,7 @@
 			// it contains values for nid (node id), title, json, and player.
 			$('#snembedselect').change(function() {
          var choice = $(this).val();
-     		 var url = Drupal.Shivanode.node.player + "?m=http://" + window.location.host + Drupal.settings.basePath 
+     		 var url = Drupal.Shivanode.node.player + "?m=//" + window.location.host + Drupal.settings.basePath 
      								+ 'data/json/' + Drupal.Shivanode.node.nid;
      		 var jobj = JSON.parse(Drupal.Shivanode.node.json);
      		 var retval = '';
