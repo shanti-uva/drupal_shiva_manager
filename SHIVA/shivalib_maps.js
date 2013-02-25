@@ -142,6 +142,11 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+str);		// Send shiva message
 	 			});
 			}
+		if (items[i].layerType == "MarkerSet") {						// MarkerSet layer
+			this.items[i].obj=[];										// Array to hold icons/lines
+			this.markerData=i;											// Holds array index temporarily for cb
+			this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});
+			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity
 			obj.setVisibility(items[i].visible == "true");				// Show/hide it
@@ -154,7 +159,8 @@ SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION ME
 {
 	var v=msg.split("|");												// Split msg into parts
 	if (v[0] == "ShivaActEarth=goto") {									// GOTO
-		var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+		var lookAt=shivaLib.map.getView().co
+		pyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
 		if (v[1] != undefined)	lookAt.setLatitude(Number(v[1]));		// Set lat
 		if (v[2] != undefined)	lookAt.setLongitude(Number(v[2]));		// Set lon
 		if (v[3] != undefined)	lookAt.setRange(Number(v[3]));			// Set range
@@ -173,7 +179,7 @@ SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION ME
 		}
 }
 
-SHIVA_Show.prototype.EarthAddMarkers=function(json)				// ADD MARKERS FROM JSON
+SHIVA_Show.prototype.EarthAddMarkers=function(json, mData)				// ADD MARKERS FROM JSON
 {
 }
 
@@ -241,7 +247,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	google.maps.event.addListener(this.map,'center_changed', function(e) {
 	 	var map=shivaLib.map;
 	 	var lat=map.getCenter();
-	 	shivaLib.SendShivaMessage("ShivaMap=move|"+lat.Ya+"|"+lat.Za+"|"+map.getZoom());
+	 	shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());
  		});
 }
 
@@ -302,7 +308,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 					if (v[2] == this.title)					
  						break;											
   					}
-   				shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
+   				shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
 	 			});
 			}
 		else if (items[i].layerType == "MarkerSet") {
@@ -323,7 +329,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 //	38.07,-78.55,37.99,-78.41
 //	//www.viseyes.org/shiva/map.jpg
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+this.url+"|"+e.latLng.Ya+"|"+e.latLng.Za);
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+this.url+"|"+e.latLng.lat()+"|"+e.latLng.lng());
  				});
 			}
 		else if (items[i].layerType == "KML") {
@@ -334,7 +340,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	  			var str=this.url+"|"+e.featureData.name+"|"+e.latLng.Ya+"|"+e.latLng.Za;
+	  			var str=this.url+"|"+e.featureData.name+"|"+e.latLng.lat()+"|"+e.latLng.lng();
 		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+str);
 	 			});
 			}
@@ -377,7 +383,9 @@ SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESS
 
 SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP FROM JSON
 {
+	var hasLines=false;
 	var i,j,o,mark,list,ops;
+	var flat,flon,tlat,tlon,col,alpha,width,coords,path;
 	var _this=shivaLib;
 	if (typeof(json) == "string") {										// If it came from shivaEvent
 		json=$.parseJSON(json);											// Objectify
@@ -392,20 +400,56 @@ SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP
 		mData=this.markerData;											// Point at markerdata
 		if (mData) {													// If data
 			for (i=0;i<mData.length;++i) {								// For each old maker
-				google.maps.event.removeListener(mData[i].listener);	// Remove listener
+				if (mData[i].listener)									// If it has a listener
+					google.maps.event.removeListener(mData[i].listener);	// Remove listener
 				mData[i].obj.setMap(null);								// Remove marker
 				}
 			}
 		this.markerData=mData=[];										// Clear data 
 		}
-	for (i=0;i<json.length;++i) {										// For each marker
+	for (i=0;i<json.length;++i) {										// For each row
+//https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdG9ETURycHJLMUF0WG94d2FHRGcxWUE&usp=sharing
+		if (json[i].icon != "line")										// If not a line
+			continue;													// Skip
+		hasLines=true;													// Is a network map
+		alpha=1;														// Assume full alpha
+		width=2;														// Assume default width
+		col="#990000";													// Assume default color
+		if (json[i].width)												// If defined
+			width=json[i].width;										// Use it
+		if (json[i].color) {											// If defined
+			if (json[i].color.length > 7) {								// If has alpha
+				col=json[i].color.substr(0,7);							// Isolate color
+				alpha=parseInt(json[i].color.substr(7,2),16)/255;		// Isolate alpha
+				}
+			}
+		flat=json[json[i].lat-2].lat;									// From lat	
+		flon=json[json[i].lat-2].lon;									// From lon
+		tlat=json[json[i].lon-2].lat;									// To lat	
+		tlon=json[json[i].lon-2].lon;									// To lon
+		path=new google.maps.Polyline({									// Polygon
+    		path: [ new google.maps.LatLng(flat,flon),new google.maps.LatLng(tlat,tlon) ],
+   			strokeColor: col,
+    		strokeOpacity: alpha,
+    		strokeWeight: width
+  			});
+		path.setMap(shivaLib.map);										// Add to map
+		mData.push({ obj:path, title:"",listener:null });				// Add to array
+		}
+	for (i=0;i<json.length;++i) {										// For each row
+		if (json[i].icon == "line")										// If a line
+			continue;													// Skip
 		mark=new google.maps.Marker();									// Create marker obj
 		ops={};															// New obj
 		if (json[i].title)												// If a title
 			ops["title"]=json[i].title;									// Set title
 		ops["position"]=new google.maps.LatLng(json[i].lat-0,json[i].lon-0); // Set position
-		if (json[i].icon)												// If an icon
-			ops["icon"]=json[i].icon;									// Set icon
+		if (json[i].icon) {												// If has an icon
+			if (hasLines)												// If a network map
+				ops["icon"]={ url:json[i].icon, anchor: new google.maps.Point(8,8) };  // Center icon and add
+			else 														// MarkerSet
+				ops["icon"]=json[i].icon;								// Add icon
+				}
 		mark.setOptions(ops);											// Set options
 		mark.setMap(shivaLib.map);										// Add to map
 		list=google.maps.event.addListener(mark,'click', function(e) {	// Add listener
@@ -413,7 +457,7 @@ SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP
  			for (j=0;j<mData.length;++j)								// Look thru data	
  				if (mData[j].title == this.title)						// If titles match
  						break;											// Quit looking
-  			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
+    			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
 			});
 		mData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
 		}

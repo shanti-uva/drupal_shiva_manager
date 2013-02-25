@@ -10218,7 +10218,7 @@ tg.validateOptions = function (widget_settings) {
         timelinePlayer.max_modals = tlopts.max_modals;
       }
       
-      // Show Hide Descriptioni
+      // Show Hide Description
       tlopts.show_desc = (tlopts.show_desc == 'true'); // convert to boolean
       if(tlopts.show_desc) {
         setTimeout(function() {
