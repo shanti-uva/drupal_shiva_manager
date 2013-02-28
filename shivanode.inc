@@ -2110,8 +2110,6 @@ function _shivanode_node_embed_page($nid) {
     $bcontent = preg_replace('/stLight.options\(\{"publisher"\:"([^"]+)"/','stLight.options({"publisher":"$1", "onhover":"false", "doNotCopy":"true"', $bcontent);
     $imgurl = _get_thumb_image($node);
     $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
-    $m = preg_match('/doNotCopy/', $bcontent);
-    dpm($m, "don not copy found");
     $page['stdiv'] = array(
       '#type' => 'markup',
       '#markup' => $bcontent,
