@@ -2107,9 +2107,11 @@ function _shivanode_node_embed_page($nid) {
     $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
     $bcontent = $block['content'];
     $bcontent = preg_replace('/node\/(\d+)\/share/','node/$1', $bcontent);
-    $bcontent = preg_replace('/stLight.options\(\{publisher:([^\}]+)\}\);/','stLight.options({publisher:$1, onhover:\'false\'});', $bcontent);
+    $bcontent = preg_replace('/stLight.options\(\{"publisher"\:"([^"]+)"/','stLight.options({"publisher":"$1", "onhover":"false", "doNotCopy":"true"', $bcontent);
     $imgurl = _get_thumb_image($node);
     $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
+    $m = preg_match('/doNotCopy/', $bcontent);
+    dpm($m, "don not copy found");
     $page['stdiv'] = array(
       '#type' => 'markup',
       '#markup' => $bcontent,
