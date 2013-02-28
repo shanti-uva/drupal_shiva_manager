@@ -110,7 +110,7 @@
      		 var retval = '';
          switch (choice) {
           case 'cf':
-            retval = '{iframe:src=' + url + '|width=800|height=500}Your browser does not support iframes{iframe}';
+            retval = '{iframe:src=' + url + '|width=' + jobj.width + '|height=' + jobj.height + '}Your browser does not support iframes{iframe}';
             break;
          	case 'wp':
          		retval = "[iframe src='" + url + "']";
