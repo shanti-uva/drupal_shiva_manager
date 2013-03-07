@@ -492,9 +492,10 @@
 	};
 	
 	Drupal.Shivanode.filterSsList = function(el) {
-		var srch = $(el).val();
+		var srch = $(el).val().toLowerCase();
 		$.each($('li.mynode, li.othernode, #edit-newss div.form-item, #edit-gss-done li, #edit-gss-list li'), function() {
-			if($(this).text().indexOf(srch) > -1) {
+		  var mytxt = $(this).text().toLowerCase();
+			if(mytxt.indexOf(srch) > -1) {
 				$(this).show();
 			} else {
 				$(this).hide();
