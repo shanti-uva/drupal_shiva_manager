@@ -41,7 +41,7 @@ a.sn-helplink {
 
 a.sn-helplink img {
   padding: 0px !important;
-  vertical-align: middle;
+  vertical-align: text-bottom;
   background: transparent !important;
   box-shadow: 0 !important;
   border: none !important;

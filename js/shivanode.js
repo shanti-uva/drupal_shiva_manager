@@ -417,7 +417,7 @@
 		
 	};
 
-	// checkPrivacyValue(val): Checking the privacy value and not allowing any but public and private
+	// checkPrivacyValue(val): Checking the privacy value and not allowing any but published and draft
 	Drupal.Shivanode.checkPermissionsValue = function(sval) {
 		val = parseInt(sval);
 		if (sval != '_none' && (isNaN(val) || (val != 1 && val != 4))) { sval = '1'; }

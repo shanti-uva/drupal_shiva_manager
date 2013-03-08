@@ -202,7 +202,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	latlng=new google.maps.LatLng(ll[0],ll[1]);
 	ops.center=latlng;
 	ops.zoom=Number(ll[2]);
-   	
+   	this.mapsInfoWindow=new google.maps.InfoWindow({ maxWidth:300 });							
   	this.items=[];
   	for (var key in ops) {
 		if (ops[key] == "true")  ops[key]=true;
@@ -418,6 +418,7 @@ SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP
 		if (json[i].width)												// If defined
 			width=json[i].width;										// Use it
 		if (json[i].color) {											// If defined
+			col=json[i].color;											// Set color
 			if (json[i].color.length > 7) {								// If has alpha
 				col=json[i].color.substr(0,7);							// Isolate color
 				alpha=parseInt(json[i].color.substr(7,2),16)/255;		// Isolate alpha
@@ -454,12 +455,16 @@ SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP
 		mark.setMap(shivaLib.map);										// Add to map
 		list=google.maps.event.addListener(mark,'click', function(e) {	// Add listener
  			var j;
- 			for (j=0;j<mData.length;++j)								// Look thru data	
+  			for (j=0;j<mData.length;++j)								// Look thru data	
  				if (mData[j].title == this.title)						// If titles match
  						break;											// Quit looking
-    			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
+    		shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
+			if (mData[j].desc) {										// If a desc
+				shivaLib.mapsInfoWindow.setContent(mData[j].desc);		// Set new desc
+	   			shivaLib.mapsInfoWindow.open(this.map,this);			// Open
+				}
 			});
-		mData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
+		mData.push({ obj:mark, title:json[i].title,listener:list, desc:json[i].desc });	// Add to array
 		}
 }
 

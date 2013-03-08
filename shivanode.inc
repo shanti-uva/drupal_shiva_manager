@@ -123,7 +123,7 @@ function _shivanode_installed_instances() {
     ),
     'shivanode_access' => array(
       'field_name'  => 'shivanode_access',
-      'label'  => $t('Privileges'),
+      'label'  => $t('PrivilegesWOW'),
       'required' => 1,
       'display' => array(
         'default' => array(
@@ -226,8 +226,8 @@ function _shivanode_element_typelist() {
     3 => t('Map'),
     10 => t('Network'),
     4 => t('Subway'),
-    //5 => t('Timeline'),
-    13 => t('Timeglider'),
+    5 => t('Timeline (Deprecated)'),
+    13 => t('Timeline'),
     6 => t('Video'),
     /*
     8 => 'Control',
@@ -255,8 +255,8 @@ function _shivanode_options_list($option = NULL) {
       3 => t('Map'),
       10 => t('Network'),
       4 => t('Subway'),
-      5 => t('Timeglider'), // was simile = "Timeline"
-      13 => t('Timeglider'),
+      5 => t('Timeline (deprecated)'), // was simile = "Timeline"
+      13 => t('Timeline'),
       6 => t('Video'),
     ),
    /*
@@ -287,10 +287,10 @@ function _shivanode_options_list($option = NULL) {
  */
 function _shivanode_access_modes() {
   $options = array(
-    1 => t('Private'),
+    1 => t('Draft'),
     //2 => 'Group',
     //3 => 'University',
-    4 => t('Public'),
+    4 => t('Published'),
   );
   return $options;
 }
@@ -323,7 +323,7 @@ function _get_shivanodes($stype = 0) {
   $nodes = array();
   foreach ($results as $row) {
     $node = node_load($row->nid);
-    if ($node->uid == $uid || _get_shivanode_access_status($node) == "Public" ||  user_access('bypass node access')) {
+    if ($node->uid == $uid || _get_shivanode_access_status($node) == "Published" ||  user_access('bypass node access')) {
       if (strpos($stype, "nodata") > -1 ) {
         if (_get_shivanode_type($node) != "Data") {
           $nodes[] = $node;

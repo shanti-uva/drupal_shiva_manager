@@ -825,3 +825,13 @@ function shivanode_update_7002() {
   }
 }
 
+/**
+ * Update to the label of shivanode_access field instance, changing from "Privileges" to "Status"
+ */
+ 
+function shivanode_update_7003() {
+  $instances = field_info_instances('node', 'shivanode');
+  $safield = $instances['shivanode_access'];
+  $safield['label'] = "Status";
+  field_update_instance($safield);
+}
