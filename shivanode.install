@@ -522,7 +522,7 @@ function shivanode_build_view() {
   $handler->display->display_options['filters']['uid_current']['relationship'] = 'uid';
   $handler->display->display_options['filters']['uid_current']['value'] = '1';
   $handler->display->display_options['filters']['uid_current']['group'] = 2;
-  $handler->display->display_options['path'] = 'node/elements';
+  $handler->display->display_options['path'] = 'view/elements';
   $handler->display->display_options['menu']['type'] = 'normal';
   $handler->display->display_options['menu']['title'] = 'SHIVA Elements';
   $handler->display->display_options['menu']['description'] = 'A list of all SHIVA visualizations created.';
@@ -561,7 +561,7 @@ function shivanode_build_view() {
   $handler->display->display_options['filters']['uid_current']['relationship'] = 'uid';
   $handler->display->display_options['filters']['uid_current']['value'] = '1';
   $handler->display->display_options['filters']['uid_current']['group'] = 1;
-  $handler->display->display_options['path'] = 'node/my-elements';
+  $handler->display->display_options['path'] = 'view/my-elements';
   
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block_1');
@@ -834,4 +834,48 @@ function shivanode_update_7003() {
   $safield = $instances['shivanode_access'];
   $safield['label'] = "Status";
   field_update_instance($safield);
+}
+
+/**
+ * Update to the shiva_elements view paths, to change them from node/... to view/...
+ */
+ 
+function shivanode_update_7004() {
+  $vnm = 'shiva_elements';
+  $view = views_get_view($vnm);
+  $changed = array();
+  foreach ($view->display as $d) {
+    if (isset($d->display_options['path'])) {
+      $path = $d->display_options['path'];
+      if(strpos($path,'node/') > -1) {
+        $newpath = str_replace('node/', 'view/', $path);
+      }
+      $d->display_options['path'] = $newpath;
+      $changed[] = array($path, $newpath);
+      drupal_set_message(t("Changed view path @PATH to @NEWPATH", array('@PATH' => $path, '@NEWPATH' => $newpath)));
+    }
+    if (count($changed) > 0) {
+      $view->update();
+      $view->save();
+    }
+  }
+  
+  $mtree = menu_tree_all_data('main-menu', NULL);
+  $ltitles = array();
+  foreach ($mtree as $k => $v) {
+    $l = $v['link'];
+    if(isset($l['link_path'])) {
+      foreach($changed as $clink) {
+        if ( $l['link_path'] == $clink[0] ) {
+          $l['link_path'] = $clink[1];
+          $l['router_path'] = $clink[1];
+          menu_link_save($l);
+          $ltitles[] = $l['link_title'];
+        }
+      }
+    }
+  }
+  if(count($ltitles) > 0) {
+    drupal_set_message(t("Updated paths to the following main menu links: @LINKS"), array('@LINKS' => implode(', ', $ltitles)));
+  }
 }

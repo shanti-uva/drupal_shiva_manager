@@ -797,7 +797,7 @@ function _shivanode_gss_form($form, &$form_state) {
     // View All Shiva Visualizations Link
     $form['viewall'] = array(
       '#type' => 'markup',
-      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'node/data-elements', array(
+      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'list/my-data', array(
         'attributes' => array(
           'target' => '_top',
         )
@@ -1227,7 +1227,7 @@ function _shivanode_data_elements($form, &$form_state) {
     
     // if the request uri has ?format=simple in it 
     // then it's in the add data entry popup, return there;
-    $return_page = 'node/data-elements';
+    $return_page = 'list/my-data';
     $rui = request_uri();
     if(strpos($rui, 'format=simple') > -1) {
        $return_page  = 'node/add/shivanode?popup=dataurl'; 
@@ -1413,7 +1413,7 @@ function _shivanode_greset_form_submit($form, &$form_state) {
     unset($_SESSION['gdoc_token']); 
   }
   drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
-  drupal_goto($base_root . $base_path . 'node/data-elements');
+  drupal_goto($base_root . $base_path . 'list/my-data');
 }
 
 function _get_shivaframe_url($opt, $nid = '') {

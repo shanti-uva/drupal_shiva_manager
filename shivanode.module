@@ -158,7 +158,7 @@ function shivanode_menu() {
   );
   
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
-  $items['node/data-elements'] = array(
+  $items['list/my-data'] = array(
     'title' => 'Available Shiva Data Entries',
     'description' => 'List of Available Shiva Data Entries',
     'page callback' => 'drupal_get_form',
@@ -284,7 +284,7 @@ function shivanode_permission() {
  *  
  *   Popups need to be called with {path url}?format=simple, as in: 
  * 
- *           http://shantivis.org/node/data-elements?format=simple
+ *           http://shantivis.org/list/my-data?format=simple
  * 
  *   in lightbox you have to add a query object {'format' : 'simple' }
  * 
@@ -1023,7 +1023,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
   // Link is hidden but click is mimiced from JS when Iframe sends a message asking for DataSourceURL
   $form['shivanode_access']['#suffix'] = '<div id="use-data-element-link" style="display: none;">' .
-      l('Use an Existing Data Listing', 'node/data-elements',
+      l('Use an Existing Data Listing', 'list/my-data',
         array(
           'attributes' => array(
             'rel' => 'lightframe[|width:800px; height:900px; scrolling: auto;]',
@@ -1033,7 +1033,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
           ),
         )
       ) . '</div>' . '<div class="spreadsheet-add-de-link" style="display: none;">' .
-        l(t('Create a Data Listing from Google Spreadsheet'), 'node/data-elements') . '</div>';
+        l(t('Create a Data Listing from Google Spreadsheet'), 'list/my-data') . '</div>';
   
   // The upper Save/Update button
   $form['upperbuttons'] = array(
