@@ -123,7 +123,7 @@ function _shivanode_installed_instances() {
     ),
     'shivanode_access' => array(
       'field_name'  => 'shivanode_access',
-      'label'  => $t('PrivilegesWOW'),
+      'label'  => $t('Status'),
       'required' => 1,
       'display' => array(
         'default' => array(
