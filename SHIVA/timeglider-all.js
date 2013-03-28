@@ -7888,10 +7888,10 @@ tg.TG_TimelinePlayer.prototype = {
           // for any of the small modals...
           // $event.parent()
             $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent());
-          var ihtml = $modal[0].innerHTML;
-          ihtml = ihtml.replace(/&lt;i&gt;/,"<i>").replace(/&lt;\/i&gt;/,"</i>");
-          $modal[0].innerHTML = ihtml;
-          console.info(ihtml);  
+          //var ihtml = $modal[0].innerHTML;
+          //ihtml = ihtml.replace(/&lt;(\/?[^&]+)&gt;/,"<i>").replace(/&lt;\/i&gt;/,"</i>");
+          //$modal[0].innerHTML = ihtml;
+         //console.info(ihtml);  
           var pad = 8;
           var arrow_class = "", tb_class = "", lr_class = "";
           
