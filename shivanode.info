@@ -10,3 +10,4 @@ dependencies[] = zend (7.x-1.0-beta1)
 files[] = shivanode.module
 files[] = shivanode.inc
 configure = admin/config/content/shivanode
+version = "7.x-1.0beta"
