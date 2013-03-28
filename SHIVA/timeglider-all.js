@@ -7741,7 +7741,6 @@ tg.TG_TimelinePlayer.prototype = {
         modal_type = "full";
       }
             // return false;
-      
       switch (modal_type) {
       
         case "full":

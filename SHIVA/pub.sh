@@ -10,6 +10,6 @@ shivalib_subway.js \
 shivalib_network.js \
 shivalib_timeline.js \
 shivalib_colorpick.js \
-> tmp
+>tmp
 jsmin <tmp >shivalib-min.js
 rm tmp
