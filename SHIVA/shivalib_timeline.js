@@ -72,7 +72,21 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       }
 
       stimeline.events = eventData.events;
-      
+      if (typeof(stimeline.options.min_zoom) == "undefined" ||
+           stimeline.options.min_zoom == "" || 
+           stimeline.options.min_zoom == "0") {
+              stimeline.options.min_zoom = 1
+      }
+      if (typeof(stimeline.options.max_zoom) == "undefined" ||
+           stimeline.options.max_zoom == "" || 
+           stimeline.options.max_zoom == "0") {
+              stimeline.options.max_zoom = 99
+      }
+      if (typeof(stimeline.options.initial_zoom) == "undefined" ||
+           stimeline.options.initial_zoom == "" || 
+           stimeline.options.initial_zoom == "0") {
+              stimeline.options.initial_zoom = 50
+      }
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
