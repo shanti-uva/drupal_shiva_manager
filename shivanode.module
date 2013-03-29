@@ -938,6 +938,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // Remove the Simile timeline option when displaying form only, 
   // but left it in array of types to display type of old existing simile timelines
   unset($form['shivanode_element_type']['und']['#options'][5]);
+  _shivanode_add_jtree_js();
+  _shivanode_add_ms_metafix();
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }

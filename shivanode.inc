@@ -2242,3 +2242,24 @@ function _shivanode_popup_page($content) {
   $out = drupal_render($content);
   print '<html><body>' . $out . '</body></html>';
 }
+
+function _shivanode_add_jtree_js() {
+  if(module_exists("kmap_taxonomy") === TRUE) {
+    $kmappath = drupal_get_path("module","kmap_taxonomy");
+    if (strpos($kmappath,'sites') > -1) {
+      drupal_add_js($kmappath . "/js/lib/jstree/jquery.jstree.js");
+    }
+  }
+}
+
+function _shivanode_add_ms_metafix() {
+  $meta = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      "http-equiv" => "X-UA-Compatible",
+       "content" => "IE=Edge",
+    ),
+    '#weight' => '-99999', // To put it first in the head element
+  );
+  drupal_add_html_head($meta, 'iemetatag');
+}
