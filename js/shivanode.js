@@ -386,12 +386,15 @@
 			var did = e.data.substr(15);
 			Drupal.Shivanode.setDataElement(did);
 		
-		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it
+		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it if editing
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
 			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
 				Drupal.Shivanode.jsonloaded = true;
+		  // else if adding a new element tell it to load default data (only timeglider needs this)
+			} else if (window.location.href.indexOf("add/shivanode") > -1) {
+			   Drupal.Shivanode.ShivaMessage("shivaEditFrame", "LoadDefaultData");
 			}
 			
 		// GetKML={layerid} : Set the data entry in the Iframe using the data entries ID.
