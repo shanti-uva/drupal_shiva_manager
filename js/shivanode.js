@@ -723,6 +723,10 @@
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
+	  // This is called every .5 secs. If JSON is the same, then return
+    if (Drupal.Shivanode.latestJSON == json) {
+      return;
+    }
 		Drupal.Shivanode.latestJSON = json;
   	// if Drupal.Shivanode.embedCallType is set to 'json', means Lightbox Frame is requesting JSON so set it.
 		if (Drupal.Shivanode.embedCallType == 'json') {
