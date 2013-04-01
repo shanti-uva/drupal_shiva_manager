@@ -12,7 +12,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
   }
   var i;
   var stimeline = new Object();
-
+  
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
@@ -41,7 +41,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
       if(response.isError()) {
         alert("Either your internet connection is down or the Google spreadsheet that  \n" +
-         + "holds the data for this visualization has not been properly shared.\n" +
+          "holds the data for this visualization has not been properly shared.\n" +
           "The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");
           return;
       }
@@ -66,6 +66,10 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           }
         else {
             o[key]=data.getValue(i,j);
+            // replace carriage returns with <br/> html
+            if(typeof(o[key]) == "string" ) {
+              o[key] = o[key].replace(/[\n\r\f]/g, "<br/>");
+            }
           }
         }
         eventData.events.push(o);
