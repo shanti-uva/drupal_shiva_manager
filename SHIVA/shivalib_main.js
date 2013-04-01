@@ -5,6 +5,7 @@
 function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 {
 	this.drupalMan=false;
+	this.inGo=false;
 	this.options=null;
 	this.map=null;															
 	this.player=null;
@@ -66,13 +67,14 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();
+   else if (group == 'WordCloud')
+        this.DrawWordCloud();
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
 	if (ud == "true")		ud=true;										// Convert to boolean
 	else if (ud == "false")	ud=false;										// Convert to boolean
-	if (ud) {																// If allowing user annotation in go.htm														
-		if ((this.drupalMan) || ((window.parent) && (window.parent.name != "topWindow"))) {	
+	if ((ud) && (this.inGo)) {												// If allowing user annotation in go.htm														
 		var h=$("#"+this.container).css("height").replace(/px/g,"");		// Get height
 		var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";	
 		str+=";top:"+(h-0+12)+"px'>";										// Bottom of container div
@@ -80,7 +82,6 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		$("#shivaAnnotateBut").click(function() { _this.Annotate(); });		// Click event
 		$("#shivaAnnotateBut").css('pointer-events','auto');				// Inibit pointer clicks if menu gone
 		}
-	}
 }
 
 SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
@@ -111,6 +112,9 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
   			obj="google.maps.Map";											// Object to test for
         	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
+       case "WordCloud":
+            obj="d3.layout.cloud";
+            lib="d3_cloud_combined.js";
 		}
 	if (lib) {																// If a lib to load
 		var v=obj.split(".");												// Split by parts
@@ -345,10 +349,12 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 						shivaLib.dr.MoveIdeaChildren(num,dx,dy);			// Move children
 						shivaLib.DrawIdeaLinks(true);						// Draw idea link lines										
 						},
+					containment:"parent", 
 					stop:function(event, ui) {
-						shivaLib.dr.DrawOverlay();								// Redraw
-					} });
-	
+						shivaLib.dr.DrawOverlay();							// Redraw
+						} 
+					});
+
 				$(dd).droppable( { drop:function(event, ui) {				// ON DROP HANDLER
 					var from=ui.draggable.context.id.substr(9);				// From id
 					var to=event.target.id.substr(9);						// To id
@@ -381,15 +387,20 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				this.g.DrawBar(ctx,o.boxColor,a,o.x[0],o.y[0],o.x[1],o.y[1],ecol,ewid);
 			str="<text";													// Assume display mode
 			if ($("#shivaDrawPaletteDiv").length)							// If palette is up
-				str+="area"; 												// Textarea makes it editable
-			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' ";
-			str+="style='position:absolute;background:transparent;border:none;margin:8px;font-family:sans-serif;";
+				str+="area rows='8'"; 										// Textarea makes it editable
+			str+=" id='shtx"+i+"' ";
+			str+="style='position:absolute;background:transparent;border:none;margin:8px;font-family:sans-serif;overflow:auto;";
 			str+="left:"+Math.min(o.x[0],o.x[1])+"px;top:"+Math.min(o.y[0],o.y[1])+"px;opacity:"+(o.alpha/100)+";";
 			str+="width:"+(Math.abs(o.x[1]-o.x[0])-18)+"px;height:"+Math.abs(o.y[1]-o.y[0]-18)+"px'/>";
 			$("#shivaDrawDiv").append(str);									// Add div
 			$("#shtx"+i).css("color",o.textColor).css("text-align",o.textAlign.toLowerCase());	// Color/align
 			$("#shtx"+i).css("font-size",Number(o.textSize)+12);			// Set font size
 			$("#shtx"+i).html(o.text);										// Set text
+			$("#shtx"+i).bind("change input propertychange",function(e) {	// Change event
+				var i=e.target.id.substr(4);								// Extract index
+				var val=$("#shtx"+i).val();									// Get text
+				shivaLib.dr.SetShivaText(val,i);							// Set structure
+				});
 			}
 		else if (o.type == 4) {												// Image
 			this.g.DrawBar(ctx,-1,a,o.x[0],o.y[0],o.x[1],o.y[1],ecol,ewid);
@@ -1076,9 +1087,8 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 	for (i=0;i<files.length;++i) {											// For each file
 		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
-			str="http://www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
 			if ((mode == "link") && (type == "KML"))						// If a KML link
-				alert("http://www.primaryaccess.org/REST/getkml.php?e="+this.id.substr(7));	// Show url
+				alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));	// Show url
 			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
 				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load

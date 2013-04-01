@@ -69,7 +69,8 @@
 		 	}
 		shivaLib=new SHIVA_Show("containerDiv");							// Alloc rendering lib
 		shivaLib.ShivaEventHandler("init");									// Init event handler
-		shivaLib.drupalMan=(""+window.location).match(/pr=d/);				// If called from Drupal managrt
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);				// If called from Drupal manager
+		shivaLib.inGo=true;													// From go
 		if (window.addEventListener) 										// Old style event listener
 			window.addEventListener("message",shivaEventHandler,false);		// Listen for HTML5 messages
 		else																// New style listener

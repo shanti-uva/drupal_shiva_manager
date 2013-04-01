@@ -92,7 +92,7 @@
     shivaLib=new SHIVA_Show("containerDiv");
     shivaLib.drupalMan=(""+window.location).match(/pr=d/);
     shivaLib.SetAttributes(props,items,false);
-    //ReEdit();
+    if(!shivaLib.drupalMan) { ReEdit(); }
     //Draw();
     ShowHelp("startup");
     if (window.addEventListener) 
@@ -125,7 +125,7 @@
       e.source.postMessage("GetType="+shivaGroup,"*");
     else if (e.data.indexOf("PutJSON") == 0) {
       ReEdit($.parseJSON(e.data.substr(8)));
-    } else if (e.data.indexOf("LoadDefaultData") == 0) {
+    } else if (e.data.indexOf("LoadDefaultData") == 0) {  // if Drupal manager tells page to load default data
       ReEdit();
     }
   }

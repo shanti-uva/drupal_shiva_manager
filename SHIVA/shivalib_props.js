@@ -250,7 +250,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
    			str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";
    		else if ((props[o].opt == "color") || (props[o].opt == "colors")) {
    			str+="<div style='max-height:26px'><input size='7' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";
-   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px'"
+   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px;background-color:white'"
 			if (props[o].opt == "colors")	
   				str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";		   			
 			else
@@ -402,7 +402,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 			aProps= { 	baseline: 		{ opt:'string',	 des:'Baseline'},		// Sub-items
 						baselineColor: 	{ opt:'color',	 des:'Baseline color'},
 						direction:		{ opt:'string',	 des:'Direction'},
-						format:			{ opt:'string',	 des:'Axis lable format'},
+						format:			{ opt:'string',	 des:'Axis label format'},
 						direction:		{ opt:'string',	 des:'Direction'},
 						logScale:		{ opt:'string',	 des:'Log scale?'},
 						textPosition:	{ opt:'string',	 des:'Text position'},
@@ -434,7 +434,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 			str+="<tr style='height:26px' onClick='ShowHelp(\""+aProps[o].des+"\")'><td>"+aProps[o].des+"</td><td>";	// Add title
 			if (aProps[o].opt == "color") { 									// If a color
 	   			str+="<div style='max-height:26px'><input size='14' style='position:relative;text-align:center;height:16px;top:2px' id='"+baseVar+o+"'/>";
-   				str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px'"
+   				str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px;background-color:white'"
  				str+=" onclick='shivaLib.ColorPicker(0,\"___"+baseVar+o+"\")' id='"+baseVar+o+"C'/>";		   			
 				}
 			else															// If input

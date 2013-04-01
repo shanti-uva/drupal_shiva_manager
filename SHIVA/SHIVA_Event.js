@@ -278,7 +278,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value))'";
-	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","poller","webservice"],etype,chg)+"</td></tr>";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";

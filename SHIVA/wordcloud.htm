@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+		<title>SHIVA Word Cloud</title>
+		<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+		<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+		<script type="text/javascript" src="shivalib-min.js"></script>
+		<style>
+		body {
+				margin: 8px;
+				font-family: Verdana, Geneva, sans-serif;
+				font-size: xx-small;
+			}
+			.h1 {
+				font-size: larger;
+				color: #666666;
+			}
+			p.pb {
+				text-align: right;
+				color: #999999;
+			}
+			.rounded-corners {
+				-moz-border-radius: 8px;
+				-webkit-border-radius: 8px;
+				-khtml-border-radius: 8px;
+				border-radius: 8px;
+			}
+			tr.odd {
+				background-color: #e0e0e0;
+			}
+			.propTable {
+				background-color: #eee;
+				border-radius: 8px;
+				background: -moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				background: -webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				border-collapse: collapse;
+				width: 278px;
+			}
+			</style>
+	</head>
+	<body>
+		<div style="width:279px;position:absolute;top:0px;left:0px">
+			<table id="propertyTable" class="propTable">
+				<tr style="height:8px">
+					<td></td>
+				</tr>
+			</table>
+			<p style="text-align:right"><img src='annotate.gif' alt='Annotate' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>
+				<span id='saveAsDiv'></span>
+			</p>
+			<div id="helpDiv"></div>
+			<br/>
+			</br/>
+			<div id="p1"></div>
+			<div id="outputDiv" style="width:460px;"></div>
+		</div>
+		<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px">
+			...Loading Word Cloud...
+		</div>
+		<script>
+            var items = new Array();
+            var shivaGroup = "WordCloud"
+            var curAtt = null;
+            var props = {
+                dataSourceUrl : {
+                    def : 'http://www.katsandogz.com/ongood.html',
+                    opt : 'string',
+                    des : 'Data source URL'
+                },
+                title : {
+                    def : '',
+                    opt : 'string',
+                    des : 'Title of word cloud'
+                },
+                titleColor: {
+					def: '000000',
+					opt: 'color',
+					des: 'Title font color'
+                },
+                titleFontSize: {
+                	def: '20',
+                	opt: 'string',
+                	des: 'Title font size'
+                },
+                wordcount: {
+                	def: '150',
+                	opt: 'number',
+                	des: 'Number of visible words'
+                },
+                height : {
+                    def : '500',
+                    opt : 'number',
+                    des : 'Height of word cloud'
+                },
+                width : {
+                    def : '1000',
+                    opt : 'number',
+                    des : 'Width of word cloud'
+                },
+                font_name : {
+                    def : 'Arial',
+                    opt : 'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',
+                    des : 'Font'
+                },
+                spectrum : {
+                    def : '',
+                    opt : 'colors',
+                    des : 'Cloud colors'
+                },
+                backgroundColor : {
+                    def : 'ffffff',
+                    opt : 'color',
+                    des : 'Background color'
+                }
+            };
+            //TODO write help text
+            var helpText = new Array();
+
+            $(function() {
+                shivaLib = new SHIVA_Show("containerDiv");
+                shivaLib.drupalMan = ("" + window.location).match(/pr=d/);
+                shivaLib.SetAttributes(props, items, false);
+                ReEdit();
+                ShowHelp("startup");
+                if (window.addEventListener)
+                    window.addEventListener("message", shivaEventHandler, false);
+                else
+                    window.attachEvent("message", shivaEventHandler);
+                if (!shivaLib.drupalMan) {
+                    var str = "&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+                    str += "<option>Choose format</option>";
+                    str += "<option>WordPress</option>";
+                    str += "<option>eStore</option>";
+                    str += "<option>iFrame</option>";
+                    str += "<option>JSON</option>";
+                    str += "<option>Web-page</option>";
+                    str += "</select>";
+                    $("#saveAsDiv").html(str);
+                }
+            });
+                function shivaEventHandler(e) {
+                    if (e.data.indexOf("GetJSON") == 0)
+                        e.source.postMessage("GetJSON=" + SaveData("GetJSON"), "*");
+                    else if (e.data.indexOf("GetWebPage") == 0)
+                        e.source.postMessage("GetWebPage=" + SaveData("Web-page"), "*");
+                    else if (e.data.indexOf("GetWordPress") == 0)
+                        e.source.postMessage("GetWordPress=" + SaveData("WordPress"), "*");
+                    else if (e.data.indexOf("GetType") == 0)
+                        e.source.postMessage("GetType=" + shivaGroup, "*");
+                    else if (e.data.indexOf("PutJSON") == 0)
+                        ReEdit($.parseJSON(e.data.substr(8)));
+                }
+                function ReEdit(jsonData) {
+                    var it = shivaLib.ReEdit(jsonData, props);
+                    if (it)
+                        items = it;
+                    shivaLib.SetAttributes(props, items, true);
+                    Draw();
+                }
+                function Draw(mode) {
+                    if (shivaLib.drupalMan)
+                        window.parent.postMessage("DataChanged=true", "*");
+                    var opts = $.parseJSON(SaveData("GetJSON"));
+                    shivaLib.Draw(opts);
+                }
+                function SaveData(mode) {
+                	var data = shivaLib.SaveData(mode, shivaGroup, items, props);
+                    return data;
+                }
+                function ShowHelp(att) {
+                    if (att == "startup")
+                        $("#helpDiv").html("<br/><p class='pb'>Powered by D3<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+                    else
+                        shivaLib.ShowHelp(att, helpText);
+                }
+                function SetAttributes() {
+					chartType=$('#chartType').val();
+					var dsurl=$('#propInput0').val();
+					var newprops=props[chartType];
+					if ($.trim(dsurl).length > 5)
+						newprops.dataSourceUrl.def=dsurl;
+					shivaLib.SetAttributes(newprops);
+					Draw();
+				}	
+				function trace(str) { 
+					console.log(str);
+				}
+		</script>
+	</body>
+</html>
+
