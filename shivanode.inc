@@ -2179,7 +2179,7 @@ function _shivanode_node_embed_page($nid) {
 		),
 		'tabcf' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-cf"><p>Cut and paste the following macron into your Confluence site page</p>' .
+			'#markup' => '<div id="tab-cf"><p>Cut and paste the following macron into the "Wiki Markup" view of your Confluence site page:</p>' .
 						'<textarea class="code">{iframe:src=' . $nurl . '|width=' . $width .
 						 '|height=' . $height .  '}Your browser does not support iframes{iframe}</textarea>' .
 						'<p>For information on other iframe macro parameters see the <a href="http://www.adaptavist.com/display/AtlassianConfluence/iframe+macro" target="_blank">Confluence IFrame Macro Overview</a>.</p> </div>'
