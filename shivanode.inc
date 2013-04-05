@@ -2054,7 +2054,9 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
   }
 }
 
-function _shivanode_node_embed_page($nid) {
+/*
+
+function _shivanode_node_old_embed_page($nid) {
   global $base_root, $base_path;
   $node = node_load($nid);
   $page = array(
@@ -2099,6 +2101,7 @@ function _shivanode_node_embed_page($nid) {
       };</script>',
     ),
   ); 
+  
   if(module_exists('sharethis')) {
     // add meta tag for share image
     // Can also be done through custom JS adding chicklets as outlined on http://support.sharethis.com/customer/portal/articles/475079-share-properties-and-sharing-custom-information
@@ -2116,6 +2119,163 @@ function _shivanode_node_embed_page($nid) {
     );
   }
   return $page;
+}*/
+
+
+function _shivanode_node_embed_page($nid) {
+	global $base_url, $base_path;
+	$node = node_load($nid);
+	// Starting code for sharing url pattern: node/###/share
+	// example taken from http://papermashup.com/simple-jquery-tabs/
+	$bcontent = FALSE;
+	$selcontent = '<ul>
+					     <li><a href="#tab-cf">Confluence</a></li>
+					     <li><a href="#tab-wp">Word Press</a></li>
+					     <li><a href="#tab-if">IFrame</a></li>
+					     <li><a href="#tab-lk">Link</a></li>
+					     <li><a href="#tab-url">URL</a></li>
+					     <li><a href="#tab-js">JSON</a></li>
+				   </ul>';
+    $smtab = '';
+	if(module_exists('sharethis')) {
+	    // add meta tag for share image
+	    // Can also be done through custom JS adding chicklets as outlined on http://support.sharethis.com/customer/portal/articles/475079-share-properties-and-sharing-custom-information
+	    // but have been unable to get thumnail and node name to be shared.
+	    _shivanode_add_share_meta($node);
+	    $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
+	    $bcontent = $block['content'];
+	    $bcontent = preg_replace('/node\/(\d+)\/share/','node/$1', $bcontent);
+	    $bcontent = preg_replace('/stLight.options\(\{"publisher"\:"([^"]+)"/','stLight.options({"publisher":"$1", "onhover":"false", "doNotCopy":"true"', $bcontent);
+	    $imgurl = _get_thumb_image($node);
+	    $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
+	    $selcontent = str_replace('<ul>','<ul><li><a href="#tab-sm">Social Media</a></li>', $selcontent);
+		$smtab = '<div id="tab-sm">' . str_replace('display: none;','', $bcontent) . '<p>Click on a button to share this visualization through the desired social media site. <br/> ' .
+					'Don\'t see your preferred social media site? Then let us know by <a href="/contact" target="_blank">clicking here</a>.</p></div>';
+	}
+
+	$nurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . preg_replace('/https?\:/','', $base_url) . $base_path . 'data/json/' . $nid;
+	$njson = _shivanode_get_json($nid);
+	$width = $njson['width'];
+	$height = $njson['height'];
+ 
+	$page =  array(
+	    'head' => array(
+	      '#type' => 'markup',
+	      '#prefix' => '<div id="sharetabs">',
+	      '#markup' => '<h2>How To Share <i>' . $node->title . '</i></h2>',
+	    ),
+	   /* 'instructions' => array(
+	    	'#type' => 'markup',
+	    	'#markup' => '<p>' . t('Choose the format you would like to use and copy the resulting code to your site.') . '</p>',
+		),*/
+
+	    'selectors' => array(
+	    	'#type' => 'markup',
+	    	'#markup' => $selcontent
+		),
+		'tabsm' => array(
+			'#type' => 'markup',
+			'#markup' => $smtab
+		),
+		'tabcf' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-cf"><p>Cut and paste the following macron into your Confluence site page</p>' .
+						'<textarea class="code">{iframe:src=' . $nurl . '|width=' . $width .
+						 '|height=' . $height .  '}Your browser does not support iframes{iframe}</textarea>' .
+						'<p>For information on other iframe macro parameters see the <a href="http://www.adaptavist.com/display/AtlassianConfluence/iframe+macro" target="_blank">Confluence IFrame Macro Overview</a>.</p> </div>'
+						 
+						 //
+		),
+		'tabwp' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-wp"><p>Cut and paste the following code into your Word Press site: </p>' . 
+						'<textarea class="code">[iframe src="' . $nurl . '" width="' . $width . '" height="' . $height . '"]</textarea>' .
+						'<p>For information on other iframe parameters see the <a href="http://wordpress.org/extend/plugins/iframe/other_notes/" target="_blank">WP IFrame Plugin Notes</a>.</p> </div>'
+		),
+		'tabif' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-if"><p>Use this HTML code to put an iframe of this visualization on a web page: </p> ' .
+							'<textarea class="code"><iframe src="' . $nurl . '" height="' . $height .  '" width="' . $width . '"></iframe></textarea></div>'
+		),
+		'tablk' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-lk"><p>To link to this visualization on a web page use the following link code: </p>' .
+							'<textarea class="code"><a href="' . $nurl . '">' . $node->title .  '</a></textarea></div>'
+		),
+		'taburl' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-url"><p>The public URL to view this visualization is: </p>' .
+							'<p><a href="' . $nurl . '" target="_blank">' . $nurl . '</a></p></div>'
+		),
+		'tabjs' => array(
+			'#type' => 'markup',
+			'#markup' => '<div id="tab-js"><p>The JSON code that defines this visualization is: </p>' .
+							'<textarea class="code">' . prettyJson(json_encode($njson)) . '</textarea></div>'
+		),
+		'closing' => array(
+			'#type' => 'markup',
+			'#markup' => '',
+			'#suffix' => '</div>',
+		),
+	);
+	return $page;
+}
+
+
+/**
+ * Indents a flat JSON string to make it more human-readable.
+ *   Taken from: http://www.daveperrett.com/articles/2008/03/11/format-json-with-php/
+ */
+ 
+function prettyJson($json) {
+
+    $result      = '';
+    $pos         = 0;
+    $strLen      = strlen($json);
+    $indentStr   = '  ';
+    $newLine     = "\n";
+    $prevChar    = '';
+    $outOfQuotes = true;
+
+    for ($i=0; $i<=$strLen; $i++) {
+
+        // Grab the next character in the string.
+        $char = substr($json, $i, 1);
+
+        // Are we inside a quoted string?
+        if ($char == '"' && $prevChar != '\\') {
+            $outOfQuotes = !$outOfQuotes;
+
+        // If this character is the end of an element,
+        // output a new line and indent the next line.
+        } else if(($char == '}' || $char == ']') && $outOfQuotes) {
+            $result .= $newLine;
+            $pos --;
+            for ($j=0; $j<$pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+
+        // Add the character to the result string.
+        $result .= $char;
+
+        // If the last character was the beginning of an element,
+        // output a new line and indent the next line.
+        if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+            $result .= $newLine;
+            if ($char == '{' || $char == '[') {
+                $pos ++;
+            }
+
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+
+        $prevChar = $char;
+    }
+
+    return $result;
 }
 
 function _node_using_data_element($dnid) {

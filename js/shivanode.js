@@ -30,8 +30,8 @@
 			if($('iframe#shivaEditFrame').length > 0) {
 			  setTimeout(function() {
 			    setInterval(function() { 
-            Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
-          }, 500);
+		            Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
+		        }, 500);
 			  }, 10000);
 				// When there's a validation error, reload the type of iframe
 				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
@@ -96,40 +96,50 @@
 				$('input[type="submit"]').each(function() {
 					$(this).click(function() { window.lastButtonClicked = $(this).attr('id'); });
 				});
+				
+				// Disable CR for input fields in entry form
+				$("form.node-shivanode-form input[type=text]").keypress(function(e){
+				    if ( e.which == 13 ) {
+				    	console.info("caught it!");
+				    	return false;
+				    }
+				});
 			}
 			 
+			/* Old code for when embed page had a drop down list (commented out 2013-04-05)
 			// If it's an embed code pop-up, add change to the select
-			// to relay the request for the appropriate get function and put its result in the text area
-			// the object Drupal.Shivanode.node is embeded in popup window by the Drupal _shivanode_node_embed_page($nid) function
-			// it contains values for nid (node id), title, json, and player.
-			$('#snembedselect').change(function() {
-         var choice = $(this).val();
-     		 var url = Drupal.Shivanode.node.player + "?m=//" + window.location.host + Drupal.settings.basePath 
-     								+ 'data/json/' + Drupal.Shivanode.node.nid;
-     		 var jobj = JSON.parse(Drupal.Shivanode.node.json);
-     		 var retval = '';
-         switch (choice) {
-          case 'cf':
-            retval = '{iframe:src=' + url + '|width=' + jobj.width + '|height=' + jobj.height + '}Your browser does not support iframes{iframe}';
-            break;
-         	case 'wp':
-         		retval = "[iframe src='" + url + "']";
-         		break;
-         	case 'link':
-         		retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
-         		break;
-         	case 'if':
-         		retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
-         		break;
-         	case 'json':
-         		retval = Drupal.Shivanode.node.json;
-         		break;
-         	default:
-         		retval = url;				
-         		break;
-         }
-         $('#sn-embedcode-area').val(retval); 
-      });
+						// to relay the request for the appropriate get function and put its result in the text area
+						// the object Drupal.Shivanode.node is embeded in popup window by the Drupal _shivanode_node_embed_page($nid) function
+						// it contains values for nid (node id), title, json, and player.
+						$('#snembedselect').change(function() {
+					 var choice = $(this).val();
+						  var url = Drupal.Shivanode.node.player + "?m=//" + window.location.host + Drupal.settings.basePath 
+												 + 'data/json/' + Drupal.Shivanode.node.nid;
+						  var jobj = JSON.parse(Drupal.Shivanode.node.json);
+						  var retval = '';
+					 switch (choice) {
+					  case 'cf':
+						retval = '{iframe:src=' + url + '|width=' + jobj.width + '|height=' + jobj.height + '}Your browser does not support iframes{iframe}';
+						break;
+						 case 'wp':
+							 retval = "[iframe src='" + url + "']";
+							 break;
+						 case 'link':
+							 retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
+							 break;
+						 case 'if':
+							 retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
+							 break;
+						 case 'json':
+							 retval = Drupal.Shivanode.node.json;
+							 break;
+						 default:
+							 retval = url;				
+							 break;
+					 }
+					 $('#sn-embedcode-area').val(retval); 
+				  });*/
+			
 			
 			// if format=simple then hide header footer and sidenavs
 			var ss = window.location.search;
@@ -169,15 +179,35 @@
 			  if(Drupal.Shivanode.getShivaCookie('Drupal.Shivanode.popup') != 'done') {
 			    var etyp = Drupal.Shivanode.getShivaCookie('Drupal.Shivanode.lastElementType');
 			    if(etyp) {
-            $('#edit-shivanode-element-type-und').val(etyp);
-            $('#edit-shivanode-element-type-und').change();
-          }
-          $('#use-data-element-link a').click();
-  			  Drupal.Shivanode.setShivaCookie('Drupal.Shivanode.popup', 'done', 1);
-  			}
+		            $('#edit-shivanode-element-type-und').val(etyp);
+		            $('#edit-shivanode-element-type-und').change();
+		          }
+	            $('#use-data-element-link a').click();
+	  			Drupal.Shivanode.setShivaCookie('Drupal.Shivanode.popup', 'done', 1);
+  			  }
+		    }
+		    
+		    // Code to activate JQuery Tabs in the Share embed page
+		    if($('#sharetabs').length > 0) {
+			    $('#sharetabs div').hide();
+				$('#sharetabs div:first').show();
+				$('#sharetabs ul li:first').addClass('active');
+				$('#sharetabs .sharethis-wrapper').show();
+				$('#sharetabs ul li a').click(function(){
+					$('#sharetabs ul li').removeClass('active');
+					$(this).parent().addClass('active');
+					var currentTab = $(this).attr('href');
+					$('#sharetabs div').hide();
+					$(currentTab).show();
+					if($(currentTab).find('.sharethis-wrapper').length > 0) {
+						$('.sharethis-wrapper').show();
+					}
+					return false;
+				});
 			}
-		}
-	};
+			
+		} // End of attach function
+	}; // End of Drupal.behaviors.shivaEntryFormConfig
 
 	// Use custom Drupal.Shivanode object for functions that are called at various times.
 	Drupal.Shivanode = {};
