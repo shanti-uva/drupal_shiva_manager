@@ -346,6 +346,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 						var dy=ui.position.top-shivaLib.dr.segs[num].ideaTop;	// Dy
 						shivaLib.dr.segs[num].ideaLeft=ui.position.left;	// Set left
 						shivaLib.dr.segs[num].ideaTop=ui.position.top;		// Set top
+						shivaLib.dr.segs[num].ideaText=$("#"+this.id).val();	// Set current text
 						shivaLib.dr.MoveIdeaChildren(num,dx,dy);			// Move children
 						shivaLib.DrawIdeaLinks(true);						// Draw idea link lines										
 						},
@@ -532,13 +533,17 @@ SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT 
 	}
 }
 
-SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
+SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATTE
 {
 	if (!this.dr) {																			// If not already instantiated
 		this.Draw({shivaGroup:"Draw"});														// Create canvas
 		this.dr=new SHIVA_Draw(this.container);												// Alloc drawing module
 		}
 	else this.dr.DrawPalette();																// Draw palette
+	if (x != undefined) {																	// If a position set
+		$("#shivaDrawPaletteDiv").css("left",x+"px");										// Set x
+		$("#shivaDrawPaletteDiv").css("top",y+"px");										// Set y
+		}
 	this.Sound("click");																	// Click
 }
 
@@ -575,7 +580,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 	var h=$(con).css('height');
 	var w=$(con).css('width');
 	var _this=this;
-	
+//options.dataSourceUrl="http://www.primaryaccess.org/test.jpg";	
 	if (options.dataSourceUrl.indexOf("//docs.google.com") != -1)
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
@@ -583,11 +588,14 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		if (options.height)
 			$(con).css('height',options.height);
 		this.SendReadyMessage(true);											
+//		var mob={sx:0,ex:1,sy:00,ey:0,sw:200,ew:100,sa:1,ea:1,easeIn:1,easeOut:1 };
+//		this.AnimateDivPosition(this.container+"Img",0,mob,false);
+		
 		}
 	else
 		this.SendReadyMessage(true);											
 		
- 	  function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid) 	{
+ 	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
   		var query=new google.visualization.Query(file);
    		query.send(handleQueryResponse);
  
@@ -632,6 +640,27 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
  	}
 
 }  // Closure end
+
+
+SHIVA_Show.prototype.AnimateDivPosition=function(div, pct, mob, playing)		// ANIMATE/POSITION DIB
+{
+	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
+	if ($("#"+shivaLib.container+"PlyBut").length == 0)								// If no playbut yet
+		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:0px;left:0px'>");
+	if (mob.easeIn && mob.easeOut)													// Both
+		pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);										// Full cosine curve
+	else if (easeIn)																// Slow in
+		pct=1.0-(Math.cos(1.5707*pct));												// 1st quadrant of cosine curve
+	else if (easeOut)																// Slow out
+		pct=1.0-(Math.cos(1.5707+(1.5707*pct))+1.0);								// 2nd quadrant of cosine curve
+	var o={ position:"relative"};													// Posioton mode
+	o.left=-(mob.sx+((mob.ex-mob.sx)*pct))+"%";										// Calc top
+	o.top=-(mob.sy+((mob.ey-mob.sy)*pct))+"%";										// Calc left
+	o.width=(mob.sw+((mob.ew-mob.sw)*pct)+"%");										// Calc width
+	o.opacity=mob.sa+((mob.ea-mob.sa)*pct);											// Calc alpha
+	$("#"+div).css(o);																// Set css 
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	CHART

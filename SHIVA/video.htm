@@ -103,8 +103,6 @@
 
 	function shivaEventHandler(e)
 	{
-		if (e.data.indexOf("ShivaVideo") != -1)
-			trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 

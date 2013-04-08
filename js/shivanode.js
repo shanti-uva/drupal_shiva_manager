@@ -7,12 +7,10 @@
  *      This is called after every ajax call. Hence the use of context.
  * 			May have to detect context to run some of this only when major page loads.
  */
-	
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
 			setTimeout(function () {$('body').css('padding-top', '0px');}, 50);
-			
 			
 			Drupal.Shivanode.shibstatus = null;
 			
@@ -97,12 +95,11 @@
 					$(this).click(function() { window.lastButtonClicked = $(this).attr('id'); });
 				});
 				
-				// Disable CR for input fields in entry form
-				$("form.node-shivanode-form input[type=text]").keypress(function(e){
-				    if ( e.which == 13 ) {
-				    	console.info("caught it!");
-				    	return false;
-				    }
+				$("input.form-text").keypress(function(e){
+					if(e.which==13) {
+						console.info('returning false');
+						return false;
+					}
 				});
 			}
 			 
@@ -211,7 +208,6 @@
 
 	// Use custom Drupal.Shivanode object for functions that are called at various times.
 	Drupal.Shivanode = {};
-	
 	Drupal.Shivanode.debug = { 
 		send : true, 
 		sendtype : 'all',

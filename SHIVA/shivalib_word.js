@@ -40,7 +40,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             if (this.wcloud.options[prop] != this.options[prop]) {
                 if (prop == "dataSourceUrl") {
                     cloud.options = this.options;
-                    cloud.load();
+                    cloud.load(cloud.options['dataSourceUrl']);
                     break;
                 } else if (prop == "width" || prop == "height" || prop == "wordcount") {
                     cloud.options = this.options;

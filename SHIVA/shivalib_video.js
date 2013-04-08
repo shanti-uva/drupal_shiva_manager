@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
-	var v,t;
+	var v,t,type="YouTube";
 	var options=this.options;
 //	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
@@ -16,19 +16,20 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return;
 	if (typeof(Popcorn.smart) != "function")
 		return;
-	var base="http://www.youtube.com/watch?v=";
+	var base="http://www.youtube.com/watch?autoplay=1&v=";
 	$(con).css("width",options.width+"px");
 	$(con).css("height",options.height+"px");
 	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))
-		base="http://vimeo.com/";
+		base="http://vimeo.com/",type="Vimeo";
 	else if (options.dataSourceUrl.match(/kaltura/)) {
 		var s=options.dataSourceUrl.indexOf("kaltura_player_");
 		id=options.dataSourceUrl.substring(s+15);
 		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301951/protocol/https/video.mp4"
-		base=""
+		base="";
+		type="Kaltura";
 		}
 	else if ((options.dataSourceUrl.match(/http/g)) && (!options.dataSourceUrl.match(/youtube/g)))
-		base="";
+		base="",type="HTML5";
 	if (this.player) {
     	this.player.destroy();
     	$(con).empty();
@@ -36,6 +37,8 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	}
   	if (!this.player)
 		this.player=Popcorn.smart(con,base+id);
+	this.player.smartPlayerType=type;
+
 	this.player.media.src=base+id;
 	if (options.end) {
 		v=options.end.split(":");
@@ -64,8 +67,11 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
-    	shivaLib.player.currentTime(Number(v[0]*60)+Number(v[1]));
-		shivaLib.player.volume(shivaLib.options.volume/100);
+    	if (this.smartPlayerType == "Vimeo") 
+   			shivaLib.player.currentTime(shivaLib.options.start);
+ 		else
+  			shivaLib.player.currentTime(Number(v[0]*60)+Number(v[1]));
+  		shivaLib.player.volume(shivaLib.options.volume/100);
 	   	if (shivaLib.options.autoplay == "true")
     		shivaLib.player.play();
     	else

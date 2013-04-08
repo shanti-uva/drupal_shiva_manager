@@ -25,7 +25,7 @@
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
 	</table> 
-		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate(45,250)'>
 		<span id='saveAsDiv'></span>
 		</select> 
 	</p>		
@@ -61,9 +61,6 @@
 	  	SetAttributes(props);
 		ReEdit();
 		ShowHelp("startup");
-//		shivaLib.Annotate();
-		$("#shivaDrawPaletteDiv").css("left","45px")
-		$("#shivaDrawPaletteDiv").css("top","250px")
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
 		else
@@ -93,6 +90,8 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
+	trace(e.data)
+	
 	}
 
 	function Draw(mode)
