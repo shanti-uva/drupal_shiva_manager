@@ -9,8 +9,8 @@
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 		<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 		<script type="text/javascript" src="shivalib-min.js"></script>
-		<style>
-		body {
+		<script type="text/javascript" src="shivalib_word.js"></script>
+		<style>		body {
 				margin: 8px;
 				font-family: Verdana, Geneva, sans-serif;
 				font-size: xx-small;
@@ -59,7 +59,7 @@
 			<div id="outputDiv" style="width:460px;"></div>
 		</div>
 		<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px">
-			...Loading Word Cloud...
+			<span id="cloudLoad">...Loading Word Cloud...</span>
 		</div>
 		<script>
             var items = new Array();
@@ -70,6 +70,16 @@
                     def : 'http://www.katsandogz.com/ongood.html',
                     opt : 'string',
                     des : 'Data source URL'
+                },
+                height : {
+                    def : '500',
+                    opt : 'number',
+                    des : 'Height of word cloud'
+                },
+                width : {
+                    def : '800',
+                    opt : 'number',
+                    des : 'Width of word cloud'
                 },
                 title : {
                     def : '',
@@ -86,20 +96,20 @@
                 	opt: 'string',
                 	des: 'Title font size'
                 },
-                wordcount: {
-                	def: '150',
+                low_threshold: {
+                	def: '',
                 	opt: 'number',
-                	des: 'Number of visible words'
+                	des: 'Lowest visible frequency'
                 },
-                height : {
-                    def : '500',
-                    opt : 'number',
-                    des : 'Height of word cloud'
+                high_threshold: {
+                	def: '',
+                	opt: 'number',
+                	des: 'Highest visible frequency'
                 },
-                width : {
-                    def : '1000',
-                    opt : 'number',
-                    des : 'Width of word cloud'
+                scale: {
+                	def: 'raw',
+                	opt: 'linear|logarithmic|binary|',
+                	des: 'Scale'
                 },
                 font_name : {
                     def : 'Arial',
@@ -115,6 +125,16 @@
                     def : 'ffffff',
                     opt : 'color',
                     des : 'Background color'
+                },
+              	tiltRange: {
+              		def: '45',
+              		opt: 'number',
+              		des: 'Word tilt range'
+              	},
+                wordList: {
+                	def: 'false',
+                	opt: 'true|false',
+                	des: 'Show a list of words?'
                 }
             };
             //TODO write help text

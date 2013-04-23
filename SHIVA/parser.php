@@ -36,8 +36,11 @@ function check_robots($url) {
 }
 
 $rawtext = '';
-if (strpos($_GET['url'], 'http') !== FALSE) {
+if (!preg_match("/\s/", $_GET['url'])) {
 	$url = $_GET['url'];
+	if(!preg_match('/^http(s*):\/\//', $url)){
+		$url= "http://".$url;
+	}
 	if (check_robots($url)) {
 		exit(json_encode(array("error" => "robots")));
 	} else {
@@ -78,10 +81,26 @@ if ($rawtext == FALSE) {
 	arsort($wordsAsoc);
 	$json = array();
 	$keys = array_keys($wordsAsoc);
+	
 	for ($i = 0; $i < count($keys); $i++) {
 		$word = new word();
 		$word -> text = $keys[$i];
-		$word -> size = $wordsAsoc[$keys[$i]];
+		if(isset($_REQUEST['a'])){
+			switch($_REQUEST['a']){
+				case 'raw':
+					$word -> freq = $wordsAsoc[$keys[$i]];
+				break;
+				case 'logarithmic':
+					$word -> freq = log($wordsAsoc[$keys[$i]]+0.1);
+				break;
+				case 'binary':
+					$word -> freq =  20;
+				break;
+				case 'normalized':
+					$word -> freq = ($wordsAsoc[$keys[$i]]/$wordsAsoc[$keys[0]]);
+				break;
+			}
+		}
 		array_push($json, $word);
 	}
 	echo json_encode($json);

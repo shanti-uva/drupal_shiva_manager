@@ -568,103 +568,11 @@ SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
 	this.SendReadyMessage(true);															// Send ready message									
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//	IMAGE
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
-{
-	var options=this.options;
-	var container=this.container;
-	var con="#"+container;
-	var h=$(con).css('height');
-	var w=$(con).css('width');
-	var _this=this;
-//options.dataSourceUrl="http://www.primaryaccess.org/test.jpg";	
-	if (options.dataSourceUrl.indexOf("//docs.google.com") != -1)
- 	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
- 	 else if (options.dataSourceUrl) {
-	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
-		if (options.height)
-			$(con).css('height',options.height);
-		this.SendReadyMessage(true);											
-//		var mob={sx:0,ex:1,sy:00,ey:0,sw:200,ew:100,sa:1,ea:1,easeIn:1,easeOut:1 };
-//		this.AnimateDivPosition(this.container+"Img",0,mob,false);
-		
-		}
-	else
-		this.SendReadyMessage(true);											
-		
- 	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
-  		var query=new google.visualization.Query(file);
-   		query.send(handleQueryResponse);
- 
-	    function handleQueryResponse(response) {
-		    var a,i,j;
-			var data=response.getDataTable();
-			var cols=data.getNumberOfColumns();
-			var rows=data.getNumberOfRows();
-	 		var rowData=new Array();
- 			for (i=0;i<rows;++i) {
- 				a=new Array()
-				for (j=0;j<cols;++j) 
-					a.push(data.getValue(i,j));
-   				rowData.push(a);
-    			}
-     		AddImages(rowData,imgHgt,showImage,showSlide,trans,wid);
-		 	shivaLib.SendReadyMessage(true);											
-  	     }
- 	}
-
-   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)
- 	{
-		var str="<div id='gallery' class='ad-gallery'>"
-		if (showImage == "true")
-			str+="<div class='ad-image-wrapper'></div>";
-		if (showSlide == "true")
-			str+="<div class='ad-controls'></div>";
-		str+="<div class='ad-nav'><div class='ad-thumbs'><ul class='ad-thumb-list'>"
-		for (var i=1;i<data.length;++i) {
-			str+="<li><a href='"+data[i][0]+"'><img height='"+imgHgt+" 'src='"+data[i][0]+"'";
-			if (data[i][1])
-				str+=" title='"+data[i][1]+"'";		
-			if (data[i][2])
-				str+=" alt='"+data[i][2]+"'";		
-	   		str+=" class='image"+i+"'></a></li>";
-	   		}
-	    str+="</ul></div></div></div>";
-	    $("#"+container).html(str);
-	  	$('.ad-gallery').adGallery()[0].settings.effect=transition;
-	    $("#gallery").css("background","#ddd");
-		$(".ad-gallery").css("width",wid) 
- 	}
-
-}  // Closure end
-
-
-SHIVA_Show.prototype.AnimateDivPosition=function(div, pct, mob, playing)		// ANIMATE/POSITION DIB
-{
-	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
-	if ($("#"+shivaLib.container+"PlyBut").length == 0)								// If no playbut yet
-		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:0px;left:0px'>");
-	if (mob.easeIn && mob.easeOut)													// Both
-		pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);										// Full cosine curve
-	else if (easeIn)																// Slow in
-		pct=1.0-(Math.cos(1.5707*pct));												// 1st quadrant of cosine curve
-	else if (easeOut)																// Slow out
-		pct=1.0-(Math.cos(1.5707+(1.5707*pct))+1.0);								// 2nd quadrant of cosine curve
-	var o={ position:"relative"};													// Posioton mode
-	o.left=-(mob.sx+((mob.ex-mob.sx)*pct))+"%";										// Calc top
-	o.top=-(mob.sy+((mob.ey-mob.sy)*pct))+"%";										// Calc left
-	o.width=(mob.sw+((mob.ew-mob.sw)*pct)+"%");										// Calc width
-	o.opacity=mob.sa+((mob.ea-mob.sa)*pct);											// Calc alpha
-	$("#"+div).css(o);																// Set css 
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	CHART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 {	

@@ -11,6 +11,7 @@ shivalib_network.js \
 shivalib_timeline.js \
 shivalib_colorpick.js \
 shivalib_word.js \
+shivalib_image.js \
 > tmp
 jsmin <tmp >shivalib-min.js
 rm tmp
