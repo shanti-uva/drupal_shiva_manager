@@ -205,11 +205,22 @@ function shivanode_menu() {
       'title' => 'JSON output of Node',
       'description' => 'Return the JSON description of a node',
       'page callback' => '_shivanode_node_json',
-      'page arguments' => array(2),
+      'page arguments' => array(2, 'normal'),
       'access callback' => TRUE,
       'file' => 'shivanode.inc',
     );
-
+	
+	// Return SHIVA jsaon of a single node 
+  
+  $items['data/json/%/teaser'] = array(
+      'title' => 'JSON output of Node',
+      'description' => 'Return the JSON description of a node',
+      'page callback' => '_shivanode_node_json',
+      'page arguments' => array(2, 'teaser'),
+      'access callback' => TRUE,
+      'file' => 'shivanode.inc',
+    );
+	
   // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
   // Calls _shivanode_shib_check
   $items['shib/auth/check'] = array(
@@ -646,7 +657,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
           }
         }
       }
-      else { // For Teasers automatically use the default teaser settings in jdata and iframe markup
+      else if ($display['settings']['context'] == 'teaser') { // For Teasers automatically use the default teaser settings in jdata and iframe markup
         $height = variable_get('shivanode_teaser_height', (isset($display['settings']['height'])?$display['settings']['height']:SHIVA_IFRAME_HEIGHT_TEASER));
         $width = variable_get('shivanode_teaser_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH_TEASER));
       }
@@ -654,6 +665,9 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $jsonurl = $base_root . $base_path . 'data/json/' . $object->nid;
       // remove distinct protocol https:// or http:// and replace with // so as to match current domain protocol
       $jsonurl = preg_replace("/https?\:\/\//","//", $jsonurl); 
+	  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
+	  	$jsonurl .= '/teaser';
+	  }
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
       $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $jsonurl;
       if(_shivanode_get_access($object) == "1") {

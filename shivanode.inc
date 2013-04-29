@@ -1485,7 +1485,7 @@ function _get_shivaframe_url($opt, $nid = '') {
  * 		This function retreives the node, gets its SHIVA json data and publishes that
  * 		Returned in jsonp format for the new viewer.
  */
-function _shivanode_node_json($nid) {
+function _shivanode_node_json($nid, $display) {
   $pwd = '';
   if(strpos($nid,'-') > -1) {
     $pts = explode('-',$nid);
@@ -1498,6 +1498,12 @@ function _shivanode_node_json($nid) {
     $json = '';
     drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
     $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
+    if($display == "teaser") {
+    	$json = _shivanode_get_json($node, TRUE);
+		$json['height'] = variable_get('shivanode_teaser_height', SHIVA_IFRAME_HEIGHT_TEASER);
+		$json['width'] = variable_get('shivanode_teaser_width', SHIVA_IFRAME_WIDTH_TEASER);
+		$json = json_encode($json);
+    }
     $json = 'shivaDataWrapper(' . $json . ')'; // drupal_json_encode means turn a PHP object into JSON text
     echo $json;
   } else {
