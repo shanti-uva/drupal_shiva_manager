@@ -10,7 +10,6 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
  	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
  	<script type="text/javascript" src="shivalib-min.js"></script>
- 	<script type="text/javascript" src="shivalib_image.js"></script>
  	<script type="text/javascript" src="jquery.ad-gallery.min.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
@@ -39,6 +38,7 @@
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Slideshow</option>
 			<option>Montage</option>
+			<option>Zoomable</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -51,6 +51,7 @@
 	</span></p>
 	<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
 		<span id='saveAsDiv'></span>
+	<span><br/><br/><a onclick='ShowSample()'><i>Click <u>here</u> to add Montage sample</i></a></span>
 		</p>		
  	<div id="helpDiv"> </div>
 	<div id="outputDiv" style="width:460px"> </div>
@@ -89,7 +90,12 @@
 			dur: 						{	def:'4', 			opt:'number',			des:'Duration (seconds)'}, 
 			ease: 						{	def:'both', 		opt:'both|in|out|none',	des:'Motion eases'}, 
 //			fx: 						{	def:'none', 		opt:'none|dissolve|fade-in|fade-out|slide-horiz|slide-vert',		des:'Transition style'},
-			title: 						{	def:'', 			opt:'list',				des:'Title'}}
+			title: 						{	def:'', 			opt:'list',				des:'Title'}},
+	Zoomable: {
+			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string', des:'URL of image'}, 
+			height: 					{	def:'600', 			opt:'number',			des:'Height of player'},
+			width: 						{	def:'800', 			opt:'number',			des:'Width of player'}, 
+			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'}}
 			}
 	
 	var helpText=new Array();
@@ -116,6 +122,8 @@
 	helpText['Duration (seconds)']="The number of seconds the move will occur in.";
 	helpText['Motion eases']="Motions look more natural if they ease in and out rather than abruptly start and  stop. Possible choices are both, in, out, or none.";
 	helpText['Title']="Type the title you wish to appear atop this image, if any. You can add HTML tags is desired.";
+	helpText['URL of image']="In the text box to the right enter the web URL of that Image source."; 
+
 
 ///// INIT  /////////////
 	
@@ -153,7 +161,9 @@
 	{
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("ChartChanged="+type,"*");
+		$("#containerDiv").html("");
 		SetAttributes(type,false);	
+		Draw();
 	}
 
 	function shivaEventHandler(e)
@@ -274,6 +284,31 @@
 	  	shivaLib.SetAttributes(props[chartType],items,true);
 		if (cur != -1)
 			$("#accord").accordion({ active: cur });
+	}
+
+	function ShowSample()
+	{
+		var data={
+			"item-1": "name:Image-1;url:http`//memory.loc.gov/pnp/fsa/8e00000/8e00800/8e00810r.jpg;sp:1325,733,6450;ep:500,533,9075;dur:8;ease:both;title:<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>Japanese Internment",
+			"item-2": "name:Image-2;url:http`//memory.loc.gov/service/pnp/cph/3a10000/3a18000/3a18700/3a18762r.jpg;sp:150,200,9738;ep:2400,3033,7450;dur:8;ease:both;title:",
+			"item-3": "name:Image-3;url:http`//memory.loc.gov/pnp/ppprs/00200/00226v.jpg;sp:3925,1633,3938;ep:263,367,7563;dur:7;ease:both;title:",
+			"item-4": "name:Image-4;url:http`//memory.loc.gov/pnp/ppprs/00100/00173v.jpg;sp:2450,917,6513;ep:1450,667,8000;dur:8;ease:both;title:",
+			"item-5": "name:Image-5;url:http`//memory.loc.gov/pnp/ppprs/00100/00191r.jpg;sp:2512,3817,4150;ep:1063,517,7788;dur:16;ease:both;title:",
+			"item-6": "name:Image-6;url:http`//memory.loc.gov/pnp/ppprs/00100/00115v.jpg;sp:5525,1950,3913;ep:463,1950,8925;dur:15;ease:both;title:",
+			"item-7": "name:Image-7;url:http`//memory.loc.gov/pnp/ppprs/00200/00236v.jpg;sp:900,1633,7375;ep:550,533,8500;dur:5;ease:both;title:",
+			"item-8": "name:Image-8;url:http`//memory.loc.gov/pnp/ppprs/00200/00237v.jpg;sp:1000,1467,7588;ep:4538,4067,3500;dur:25;ease:both;title:",
+			"item-9": "name:Image-9;url:;sp:0,0,10000;ep:0,0,10000;dur:4;ease:both;title:<br/><br/><br/><br/><br/>Thanks to Mrs. Roache <br/>and her <br/>5th grade class <br/>at Buford Middle School",
+			"chartType": "Montage",
+			"height": "600",
+			"width": "800",
+			"audio": "http://www.primaryaccess.org/listenup/uploads/1internment133.mp3",
+			"volume": "100",
+			"autoplay": "false",
+			"ud": "false",
+			"shivaMod": "Thu, 09 May 2013",
+			"shivaGroup": "Image"
+			}
+		ReEdit(data);
 	}
 
 		

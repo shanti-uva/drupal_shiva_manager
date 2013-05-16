@@ -119,11 +119,15 @@
 	{	
 		if (shivaLib.drupalMan) 
 			window.parent.postMessage("DataChanged=true","*");
-		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+			shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 
 	function SaveData(mode)
 	{
+		var re=/id="kaltura_([^"]+)"/;
+		var v=re.exec($("#propInput0").val());
+		if (v)	
+			$("#propInput0").val("kaltura_"+v[1])
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 

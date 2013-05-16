@@ -2,7 +2,6 @@
 //  SHIVALIB IMAGE
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-
 SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 {
 	var i,v,o,str;
@@ -24,6 +23,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		else
 			this.SendReadyMessage(true);	
 		}										
+	else if ((options.chartType == "Zoomable") && (options.dataSourceUrl)) 					// If zoomable
+		this.DrawPoster("Image");															// Draw poster
 	else if (options.chartType == "Montage") {												// If montage
 		var items=new Array();																// Alloc iteems array
 	   	for (var key in options) {															// For each item
@@ -49,7 +50,6 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		for (i=0;i<act;++i)																	// Run up to act
 			this.imageMob.audioStart+=items[i].dur-0;										// Add time
 		this.imageMob.numMobs=items.length;													// Number of mobs
-  
    		clearInterval(shivaLib.imageMob.interval);											// Clear timer
 		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='shivaLib.DrawImage()'/>"); // Add image
 		if (act < items.length-1)															// If not last image
@@ -68,7 +68,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		if (options.etitle == "true") 	str+=" contenteditable='true'";						// If editable, set flag
 		else							str+=" onclick='shivaLib.DrawImage()'";				// If not, repond to clicks
 		str+="style='top:0px;left:0px;height:90%;width:90%;padding:5%;position:absolute;"; 	// Pos
-		str+="font-size:"+options.height/20+"px;font-weight:bold;"							// Set height/bold
+		str+="font-size:"+options.height/20+"px;font-weight:bold;";							// Set height/bold
 		str+="text-align:center;text-shadow:5px 5px 10px black;color:white'>";				// Text format		
 		str+=items[act].title+"</div>";														// Add title
 		$(con).append(str);																	// Add title overlay to container

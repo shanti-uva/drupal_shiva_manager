@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Poster</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+ 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+  	<script type="text/javascript" src="shivalib-min.js"></script>
+  	<script type="text/javascript" src="shivalib_poster.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 }
+  </style>
+</head>
+<body style="'background:none transparent">
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+ 		<div style="text-align:center">
+ 		<span id="controlbar" style="font-size:xx-small">
+		<input type='radio' id='cb1' onclick='SetMode(0)' name='mainMen' checked='checked' /><label for='cb1'>Setup</label>
+		<input type='radio' id='cb2' onclick='SetMode(1)' name='mainMen'/><label for='cb2'>Link</label>
+		<input type='radio' id='cb3' onclick='SetMode(2)' name='mainMen'/><label for='cb3'>View</label></span>
+		</div><br/><br/>
+	
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+   <p style="text-align:right"><span style="vertical-align:50%">Montage images </span><span id="toolbar" style="font-size:medium">
+		<button type='button' id='tb1' onclick='ShiftItem(-1)'> </button>
+		<button type='button' id='tb2' onclick='ShiftItem(1)'> </button>
+		<button type='button' id='tb3' onclick='RemoveItem()'> </button>
+		<button type='button' id='tb4' onclick='AddNewItem()'> </button>
+	</span></p>
+	<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+	<span><br/><br/><a onclick='ShowSample()'><i>Click <u>here</u> to add Poster sample</i></a></span>
+		</p>		
+ 	<div id="helpDiv"> </div>
+	<div id="outputDiv" style="width:460px"> </div>
+	</div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px;"> </div>
+ 
+<script>
+
+///////// GLOBALS   //////////
+
+	var items=new Array();
+	var shivaLib=null;
+	var shivaGroup="Poster"
+	var chartType="Canvas";
+	
+	var props={
+		Canvas: {
+			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
+			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
+			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
+			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
+			backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
+			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
+			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
+			grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
+			controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
+			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
+			data: 						{	def:'', 			opt:'hidden',			des:'data'},
+			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
+			layerTitle: 				{	def:'', 			opt:'string',			des:'Control Box label'}, 
+			}
+		}
+	
+	var helpText=new Array();
+	helpText['Height of poster']="The height of the player box where the montage will play in";
+	helpText['Width of poster']="The width of the player box where the montage will play in";
+	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
+	helpText['URL of pane']="The URL of the pane to add to the poster.";
+	helpText['Show placement grid?']="Show grid to help align panes.";
+	helpText['Background color']="Use the text box to the right to set the background color for the poster. Either click on the square color chip icon in the text box to launch the color picker and select a color, or enter a hexadecimal color value directly into the text box.";
+	helpText['Show Overview?']="Whether or not to add a small icon at the bottom right of your poster. Clicking this icon will will show or hide a small mini-poser at the bottom right corner of the poster; this mini-poster allows easy navigation through the poster.";
+	helpText['Show controlbox?']="Use the drop-down menu to the right to choose whether to show or hide the control box from your poster. The control box allows users to interactively got to specific areas in your poster.";
+	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
+	helpText['Control Box label']="Short lable that will appear in the control box. If you do not provide a lable, the pane will not appeear in the control box";
+	
+///// INIT  /////////////
+	
+	$(document).ready(function() {
+  		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	shivaLib.SetAttributes(props[chartType],items,false);
+		shivaLib.callback=Draw;
+		shivaLib.posterMode="Setup";
+		$("#controlbar").buttonset();
+		$("#cb1").button({text: true, icons: { primary: "ui-icon-gear"}});
+		$("#cb2").button({text: true, icons: { primary: "ui-icon-shuffle"}});
+		$("#cb3").button({text: true, icons: { primary: "ui-icon-image"}});
+
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
+		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
+		$("#toolbar").buttonset();
+	});
+
+	function setMode(type)
+	{
+		shivaLib.posterMode=type;
+	}
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+
+	function Draw(mode)
+	{	
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,items,props[chartType],chartType);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		if (jsonData) {
+			if (jsonData.chartType)
+				chartType=jsonData.chartType;
+			}
+		else{
+			var s,e;
+			var query=window.location.search.substring(1);
+			if ((s=query.indexOf("&chartType=")) != -1)
+				if ((e=query.indexOf("&",s+1)) != -1)
+					chartType=query.substring(s+11,e);
+			}
+		SetAttributes(chartType,false);	
+		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
+		if (it)
+			items=it;
+		SetAttributes(chartType,true);
+		$("#chartType").val(chartType);
+		Draw();
+	}
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function SetAttributes(type,keep)
+	{
+		chartType=type;
+		shivaLib.SetAttributes(props[chartType],items,keep);
+	}	
+
+///////// ITEMS  /////////////
+	
+	function AddNewItem()
+	{
+		var o=new Object;
+		var s=0,i=0;
+		shivaLib.Sound("ding");
+		for (var key in props[chartType]) {
+			if (key == "item")
+				s=i;
+			++i;
+			if (!s)
+				continue;
+			o[key]=props[chartType][key].def;
+			}
+		var scale=shivaLib.posterScale;
+		for (var i=0;i<items.length;++i)
+			items[i].name="Pane-"+(i+1);
+		var cx=Math.round(shivaLib.posterX*1000)
+		var cy=Math.round(shivaLib.posterY*1000)
+		o.data=500/scale+"|"+cx+"|"+cy;
+		$("#itemInput"+items.length-1+"-1").val(o.data)
+		items.push(o);
+		for (var i=0;i<items.length;++i)
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		Draw();
+		$("#accord").accordion({ active: items.length-1 });
+	}	
+	
+	function RemoveItem()
+	{
+		var active=$("#accord").accordion("option","active");
+		if (active === false)
+			return;
+		shivaLib.Sound("delete");
+		items.splice(active,1);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		Draw();
+	}
+
+	function ShiftItem(dir)
+	{
+		var cur=shivaLib.ShiftItem(dir,items);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		if (cur != -1)
+			$("#accord").accordion({ active: cur });
+	}
+
+	function ShowSample()
+	{
+		var data={
+			}
+		ReEdit(data);
+	}
+
+	function DrawPosterGrid()
+	{
+		if (shivaLib.options.grid != "true")
+			return;
+		var i,inc,str;
+		var w=$("#posterDiv").width();
+		var h=$("#posterDiv").height();
+		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed #333;opacity:.5;";
+		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border :1px dashed #333;opacity:.5;";
+		inc=h/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
+			$("#posterDiv").append(str);
+			}
+		inc=w/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
+			$("#posterDiv").append(str);
+			}
+	}
+	
+	function DrawPosterOverviewGrid()
+	{
+		if (shivaLib.options.grid != "true")
+			return;
+		var i,inc,str;
+		var w=$("#posterOverDiv").width();
+		var h=$("#posterOverDiv").height();
+		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed;opacity:.3;";
+		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border:1px dashed;opacity:.3;";
+		inc=h/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
+			$("#posterOverDiv").append(str);
+			}
+		inc=w/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
+			$("#posterOverDiv").append(str);
+			}
+	}
+
+		
+</script>
+</body></html>

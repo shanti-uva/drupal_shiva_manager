@@ -67,10 +67,11 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
-    	if (this.smartPlayerType == "Vimeo") 
+    	var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);
+     	if (this.smartPlayerType == "Vimeo") 
    			shivaLib.player.currentTime(shivaLib.options.start);
  		else
-  			shivaLib.player.currentTime(Number(v[0]*60)+Number(v[1]));
+  			shivaLib.player.currentTime(time);
   		shivaLib.player.volume(shivaLib.options.volume/100);
 	   	if (shivaLib.options.autoplay == "true")
     		shivaLib.player.play();

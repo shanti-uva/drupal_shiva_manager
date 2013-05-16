@@ -69,6 +69,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawWebpage();
    else if (group == 'WordCloud')
         this.DrawWordCloud();
+  	else if (group == 'Poster')
+        this.DrawPoster();
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
