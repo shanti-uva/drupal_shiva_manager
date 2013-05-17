@@ -37,8 +37,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 				}
 			}
 		this.items=items;
-		$(con).css('height',options.height+"px");											// Set height
-		$(con).css('width',options.width+"px");												// Set width
+		$(con).height(options.height);														// Set height
+		$(con).width(options.width);														// Set width
 		var act=$("#accord").accordion("option","active");									// Get active
    		if ((act === false) || (isNaN(act)) || (!$("#accord").length))						// If no image or in go.htm
    			act=0;																			// Force to first

@@ -501,7 +501,7 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 			this.items[num].visible=mode.toString();						// Set visibility to mode as string
 		}
 
-	if (group == "Map")
+	if (group == "Map")														// Route on type
 		this.DrawMapOverlays();												
 	else if (group == "Earth") 
 		this.DrawEarthOverlays();												
@@ -509,6 +509,8 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 		this.DrawSubway();
 	else if (group == "Timeline") 
 		this.DrawTimeline();
+	else if (group == "Poster") 
+		this.GoToPosterPane(num);
 }
 
 SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT WITH DATA TABLE
@@ -780,6 +782,7 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	if (width < 0) {												// EARTH KLUDGE!!
 		x=$("#"+this.container).css("left").replace(/px/,"");
 		x=x-0+$("#"+this.container).width()-0+20;
+		x=0;
 		}
 	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
@@ -913,7 +916,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			email=v[i].substr(9);											// Use it
 	var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
 		str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
-	str+="<tr><td width='25%'>Type email</td><td><input type='text' size='40' id='email' value='"+email+"'/></td></tr>";
+	str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='30' value='"+email+"'/></td></tr>";
 	str+="</table><div align='right' style='font-size:x-small'><br/>";	
 	if (type != "all")
 		str+=" <button id='saveBut'>Save</button>";	
@@ -921,7 +924,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 	if (type != "all")
 		str+=" <button id='linkBut'>Link</button>";	
 	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	if ((type == "KML") || (this.group == "Earth")) w=-350;					// Force to right of Earth (KLUDGE)																
+	if ((type == "KML") || (this.group == "Earth")) w=-276;					// Force to right of Earth (KLUDGE)																
 	this.ShowLightBox(w,20,"SHIVA eStore",str)								// Create light box
 
 	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
@@ -939,7 +942,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			return;															// Don't save
 			}						
 		if (!$("#ez-title").length) {										// If no title
-			str="<tr><td>Type title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";
+			str="<tr><td>Title</td><td><input type='text' size='30' id='ez-title'/></td></tr>";
 			$(str).appendTo("#ez-maintbl tbody");							// Add title to table
 			$("#ez-title").focus();											// Focus on title
 			return;
@@ -987,7 +990,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		});
 	}
 
-SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FROM EASYFILE
+SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) 		// GET DATA FROM EASYFILE
 {
 		var i;
 		var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";
@@ -1017,9 +1020,9 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 	for (i=0;i<files.length;++i) {											// For each file
 		if ((filter) && (files[i].title.toLowerCase().indexOf(filter.toLowerCase()) == -1)) // If  filter not in title
 			continue;														// Skip it
-		str="<tr ><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
-		str+="<td width='100%'><img id='ezfile-"+files[i].id+"' src='adddot.gif'  height='11'> &nbsp;";
-		str+=files[i].title+"</td></tr>";									// Add title
+		str="<tr id='ezfile-"+files[i].id+"'><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
+		str+="<td width='100%'><img  src='adddot.gif'  height='11'> &nbsp;";
+		str+=files[i].id+" "+files[i].title+"</td></tr>";					// Add title
 		$(str).appendTo("#ezFilesTable tbody");								// Add file to table
 		$("#ezFilesTable tr:odd").addClass("odd");							// Color
 		}

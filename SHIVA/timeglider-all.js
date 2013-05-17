@@ -5123,7 +5123,7 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     // Code added by ndg8f for Shanti (2013-01)
     // If open modals is greater than the maxnumber set, close the first one before opening a new one
     var openModals = $('.timeglider-ev-modal');
-    if(openModals.length == me.max_modals) {
+    if(openModals.length >= me.max_modals) {
       $(openModals[0]).find('.tg-close-button').click();
     }
     var $ev = $(this);

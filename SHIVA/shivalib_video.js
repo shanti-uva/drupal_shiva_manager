@@ -17,8 +17,9 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	if (typeof(Popcorn.smart) != "function")
 		return;
 	var base="http://www.youtube.com/watch?autoplay=1&v=";
-	$(con).css("width",options.width+"px");
-	$(con).css("height",options.height+"px");
+	
+	$(con).width(options.width);
+	$(con).height(options.height);
 	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))
 		base="http://vimeo.com/",type="Vimeo";
 	else if (options.dataSourceUrl.match(/kaltura/)) {

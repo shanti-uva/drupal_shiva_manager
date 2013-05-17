@@ -12,8 +12,9 @@
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
-		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		. { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		tr.odd { background-color:#e0e0e0; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
@@ -25,9 +26,9 @@
 	<div style="width:279px;position:absolute;top:0px;left:0px">
  		<div style="text-align:center">
  		<span id="controlbar" style="font-size:xx-small">
-		<input type='radio' id='cb1' onclick='SetMode(0)' name='mainMen' checked='checked' /><label for='cb1'>Setup</label>
-		<input type='radio' id='cb2' onclick='SetMode(1)' name='mainMen'/><label for='cb2'>Link</label>
-		<input type='radio' id='cb3' onclick='SetMode(2)' name='mainMen'/><label for='cb3'>View</label></span>
+		<input type='radio' id='cb1' onclick='SetMode("Edit")' name='mainMen' checked='checked' /><label for='cb1'>Edit</label>
+		<input type='radio' id='cb2' onclick='SetMode("Connect")' name='mainMen'/><label for='cb2'>Connect</label>
+		<input type='radio' id='cb3' onclick='SetMode("View")' name='mainMen'/><label for='cb3'>View</label></span>
 		</div><br/><br/>
 	
     <table id="propertyTable" class="propTable">
@@ -55,49 +56,47 @@
 	var items=new Array();
 	var shivaLib=null;
 	var shivaGroup="Poster"
-	var chartType="Canvas";
 	
 	var props={
-		Canvas: {
-			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
-			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
-			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
-			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
-			backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
-			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
-			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
-			grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
-			controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
-			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
-			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
-			data: 						{	def:'', 			opt:'hidden',			des:'data'},
-			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
-			layerTitle: 				{	def:'', 			opt:'string',			des:'Control Box label'}, 
-			}
-		}
+		pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
+		height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
+		width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
+		backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
+		dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
+		overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
+		grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
+		controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+		item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
+		data: 						{	def:'', 			opt:'hidden',			des:'data'},
+		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
+		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
+		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
+	}
 	
 	var helpText=new Array();
 	helpText['Height of poster']="The height of the player box where the montage will play in";
 	helpText['Width of poster']="The width of the player box where the montage will play in";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
-	helpText['URL of pane']="The URL of the pane to add to the poster.";
+	helpText['URL or ID of pane']="The URL of the pane to add to the poster. Alternatively, you can simply put in the eStore number for the SHIVA element.";
 	helpText['Show placement grid?']="Show grid to help align panes.";
 	helpText['Background color']="Use the text box to the right to set the background color for the poster. Either click on the square color chip icon in the text box to launch the color picker and select a color, or enter a hexadecimal color value directly into the text box.";
 	helpText['Show Overview?']="Whether or not to add a small icon at the bottom right of your poster. Clicking this icon will will show or hide a small mini-poser at the bottom right corner of the poster; this mini-poster allows easy navigation through the poster.";
 	helpText['Show controlbox?']="Use the drop-down menu to the right to choose whether to show or hide the control box from your poster. The control box allows users to interactively got to specific areas in your poster.";
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
-	helpText['Control Box label']="Short lable that will appear in the control box. If you do not provide a lable, the pane will not appeear in the control box";
+	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
+	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
 	
 ///// INIT  /////////////
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
-	  	shivaLib.SetAttributes(props[chartType],items,false);
+	  	shivaLib.SetAttributes(props,items,false);
 		shivaLib.callback=Draw;
-		shivaLib.posterMode="Setup";
+		shivaLib.posterMode="Edit";
 		$("#controlbar").buttonset();
-		$("#cb1").button({text: true, icons: { primary: "ui-icon-gear"}});
+		$("#cb1").button({text: true, icons: { primary: "ui-icon-pencil"}});
 		$("#cb2").button({text: true, icons: { primary: "ui-icon-shuffle"}});
 		$("#cb3").button({text: true, icons: { primary: "ui-icon-image"}});
 
@@ -125,9 +124,10 @@
 		$("#toolbar").buttonset();
 	});
 
-	function setMode(type)
+	function SetMode(type)
 	{
 		shivaLib.posterMode=type;
+		Draw();
 	}
 
 	function shivaEventHandler(e)
@@ -148,33 +148,24 @@
 	{	
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("DataChanged=true","*");
-		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+		if (shivaLib.posterMode == "Connect")
+			DrawConnections();
+		else
+			shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 
 	function SaveData(mode)
 	{
-		return shivaLib.SaveData(mode,shivaGroup,items,props[chartType],chartType);
+		return shivaLib.SaveData(mode,shivaGroup,items,props);
 	}	
 
 	function ReEdit(jsonData)
 	{
-		if (jsonData) {
-			if (jsonData.chartType)
-				chartType=jsonData.chartType;
-			}
-		else{
-			var s,e;
-			var query=window.location.search.substring(1);
-			if ((s=query.indexOf("&chartType=")) != -1)
-				if ((e=query.indexOf("&",s+1)) != -1)
-					chartType=query.substring(s+11,e);
-			}
-		SetAttributes(chartType,false);	
-		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
+		SetAttributes(false);	
+		var it=shivaLib.ReEdit(jsonData,props,false);
 		if (it)
 			items=it;
-		SetAttributes(chartType,true);
-		$("#chartType").val(chartType);
+		SetAttributes(true);
 		Draw();
 	}
 
@@ -186,10 +177,9 @@
 			shivaLib.ShowHelp(att,helpText);
 	}	
 
-	function SetAttributes(type,keep)
+	function SetAttributes(keep)
 	{
-		chartType=type;
-		shivaLib.SetAttributes(props[chartType],items,keep);
+		shivaLib.SetAttributes(props,items,keep);
 	}	
 
 ///////// ITEMS  /////////////
@@ -199,13 +189,13 @@
 		var o=new Object;
 		var s=0,i=0;
 		shivaLib.Sound("ding");
-		for (var key in props[chartType]) {
+		for (var key in props) {
 			if (key == "item")
 				s=i;
 			++i;
 			if (!s)
 				continue;
-			o[key]=props[chartType][key].def;
+			o[key]=props[key].def;
 			}
 		var scale=shivaLib.posterScale;
 		for (var i=0;i<items.length;++i)
@@ -217,7 +207,7 @@
 		items.push(o);
 		for (var i=0;i<items.length;++i)
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 		$("#accord").accordion({ active: items.length-1 });
 	}	
@@ -231,7 +221,7 @@
 		items.splice(active,1);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 	}
 
@@ -240,7 +230,7 @@
 		var cur=shivaLib.ShiftItem(dir,items);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		if (cur != -1)
 			$("#accord").accordion({ active: cur });
 	}
@@ -294,6 +284,273 @@
 			}
 	}
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	CONNECT
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+var g=new SHIVA_Graphics();
+
+function DrawConnections()												// DRAW PROXIES/LINES
+{
+	shivaLib.DrawPoster();													// Redraw background
+//	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
+//	DrawLinks();															// Draw link lines first
+//	DrawItems();															// Draw items
+}
+
+function DrawLinks()													// DRAW LINK LINES
+{
+	var i,o,v,k=0,dir,dir2,dir3;
+	var leftToRight;
+	var fx,fy,tx,ty,fr,fi,te,ti,dx,dy;
+	var ctx=$("#links")[0].getContext('2d');								// Get context
+	var xMax=$("#links")[0].width;											// Init max wid to cur wid
+	var yMax=$("#links")[0].height;											// And hgt
+	ctx.clearRect(0,0,xMax,yMax);											// Erase canvas
+	for (i=0;i<shivaLib.cvs.elements.length;++i) {							// For each element
+		xMax=Math.max(xMax,shivaLib.cvs.elements[i].px+200);				// Get max x
+		yMax=Math.max(xMax,shivaLib.cvs.elements[i].py);					// Get max y
+		}
+	$("#links")[0].width=xMax;												// Set new wid
+	$("#links")[0].heigt=yMax;												// Set new hgt
+	for (i=0;i<items.length;++i) {											// For each action
+		dleftToRight=leftToRight=true;										// Assume l-r
+		dir2=dir=2;															// Dir divisors
+		v=String(items[i].from).split(".");									// From array
+		fe=v[0];		fi=v[1];											// Split into element/item
+		v=String(items[i].to).split(".");									// To array
+		te=v[0];		ti=v[1];											// Split into element/item
+		if ((shivaLib.cvs.elements[fe].pv == false) || (shivaLib.cvs.elements[te].pv == false))		// If not visible
+			continue;														// Skip
+		fx=Number(shivaLib.cvs.elements[fe].px)+75;										// Center from x
+		fy=Number(shivaLib.cvs.elements[fe].py)+Number(shivaLib.cvs.elements[fe].ph)-15;				// Y
+		tx=Number(shivaLib.cvs.elements[te].px)+75;										// To X
+		ty=Number(shivaLib.cvs.elements[te].py)+Number(shivaLib.cvs.elements[te].ph)-15;				// Y
+		if (items[i].type == "fill") {										// If a data fill
+			if (shivaLib.cvs.elements[items[i].dat].pv == false)							// If not visible
+				continue;													// Skip
+			dx=Number(shivaLib.cvs.elements[items[i].dat].px)+52;						// Center X
+			dy=Number(shivaLib.cvs.elements[items[i].dat].py)+48;						// Y
+			if (dx < fx)													// If data left of control
+				leftToRight=false;											// Set l-r flag to false
+			if (dx > tx) 													// If data left of control
+				dleftToRight=false;											// Set d l-r flag to false
+			}
+		else if (tx < fx)													// If a set and left of control
+			dleftToRight=leftToRight=false;									// Set l-r flag to false
+		if (fi != 0)  														// If coming from a sub-item 
+			fy-=(shivaLib.cvs.elements[fe].ph)-(fi*17)-33;								// Line up with item
+		if (ti != 0) 														// If going to a sub-itmem
+			ty-=(shivaLib.cvs.elements[te].ph)-(ti*17)-33;								// Align verically w/ item
+		if (leftToRight)													// If 'to' is to the right
+			fx+=78,tx-=74,dir2=-2;											// Set sides
+		else																// On left	
+			fx-=76,tx+=76,dir=-2;											// Set sides
+		if (items[i].type == "fill") {										// If a data fill
+			if (shivaLib.cvs.elements[items[i].dat].px > shivaLib.cvs.elements[te].px)				// If right of data
+				tx=shivaLib.cvs.elements[te].px+150,dir2=2;
+			var x=[fx,fx+(100/dir),dx,dx,dx,tx+(100/dir2),tx];				// Route line
+			var y=[fy,fy,dy,dy,dy,ty,ty];									// thru data icon
+			}
+		else{																// Set action
+			var x=[fx,fx+(100/dir),tx+(100/dir2),tx];						// Draw S-shaped
+			var y=[fy,fy,ty,ty];											// line
+			}
+		g.DrawPolygon(ctx,-1,.75,x,y,itemCols[(k)%items.length],2,true);	// Draw line, varying color
+		dx=4;																// Offset for whole
+		if (ti != 0) 														// If going to a sub-itmem
+			dx=12;															// Bigger offset
+		if (dleftToRight)													// If l-r
+			g.DrawTriangle(ctx,itemCols[(k++)%items.length],1,tx-dx,ty,4,"right")
+		else																// R-l
+			g.DrawTriangle(ctx,itemCols[(k++)%items.length],1,Number(tx)+dx,ty,4,"left")
+		}
+}
+
+function DrawItems()													// DRAW ELEMENT PROXIES
+{
+	var o,v,p;
+	var i,j,knum;
+	var str,lab,title;
+	for (i=0;i<items.length;++i) {
+		num=i;
+		k=0;
+		o=items[i];
+		while (1) {
+			if (!o["item-"+(Number(k)+1)])
+				break;
+			else
+				++k;
+			}
+		if ((o.shivaTitle) && (o.shivaTitle.length > 22))
+			title=o.shivaTitle.substr(0,22)+"...";
+		else
+			title=o.shivaTitle;
+		if (o.shivaGroup == "Data") {
+			str="<div id='element"+i+"' style='position:absolute;left:"+o.px+"px;top:"+o.py+"px'>";
+			str+="<p id='item"+i+"-0' align='center'><img src='dataicon.gif'><br/><b>"+o.shivaTitle+"</b></p>";
+			$("#containerDiv").append("</div>"+str)
+			$("#item"+i+"-0").css("padding","4px").addClass("rounded-corners");
+			$("#element"+num).draggable({drag:ElementMove,cursor:'move'});
+			o.ph=96;				
+			}
+		else{
+			str="<div id='element"+i+"' style='position:absolute;left:"+o.px+"px;top:"+o.py+"px;width:150px;'>";
+			str+="<p style='text-shadow:1px 1px white' align='center'><b>"+title+"</b></p>";
+			for (j=1;j<=k;++j) {
+				if (o.shivaGroup == "Control") {
+					v=o["item-"+j].split(";");
+					for (var ii=0;ii<v.length;++ii) {
+						p=v[ii].split(":");
+						lab=p[1];
+						if ((p[0] == "label") && (p[1])) break;
+						if ((p[0] == "def")   && (p[1])) break;
+						}
+					}
+				else{
+					s=o["item-"+j].indexOf("name:");
+					e=o["item-"+j].indexOf(";",s);
+					lab=o["item-"+j].substring(s+5,e)
+					}
+				str+="<div id='item"+i+"-"+j+"' style='position:absolute;width:166px;height:12px' class='linkButton'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+lab+"</div>";
+				}
+			str+="<div align='center' id='item"+i+"-0'style='position:absolute;width:133px;height:12px;' class='linkButton' >Whole element</div>";
+			$("#containerDiv").append("</div>"+str)
+			$("#element"+i).addClass("rounded-corners");
+			$("#element"+num).css("background-color","#eee").css('border',"1px solid #999");
+			$("#element"+i).css("background","-webkit-linear-gradient(top, #dfdfdf 0%, #f0f0f0 100%)")
+			$("#element"+num).draggable({drag:ElementMove,cursor:'move'});
+			o.pn=k;
+			o.ph=(k*17)+22+27+16;
+			$("#element"+num).css("height",o.ph);
+			for (j=0;j<=k;++j) {
+				$("#item"+num+"-"+j).draggable({stop:StopItemDrag,start:StartItemDrag,drag:ItemDrag,cursor:'e-resize'});
+				StopItemDrag("","","#item"+num+"-"+j);
+				$("#item"+num+"-"+j).addClass("rounded-corners").css("background-color","#ccc").css('border',"1px solid #999");
+				}
+			}
+		}
+}
+
+function ItemDrag(e,ui)
+{
+	var i,inum;
+	var id="#"+e.target.id;
+	var num=id.substring(5,id.indexOf("-"));
+	var eid="#element"+num;
+	var x=Number(ui.position.left)+Number($(eid).css("left").replace(/px/g,""))+Number(dragOffX);
+	var y=Number(ui.position.top )+Number($(eid).css("top").replace(/px/g,""));
+	if (curDragElement != -1) {
+		if (shivaLib.cvs.elements[curDragElement].shivaGroup == "Data")
+			$("#item"+curDragElement+"-"+curDragItem).css("border","none");
+		else
+			$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #999");
+		}
+	curDragItem=curDragElement=-1;
+	for (i=0;i<shivaLib.cvs.elements.length;++i) {
+		if ((x >= shivaLib.cvs.elements[i].px) && (x < shivaLib.cvs.elements[i].px+150) && (i != num) &&
+			(y >= shivaLib.cvs.elements[i].py) && (y < shivaLib.cvs.elements[i].py+shivaLib.cvs.elements[i].ph)) {
+			curDragElement=i;
+			curDragItem=0;
+			inum=Math.floor((y-Number($("#element"+i).css("top").replace(/px/g,"")))/17);
+			if ((inum > 0) && (inum < shivaLib.cvs.elements[i].pn+1))
+				curDragItem=inum;
+			break;
+			}
+		}
+	$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #990000");
+}
+
+function StartItemDrag(e,ui)
+{
+	var id="#"+e.target.id;
+	var eid="#element"+id.substring(5,id.indexOf("-"));
+	$(eid).css("z-index",1000);
+	$(id).css("z-index",1001)
+	dragOffX=e.pageX-$("#containerDiv").css("left").replace(/px/g,"")-$(eid).css("left").replace(/px/g,"")-$(id).css("left").replace(/px/g,"");
+	dragOffY=e.pageY-$("#containerDiv").css("top" ).replace(/px/g,"")-$(eid).css("top" ).replace(/px/g,"")-$(id).css("top" ).replace(/px/g,"");
+}
+
+function StopItemDrag(e,ui,id)
+{
+	var y,s;
+	$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #999");
+	if (!id) 
+		id="#"+e.target.id;
+	var num=id.substring(5,id.indexOf("-"));
+	var inum=id.substring(id.indexOf("-")+1);
+	if (curDragItem != -1) {
+		var o=new Object();
+		o.from=num+"."+inum;
+		o.to=curDragElement+"."+curDragItem;
+		o.alpha=100;
+		o.vis=true;
+		if (shivaLib.cvs.elements[curDragElement].shivaGroup == "Data"){
+			o.type="fill";
+			o.fld="";
+			o.query="";
+			o.dat=curDragElement;
+			curDataDrag=items.length;
+			selectedItems[0]=items.length;
+			items.push(o);
+			ShowElements();
+			$(id).append("<div id='dragdir' align='center' style='position:absolute;top:-16px;left:171px;width:8px;background:#eee'><font color='#990000'>Drag this over element to fill with data</font></div>");
+			$("#dragdir").css("border","1px solid #990000").css("padding","4px").addClass("rounded-corners");
+			shivaLib.Sound("click");
+			return;
+			}
+		else
+			o.type="set";
+		if (curDataDrag != -1) {
+			if (curDragElement != -1) { 
+				items[curDataDrag].to=o.to;
+				$("#dragdir").remove();
+				DrawLinks();
+				shivaLib.Sound("ding");
+				}
+			}		
+		else{
+			selectedItems[0]=items.length;
+			items.push(o);
+			ShowElements();
+			DrawLinks();
+			shivaLib.Sound("ding");
+			}
+		}
+	else{
+		if (curDataDrag != -1) {
+			items.pop();
+			$("#dragdir").remove();
+			shivaLib.Sound("delete");
+			}			
+		}
+	curDragItem=curDragElement=-1;
+	if ((s=id.indexOf("-0")) != -1) {
+		y=shivaLib.cvs.elements[num].ph-22;
+		$("#element"+num).css("z-index","auto");
+		$(id).css("left","9px");
+		}
+	else{
+		y=Number(10)+(inum*17);
+		$(id).css("left","-9px");
+		}
+	$(id).css("top",y+"px");
+	$(id).css("z-index","auto");
+	dragOffX=dragOffY=0;
+	curDataDrag=-1;	
+	SetDataChanged(true);
+}
+
+function ElementMove(e,ui)
+{
+	var j=e.target.id.substr(7);
+	shivaLib.cvs.elements[j].px=Number(ui.position.left);
+	shivaLib.cvs.elements[j].py=Number(ui.position.top)
+	DrawLinks();
+}
+		
+		
 		
 </script>
 </body></html>

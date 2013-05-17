@@ -23,8 +23,8 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
   stimeline.con="#"+stimeline.container;
 
   // Always set width and height before drawing timeline as the layout depends on the container size.
-  $(stimeline.con).css('width',stimeline.options['width']+"px");
-  $(stimeline.con).css('height',stimeline.options['height']+"px");
+  $(stimeline.con).width(stimeline.options['width']);
+  $(stimeline.con).height(stimeline.options['height']);
   $(stimeline.con).timeline('resize');  // Resixe after setting height
 
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
