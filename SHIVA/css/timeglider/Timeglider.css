@@ -1120,13 +1120,15 @@
 	padding:8px;
 	height:auto;
 	z-index: 99999999905;
-	position: absolute !important;
-	top: -300px !important;
+	/* below added by SAM for Image fix */
+	/*position: absolute !important;
+	top: -300px !important;*/
 }
 
 .tg-ev-modal-description {
 	height:auto;
 	max-height:50%;
+	/* overflow added by SAM for image fix */
 	overflow-x:hidden;
 	overflow-y:auto;
   background: white;

@@ -7697,7 +7697,9 @@ tg.TG_TimelinePlayer.prototype = {
     return html;
   },
   
-  
+  /** 
+   * Event Modal (eventmodal) Function: Creates Popup for Event (comment added by ndg) 
+   */
   
   eventModal : function (eid, $event) {
   
@@ -7719,6 +7721,7 @@ tg.TG_TimelinePlayer.prototype = {
       links = this.createEventLinksMenu(ev.link),
         
       templ_obj = { 
+      	id:ev.id, // added by ndg to get template to include id
         title:ev.title,
         description:ev.description,
         link:ev.link,
@@ -7737,10 +7740,11 @@ tg.TG_TimelinePlayer.prototype = {
         modal_type = "full";
         
       // if the embed size is small
-      } else if ((ev.description.length > 1200) || (me.dimensions.container.width < 500)) {
+      // ndg upped length from 1200 to 2000 for SHIVA
+      } else if ((ev.description.length > 2000) || (me.dimensions.container.width < 500)) {
         modal_type = "full";
       }
-      console.info(modal_type);
+      
             // return false;
       switch (modal_type) {
       
@@ -7888,8 +7892,8 @@ tg.TG_TimelinePlayer.prototype = {
           // abstract this into a common positioning function
           // for any of the small modals...
           // $event.parent()
-            $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent());
-          // added code to replace escaped markup with valid tags (ndg, 2013-03-28)
+            $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent()); 
+          // added code below to replace escaped markup with valid tags (ndg, 2013-03-28)
           var ihtml = $modal[0].innerHTML;
           ihtml = ihtml.replace(/&lt;(\/?[^&]+)&gt;/g, "<$1>");
           $modal[0].innerHTML = ihtml;
@@ -7935,14 +7939,17 @@ tg.TG_TimelinePlayer.prototype = {
           }
           arrow_class = "arrow-" + tb_class + "-" + lr_class;
           
-              $modal.css({
+          $modal.css({
               "z-index": me.ztop++,
               "top":top_set,
               "left":ev_left
-              });
+          });
+          
+          // Adding code to make modal draggable (ndg)
+          $modal.draggable({cancel : 'div.tg-ev-modal-description'});
               
       
-          } // eof switch
+     } // eof switch
   }, // eof eventModal
   
   
