@@ -7740,6 +7740,7 @@ tg.TG_TimelinePlayer.prototype = {
       } else if ((ev.description.length > 1200) || (me.dimensions.container.width < 500)) {
         modal_type = "full";
       }
+      console.info(modal_type);
             // return false;
       switch (modal_type) {
       
@@ -10034,16 +10035,16 @@ tg.validateOptions = function (widget_settings) {
         MED.setFocusDate(new TG_Date(this.options.initial_focus));
         MED.loadTimelineData(this.options.data_source, this.options.loaded);
         
-        // binds drag of timeline to messaging, ndg added for SHIVA
-        //Need to give center|start| and end of timeline window on drag
+        // Timeline events HTML 5 Messaging: 1. center date changed (timeline drag), 2. event clicked
+        // Added by ndg for SHIVA
        $('.timeglider-ticks').bind('drag',function() {
           var scope = MED.getScope();
-          shivaLib.SendShivaMessage("ShivaTime=time|" + scope.focusMS + "|" + scope.leftMS + "|" + scope.rightMS);
+          shivaLib.SendShivaMessage("ShivaTime=time|" + window.name + "|" + scope.focusMS + "|" + scope.leftMS + "|" + scope.rightMS);
         });
         // binds opening event modals to messaging ndg added for SHIVA
         $('.timeglider-timeline-event').live('click', function() {
            var teid = ($(this).attr('id').split('-')).pop();
-           shivaLib.SendShivaMessage("ShivaTime=event|"+teid);
+           shivaLib.SendShivaMessage("ShivaTime=event|"+ window.name + "|" + teid);
          });
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);
