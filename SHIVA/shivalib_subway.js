@@ -127,7 +127,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 			else
 				str+=lab;
 			$("#textLayer").append(str+"</div>");
-			$("#shivaSubtx"+j).click(function(){shivaLib.SendShivaMessage("ShivaSubway="+this.id.substr(10))});
+			$("#shivaSubtx"+j).click(function(){shivaLib.SendShivaMessage("ShivaSubway=click|"+window.name+"|"+this.id.substr(10))});
 			if (tp == "t") 	
 				$("#shivaSubtx"+j).css("top",(y2-$("#shivaSubtx"+j).height()+4)+"px");
 			else if ((tp == "r") || (tp == "l")) 	

@@ -53,12 +53,21 @@ function VIZ(container)
 	}
 }
 
+SHIVA_Show.prototype.NetworkActions=function(msg)								// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");															// Split msg into parts
+	if (v[0] == "ShivaAct=resize") {  												// RESIZE
+		if (v[1] == "100") 															// If forcing 100%
+			shivaLib.options.width=shivaLib.options.height="100%";					// Set values
+		shivaLib.DrawNetwork();														// Redraw
+	}
+}
+
 VIZ.prototype.Draw=function(json) 
 {
 	var k,key,val;
 	this.chartType=json.chartType;		
 	for (key in json) {
-		
 		val=json[key];
 		if (key.match(/_(fillStyle|strokeStyle|color)/)) 	// It would be nice to inspect props here ...
 			val = '#' + val;
@@ -78,8 +87,8 @@ VIZ.prototype.Draw=function(json)
 		}
 	new google.visualization.Query(json.dataSourceUrl).send($.proxy(this.Google2Jit,this));
 	this.config=this.Config[this.chartType]; 
-	$jit.id(this.container).style.height=this.config.height+"px";
-	$jit.id(this.container).style.width=this.config.width+"px";	
+	$("#"+this.container).height(this.config.height);
+	$("#"+this.container).width(this.config.width);
 	$jit.id(this.container).style.backgroundColor=this.config.background.CanvasStyles.fillStyle;
 }
 
@@ -175,17 +184,21 @@ VIZ.prototype.Init = {
 		var config 	= obj.Config[obj.chartType];
 		var div 		= obj.container;
 		config.injectInto = div;							// Canvas level params set at run time
+
+		var divElement = document.getElementById(div);
+		config.width = divElement.offsetWidth; // - 50;
+		config.height = divElement.offsetHeight; // - 50;
 		            
 		config.onCreateLabel = function(domElement, node) {
 			domElement.className = 'shiva-node-label';
 			domElement.innerHTML = node.name;
 			domElement.onclick = function(){
-				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
+				shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
 				rgraph.onClick(node.id,{});
 			};
 			var style = domElement.style;
 			style.fontSize 		= config.Label.size + 'px';
-			style.color 			= config.Label.color;
+			style.color 		= config.Label.color;
 			style.fontWeight 	= config.Label.style;
 			style.fontStyle 	= config.Label.style;
 			style.fontFamily 	= config.Label.family;
@@ -235,16 +248,16 @@ VIZ.prototype.Init = {
 		var canvasConfig = rgraph.canvas.getConfig();	
 	},
 	forcedir: function (obj) {
-		var jsonData 	= obj.data;
-		var config		= obj.Config[obj.chartType];
+		var jsonData 		= obj.data;
+		var config			= obj.Config[obj.chartType];
 		var div 			= obj.container;
 		config.injectInto = div; 
-		
+	
 		config.onCreateLabel = function(domElement, node){
 			var style = domElement.style;
 			domElement.className = 'shiva-node-label';
 			style.fontSize 		= config.Label.size + 'px';
-			style.color 			= config.Label.color;
+			style.color 		= config.Label.color;
 			style.fontWeight 	= config.Label.style;
 			style.fontStyle 	= config.Label.style;
 			style.fontFamily 	= config.Label.family;
@@ -258,7 +271,7 @@ VIZ.prototype.Init = {
 			style.top = (top + 10) + 'px';
 			style.display = '';
 			domElement.onclick = function(){
-				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
+				shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
 			};
 		};
 
@@ -317,7 +330,7 @@ VIZ.prototype.Init = {
 	},
 	hypertree: function (obj) {
 		var data 		= obj.data;
-		var config	= obj.Config[obj.chartType];
+		var config		= obj.Config[obj.chartType];
 		var div			= obj.container;
 	
 		config.injectInto = div;
@@ -341,7 +354,7 @@ VIZ.prototype.Init = {
 			$jit.util.addEvent(domElement, 'click', function () {
 				ht.onClick(node.id, {
 					onComplete: function() {
-						shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
+						shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
 						ht.controller.onComplete();
 					}
 				});

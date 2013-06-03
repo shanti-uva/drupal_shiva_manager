@@ -71,13 +71,13 @@ SHIVA_Show.prototype.DrawEarth=function()
 			ShivaPostInit();											// Do any post-init actions					
 		google.earth.addEventListener(this.map.getGlobe(),'click', function(e) {	 // Click event
 			var str=e.getLatitude()+"|"+e.getLongitude()+"|"+e.getClientX()+"|"+e.getClientY();
-	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+str);			// Send shiva message
+	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+window.name+"|"+str);		// Send shiva message
  			});
 		google.earth.addEventListener(shivaLib.map.getView(),'viewchangeend', function() { 
 			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
 			var view=Math.floor(lookAt.getLatitude()*10000)/10000+"|"+Math.floor(lookAt.getLongitude()*10000)/10000+"|";
 			view+=Math.floor(lookAt.getRange())+"|"+Math.floor(lookAt.getTilt()*100)/100+"|"+Math.floor(lookAt.getHeading()*100)/100;
- 			shivaLib.SendShivaMessage("ShivaEarth=move|"+view);			// Send shiva message
+ 			shivaLib.SendShivaMessage("ShivaEarth=move|"+window.name+"|"+view);		// Send shiva message
 			});
 		}
 	this.SendReadyMessage(true);										// Send ready message									
@@ -139,7 +139,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 			obj.set(link,true,fly); 									// Sets the flyToView
 			items[i].listener=google.earth.addEventListener(obj,'click', function(e) {		 // Click event
 				var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();		// Get lon and lat
-		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+str);		// Send shiva message
+		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+window.name+"|"+str);		// Send shiva message
 	 			});
 			}
 		if (items[i].layerType == "MarkerSet") {						// MarkerSet layer
@@ -239,12 +239,12 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	google.maps.event.addListener(this.map,'click', function(e) {
 	 	var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
 	 	var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
-	 	shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);
+	 	shivaLib.SendShivaMessage("ShivaMap=click|"+window.name+"|"+l+"|"+p);
  		});
 	google.maps.event.addListener(this.map,'center_changed', function(e) {
 	 	var map=shivaLib.map;
 	 	var lat=map.getCenter();
-	 	shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());
+	 	shivaLib.SendShivaMessage("ShivaMap=move|"+window.name+"|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());
  		});
 }
 
@@ -305,7 +305,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 					if (v[2] == this.title)					
  						break;											
   					}
-   				shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
+   				shivaLib.SendShivaMessage("ShivaMap=marker|"+window.name+"|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
 	 			});
 			}
 		else if (items[i].layerType == "MarkerSet") {
@@ -326,7 +326,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 //	38.07,-78.55,37.99,-78.41
 //	//www.viseyes.org/shiva/map.jpg
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+this.url+"|"+e.latLng.lat()+"|"+e.latLng.lng());
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+window.name+"|"+this.url+"|"+e.latLng.lat()+"|"+e.latLng.lng());
  				});
 			}
 		else if (items[i].layerType == "KML") {
@@ -338,7 +338,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
 	  			var str=this.url+"|"+e.featureData.name+"|"+e.latLng.lat()+"|"+e.latLng.lng();
-		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+str);
+		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+window.name+"|"+str);
 	 			});
 			}
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
@@ -455,7 +455,7 @@ SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP
   			for (j=0;j<mData.length;++j)								// Look thru data	
  				if (mData[j].title == this.title)						// If titles match
  						break;											// Quit looking
-    		shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
+    		shivaLib.SendShivaMessage("ShivaMap=marker|"+window.name+"|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);
 			if (mData[j].desc) {										// If a desc
 				shivaLib.mapsInfoWindow.setContent(mData[j].desc);		// Set new desc
 	   			shivaLib.mapsInfoWindow.open(this.map,this);			// Open

@@ -24,7 +24,6 @@
 		table.propTable td { font-size: 10px; }
 		table.propTable td select {max-width: 120px;}
 	</style>
-	
 </head>
 <body>
 	<div style="width:279px;position:absolute;top:0px;left:0px">
@@ -59,6 +58,7 @@
       initial_zoom:         { def:'49',    opt:'number',   des:'Initial zoom of timeline'}, 
       min_zoom:             { def:'10',       opt:'number',        des:'Minimum zoom of timeline'}, 
       max_zoom:             { def:'70',  opt:'number',     des:'Maximum zoom of timeline'}, 
+      imglane_height:		{ def: '60', opt:'number',     des:'Image lane height'},
       font_name:            { def:'Arial',   opt:'Arial|Comic Sans MS|Courier New|Geneva|Georgia|Helvetica|Impact|Lucida Console|Lucida Sans Unicode|Lucida Grande|Monaco|Times New Roman|Trebuchet MS|Verdana|',     des:'Font' },
       fontColors:           { def:'',   opt:'advanced',     des:'Font colors' },
       backgroundColors:     { def:'',     opt:'advanced',    des:'Background colors'},
@@ -79,6 +79,7 @@
 	helpText['Initial zoom of timeline']="Click on the text box to the right and enter a number representing the initial zoom factor of the timeline (1 - 100)";
 	helpText['Minumum zoom of timeline']="Click on the text box to the right and enter a number representing the minimum zoom factor of the timeline (1 - 100)";
 	helpText['Maximum zoom of timeline']="Click on the text box to the right and enter a number representing the maximum zoom factor of the timeline (1 - 100)";
+	helpText['Image lane height']="Click on the text box to the right and enter the height (in pixels) for the image lane at the top of the timeline";
 	helpText['Font']="Use the drop-down menu to the right to choose a font to use for the text of the timeline. It is best to use standard fonts, such as Arial, Courier, and Times Roman, to ensure that the font will display on all computers.";
 	helpText['Font colors']="Click on the text box to the right to open a dialog that allows you to set multiple font colors of the timeline in the following order: <ol><li>main area font</li><li>header fonts for timeline and popups</li><li>text of popups</li></ol><br /> When setting colors either click on the square color chip icon in the relevant text box to launch the color picker and select  a color, or enter a hexadecimal color value in the text box.";
 	helpText['Background colors']="Click on the text box to the right to open a dialog that allows you to set multiple background colors for the following areas of the timeline: <ol><li>main background of the timeline</li><li>event spans</li><li>background for the header, footer, and zoom controls</li><li>background of popup boxes,</li><li>background  for the image lane at the top of the timeline</li><li>\'tick\' lane at the bottome of the timeline</li></ol><br />When setting colors either click on the square color chip icon in the relevant text box to launch the color picker and select  a color, or enter a hexadecimal color value in the text box.";

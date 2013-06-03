@@ -396,7 +396,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 			aProps= { 	left: 	{ opt:'string',	 des:'Left'},				// Sub-items
 						top: 	{ opt:'string',	 des:'Top'},
 						height: { opt:'string',	 des:'Height'},
-						width: 	{ opt:'strinh',	 des:'Width'}
+						width: 	{ opt:'string',	 des:'Width'}
 						}			
 			break;
 		case "backgroundColor": 																				

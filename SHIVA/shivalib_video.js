@@ -47,14 +47,14 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			v[1]=v[0],v[0]=0;
     	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { 
      		this.pause()
-			shivaLib.SendShivaMessage("ShivaVideo=done");
+			shivaLib.SendShivaMessage("ShivaVideo=done|"+window.name);
     		});
     	}
 	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
-	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});
-	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});
-	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});
+	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done|"+window.name)});
+	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play|"+window.name)});
+	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause|"+window.name)});
 
 	if (this.ev) 
 		t=this.ev.events;
@@ -79,7 +79,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	else
      		shivaLib.player.pause();
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
- 		shivaLib.SendShivaMessage("ShivaVideo=ready");
+ 		shivaLib.SendShivaMessage("ShivaVideo=ready|"+window.name);
    	}
 
   	function drawOverlay()	{
@@ -91,7 +91,13 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaActVideo=play") {									// PLAY
+	if (v[0] == "ShivaAct=resize") { 									// RESIZE
+		if (v[1] == "100") {											// If forcing 100%
+			$("#containerDiv").width("100%");							// Set container 100%
+			$("#containerDiv").height("100%");							// Set container 100%
+			}
+		}
+	else if (v[0] == "ShivaActVideo=play") {							// PLAY
 		this.player.play();												// Play from current spot
 		if (v[1] != undefined)											// If a time set
 				this.player.play(v[1]);									// Play from then
@@ -104,7 +110,6 @@ SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION ME
 		}
 }
   
-
 SHIVA_Show.prototype.TimecodeToSeconds=function(timecode) 				// CONVERT TIMECODE TO SECONDS
 {
 	var h=0,m=0;

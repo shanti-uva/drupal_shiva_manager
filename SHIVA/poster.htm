@@ -34,7 +34,7 @@
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
 	</table> 
-   <p style="text-align:right"><span style="vertical-align:50%">Montage images </span><span id="toolbar" style="font-size:medium">
+   <p style="text-align:right"><span style="vertical-align:50%">Poster panes </span><span id="toolbar" style="font-size:medium">
 		<button type='button' id='tb1' onclick='ShiftItem(-1)'> </button>
 		<button type='button' id='tb2' onclick='ShiftItem(1)'> </button>
 		<button type='button' id='tb3' onclick='RemoveItem()'> </button>
@@ -72,6 +72,7 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
+		style: 						{	def:'border:3px solid white', 	opt:'string',	des:'CSS styling'}, 
 	}
 	
 	var helpText=new Array();
@@ -86,6 +87,8 @@
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
 	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
+	helpText['CSS styling']="CSS formatted styling for pane box, with multiple styles separated by |'s. i.e. <i>border=2px solid white|background=black</i>";
+
 	
 ///// INIT  /////////////
 	
@@ -132,6 +135,7 @@
 
 	function shivaEventHandler(e)
 	{
+		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -148,7 +152,7 @@
 	{	
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("DataChanged=true","*");
-		if (shivaLib.posterMode == "Connect")
+		if (shivaLib.posterMode == "Connect") 
 			DrawConnections();
 		else
 			shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
@@ -238,6 +242,21 @@
 	function ShowSample()
 	{
 		var data={
+			"item-1": "name:Pane-1;data:239|245|180;url:375;layerTitle:Pie Chart;scrollbars:false;style:",
+			"item-2": "name:Pane-2;data:148|843|191;url:401;layerTitle:MLK;scrollbars:false;style:border=3px solid white",
+			"item-3": "name:Pane-3;data:200|195|825;url:393;layerTitle:Movie;scrollbars:false;style:border=3px solid white",
+			"item-4": "name:Pane-4;data:220|594|513;url:394;layerTitle:Video;scrollbars:false;style:",
+			"pos": "1000|500|500",
+			"height": "600",
+			"width": "800",
+			"backCol": "eeeeee",
+			"dataSourceUrl": "http://www.viseyes.org/shiva/map.jpg",
+			"overview": "true",
+			"grid": "false",
+			"controlbox": "true",
+			"ud": "true",
+			"shivaMod": "Wed, 22 May 2013",
+			"shivaGroup": "Poster"
 			}
 		ReEdit(data);
 	}
@@ -249,17 +268,20 @@
 		var i,inc,str;
 		var w=$("#posterDiv").width();
 		var h=$("#posterDiv").height();
+		if ($("#posterGridDiv").length == 0)
+			$("#posterDiv").append("<div id='posterGridDiv'></div>");	
+		$("#posterGridDiv").empty();
 		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed #333;opacity:.5;";
 		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border :1px dashed #333;opacity:.5;";
 		inc=h/4;
 		for (i=1;i<4;++i) {
 			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
-			$("#posterDiv").append(str);
+			$("#posterGridDiv").append(str);
 			}
 		inc=w/4;
 		for (i=1;i<4;++i) {
 			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
-			$("#posterDiv").append(str);
+			$("#posterGridDiv").append(str);
 			}
 	}
 	
@@ -293,7 +315,11 @@ var g=new SHIVA_Graphics();
 
 function DrawConnections()												// DRAW PROXIES/LINES
 {
-	shivaLib.DrawPoster();													// Redraw background
+		var win=document.getElementById("posterFrame-0").contentWindow;			// Point at iframe	
+		win.postMessage("ShivaAct=id|posterFrame-0","*");						// Send message to container
+	
+
+//	shivaLib.DrawPoster();													// Redraw background
 //	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
 //	DrawLinks();															// Draw link lines first
 //	DrawItems();															// Draw items

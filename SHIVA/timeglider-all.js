@@ -7892,7 +7892,7 @@ tg.TG_TimelinePlayer.prototype = {
           // abstract this into a common positioning function
           // for any of the small modals...
           // $event.parent()
-            $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent()); 
+          $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent()); 
           // added code below to replace escaped markup with valid tags (ndg, 2013-03-28)
           var ihtml = $modal[0].innerHTML;
           ihtml = ihtml.replace(/&lt;(\/?[^&]+)&gt;/g, "<$1>");
@@ -7901,18 +7901,18 @@ tg.TG_TimelinePlayer.prototype = {
           var arrow_class = "", tb_class = "", lr_class = "";
           
           var ev_left = $event.position().left;
-              var ev_top = $event.position().top;
+          var ev_top = $event.position().top;
               
-              var modal_ht = $modal.outerHeight();
+          var modal_ht = $modal.outerHeight();
           var modal_wi = $modal.outerWidth();
           
           var co_off = me.dimensions.container.offset;
           var ev_off = $event.offset();
+         
           
           var extra_top = (MED.timelineCollection.length == 1) ? 24: 0;
 
           var top_set = 0;
-          
           if (ev_off.top - co_off.top < (modal_ht + (pad + extra_top))) {
             // position modal below the event
             top_set = ev_top + $event.height() + 8;
@@ -7939,6 +7939,12 @@ tg.TG_TimelinePlayer.prototype = {
           }
           arrow_class = "arrow-" + tb_class + "-" + lr_class;
           
+          // Not clear on how positioning works but below is added by ndg (2013-06-03)
+          // If top_set is positive, modal appears mostly off the timeline so subtract modal height;
+          if (top_set > -1 * (modal_ht / 2)) { top_set = top_set - modal_ht; }
+          // Prevent from going too far up and off the top (ndg)
+          if (top_set < 0 && (top_set + $event.parent().offset().top) < 0) { top_set = -1 * $event.parent().offset().top + 30; }
+
           $modal.css({
               "z-index": me.ztop++,
               "top":top_set,
@@ -10134,6 +10140,13 @@ tg.validateOptions = function (widget_settings) {
         $('.timeglider-slider-container').hide();
       }
       
+      // Image lane height
+      if (tlopts.imglane_height != MED.image_lane_height) {
+		MED.setImageLaneHeight(tlopts.imglane_height * 1);
+		MED.refresh();
+		timelinePlayer.setImageLaneHandle();
+      }
+      
       // Font face
       var ff = $('.timeglider-event-title').css('font-family');
       if(tlopts.font_name != '' && String($('.timeglider-event-title').css('font-family')).indexOf(tlopts.font_name) == -1) {
@@ -10258,10 +10271,10 @@ tg.validateOptions = function (widget_settings) {
     },
     
     // checks the the style options subset of options sent and returns true if they are the same as previously set
-    //  so if this returns true, it means one of the style options has changes and we should NOT reload timeline
+    //  so if this returns true, it means only the style options have changed and we should NOT reload timeline
     optsEquals : function(o) {
       // the name of the options to be checked. All others ignored
-      var optionsChecked = "title:description:width:height:display_zoom_level:fontColors:backgroundColors:max_modals:show_desc:show_footer:display_zoom_level:";
+      var optionsChecked = "title:description:width:height:display_zoom_level:fontColors:backgroundColors:max_modals:imglane_height:show_desc:show_footer:display_zoom_level:";
       for(var p in o) {
         if(optionsChecked.indexOf(p + ":") == -1) {
           delete o[p];

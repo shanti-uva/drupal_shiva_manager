@@ -111,7 +111,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
-            "image_lane_height":60,
+            "image_lane_height": stimeline.options.imglane_height * 1,
             "loaded":function (args, data) {
               $(stimeline.con).timeline('setOptions', stimeline.options, true);
               $(stimeline.con).timeline('registerEvents', stimeline.events);
@@ -139,7 +139,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
-            "image_lane_height":60
+            "image_lane_height": stimeline.options.imglane_height * 1,
           },
           display : true
         };
@@ -344,3 +344,14 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
   	}
 }
 
+SHIVA_Show.prototype.TimeActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaAct=resize") { 									// RESIZE
+		if (v[1] == "100") {											// If forcing 100%
+			$("#"+shivaLib.container).width("100%");					// Set container 100%
+			$("#"+shivaLib.container).height("100%");					// Set container 100%
+			}
+	$("#"+shivaLib.container).timeline('resize');  						// Resize after setting height
+	}
+}

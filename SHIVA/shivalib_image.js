@@ -131,12 +131,14 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 {
 	var o,v;
 	var mob=shivaLib.imageMob;														// Point at mob
+ 	if (!mob)																		// Nothing there
+ 		return;																		// Q!uit
  	if (mode == "next") {															// Advance to next pic
  		if (mob.curMob < shivaLib.items.length-1)	{								// If not last pic
  			mob.curMob++;															// Inc
 			shivaLib.imageMob.start=new Date().getTime();							// Set start
 			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
- 			}
+			}
  		else{																		// All done
 			if (shivaLib.imageMob.snd)												// If a sound object
 				shivaLib.imageMob.snd.pause();										// Stop playing
@@ -156,15 +158,16 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (($("#"+shivaLib.container+"PlyBut").length == 0) && mob.dur) {				// If no playbut yet, but animated
 		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
-			 $(this).hide();														// Hide it 
+			$(this).hide();															// Hide it 
 			if (shivaLib.imageMob.snd) {											// If a sound object
 				shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;		// Cue audio
 				shivaLib.imageMob.snd.play();										// Start playing
 				}
-			 clearInterval(shivaLib.imageMob.interval);								// Clear timer
-			 shivaLib.imageMob.start=new Date().getTime();							// Set start
-			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
-			 });	
+			clearInterval(shivaLib.imageMob.interval);								// Clear timer
+			shivaLib.imageMob.start=new Date().getTime();							// Set start
+			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
+		  	shivaLib.SendShivaMessage("ShivaImage=play|"+window.name);				// Playing
+			});	
 		}
  	if (mob.url != $("#"+mob.div).attr('src'))	{									// If not same url
  	 	$("#"+mob.div).attr('src',shivaLib.items[mob.curMob].url);					// Set src
@@ -175,6 +178,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
+	  	shivaLib.SendShivaMessage("ShivaImage=pause|"+window.name);					// Pause
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
 		mob.start=0;																// Stop recursing for some reason
 		shivaLib.AnimateDiv("next");												// Get next pic
@@ -201,6 +205,16 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
   		$("#"+shivaLib.container).css("overflow","visible");						// Show extra
   		}
 	$("#"+mob.div).css(o);															// Set css 
+}
+
+SHIVA_Show.prototype.ImageActions=function(msg)									// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");															// Split msg into parts
+	if (v[0] == "ShivaAct=resize") {  												// RESIZE
+		if (v[1] == "100") 															// If forcing 100%
+			shivaLib.options.width=shivaLib.options.height="100%";					// Set values
+		shivaLib.DrawImage();														// Redraw image
+	}
 }
 
                       
