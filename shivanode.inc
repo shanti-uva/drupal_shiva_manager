@@ -278,6 +278,7 @@ function _shivanode_options_list($option = NULL) {
   }
 }
 
+
 /**
  * Returns a structured array defining the values for the privileges 
  *

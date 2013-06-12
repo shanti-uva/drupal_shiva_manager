@@ -166,6 +166,7 @@ function shivanode_menu() {
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
+  
   /*
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
   $items['node/data-elements/simple'] = array(
@@ -220,18 +221,19 @@ function shivanode_menu() {
       'access callback' => TRUE,
       'file' => 'shivanode.inc',
     );
-	
-  // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
-  // Calls _shivanode_shib_check
-  $items['shib/auth/check'] = array(
-    'title' => 'Check Shibboleth Authentication',
-    'type' => MENU_LOCAL_TASK,
-    'description' => 'URL called by JS Interval to check if Shibboleth session is still active',
-    'page callback' => '_shivanode_shib_check',
-    'access callback' => TRUE,
-    'file' => 'shivanode.inc',
-  );
-  
+
+    
+    // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
+    // Calls _shivanode_shib_check
+    $items['shib/auth/check'] = array(
+      'title' => 'Check Shibboleth Authentication',
+      'type' => MENU_LOCAL_TASK,
+      'description' => 'URL called by JS Interval to check if Shibboleth session is still active',
+      'page callback' => '_shivanode_shib_check',
+      'access callback' => TRUE,
+      'file' => 'shivanode.inc',
+    );
+
   return $items;
 }
 
@@ -268,8 +270,8 @@ function shivanode_help($path, $arg) {
  */
  
 /* Is the current user authenticated, used in menu access callbacks */
-function is_auth_user() {
-  return user_is_logged_in();
+function is_auth_user($normal = TRUE) {
+  return user_is_logged_in() * $normal;
 }
 
 
