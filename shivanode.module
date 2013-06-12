@@ -233,6 +233,15 @@ function shivanode_menu() {
       'access callback' => TRUE,
       'file' => 'shivanode.inc',
     );
+    
+    $items['shiva/login'] = array(
+      'title' => 'Login to SHIVA Visualization Manager',
+      'type' => MENU_LOCAL_TASK,
+      'description' => 'Login via shibboleth if enabled.',
+      'page callback' => '_shivanode_login',
+      'access callback' => TRUE,
+      'file' => 'shivanode.inc',
+    );
 
   return $items;
 }

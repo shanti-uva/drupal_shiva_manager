@@ -278,6 +278,20 @@ function _shivanode_options_list($option = NULL) {
   }
 }
 
+/**
+ * _shivanode_login: Function called by shivanode_menu that directs page either to shibboleth login url
+ *                   or if that is not enabled then to the regular user login page
+ *                   This menu url is called by the login link that is added to the main menu through
+ *                   shantizen_preprocess_page function in the theme's template.php
+ */
+function _shivanode_login() {
+  if(is_auth_user()) { return; }
+  if (module_exists('shib_auth')) {
+    drupal_goto(shib_auth_generate_login_url()); // Go to the shibboleth login url
+  } else {
+    drupal_goto('user');
+  }
+}
 
 /**
  * Returns a structured array defining the values for the privileges 
