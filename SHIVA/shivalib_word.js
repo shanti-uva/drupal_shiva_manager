@@ -41,6 +41,10 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                     cloud.load(cloud.options['dataSourceUrl']);
                     break;
                 } else if (prop == "width" || prop == "height" || prop == "low_threshold" || prop == "high_threshold" || prop == 'tiltRange' || prop == "scale") {
+                    if(prop == "height"){
+                        if(this.options.height.indexOf('%') != -1)
+                            this.options.height = $('#containerDiv').height()*(this.options.height.slice(0,-1)/100);
+                    }
                     cloud.options = this.options;
                     cloud.buildLayout(cloud.d);
                 } else {
@@ -84,14 +88,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
         this.draw = function(data) {
             var word = data;
             $('svg').remove();
-            $('#cloudLoad').remove();
-            d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height).append("g").attr("transform", "translate(" + ((cloud.options.width/2)) + "," + ((cloud.options.height/2)) + ")").append('rect').attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")").attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '80%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
+            $('#cloudLoad').remove(); //.attr("transform", "translate(" + ((cloud.options.width/2.2)) + "," + ((cloud.options.height/2)) + ")")
+            var svg = d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height)//.attr('viewbox', '0 0 '+[cloud.options.width, cloud.options.height].join(' '));
+            // /.attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")")
+            svg.append("g").attr('scale', '(1,-1)').append('rect').attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '90%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
             d3.select('g').selectAll("text").data(data).enter().append("text").attr('class', 'word').style("font-size", function(d) {
                 return d.size + "px";
             }).style("font-family", cloud.options.font_name).style("fill", function(d, i) {
                 return fill(i);
             }).attr("text-anchor", "middle").attr("transform", function(d) {
-                return "translate(" + [d.x + 30, d.y] + ")rotate(" + d.rotate + ")";
+                //
+                return "translate(" + [d.x+cloud.options.width/2, d.y+cloud.options.height/2] + ")rotate(" + d.rotate + ")";
             }).text(function(d) {
                 return d.text;
             });
@@ -135,27 +142,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 return d.text + " (" + d.freq + ")";
             }).on('click', function(d){
                 //More SEA events
-                console.log(d.text + " : " +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
-                shivaLib.SendShivaMessage("ShivaWord=click|" + d.text + "|" +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
+                console.log(d.text + " : " +  d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
                 $('.listEntry').css('backgroundColor','white');
                 $(this).css('backgroundColor', 'rgba(255,255,105,0.5)');
             });
-            $('.listEntry').append($('<span>',{
-                css: {
-                    float: 'right'
-                }
-            }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', function(e){
-                var pass; 
-                if(typeof e.data =="undefined")
-                    pass = false;
-                else{
-                    if(typeof e.data.pass=="undefined")
-                        pass = false;
-                    else{
-                        pass = e.data.pass;
-                    }
-                }
+            
+            var listClickHandler = function(e, pass){
+                e.preventDefault();
                 e.stopPropagation();
+                if(typeof pass =="undefined")
+                    pass = false;
                 if($(this).hasClass('ui-icon-close')){
                     $(this).removeClass('ui-icon-close').addClass('ui-icon-arrowreturnthick-1-w');
                     $(this).parent().css('opacity',0.5);
@@ -167,12 +164,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 var word = $(this).parent().text().split(' ')[0];
                 if(!pass)
                     cloud.filter();                
-            }));
+            };
             
-            $('.listEntry').each(function(){
-                if(!data.find($(this).text().split(' ')[0], "text"))
-                    $(this).find('span').click({pass: true})
-            });
+            $('.listEntry').append($('<span>',{
+                css: {
+                    float: 'right'
+                }
+            }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', listClickHandler));
+            
+            $('.listEntry').filter(function(i){
+                    return cloud.filterSet.indexOf($(this).text().split(' ')[0]) != -1;
+            }).find('span').trigger('click',[true]);
             
             if (cloud.options.wordlist == "true") {
                 $('#cloudShowListButton').show();
@@ -184,11 +186,11 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             
             //Bind Events for SHIVA Messages
             d3.selectAll('.word').on("click", function(d) {
-                console.log(d.text + " : " +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
-                shivaLib.SendShivaMessage("ShivaWord=click|" + d.text + "|" +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
+                console.log(d.text + " : " +  d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
             });
             //ready
-            shivaLib.SendShivaMessage("ShivaWord=ready");
+            shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
         };
         this.buildLayout = function(data) {
             var fs;
@@ -213,7 +215,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }).on("end", cloud.draw).start();
         };
         this.load = function(src, algo) {
-            if ( typeof algo == "undefined")
+            if (typeof algo == "undefined")
                 algo = "raw";
             d3.select('svg').remove();
             var qs = 'parser.php?' + encodeURIComponent('url') + '=' + encodeURIComponent(src) + "&" + encodeURIComponent('a') + '=' + encodeURIComponent(algo);
@@ -234,6 +236,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
         };
         this.filter = function(){
             var words = [];
+            cloud.filterSet.length = 0;
             $('.listEntry').filter(function(){
                 return $(this).children('span').hasClass('ui-icon-close');
             }).each(function(){
@@ -284,12 +287,21 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                     json.sort(function(a, b) {
                         return a.size - b.size;
                     });
-                    this.wcloud.buildLayout(json.slice(0, this.wcloud.options.wordcount));
+                    this.wcloud.buildLayout(json);
                 } catch(e) {
                     //parse raw
                     this.wcloud.load(cmd[1]);
                 }
             }
-            break;
+        break;
+        case 'resize':
+            if (cmd[1] == "100") {                                            // If forcing 100%
+                $("#"+shivaLib.container).width("100%");                    // Set container 100%
+                $("#"+shivaLib.container).height("100%");                   // Set container 100%
+                this.wcloud.options.width =  $("#"+shivaLib.container).width();
+                this.wcloud.options.height =  $("#"+shivaLib.container).height();
+            }
+            this.wcloud.buildLayout(this.wcloud.d);
+        break;
     }
 }

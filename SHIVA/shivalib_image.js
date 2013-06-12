@@ -160,7 +160,8 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
 			$(this).hide();															// Hide it 
 			if (shivaLib.imageMob.snd) {											// If a sound object
-				shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;		// Cue audio
+				if (shivaLib.imageMob.snd.readyState)								// If ready
+					shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;	// Cue audio
 				shivaLib.imageMob.snd.play();										// Start playing
 				}
 			clearInterval(shivaLib.imageMob.interval);								// Clear timer

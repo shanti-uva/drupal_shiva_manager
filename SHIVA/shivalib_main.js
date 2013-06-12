@@ -200,6 +200,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.ImageActions(e.data);									// Route
 		else if (shivaLib.options.shivaGroup == "Network")					// If an network action
 			shivaLib.NetworkActions(e.data);								// Route
+		else if (shivaLib.options.shivaGroup == "WordCloud")				// If an wordcloud action
+			shivaLib.WordActions(e.data);									// Route
 		}
 }
 
@@ -791,8 +793,7 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	var x=($("#shivaLightBoxDiv").width()-width)/2;
 	if (width < 0) {												// EARTH KLUDGE!!
 		x=$("#"+this.container).css("left").replace(/px/,"");
-		x=x-0+$("#"+this.container).width()-0+20;
-		x=0;
+		x=x-0+$("#"+this.container).width()/2+(width/2);
 		}
 	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
@@ -926,7 +927,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			email=v[i].substr(9);											// Use it
 	var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
 		str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
-	str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='30' value='"+email+"'/></td></tr>";
+	str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='40' value='"+email+"'/></td></tr>";
 	str+="</table><div align='right' style='font-size:x-small'><br/>";	
 	if (type != "all")
 		str+=" <button id='saveBut'>Save</button>";	
@@ -934,10 +935,15 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 	if (type != "all")
 		str+=" <button id='linkBut'>Link</button>";	
 	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	if ((type == "KML") || (this.group == "Earth")) w=-276;					// Force to right of Earth (KLUDGE)																
+	if ((type == "KML") || (this.group == "Earth")) {						// Earth kluge
+		 w=-400;															// Move left
+		 $("#containerDiv").height($("#containerDiv").height()/100);		// Shrink it
+		 }																
 	this.ShowLightBox(w,20,"SHIVA eStore",str)								// Create light box
-
-	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
+	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();		// Remove box
+												if ($("#containerDiv").height() < 10)	// If a shrunken frame
+													$("#containerDiv").height($("#containerDiv").height()*100);	// Restore it
+												});
 	$("#saveBut").button().click(function() {								// SAVE
 		var _email=$("#email").val();										// Get email
 		var _title=$("#ez-title").val();									// Get title
@@ -952,7 +958,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			return;															// Don't save
 			}						
 		if (!$("#ez-title").length) {										// If no title
-			str="<tr><td>Title</td><td><input type='text' size='30' id='ez-title'/></td></tr>";
+			str="<tr><td>Title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";
 			$(str).appendTo("#ez-maintbl tbody");							// Add title to table
 			$("#ez-title").focus();											// Focus on title
 			return;
@@ -963,6 +969,8 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			}						
 		document.cookie="ez-email="+_email;									// Save email in cookie
 		$("#shivaLightBoxDiv").remove();									// Close box						
+		if ($("#containerDiv").height() < 10)								// If a shrunken frame (Earth kluge)
+			$("#containerDiv").height($("#containerDiv").height()*100);		// Restore it
 		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
 		if ((type != "Canvas") && (type != "KML"))							// Not for canvas or KML
 			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
@@ -1009,9 +1017,11 @@ SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) 		// GET DATA 
 		str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";
 		str+=" <button id='cancelBut'>Cancel</button></div>";	
 		$("#shivaLightContentDiv").append(str);
-		$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
+		$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();
+													if ($("#containerDiv").height() < 10)	// If a shrunken frame (Earth kluge)
+													$("#containerDiv").height($("#containerDiv").height()*100);		// Restore it
+													});
 		this.MakeEasyFileList(files,"",callback,mode);						// Show files
-	
 		$("#ezFileFilter").keyup($.proxy(function() {						// Add change handler
  			var filter=$("#ezFileFilter").val();							// Get filter
 			$("#ezFilesTable tbody").empty();								// Empty all rows
@@ -1051,6 +1061,8 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 				$.ajax({ url: str, data:dat, dataType:'jsonp' });			// Get jsonp
 				}
 			$("#shivaLightBoxDiv").remove();								// Close lightbox
+			if ($("#containerDiv").height() < 10)							// If a shrunken frame (Earth kluge)
+				$("#containerDiv").height($("#containerDiv").height()*100);	// Restore it
 			});	
 		}
 }
