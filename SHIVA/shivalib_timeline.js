@@ -108,10 +108,12 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "max_zoom":stimeline.options.max_zoom * 1,
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source":stldata,
+            "timezone": "-05:00",
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
             "image_lane_height": stimeline.options.imglane_height * 1,
+            "mousewheel": "none",
             "loaded":function (args, data) {
               $(stimeline.con).timeline('setOptions', stimeline.options, true);
               $(stimeline.con).timeline('registerEvents', stimeline.events);
@@ -136,6 +138,8 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "max_zoom":stimeline.options.max_zoom * 1,
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source": stldata,
+            "timezone": "-05:00",
+            "mousewheel": "none",
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
@@ -192,10 +196,12 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         }
         
         // Adjust positive years to match the tick (doesn't work with BCE years)
-        if(typeof(dt.getFullYear()) == "number" && dt.getFullYear() > 0) {
+        /* Taking out because it messes with the dates too much. 
+         * If it is still an issue of aligning with the tick marks trying using CSS
+         if(typeof(dt.getFullYear()) == "number" && dt.getFullYear() > 0) {
           dateTime=Date.parse(dt)+50000000;
           dt = new Date(dateTime);
-        }
+        }*/
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());
         var hrs = padZero(dt.getHours());
