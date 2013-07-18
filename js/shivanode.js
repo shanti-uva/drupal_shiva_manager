@@ -97,7 +97,6 @@
 				
 				$("input.form-text").keypress(function(e){
 					if(e.which==13) {
-						console.info('returning false');
 						return false;
 					}
 				});
@@ -334,7 +333,18 @@
 	  if (e.data.indexOf('ChartChanged=') == 0) {
 	    Drupal.Shivanode.setHelpLink(e.data.substr(13));
 	    
-			if($('#shivanode_data_nid').length > 0) {
+	    // Special code for reloading data in Network visualizations. 
+	    // If we need to do this for charts as well, then a separate function should be spawned.
+	    if(e.data.search(/rgraph|forcedir|hypertree/) > -1) {
+	    	jobj = JSON.parse(Drupal.Shivanode.latestJSON);
+	    	jobj.chartType = e.data.substr(13);
+	    	if(jQuery('#chosen_data_element_url').length > 0) {
+	    		jobj.dataSourceUrl = jQuery('#chosen_data_element_url').text();
+	    	}
+	    	json = JSON.stringify(jobj);
+	    	Drupal.Shivanode.networkJSON = json;
+	    //
+	    } else if($('#shivanode_data_nid').length > 0) {
 				// if there is a set data node, then reinsert that data
 				setTimeout("Drupal.Shivanode.insertDataElement('preset');", 1000);
 			}
@@ -422,6 +432,10 @@
 			} else if (window.location.href.indexOf("add/shivanode") > -1) {
 			   Drupal.Shivanode.ShivaMessage("shivaEditFrame", "LoadDefaultData");
 			}
+			if(typeof(Drupal.Shivanode.networkJSON) != "undefined") {
+				Drupal.Shivanode.putJSON('shivaEditFrame', Drupal.Shivanode.networkJSON);
+				delete Drupal.Shivanode.networkJSON;
+			} 
 			
 		// GetKML={layerid} : Set the data entry in the Iframe using the data entries ID.
     } else if (e.data.indexOf('GetFile=') == 0) {
