@@ -161,7 +161,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
-}
+ 	shivaLib.SendShivaMessage("ShivaChart=ready|"+window.name); 			// Send ready message to EvA
+  }
 
 SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE 
 {
@@ -1090,16 +1091,18 @@ SHIVA_Graphics.prototype.EnumObject=function(obj) 														// DEBUG TOOL
 		trace(key+"="+obj[key])													
 }
 
-function trace(msg, p1, p2, p3)
+function trace(msg, p1, p2, p3, p4)
 {
-	if (p3)
+	if (p4)
+		console.log(msg,p1,p2,p3,p4);
+	else if (p3)
 		console.log(msg,p1,p2,p3);
 	else if (p2)
 		console.log(msg,p1,p2);
 	else if (p1)
 		console.log(msg,p1);
 	else
-	console.log(msg);
+		console.log(msg);
 	
 }
 

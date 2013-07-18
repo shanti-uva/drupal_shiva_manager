@@ -169,9 +169,8 @@ VIZ.prototype.Google2Jit=function(rs)
 			JIT[nodeID].adjacencies.push(linkObject);  
 		}
 		
-		shivaLib.SendReadyMessage(true);					// Send ready msg to drupal manager
 	}		
-
+	shivaLib.SendReadyMessage(true);					// Send ready msg to drupal manager
 	this.data = [];															// Clear data array
 	for (var x in JIT) this.data.push(JIT[x]);	// Turn into array
 		$jit.id(this.container).innerHTML = ''; 	// Empty div										
