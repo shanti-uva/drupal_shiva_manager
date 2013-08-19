@@ -1492,6 +1492,7 @@ function _get_shivaframe_url($opt, $nid = '') {
     $player = variable_get('shivanode_root_url', SHIVA_ROOT) . $player; 
     $player = $player . '?pr=d';
   }
+  $player = preg_replace('/https?\:\/\//', '//', $player); // added 2013-08-19 for Firefox 23 which blocks mixed content in iframes
   return $player;
 }
 
