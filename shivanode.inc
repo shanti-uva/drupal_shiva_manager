@@ -1249,7 +1249,7 @@ function _shivanode_data_elements($form, &$form_state) {
     }
     $gdocs = 'http://spreadsheets.google.com/feeds/';
     $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-        str_replace('http://', 'https://', $base_root) . $base_path . $return_page,
+        str_replace('http://', 'https://', $base_root) . $base_path . $return_page, 
         $gdocs, 0, 1);
     $markup['spreadsheets'] = array(
       '#type' => 'markup',
