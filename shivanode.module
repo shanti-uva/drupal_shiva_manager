@@ -739,7 +739,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       if (is_numeric($width)) {
         $width += 50;
       }
-      $iframe .= '<iframe id="shivaViewFrame" src="' . $iframeurl . '"';
+      $iframe .= '<iframe id="shivaViewFrame" src="' . preg_replace('/https?\:\/\//','//', $iframeurl) . '"';
       $iframe .= ' height="' . $height . '" width="' . $width . '"';
       $iframe .= ' scrolling="auto" style="overflow: auto;" frameborder="0" ' . $disStr;
       $iframe .= '> </iframe>';
