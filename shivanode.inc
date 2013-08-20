@@ -752,7 +752,7 @@ function _get_recent_shivanodes() {
 }
 
 /**
- * Callback for menu node/spreadsheets.
+ * Callback for menu node/spreadsheets. (I think this is deprecated. Replaced by _shivanode_data_elements. 2013-08-20)
  *
  * Tests if any google docs logon info is stored either 1. in a session variable or
  *   2. in the user's data and if it is displays a list of spreadsheets (_shivanode_spreadsheet_list)
@@ -924,6 +924,9 @@ function _shivanode_gss_form($form, &$form_state) {
       '#prefix' => '<p>',
       '#suffix' => '</p>',
     );
+    
+    // Enable submit by pressing enter
+    $form['#attributes']['onkeypress'][]='if(event.keyCode==13){this.submit();}';
     return $form;
   }
 }
@@ -1024,7 +1027,7 @@ function cmp_titles($a, $b) {
 }
 
 /**
- * Function _shivanode_gss_form_submit($form, &$form_state):
+ * Function _shivanode_gss_form_submit($form, &$form_state): (I think this is deprecated. Replaced by _shivanode_data_elements_submit. 2013-08-20)
  * 
  * called upon submission of the gss_form which lists one's google
  * spreadsheets with checkboxes. For each ss checked in that form this function
@@ -1037,7 +1040,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
   //   title and url. Put these in a $values array indexed by the integer
   //   found in the checkbox name cbox0, cbox1, etc. There are also access0, access1, etc. fields
   //   The title and url come from the 'complete form' variable of the form_state
-  
+
   $formvalues = $form_state['values'];
   $values = array();
   foreach ($formvalues as $key => $val) {
@@ -1232,6 +1235,7 @@ function _shivanode_data_elements($form, &$form_state) {
     $markup['spreadsheets']['newss'] = array(
       '#type' => 'radios',
       '#options' => $gsheets,
+      '#attributes' => array( 'ondblclick' => 'this.form.submit();'),  // submit form when radio button is double clicked
     );
     $markup['spreadsheets']['sumbitss'] = array(
       '#type' => 'submit',
