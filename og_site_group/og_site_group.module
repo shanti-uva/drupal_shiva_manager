@@ -142,6 +142,12 @@ function og_sitegroup_addall() {
 /**
  * Implements hook_user_insert(&$edit, $account, $category)
  *    Assign user automatically to the global group so og create permissions does not throw error
+ * 
+ * This may cause an error in devel when generating users, which can be fixed for og 1.5 with patch at:
+ * 
+ *  https://drupal.org/files/og-duplicate_default_values-1664832-3.patch
+ * 
+ * See https://drupal.org/node/1664832
  *    
  */
 function og_site_group_user_insert(&$edit, $account, $category) {
@@ -152,7 +158,13 @@ function og_site_group_user_insert(&$edit, $account, $category) {
       return;
   }
   $group = og_get_group('node', variable_get('shiva_site_group_num'));
-  og_group($group->gid, array('entity' => $account));
+  // Check if user already belongs to global group. Happens with devel create users.
+  foreach($account->group_audience['und'] as $ugroup) {
+    if ($ugroup['gid'] == $group->gid) {
+      return;
+    }
+  }
+  og_membership_create($group->gid, 'user', $account->uid);  // create the membership for that user in the global group
 }
 
 /**
