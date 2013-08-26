@@ -917,7 +917,8 @@ function shivanode_wysiwyg_include_directory($type) {
  */
   
 function shivanode_form_og_ui_add_users_alter(&$form, &$form_state, $form_id) {
-  $roles = og_get_global_roles();
+  return;
+  //$roles = og_get_global_roles();
   $unwanted = array();
   foreach ($roles as $key => $value) {
     if ($value == 'non-member') {
