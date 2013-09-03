@@ -1576,7 +1576,8 @@ function _shivanode_search_json($q) {
  * 			if Shibboleth session is still active. If expired, JS popups up an alert
  */
 function _shivanode_shib_check() {
-  $status = (!empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired";
+  // added user_is_logged_in() for extra security: 2013-08-30. Need to test.
+  $status = (user_is_logged_in() && !empty($_SERVER['Shib-Application-ID'])) ? "ok" : "expired"; // Adding check to make sure user is logged in
   $json = '{ "status": "' . $status . '"}';
   drupal_json_output(json_decode($json));
 }
