@@ -22,6 +22,8 @@ if(null!=c)if(Math.abs(c-e)+Math.abs(f-r)<.01)l(n,t,e,r,u,i,a,o);else{var s=n.po
         event = d3.dispatch("word", "end"),
         timer = null,
         cloud = {};
+    
+    cloud.bounds = [];
 
     cloud.start = function() {
       var board = zeroArray((size[0] >> 5) * size[1]),
@@ -342,6 +344,8 @@ if(null!=c)if(Math.abs(c-e)+Math.abs(f-r)<.01)l(n,t,e,r,u,i,a,o);else{var s=n.po
     if (d.y + d.y0 < b0.y) b0.y = d.y + d.y0;
     if (d.x + d.x1 > b1.x) b1.x = d.x + d.x1;
     if (d.y + d.y1 > b1.y) b1.y = d.y + d.y1;
+    //This is a hack added by shc7pw to resize the cloud after drawing
+    shivaLib.options.bounds = JSON.parse(JSON.stringify(bounds));
   }
 
   function collideRects(a, b) {
