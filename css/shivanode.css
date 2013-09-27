@@ -175,6 +175,7 @@ div#use-data-element-link a {
 
 #iframe_container {
   clear: both;
+  background-color: #ffffff;
 }
 
 #iframe_container legend span.form-required {
