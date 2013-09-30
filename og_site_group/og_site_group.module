@@ -129,12 +129,12 @@ function og_sitegroup_create(&$form, &$form_state) {
  * og_sitegroup_addall(): Function to all all existing users other than admin to the site group.
  */
 function og_sitegroup_addall() {
-  $group = og_get_group('node', variable_get('shiva_site_group_num'));
+  $gid = variable_get('shiva_site_group_num');
   $uids = db_select('users','u')->fields('u', array('uid'))->execute()->fetchCol(0);
   foreach ($uids as $uid) {
     if($uid > 1) {
       $uaccount = user_load($uid); 
-      og_group($group->gid, array('entity' => $uaccount));
+      og_group($gid, array('entity' => $uaccount));
     }
   }
 }
@@ -157,14 +157,17 @@ function og_site_group_user_insert(&$edit, $account, $category) {
       'Please do so at ') .  l(t('Organic Groups Settings Page'), $base_root . $base_path .  'admin/config/group/settings'), 'warning');
       return;
   }
-  $group = og_get_group('node', variable_get('shiva_site_group_num'));
-  // Check if user already belongs to global group. Happens with devel create users.
-  foreach($account->group_audience['und'] as $ugroup) {
-    if ($ugroup['gid'] == $group->gid) {
-      return;
+  $sgid = variable_get('shiva_site_group_num'); // get Site Group ID
+  $ugps = og_get_entity_groups('user', $account); // get user Groups
+  // Check if user already belongs to Site group. Happens with devel create users.
+  if(isset($ugps['node'])) {
+    foreach($ugps['node'] as $key => $gid) {
+      if ($gid == $sgid) {
+        return;
+      }
     }
   }
-  og_membership_create($group->gid, 'user', $account->uid);  // create the membership for that user in the global group
+  og_group('node', $sgid, array('entity' => $account), $save_created = TRUE);
 }
 
 /**
