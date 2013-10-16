@@ -87,6 +87,8 @@ define('SHIVA_RECENT_ENTRIES', 5);
 // Whether to show JSON in Edit Form  
 define('SHIVA_SHOW_JSON', FALSE);
 
+// Default thumbnail field
+define('SHIVA_DEFAULT_IMAGE_FIELD', NULL); 
 
 /**
  * Implements hook_init.
@@ -146,6 +148,31 @@ function shivanode_menu() {
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'shivanode.inc',
   );
+  
+  $items['admin/config/content/shivanode/urls'] = array(
+    'title' => 'URLs',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -20
+  );
+  
+  $items['admin/config/content/shivanode/display'] = array(
+    'title' => 'Display',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_admin_settings_display'),
+    'access arguments' =>  array('access shivanode view settings'),
+    'weight' => -10
+  );
+  
+  $items['admin/config/content/shivanode/images'] = array(
+    'title' => 'Default Images',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_admin_settings_thumbs'),
+    'access arguments' =>  array('access shivanode view settings'),
+    'weight' => -1
+  );
+  
     // Defines link page that lists Google spreadsheets (OLD FORM)
   $items['data/spreadsheets'] = array(
     'type' => MENU_NORMAL_ITEM,
@@ -298,6 +325,7 @@ function shivanode_permission() {
   ); 
 }
 
+
 /**
  * Implements hook_preprocess_page () 
  *   This code  and the registry alter code comes from 
@@ -442,10 +470,32 @@ function shivanode_node_update($node) {
       if (!$result) {
         _shivanode_add_data_correspondence($node); 
       }
-    // else remove any stored data links
-    } 
-    else {
+    // else if set to -1 by node_submit then remove any stored data links
+    } else if ($node->data_id == -1 ) {
       _shivanode_remove_datalink($node);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave: sets a type-specific generic image for visualizations
+ *    Generic thumbnails are set in shivanode.install 7005 and shivanode.inc
+ */
+function shivanode_node_presave($node) {
+  if($node->type == 'shivanode') { 
+    $lang = (isset($node->language)) ? $node->language : 'und';
+    if(!isset($node->field_image[$lang][0])) {
+      $type = strtolower(_get_shivanode_type($node));
+      if($type == 'chart') {
+        $json = _shivanode_get_json($node);
+        $subtype = strtolower($json['chartType']);
+        if($subtype != '') {
+          $type .= "_$subtype";
+        }
+      }
+      if($fid = _shivanode_get_generic_image_info($type)) {
+        $node->field_image[$lang][0]['fid'] = $fid;
+      }
     }
   }
 }
@@ -455,9 +505,7 @@ function shivanode_redirect_to_new() {
 }
 
 function shivanode_node_submit($node, $form, &$form_state) {
-  if (isset($form_state['input']['shivanode_data_nid'])) {
-    $node->data_id = $form_state['input']['shivanode_data_nid'];
-  }
+  $node->data_id = (isset($form_state['input']['shivanode_data_nid'])) ? $form_state['input']['shivanode_data_nid'] : -1;
   $trigger = strtolower($form_state['triggering_element']['#value']);
   $dest = drupal_get_destination();
   $dest = $dest['destination'];
@@ -485,62 +533,64 @@ function shivanode_view($node, $view_mode) {
  *
  */ 
 function shivanode_node_view_alter(&$build) {
-  global $base_path;
-  $node = $build['#node'];
-
-  if (_shivanode_get_access($node) == 4) {
-    // If viewing a node that is a shivanode, show the Share button
-    if ($build['#bundle'] == "shivanode") {
-      $build['sharediv'] = array(
-        '#type' => 'markup',
-        '#prefix' => '<div class="sn-share-button">',
-        '#suffix' => '</div>',
-      );
-      
-      $shareicon = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
-      
-      $build['sharediv']['share'] = array(
-        '#type' => 'markup',
-        '#markup' => '<span>' . l('<span>' . t('SHARE') . ' <img height="20" width="20" src="' . $shareicon . '" /></span>', 'node/' . $node->nid . '/share', array(
-          'attributes' => array(
-            'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
-            //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
-            'title' => 'Share this visualization!',
-            'onclick' => (_shivanode_get_element_type($node) == 'Earth')?'javascript: Drupal.Shivanode.hideViewDuringPopups();':'',
-          ),
-          'html' => true,
-          'query' => array(
-            'format' => 'simple',
-            'class' => 'lightbox',
-          ),
-        )) . '</span>',
-      );
-    }
-  }
-
-  $sntype = _shivanode_get_element_type($node); // type of shiva visualization
-  $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
-  // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
-  if ($node->type == 'shivanode' && $sntype != 'Data') {
-    // If it's got a data element link, display that info
-    if ($data_id) {
-      $dnode = node_load($data_id);
-      if ($dnode && node_access('view', $dnode)) {
-        // make text to display: link if user has permission to view, otherwise just text
-        $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
-        // Put it after visualization type or assign it a weight of 12
-        $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
-        $build['data_element'] = array(
+  // Full View
+  if($build['#view_mode'] == 'full') { 
+    global $base_path;
+    $node = $build['#node'];
+    if (_shivanode_get_access($node) == 4) {
+      // If viewing a node that is a shivanode, show the Share button
+      if ($build['#bundle'] == "shivanode") {
+        $build['sharediv'] = array(
           '#type' => 'markup',
-          '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
-              '<div class="field-label">Data Element Used:&nbsp;</div>' .
-              '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
-          '#weight' => $weight,
+          '#prefix' => '<div class="sn-share-button">',
+          '#suffix' => '</div>',
+        );
+        
+        $shareicon = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
+        
+        $build['sharediv']['share'] = array(
+          '#type' => 'markup',
+          '#markup' => '<span>' . l('<span>' . t('SHARE') . ' <img height="20" width="20" src="' . $shareicon . '" /></span>', 'node/' . $node->nid . '/share', array(
+            'attributes' => array(
+              'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
+              //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
+              'title' => 'Share this visualization!',
+              'onclick' => (_shivanode_get_element_type($node) == 'Earth')?'javascript: Drupal.Shivanode.hideViewDuringPopups();':'',
+            ),
+            'html' => true,
+            'query' => array(
+              'format' => 'simple',
+              'class' => 'lightbox',
+            ),
+          )) . '</span>',
         );
       }
     }
-    _shivanode_add_share_meta($node);
-    if(isset($build['field_image'])) { unset($build['field_image']); }
+  
+    $sntype = _shivanode_get_element_type($node); // type of shiva visualization
+    $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
+    // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
+    if ($node->type == 'shivanode' && $sntype != 'Data') {
+      // If it's got a data element link, display that info
+      if ($data_id) {
+        $dnode = node_load($data_id);
+        if ($dnode && node_access('view', $dnode)) {
+          // make text to display: link if user has permission to view, otherwise just text
+          $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
+          // Put it after visualization type or assign it a weight of 12
+          $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
+          $build['data_element'] = array(
+            '#type' => 'markup',
+            '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
+                '<div class="field-label">Data Element Used:&nbsp;</div>' .
+                '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
+            '#weight' => $weight,
+          );
+        }
+      }
+      _shivanode_add_share_meta($node);
+      if(isset($build['field_image'])) { unset($build['field_image']); }
+    }
   }
 }
 
@@ -1161,7 +1211,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Display JSON depending on the setting
   $jsonDivDisplay = ' style="display:none;" '; // JSON remains hidden
-  if (user_access('access shivanode view json')) {
+  if (variable_get('shivanode_view_json', FALSE) == TRUE && user_access('access shivanode view json')) {
      $jsonDivDisplay = ' style="display:block;" ';
   }
   
@@ -1380,7 +1430,7 @@ function shivanode_theme() {
       'variables' => array(
         'content' => NULL,
         'type' => NULL,
-        ))
+        )),
   );
   
 }
@@ -1389,8 +1439,5 @@ function theme_shivanode($variables) {
   return '<div class="shivanode_' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
 
-
-// function shivanode_form_alter(&$form, &$form_state, $form_id) {
- // // dpm($form_id . "  (hook_form_" . $form_id . "_alter)",'Form id: ');
-// }
+
 

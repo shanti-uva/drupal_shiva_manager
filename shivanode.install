@@ -879,3 +879,27 @@ function shivanode_update_7004() {
     drupal_set_message(t("Updated paths to the following main menu links: @LINKS"), array('@LINKS' => implode(', ', $ltitles)));
   }
 }
+
+
+/**
+ * Add generic visualization thumbnails to public folder by copying images from shivanode images folder
+ *    and setting the Drupal global variables to the resulting FID.
+ */
+ 
+function shivanode_update_7005() {
+  module_load_include('inc', 'shivanode');
+  $path = 'public://shivanode';
+  if (!file_prepare_directory($path, FILE_CREATE_DIRECTORY)) {
+    drupal_set_message(t('Unable to create the directory, @path. Please check that the files directory permissions are set correctly.'), 'warning');
+    $path = NULL;
+  }
+  global $base_url;
+  $snimgdir = $base_url . '/' . drupal_get_path('module', 'shivanode') . '/images/';
+  $visimginfo = _shivanode_get_generic_image_info();
+  foreach($visimginfo as $key => $info) {
+    $imgfn = $info['variable'] . '.png';
+    $url = $snimgdir . $imgfn;
+    $file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
+    variable_set($info['variable'], $file->fid);
+  }
+}

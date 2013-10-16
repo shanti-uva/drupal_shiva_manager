@@ -417,100 +417,8 @@ function _shivanode_parse_json($jdata) {
 function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_settings_header'] = array(
-    '#markup' => '<h3>Settings for the Shivanode Module</h3>' .
-      '<p>' . t('There are two types of settings for the Shivanode module. The display settings are where one can set ' .
-      'the dimensions of the visualizations and whether individual visualizations can override the default settings. ' .
-      'In the URL section the adminitrator can set the URLs for the default players and editors for Shivanodes.') . '</p.',
-  );
-  
-  // Display Settings for Shivanode dealing with size of views etc.
-  $form['shivanode_display_settings'] = array(
-    '#description' => t('The display settings for SHIVA visualizations'),
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#title' => t('Display'),
-    '#prefix' => '<div id="shiva_settings_form_div">',
-    '#suffix' => '</div>',
-  );
-  
-  $form['shivanode_display_settings']['shivanode_default_height'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Height for Full Display'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_default_height', SHIVA_IFRAME_HEIGHT),
-    '#required' => TRUE,
-    '#element_validate' => array('_shivanode_size_settings_check', ),
-  );
-  
-  $form['shivanode_display_settings']['shivanode_default_width'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Width for Full Display'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_default_width', SHIVA_IFRAME_WIDTH),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['shivanode_default_override'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Visualization\'s settings override default settings'),
-    '#description' => t('Allows the SHIVA visualization settings for height and width to override default settings for the full display.'),
-    '#default_value' => variable_get('shivanode_default_override', SHIVA_DEFAULT_OVERRIDE),
-  );
-  
-  $form['shivanode_display_settings']['shivanode_edit_height'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Height for Edit Form'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT),
-    '#required' => TRUE,
-    '#element_validate' => array('_shivanode_size_settings_check', ),
-  );
-  
-  $form['shivanode_display_settings']['shivanode_edit_width'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Width for Edit Form'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_edit_width', SHIVA_IFRAME_HEIGHT_EDIT),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['shivanode_teaser_height'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Height for Teaser'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_teaser_height', SHIVA_IFRAME_HEIGHT_TEASER),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['shivanode_teaser_width'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Width for Teaser'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_teaser_width', SHIVA_IFRAME_WIDTH_TEASER),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['shivanode_max_size'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum size (height or width) for Iframes'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_max_size', SHIVA_IFRAME_DIMENSION_MAXIMUM),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['shivanode_min_size'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Minimum size (height or width) for Iframes'),
-    '#size' => 3,
-    '#default_value' => variable_get('shivanode_min_size', SHIVA_IFRAME_DIMENSION_MINIMUM),
-    '#required' => TRUE,
-  );
-  
-  $form['shivanode_display_settings']['p'] = array(
-    '#type' => 'markup',
-    '#markup' => '<p>' . t('Settings to show or hide the underlying JSON of a SHIVA visualization are found within') . ' ' .
-      l(t('the indvidual user permisions'), 'admin/people/permissions') . '.</p>',
+    '#markup' => t('<h3>Shivanode URL Settings</h3>') .
+      t('<p>In this form you can set the URLs for the SHIVA player (for viewing nodes) and the various SHIVA editors.</p>'),
   );
   
   // URL Settings for SHIVA Node
@@ -650,70 +558,221 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR),
     '#required' => TRUE,
   );
-      
+  // Reset buttons uses the validate function to reset data
   $form['actions']['default_values'] = array(
     '#type' => 'button',
     '#value' => t('Reset Default Settings'),
-  /*  '#submit' => array('_shivanode_settings_default_values'),
-    '#ajax' => array(
-      'callback' => '_shivanode_settings_default_values',
-      'wrapper' => 'shiva_settings_form_div',
-      'effect' => 'slide',
-    ),*/
     '#weight' => 20,
   );
   
   return system_settings_form($form);
 }
 
+function _shivanode_admin_settings_display($form, &$form_state) {
+  
+  // Display Settings for Shivanode dealing with size of views etc.
+    
+  $form['shivanode_display_settings_header'] = array(
+    '#markup' => t('<h3>Shivanode Display Settings</h3>') .
+      t('<p>In this form you can set the default parameters for how SHIVA visualizations are displayed</p>'),
+  );
+  
+  
+  $form['shivanode_default_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height for Full Display'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_default_height', SHIVA_IFRAME_HEIGHT),
+    '#required' => TRUE,
+    '#element_validate' => array('_shivanode_size_settings_check', ),
+  );
+  
+  $form['shivanode_default_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width for Full Display'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_default_width', SHIVA_IFRAME_WIDTH),
+    '#required' => TRUE,
+  );
+  
+  $form['shivanode_default_override'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Visualization\'s settings override default settings'),
+    '#description' => t('Allows the SHIVA visualization settings for height and width to override default settings for the full display.'),
+    '#default_value' => variable_get('shivanode_default_override', SHIVA_DEFAULT_OVERRIDE),
+  );
+  
+  $form['shivanode_edit_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height for Edit Form'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT),
+    '#required' => TRUE,
+    '#element_validate' => array('_shivanode_size_settings_check', ),
+  );
+  
+  $form['shivanode_edit_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width for Edit Form'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_edit_width', SHIVA_IFRAME_HEIGHT_EDIT),
+    '#required' => TRUE,
+  );
+  
+  $form['shivanode_teaser_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height for Teaser'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_teaser_height', SHIVA_IFRAME_HEIGHT_TEASER),
+    '#required' => TRUE,
+  );
+  
+  $form['shivanode_teaser_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width for Teaser'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_teaser_width', SHIVA_IFRAME_WIDTH_TEASER),
+    '#required' => TRUE,
+  );
+  
+  $form['shivanode_max_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum size (height or width) for Iframes'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_max_size', SHIVA_IFRAME_DIMENSION_MAXIMUM),
+    '#required' => TRUE,
+  );
+  
+  $form['shivanode_min_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum size (height or width) for Iframes'),
+    '#size' => 3,
+    '#default_value' => variable_get('shivanode_min_size', SHIVA_IFRAME_DIMENSION_MINIMUM),
+    '#required' => TRUE,
+  );
+  $form['shivanode_view_json'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'View JSON in Edit Form',
+    '#description' => t('Allow users to view the JSON format of the data in an uneditable field. ') . 
+                      t('Their role must have appropriate permissions set ') . l(t('here'), 'admin/people/permissions') . '.',
+    '#default_value' => variable_get('shivanode_view_json', FALSE),
+  );
+  
+  $form['actions']['default_values'] = array(
+    '#type' => 'button',
+    '#value' => t('Reset Default Settings'),
+    '#weight' => 20,
+  );
+  
+  return system_settings_form($form);
+}
+
+function _shivanode_admin_settings_thumbs($form, &$form_state) {
+  
+  // Display Settings for Shivanode dealing with size of views etc.
+  
+  $form['shivanode_display_settings_header'] = array(
+    '#markup' => t('<h3>Shivanode Image Settings</h3>') .
+      t('<p>In this form you can set the parameters for default thumbnail images for SHIVA visualizations. These images are used when a custom thumbnail is not set. This should only be adjusted by Administrators who can determine the file id (fid) of the desired images.</p>'),
+  );
+  
+  $form['shivanode_default_image_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Thumbnail Field'),
+    '#description' => t('The machine name for the thumbnail field in the Shivanode content type. This field must be manually added to the content type.'),
+    '#size' => 10,
+    '#default_value' => variable_get('shivanode_default_image_field', SHIVA_DEFAULT_IMAGE_FIELD),
+  );
+  
+  if (variable_get('shivanode_default_image_field', SHIVA_DEFAULT_IMAGE_FIELD)) {
+    $imginfo = _shivanode_get_generic_image_info();
+    foreach($imginfo as $key => $info) {
+      $fid = variable_get($info['variable'], '');
+      $suffix = '';
+      if ($fid != '') {
+        $file = file_load($fid);
+        $suffix = '(' . l(t('View Current Image'), file_create_url($file->uri), array('attributes' => array('target' => '_blank'))) . ')';
+      }
+      $form[$info['variable']] = array(
+        '#type' => 'textfield',
+        '#title' => $info['label'],
+        '#description' => t('The file id (fid) for the default thumbnail image for visualization type: @type ', array('@type' => $info['label'])) . $suffix,
+        '#size' => 10,
+        '#default_value' => variable_get($info['variable'], ''),
+      );
+    }
+  }
+  
+  return system_settings_form($form);
+}
+
 /*
- * A function to reset the default values in the Shivanode settings form
+ * Using validate function to reset the default values in the Shivanode URL settings form
  * Uses constants set at the top of shivanode.module
  * 
  */
 function _shivanode_admin_settings_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#id'] == 'edit-default-values') {
-    _shivanode_settings_default_values($form_state);
+    // Viewer and Editor URLS
+    $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
+    $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
+    $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
+    $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
+    $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
+    $form_state['input']['shivanode_earth_editor'] = SHIVA_EARTH_EDITOR;
+    $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
+    $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
+    $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
+    $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
+    //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
+    $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
+    $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
+    $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
+    $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
+  
+    drupal_set_message(t('All values have been reset to their default'));
+    drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
   }
 } 
-
 /*
- *  _shivanode_settings_default_values(&$form_state) : called by the shivanode admin settings validation routine
- * 						when the "reset" button is pressed. Resets all values to default ~~in the form only~~
- * 						Reset settings must be saved to tke effect and a warning to that effect is given.
+ * Using Validate function to reset the default values in the Shivanode URL display form
+ * Uses constants set at the top of shivanode.module
+ * 
  */
-function _shivanode_settings_default_values(&$form_state) {
-  // Display Settings 
-  $form_state['input']['shivanode_default_height'] = SHIVA_IFRAME_HEIGHT;
-  $form_state['input']['shivanode_default_width'] = SHIVA_IFRAME_WIDTH;
-  $form_state['input']['shivanode_edit_height'] = SHIVA_IFRAME_HEIGHT_EDIT;
-  $form_state['input']['shivanode_edit_width'] = SHIVA_IFRAME_WIDTH_EDIT;
-  $form_state['input']['shivanode_teaser_height'] = SHIVA_IFRAME_HEIGHT_TEASER;
-  $form_state['input']['shivanode_teaser_width'] = SHIVA_IFRAME_WIDTH_TEASER;
-  $form_state['input']['shivanode_max_size'] = SHIVA_IFRAME_DIMENSION_MAXIMUM;
-  $form_state['input']['shivanode_min_size'] = SHIVA_IFRAME_DIMENSION_MINIMUM;
-  $form_state['input']['shivanode_default_override'] = SHIVA_DEFAULT_OVERRIDE;
-  $form_state['input']['shivanode_show_json'] = SHIVA_SHOW_JSON;
-  
-  // Viewer and Editor URLS
-  $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
-  $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
-  $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
-  $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
-  $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
-  $form_state['input']['shivanode_earth_editor'] = SHIVA_EARTH_EDITOR;
-  $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
-  $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
-  $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
-  $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
-  //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
-  $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
-  $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
-  $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
-  $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
+function _shivanode_admin_settings_display_validate($form, &$form_state) {
+  if ($form_state['triggering_element']['#id'] == 'edit-default-values') { 
+    // Display Settings 
+    $form_state['input']['shivanode_default_height'] = SHIVA_IFRAME_HEIGHT;
+    $form_state['input']['shivanode_default_width'] = SHIVA_IFRAME_WIDTH;
+    $form_state['input']['shivanode_edit_height'] = SHIVA_IFRAME_HEIGHT_EDIT;
+    $form_state['input']['shivanode_edit_width'] = SHIVA_IFRAME_WIDTH_EDIT;
+    $form_state['input']['shivanode_teaser_height'] = SHIVA_IFRAME_HEIGHT_TEASER;
+    $form_state['input']['shivanode_teaser_width'] = SHIVA_IFRAME_WIDTH_TEASER;
+    $form_state['input']['shivanode_max_size'] = SHIVA_IFRAME_DIMENSION_MAXIMUM;
+    $form_state['input']['shivanode_min_size'] = SHIVA_IFRAME_DIMENSION_MINIMUM;
+    $form_state['input']['shivanode_default_override'] = SHIVA_DEFAULT_OVERRIDE;
+    $form_state['input']['shivanode_show_json'] = SHIVA_SHOW_JSON;
+    
+    drupal_set_message(t('All values have been reset to their default'));
+    drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
+  }
+}
 
-  drupal_set_message(t('All values have been reset to their default'));
-  drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
+function _shivanode_admin_settings_thumbs_validate($form, &$form_state) {
+  $imginfo = _shivanode_get_generic_image_info();
+  foreach($form_state['values'] as $key => $value) {
+    if(preg_match('/sngen-/',$key)) {
+      $file = file_load($value);
+      if(!$file) {
+        foreach($imginfo as $key2 => $info) {
+          if($info['variable'] == $key2) {
+            form_set_error('File Not Found', t('The file (fid: @fid) for the @type visualization does not exist!', array( '@fid' => $value, '@type' => $info['label'])));
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 function _shivanode_integer_check($element, &$form_state, $form) {
@@ -1375,23 +1434,27 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
 function _shivanode_remove_datalink($node) {
   if ($node->type == 'shivanode') {
     $nid = $node->nid;
-    $results = db_select('shivanode_links', 'sl')
+    $links = db_select('shivanode_links', 'sl')
       ->fields('sl')
       ->condition('sn_id', $nid)
       ->execute()
       ->fetchCol(0);
-    if (count($results) == 0) {
+  
+    if (count($links) == 0) {
       return;  
     }
     $num_deleted = db_delete('shivanode_links')
       ->condition('sn_id', $nid)
       ->execute();
     if ($num_deleted == 1) {
-      drupal_set_message(check_plain(t('Link to data entry removed.')));
+      drupal_set_message(check_plain(t('Link from @nid to data entry @did removed.', array(
+        '@nid' => $nid,
+        '@did' => $links[0],
+      ))));
     } 
     else {
       drupal_set_message(
-        check_plain($num_deleted . ' ' . t('links to data entries removed!')), 
+        check_plain(t('@num links to data entries removed!', array( '@num' => $num_deleted))), 
         'error');
     }
   }
@@ -1978,7 +2041,7 @@ function _shivanode_add_data_correspondence($node) {
         ->condition('sn_id', $node->nid, '=')
         ->execute();
     } 
-    else {
+    else if ($node->data_id > 0){
       db_insert('shivanode_links')
         ->fields(array(
           'sn_id' => $node->nid,
@@ -2450,4 +2513,48 @@ function _shivanode_add_ms_metafix() {
     '#weight' => '-99999', // To put it first in the head element
   );
   drupal_add_html_head($meta, 'iemetatag');
+}
+
+/**
+ * _shivanode_get_generic_image_info($type): 
+ *    A function that returns the variable name for the generic image of a certain type of visualization
+ *    These Drupal variables contain the FID for the generic thumbnail for that type of visualization
+ *    If $type is set to ALL (default), returns an named array of visualization type/variable name pairs
+ *    If $type is set to a particular image type, it returns that variable name if set.
+ *    Variables are set in shivanode.install (update 7005)
+ * 
+ *    The variable names must also be the name of the .png image file of the thumb. Generic Images are set for nodes in shivanode_node_presave($node).
+ */
+function _shivanode_get_generic_image_info($type = 'ALL') {
+  $imgs = array(
+    'chart' => array('label' => t('Default Chart') , 'variable' =>  'sngen-chart-default'),  
+    'chart_annotatedtimeline' => array('label' => t('Annotated Timeline Chart'), 'variable' =>  'sngen-chart-antime'),
+    'chart_areachart' => array('label' => t('Area Chart'), 'variable' =>  'sngen-chart-area'),
+    'chart_barchart' => array('label' => t('Bar Chart'), 'variable' =>  'sngen-chart-bar'),
+    'chart_candlestickchart' => array('label' =>  t('Candlestick Chart'), 'variable' =>  'sngen-chart-candle'),
+    'chart_columnchart' => array('label' => t('Column Chart'), 'variable' =>  'sngen-chart-column'),
+    'chart_gauge' => array('label' => t('Guage Chart'), 'variable' =>  'sngen-chart-guage'),
+    'chart_geochart' => array('label' => t('Geo Chart'), 'variable' =>  'sngen-chart-geo'),
+    'chart_linechart' => array('label' => t('Line Chart'), 'variable' =>  'sngen-chart-line'),
+    'chart_motionchart' => array('label' => t('Motion Chart'), 'variable' =>  'sngen-chart-motion'),
+    'chart_orgchart' => array('label' => t('Organization Chart'), 'variable' =>  'sngen-chart-org'),
+    'chart_piechart' => array('label' => t('Pie Chart'), 'variable' =>  'sngen-chart-pie'),
+    'chart_scatterchart' => array('label' => t('Scatter Chart'), 'variable' =>  'sngen-chart-scatter'),
+    'chart_table' => array('label' => t('Table Chart'), 'variable' =>  'sngen-chart-table'),
+    'chart_treemap' => array('label' => t('Tree Map Chart'), 'variable' =>  'sngen-chart-tree'),
+    'draw' => array('label' => t('Draw'), 'variable' =>  'sngen-draw'),
+    'earth' => array('label' => t('Earth'), 'variable' =>  'sngen-earth'),
+    'image' => array('label' => t('Image') , 'variable' =>  'sngen-image'),
+    'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
+    'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
+    'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
+    'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
+  );
+  if ($type == 'ALL') {
+    return $imgs;
+  } else if (isset($imgs[$type]['variable'])) {
+    return variable_get($imgs[$type]['variable'], FALSE);
+  } else {
+    return FALSE;
+  }
 }
