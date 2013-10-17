@@ -461,19 +461,20 @@ function shivanode_node_update($node) {
     // otherwise if data_id is set, store that in the shivanode_links table
     } 
     elseif (isset($node->data_id)) {
-      $result = db_update('shivanode_links')
-        ->fields(array(
-            'data_id' => $node->data_id,
-          ))
-        ->condition('sn_id', $node->nid, '=')
-        ->execute();
-      if (!$result) {
-        _shivanode_add_data_correspondence($node); 
+      if ($node->data_id == -1 ) {
+        _shivanode_remove_datalink($node);
+      } else {
+        $result = db_update('shivanode_links')
+          ->fields(array(
+              'data_id' => $node->data_id,
+            ))
+          ->condition('sn_id', $node->nid, '=')
+          ->execute();
+        if (!$result) {
+          _shivanode_add_data_correspondence($node); 
+        }
       }
-    // else if set to -1 by node_submit then remove any stored data links
-    } else if ($node->data_id == -1 ) {
-      _shivanode_remove_datalink($node);
-    }
+    } 
   }
 }
 
