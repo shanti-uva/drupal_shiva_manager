@@ -369,6 +369,11 @@ ul.shivanode-spreadsheets li * {
 	margin-top: 0px;
 }
 
+/* Shiva node teaser view */
+div.shiva-teaser {
+	box-shadow: 4px 6px 6px #aaa;
+}
+
 /* For custom User Profiles */
 div.shanti-profile-pic .panel-pane {
   height: 100px;
