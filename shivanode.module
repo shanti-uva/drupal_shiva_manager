@@ -352,6 +352,10 @@ function shivanode_theme_registry_alter(&$theme_registry) {
    } else if(is_array($theme_registry['page']['theme paths'])) {
      array_unshift($theme_registry['page']['theme paths'], $modulepath .'/templates');
    } 
+   // use shivanode's version of views-view.tpl.php to add pager at top of page
+   if(isset($theme_registry['views_view'])) {
+     $theme_registry['views_view']['path'] = $modulepath .'/templates';
+   }
 }
 
 /**
@@ -1021,7 +1025,19 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     _shivanode_check_google_login();
   }
   $action = $form['#action']; // the action url as stored in form
-  $sntype = _shivanode_get_element_type($form['#node']);
+  $sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
+  $is_new_el = FALSE;
+  $submitVal = t('Update');
+  
+  // if the node with the form does not have an nid, we are creating a new shivanode node. Set variables accordingly
+  if(!isset($form['#node']->nid)) {
+    $is_new_el = TRUE;
+    $typematch = preg_match('/add\/shivanode\/([^\/]+)/', current_path(), $match);
+    $snnewtype = ($typematch) ? $match[1] : 'chart';
+    $sntype = ucfirst($snnewtype);
+    $submitVal = t('Save');
+  }
+  
   // Make a json object from json string if set, otherwise set jobj to FALSE
   $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
             strlen($form['shivanode_json']['und'][0]['value']['#default_value']) > 0) ? 
@@ -1030,10 +1046,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $aparts = explode('?', $action); 
     $action = $aparts[0];
   }
+  
   $form_state['no_redirect'] = TRUE;
-  $is_new_el = (strpos($action, '/add/') > -1) ? TRUE : FALSE;
+  
   // default settings are for the edit form
-  $submitVal = ($is_new_el) ? t('Save') : t('Update');
   if(!isset($form['title'] )) {
     $form['title'] = array(
       '#type' => 'textfield',
@@ -1043,7 +1059,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       '#weight' => -5
     );
   }
-  // if it's not the edit form, it's the save form. Set default values and buttons
+  
   $eltype = '';
   $form['shivanode_element_type']['#weight'] = 1;
   $form['shivanode_access']['#weight'] = 2;
@@ -1075,7 +1091,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
     $form['shivanode_access']['und']['#default_value'] = 1;
-    $form['shivanode_element_type']['und']['#default_value'] = 7; // default value is visualization
+    $eltypes = _shivanode_element_typelist(TRUE);
+    $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntype])) ? $eltypes[$sntype] : 7; // default value is chart
     $eltype = t('Chart');
       
     // Use ajax to reload the iframe depending on Visualization type choice

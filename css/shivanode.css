@@ -371,7 +371,17 @@ ul.shivanode-spreadsheets li * {
 
 /* Shiva node teaser view */
 div.shiva-teaser {
+	position: relative;
+	float: left;
+	margin: 4px;
+	padding: 4px;
 	box-shadow: 4px 6px 6px #aaa;
+}
+
+div.shiva-teaser .shiva-teaser-title {
+	width: 220px;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 /* For custom User Profiles */

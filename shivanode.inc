@@ -216,7 +216,7 @@ function _shivanode_installed_instances() {
  *  An associative array specifying the values we wish to add for the chart type.
  *  
  */
-function _shivanode_element_typelist() {
+function _shivanode_element_typelist($byName = FALSE) {
   $options = array(
     7 => t('Chart'),
     1 => t('Data'),
@@ -231,8 +231,25 @@ function _shivanode_element_typelist() {
     6 => t('Video'),
     /*
     8 => 'Control',
-        9 => 'Canvas',*/
+    9 => 'Canvas',
+    */
   );
+  if($byName === TRUE) {
+    $options = array( 
+      'Canvas' => 9,
+      'Control' => 8,
+      'Chart' => 7,
+      'Data' => 1,
+      'Draw' => 11,
+      'Earth' => 12,
+      'Image' => 2,
+      'Map' => 3,
+      'Network' => 10,
+      'Subway' => 4,
+      'Timeline' => 13,
+      'Video' => 6,
+    );
+  }
   return $options;
 }
 
