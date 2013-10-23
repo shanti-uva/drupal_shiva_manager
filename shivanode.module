@@ -90,6 +90,9 @@ define('SHIVA_SHOW_JSON', FALSE);
 // Default thumbnail field
 define('SHIVA_DEFAULT_IMAGE_FIELD', NULL); 
 
+// Data-based Visualizations
+define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Image|Network|Timeline');
+
 /**
  * Implements hook_init.
  *   This hook is run at the beginning of the page request. 
@@ -185,8 +188,8 @@ function shivanode_menu() {
   );
   
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
-  $items['list/my-data'] = array(
-    'title' => 'Available Shiva Data Entries',
+  $items['mydata'] = array(
+    'title' => 'Choose Your Data',
     'description' => 'List of Available Shiva Data Entries',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_data_elements'),
@@ -325,6 +328,17 @@ function shivanode_permission() {
   ); 
 }
 
+/**
+ * Implements hook_views_api to register views api functions
+ * used to add google spreadsheets to data view
+ */
+ /* not needed
+function shivanode_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'shivanode'),
+  );
+}*/
 
 /**
  * Implements hook_preprocess_page () 
@@ -1016,6 +1030,13 @@ function shivanode_add_og_user_role($form, &$form_state) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
+  
+  // Get the last part of the URL to determing what we are showing
+  $action = $form['#action']; // the action url as stored in form
+  $action_url_parts = explode('/', $action);
+  $urlsuffix = array_pop($action_url_parts);
+  
+  
   // Remove the Simile timeline option when displaying form only, 
   // but left it in array of types to display type of old existing simile timelines
   unset($form['shivanode_element_type']['und']['#options'][5]);
@@ -1024,7 +1045,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
-  $action = $form['#action']; // the action url as stored in form
   $sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
   $is_new_el = FALSE;
   $submitVal = t('Update');
@@ -1035,6 +1055,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $typematch = preg_match('/add\/shivanode\/([^\/]+)/', current_path(), $match);
     $snnewtype = ($typematch) ? $match[1] : 'chart';
     $sntype = ucfirst($snnewtype);
+    
+    // If it's a data-based visualization without a data node id at the end, redirect to data list
+    if (strpos(SHIVA_DATA_VISUALIZATIONS,$sntype) > -1 && ($sntype == ucfirst($urlsuffix) || $urlsuffix == 'shivanode')) {
+      if($urlsuffix == 'shivanode') { $urlsuffix = 'chart'; }
+      drupal_goto('mydata/'. $urlsuffix);
+    }
+    dpm(strpos(SHIVA_DATA_VISUALIZATIONS,$sntype));
+    dpm($sntype . ":" . $urlsuffix);
     $submitVal = t('Save');
   }
   
@@ -1235,9 +1263,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // gdocinfo is the part of the form that displays a link to another element that represents a google spread sheet.
   $gdocinfo = ''; 
-  // get url suffix to see if it's a number or "edit"
-  $action_url_parts = explode('/', $action);
-  $urlsuffix = array_pop($action_url_parts);
   // Hidden markup to store Data Element ID when and if assigned
   $form['gdocinfo'] = array(
     '#type' => 'markup',
@@ -1249,7 +1274,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#type' => 'markup',
     '#markup' => '<span class="label">' . t('Data Used') . ': </span>',
   );
-  // if it's a new Visualization being created with a datasheet in the URL, or if it's an edit of an existing Visualization
+  // Determine if Data source is in the URL
+  // if it's a new Visualization and the last portion of the URL is a number
+  // Then that number is to a data node to be used for the visualization
   if (($is_new_el && is_numeric($urlsuffix)) || $urlsuffix == 'edit') {
     $dataNodeId = ($is_new_el) ? $urlsuffix : _shivanode_get_data_element($form);
     // a number at the end of /node/add/shivanode is an nid of a data node to use for new shivanode

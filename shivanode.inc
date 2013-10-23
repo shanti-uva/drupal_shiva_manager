@@ -1214,14 +1214,20 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  */
 function _shivanode_data_elements($form, &$form_state) {
   global $user, $base_root, $base_path;
-  
+  $urlparts = explode('/', current_path());
+  $sntype = array_pop($urlparts);
+  if($sntype == 'shivanode') {
+    $sntype = 'chart';
+  }
+  if($sntype == 'mydata' || $sntype == '') { $sntype = 'all'; }
+  $sntypelabel = ($sntype == 'all') ? 'Charts, Images, Networks, and Timeline': ucfirst($sntype);
   //_shivanode_check_google_login();
   
   $markup = array(
     '#prefix' => '<div id="data-element-popup">',
     '#suffix' => '</div>',
   );
-  
+  /*
   $markup['instruct'] = array(
     '#type' => 'fieldset',
     '#title' => t('Instructions'),
@@ -1234,16 +1240,24 @@ function _shivanode_data_elements($form, &$form_state) {
       ),
     )
   );
-  
-  $markup['instruct']['p'] = array(
+  */
+  if( $sntype != 'all' ){
+    $markup['h2'] = array(
+      '#type' => 'markup',
+      '#markup' => t('<h2>@type Visualizations</h2>', array('@type' => $sntypelabel)),
+    );
+  }
+  $markup['p'] = array(
     '#type' => 'markup',
-    '#markup' => '<p>' . t('This list allows you to specify the data that you would like to call upon for the Shiva visualization on which you are currently working. ' . 
+    '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file. Below is a list of all the spreadsheets you have registered with this site as well as all, if permitted, all the spreadsheets in your Google Doc account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p>', array('@type' => $sntypelabel)),
+    
+    /*t('This list allows you to specify the data that you would like to call upon for the Shiva visualization on which you are currently working. ' . 
                             'Shiva visualizations draw upon Shiva Data entries, which are typically created from Google Doc spreadsheets. ' .
                             'The first section of this page shows you Shiva Data entries that you have personally created and also allows you see Shiva ' .
                             'Data entries  others have created and shared with groups to which you belong.  ' .
                             'The second section of this page shows your Google spreadsheets that you have not yet imported into Shiva. ' .
                             'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
-                            'and click the &lsquo;Add Spreadsheet&rsquo; button.') . '</p>',
+                            'and click the &lsquo;Add Spreadsheet&rsquo; button.') */
   );
 
   $markup['filterdiv'] = array(
@@ -1255,6 +1269,14 @@ function _shivanode_data_elements($form, &$form_state) {
     '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
        value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
   );
+  
+  $view = views_embed_view('data_sets', 'panel_pane_1');
+  $preview = _shivanode_add_googledoc($view);
+  $markup['addedview'] = array(
+    '#type' => 'markup',
+    '#markup' => $preview,
+  );
+  
   $markup['existing'] = array(
     '#type' => 'fieldset',
     '#title' => t('Existing Data Entries'),
@@ -1352,10 +1374,18 @@ function _shivanode_data_elements($form, &$form_state) {
       '#markup' =>'<p>' . t('To add further spreadsheets from your Google Doc account you must give permission for this site to have read-only access to your Google Docs. To do so, you will be directed away from this page to a Google authentication page. From there click "Grant Access", and you will automatically be redirected back here.') . '</p>',
     );
   }
-  
   return $markup;
 }
 
+function _shivanode_add_googledoc($preview) {
+  //dpm($preview, 'preview');
+  $xml = new SimpleXMLElement($preview);
+  //dpm($preview);
+  $result = $xml->xpath('//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]');
+  $result = $result[0];
+  $result['class'] = 'replaced';
+  dpm($result->asXML(), 'xpath result' );
+}
 
 /*
  * _shivanode_data_elements_submit($form, &$form_state) : Called when the "Add Spreadsheet" button in the 
