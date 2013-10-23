@@ -24,8 +24,9 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		base="http://vimeo.com/",type="Vimeo";
 	else if (options.dataSourceUrl.match(/kaltura/)) {
 		var s=options.dataSourceUrl.indexOf("kaltura_player_");
+		var flavor=487061;		// Was 301951
 		id=options.dataSourceUrl.substring(s+15);
-		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301951/protocol/https/video.mp4"
+		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/"+flavor+"/protocol/https/video.mp4"
 		base="";
 		type="Kaltura";
 		}

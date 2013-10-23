@@ -637,14 +637,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	if (options['height'])		$(con).height(options['height']);
 	ops.containerId=this.container;
 	if (!ops.colors)	delete ops.colors;
- 	if (ops.dataSourceUrl) {	
- 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
-	 	if (ops.dataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
-  			ops.dataTable=CSV(ops.dataSourceUrl,"hide","JSON");
-   			ops.dataDataSourceUrl="";
-  		}	
-  	}
-  	if (ops.query) {
+   	if (ops.query) {
   		var v=ops.query.split(" ");
   		for (i=0;i<v.length;++i) {
   			if (v[i] == "has") {
@@ -668,11 +661,35 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
         }
         ops.series.push(o);
         }
- 	var wrap=new google.visualization.ChartWrapper(ops);
-	this.map=wrap;
- 	wrap.setOptions(ops);
-    wrap.draw();
-  	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
+ 	var wrap=new google.visualization.ChartWrapper(ops);				// Get google chart obj
+	this.map=wrap;														// Save prt in map
+ 	if (ops.dataSourceUrl) 												// If a data source spec'd
+ 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");		// Restore special chars
+ 	wrap.setOptions(ops);												// Set options
+ 
+ 	if (ops.dataSourceUrl.indexOf("google.com") == -1) {				// Not a google doc
+    	shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data) {	// Get spreadsheet data
+			ops.dataSourceUrl=ops.query="";								// Null source/query out
+		  	wrap.setOptions(ops);										// Re-set options
+			var d = {cols: [], rows: []};
+			var keys = Object.keys(data[0]);
+			for (var i=0;i<keys.length;i++)
+			    d.cols.push({label:keys[i], type:(typeof data[0][keys[i]])});
+			d.rows = [];
+			for (var i=0; i<data.length; i++){
+			    var cell = [];
+			    for (var j=0; j<keys.length; j++){
+			        cell.push({v:data[i][keys[j]]});
+			    }
+			    d.rows.push({c:cell});
+			} 
+			wrap.setDataTable(d);										// Add the data
+		    wrap.draw();												// Draw chart
+  			});
+		}
+	else  																// Google doc
+	    wrap.draw();													// Draw chart
+ 	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
   	google.visualization.events.addListener(wrap,"select", function(r) { 
   		var o=wrap.getChart().getSelection()[0];
    		var row="-", col="-";
@@ -712,33 +729,6 @@ SHIVA_Show.prototype.Sound=function(sound, mode)				// PLAY SOUND
 		snd=new Audio(sound+".mp3");
 	if (mode != "init")
 		snd.play();
-}
-
-SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET
-{
-	var query=new google.visualization.Query(file);							
-	query.send(handleQueryResponse);
- 
-    function handleQueryResponse(response) {
-	    var i,j,o;
-		var data=response.getDataTable();
-		var cols=data.getNumberOfColumns();
-		var rows=data.getNumberOfRows();
- 		var keys=new Array();
-		var theData=new Array();
-		for (i=0;i<cols;++i) {
-		 	if (!$.trim(data.getColumnLabel(i)))
-		 		break;
-			keys.push($.trim(data.getColumnLabel(i)));
-			}
-		for (i=0;i<rows;++i) {
-			o={};
-			for (j=0;j<keys.length;++j) 
-				o[keys[j]]=data.getValue(i,j);
-			theData.push(o);
- 			}
-		callback(theData);
-     }
 }
 
 SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, content)

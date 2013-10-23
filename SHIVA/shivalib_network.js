@@ -85,31 +85,30 @@ VIZ.prototype.Draw=function(json)
 			this.Config[this.chartType][key] = val;
 		
 		}
-	new google.visualization.Query(json.dataSourceUrl).send($.proxy(this.Google2Jit,this));
+	shivaLib.GetSpreadsheet(json.dataSourceUrl,false,null,$.proxy(this.Spreadsheet2Jit,this));
 	this.config=this.Config[this.chartType]; 
 	$("#"+this.container).height(this.config.height);
 	$("#"+this.container).width(this.config.width);
 	$jit.id(this.container).style.backgroundColor=this.config.background.CanvasStyles.fillStyle;
 }
 
-VIZ.prototype.Google2Jit=function(rs)
+VIZ.prototype.Spreadsheet2Jit=function(data)
 {	
-	var table=rs.getDataTable();
-	var numRows = table.getNumberOfRows();
-	var numCols = table.getNumberOfColumns();
-	
-	// Clean up data (trim leading and ending spaces) and save to local array
-	// Crucial -- spaces will break things
-	var ROWS = [];
-	for (var i = 0; i < numRows; i++) {
-		ROWS[i] = [];
-		for (var j = 0; j < numCols; j++) {
-			var v = table.getValue(i,j);
-			if (isNaN(v)) { v = v.replace(/(^\s+|\s+$)/g,""); }
-			ROWS[i][j] = v;
-		}
+	var i,j,v,n;
+	var ROWS=[];
+	var numCols=0;
+	var numRows=data.length;									// Number of rows
+	for (i=0;i<numRows;i++) {									// For each row
+		ROWS[i]=[];												// Init sub-array
+		n=data[i].length;										// Get row length
+		numCols=Math.max(numCols,n);							// Expand to longest
+		for (j=0;j<n;j++) {										// For each col
+			v=data[i][j];										// Get value
+			if (isNaN(v)) 										// If not a number
+				 v=v.replace(/(^\s+|\s+$)/g,"");				// Remove padding (crucial!)
+			ROWS[i][j]=v;										// Set in array of arrays
+			}
 	}
-
 	// Grab the classes for interpolating into the JIT json
 	// This allows overriding node and link properties from within the spreadsheet!
 	var CLASSES = {node: {}, link: {}};

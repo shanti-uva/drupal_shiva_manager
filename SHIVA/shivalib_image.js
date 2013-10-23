@@ -80,28 +80,15 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			$("#"+this.container+"PlyBut").trigger("click");								// Trigger play								
 		}
 		
- 	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) {
-  		var query=new google.visualization.Query(file);
-   		query.send(handleQueryResponse);
- 
-	    function handleQueryResponse(response) {
-		    var a,i,j;
-			var data=response.getDataTable();
-			var cols=data.getNumberOfColumns();
-			var rows=data.getNumberOfRows();
-	 		var rowData=new Array()
- 			for (i=0;i<rows;++i) {
- 				a=new Array()
-				for (j=0;j<cols;++j) 
-					a.push(data.getValue(i,j));
-   				rowData.push(a);
-    			}
-     		AddImages(rowData,imgHgt,showImage,showSlide,trans,wid);
-		 	shivaLib.SendReadyMessage(true);											
-  	     }
- 	}
+ 	  function GetSpreadsheetData(url, imgHgt, showImage, showSlide, trans, wid) {			// GET DATA FROM SPREADSHEET
 
-   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)
+		shivaLib.GetSpreadsheet(url,false,null,function(data) {								// Get spreadsheet data
+  	     	AddImages(data,imgHgt,showImage,showSlide,trans,wid);							// Add images to gallery
+		 	shivaLib.SendReadyMessage(true);												// Sedn ready message
+  	    	});
+ 		}
+
+   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)				// ADD IMAGES TO GALLERY
  	{
 		var str="<div id='gallery' class='ad-gallery'>"
 		if (showImage == "true")
