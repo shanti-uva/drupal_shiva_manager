@@ -225,6 +225,7 @@ function _shivanode_element_typelist($byName = FALSE) {
     2 => t('Image'),
     3 => t('Map'),
     10 => t('Network'),
+    14 => t('Poster'),
     4 => t('Subway'),
     5 => t('Timeline (Deprecated)'),
     13 => t('Timeline'),
@@ -245,6 +246,7 @@ function _shivanode_element_typelist($byName = FALSE) {
       'Image' => 2,
       'Map' => 3,
       'Network' => 10,
+      'Poster' => 14,
       'Subway' => 4,
       'Timeline' => 13,
       'Video' => 6,
@@ -271,6 +273,7 @@ function _shivanode_options_list($option = NULL) {
       2 => t('Image'),
       3 => t('Map'),
       10 => t('Network'),
+      14 => t('Poster'),
       4 => t('Subway'),
       5 => t('Timeline (deprecated)'), // was simile = "Timeline"
       13 => t('Timeline'),
@@ -520,6 +523,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
     
+  $form['shivanode_url_settings']['shivanode_poster_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Poster Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_poster_editor', SHIVA_POSTER_EDITOR),
+    '#required' => TRUE,
+  );
+    
   $form['shivanode_url_settings']['shivanode_subway_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Subway Editor File:'),
@@ -740,6 +751,7 @@ function _shivanode_admin_settings_validate($form, &$form_state) {
     $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
     $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
     $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
+    $form_state['input']['shivanode_poster_editor'] = SHIVA_POSTER_EDITOR;
     $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
     //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
     $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
@@ -888,7 +900,7 @@ function _shivanode_gss_form($form, &$form_state) {
     // View All Shiva Visualizations Link
     $form['viewall'] = array(
       '#type' => 'markup',
-      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'list/my-data', array(
+      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'mydata', array(
         'attributes' => array(
           'target' => '_top',
         )
@@ -1220,13 +1232,21 @@ function _shivanode_data_elements($form, &$form_state) {
     $sntype = 'chart';
   }
   if($sntype == 'mydata' || $sntype == '') { $sntype = 'all'; }
-  $sntypelabel = ($sntype == 'all') ? 'Charts, Images, Networks, and Timeline': ucfirst($sntype);
+  $sntypelabel = ($sntype == 'all' || $sntype == 'popup') ? 'Charts, Images, Networks, and Timeline': ucfirst($sntype);
   //_shivanode_check_google_login();
   
-  $markup = array(
-    '#prefix' => '<div id="data-element-popup">',
-    '#suffix' => '</div>',
-  );
+  if($sntype == 'popup') {
+    $markup = array(
+      '#prefix' => '<div id="data-element-popup">',
+      '#suffix' => '</div>',
+    );
+  } else {
+    $markup = array(
+      '#prefix' => '<div id="data-element-page">',
+      '#suffix' => '</div>',
+    );
+  }
+  
   /*
   $markup['instruct'] = array(
     '#type' => 'fieldset',
@@ -1241,6 +1261,7 @@ function _shivanode_data_elements($form, &$form_state) {
     )
   );
   */
+  
   if( $sntype != 'all' ){
     $markup['h2'] = array(
       '#type' => 'markup',
@@ -1259,93 +1280,40 @@ function _shivanode_data_elements($form, &$form_state) {
                             'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
                             'and click the &lsquo;Add Spreadsheet&rsquo; button.') */
   );
-
-  $markup['filterdiv'] = array(
-    '#prefix' => '<div id="addspreadsheet-filter"><span class="label">' . t('Filter') . ': </span>',
-    '#suffix' => '</div>',
-  );
-  $markup['filterdiv']['input'] = array(
-    '#type' => 'markup',
-    '#markup' => '<input id="ssfilter" onkeyup="javascript: Drupal.Shivanode.filterSsList(this);" type="text" name="input" 
-       value="" size="15" title="Filter data sets by words in title (case-sensitive)"></input>',
-  );
   
-  $view = views_embed_view('data_sets', 'panel_pane_1');
-  $preview = _shivanode_add_googledoc($view);
+  // Hidden fields for spreadsheet id (gid or nid), type, and title. Set by JS when a visualize-this button is click. See Drupal.behaviors.shivaDataElementSelect
+  $markup['newss'] = array(
+    '#type' => 'hidden',
+    '#value' => '',
+  );
+  $markup['newsstype'] = array(
+    '#type' => 'hidden',
+    '#value' => '',
+  );
+  $markup['newsstitle'] = array(
+    '#type' => 'hidden',
+    '#value' => '',
+  );
+  // Call function below to get HTML from view, tweak it and insert in this form
+  $viewmarkup = _shivanode_gdocs_view();
   $markup['addedview'] = array(
     '#type' => 'markup',
-    '#markup' => $preview,
+    '#markup' => $viewmarkup,
+  );
+  $markup['submitbutton'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send'),
+    '#attributes' => array(
+      'style' => 'display: none;',
+    ),
   );
   
-  $markup['existing'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Existing Data Entries'),
-    '#collapsible' => TRUE,
-  );
-  
-  $markup['existing']['sntoggle'] = array(
-    '#markup' => '<p id="sntoggle"><input type="checkbox" onclick="javascript:jQuery(\'#shivanodelist li.othernode\').toggle(); ' . 
-        'jQuery(\'#shivanodelist .uname\').toggle();"/>&nbsp;' . t('View Others') . '&rsquo; ' . 
-        t('Public Data Entries') . '<p/>',
-  );
-  
-  $markup['existing']['snlist'] = array(
-    '#prefix' => '<ul id="shivanodelist">',
-    '#suffix' => '</ul>',
-  );
-  
-  $nodes = _get_shivanodes(1); // get all shivanode that are data entries (type = 1)
-  $lict = 0;
-  foreach ($nodes as $node) {
-    $csscode = ($user->uid == $node->uid)? 'mynode"' : 'othernode" style="display:none;"';
-    $nuser = user_load($node->uid);
-    if (node_access('view', $node)) {
-      $lict++;
-      $limarkup = '<li class="' . $csscode . '>' . l($node->title, 'node/' . $node->nid, array(
-        'attributes' => array(
-          'target' => '_top',
-        ),
-      )) . '<span class="uname" style="display: none;">&nbsp;by ' . $nuser->name . '</span> (';
-      $limarkup .= '<a class="link" onmousedown="Drupal.Shivanode.setDataElement(\'' . $node->nid . 
-                    '\', true);">' . t('Select') . '</a>';
-      if (node_access('update', $node)) {
-        $limarkup .=  ' | ' . l(t('Edit'), _shivanode_get_dataurl($node), array(
-          'attributes' => array(
-            'target' => '_blank',
-          ),
-        ));
-      }
-      $limarkup .= ')</li>';
-      $markup['existing']['snlist']['li' . $lict] = array(
-        '#markup' => $limarkup,
-      );
-    }
-  }
-  
-  if (_shivanode_check_google_login(FALSE)) {
-    $sslists = _shivanode_get_spreadsheet_list();
-    $gsheets = $sslists[0];
-    $markup['spreadsheets'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Remaining Google Spreadsheets'),
-      '#description' => t('Choose from one of your remaining @num Google spreadsheets to create a visualization from it. Select the radio button and then press the &lsquo;Add Spreadsheet&rsquo; button:', array('@num' => count($gsheets))),
-      '#collapsible' => TRUE,
-    );
-    $markup['spreadsheets']['newss'] = array(
-      '#type' => 'radios',
-      '#options' => $gsheets,
-      '#attributes' => array( 'ondblclick' => 'this.form.submit();'),  // submit form when radio button is double clicked
-    );
-    $markup['spreadsheets']['sumbitss'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add Spreadsheet'),
-    );
-  } else {
+  if (!_shivanode_check_google_login(FALSE)) {
     // Display link to generate single-use token
     
     // if the request uri has ?format=simple in it 
     // then it's in the add data entry popup, return there;
-    $return_page = 'list/my-data';
+    $return_page = 'mydata';
     $rui = request_uri();
     if(strpos($rui, 'format=simple') > -1) {
        $return_page  = 'node/add/shivanode?popup=dataurl'; 
@@ -1377,14 +1345,104 @@ function _shivanode_data_elements($form, &$form_state) {
   return $markup;
 }
 
-function _shivanode_add_googledoc($preview) {
+/**
+ * _shivanode_gdocs_view: Adds Spreadsheets in GDoc account to list of data sources
+ *    Calls a view of existing data elements and adds ones google docs to it, if one has given permission
+ *    Creates visualize buttons to create a visualization using a spreadsheet when clicked.
+ *    The buttons are modified by JS () to set the newss, newsstype, and newsstitle hidden elements when clicked before submission
+ *    See JS at:  Drupal.behaviors.shivaDataElementSelect in shivanode.js
+ */
+function _shivanode_gdocs_view() {
+  
+  $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
   //dpm($preview, 'preview');
-  $xml = new SimpleXMLElement($preview);
-  //dpm($preview);
-  $result = $xml->xpath('//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]');
-  $result = $result[0];
-  $result['class'] = 'replaced';
-  dpm($result->asXML(), 'xpath result' );
+  $xml = new DOMDocument();
+  $xml->preserveWhiteSpace = false;
+  $xml->loadXML($viewMarkup);
+  
+  $xpathstr = '//div[@class="view-content"]//tbody/tr';
+  $xpath = new DOMXPath($xml);
+  $result = $xpath->evaluate($xpathstr);
+  foreach($result as $row) {
+    $cell3 = $row->childNodes->item(2);
+    $txt = $cell3->childNodes->item(0);
+    $info = explode('|$|', trim($txt->wholeText));
+    $button = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'submit',
+        'name' => 'op',
+        'value' => t('Visualize'),
+        'class' => 'form-submit visualize-button',
+        'id' => 'submit-' . $info[1],
+      ));
+      $titleinput = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'hidden',
+        'name' => 'title',
+        'value' => $info[0],
+      ));
+      $nidinput = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'hidden',
+        'name' => 'nid',
+        'value' => $info[1],
+      ));
+    $cell3->replaceChild($button, $txt);
+    $cell3->appendChild($titleinput);
+    $cell3->appendChild($nidinput);
+  }
+  $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
+  $xpath = new DOMXPath($xml);
+  $result = $xpath->evaluate($xpathstr)->item(0);
+  $result->setAttribute('class', preg_replace('/\s*views-row-last/', '', $result->getAttribute('class')));
+  $tbody = $result->parentNode;
+  $rowmod = $result->getAttribute('class');
+  if (_shivanode_check_google_login(FALSE)) {
+    $sslists = _shivanode_get_spreadsheet_list();
+    $gsheets = $sslists[0];
+    foreach($gsheets as $key => $title) {
+      $rowclone = $result->cloneNode(TRUE);
+      $rowmod = ($rowmod == 'even') ? 'odd' : 'even';
+      $rowclone->setAttribute('class', $rowmod);
+      $gid = str_replace('https://spreadsheets.google.com/ccc?key=', '', $key);
+      $titlecell = $rowclone->childNodes->item(0);
+      $datecell = $rowclone->childNodes->item(1);
+      $linkcell = $rowclone->childNodes->item(2)->cloneNode();
+      $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
+      $datecell->replaceChild(new DOMText('n/a'), $datecell->childNodes->item(0));
+      //<input type="submit" name="op" value="I&#039;m a little button" class="form-submit" />
+      $button = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'submit',
+        'name' => 'op',
+        'value' => t('Visualize'),
+        'class' => 'form-submit visualize-button',
+        'id' => 'submit-' . $gid,
+      ));
+      $titleinput = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'hidden',
+        'name' => 'title',
+        'value' => $title,
+      ));
+      //dpm($xml->saveXML($titleinput), 'title ele');
+      $gidinput = _add_DOM_attributes($xml->createElement('input'), array(
+        'type' => 'hidden',
+        'name' => 'gid',
+        'value' => $gid,
+      ));
+      $linkcell->appendChild($button);
+      $linkcell->appendChild($titleinput);
+      $linkcell->appendChild($gidinput);
+      $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
+      $tbody->appendChild($rowclone);
+    }
+  }
+  $xhtml = $xml->saveXML();
+  //dpm($xhtml);
+  return $xhtml;
+}
+
+function _add_DOM_attributes($newel, $atts = array()) {
+  foreach ($atts as $aname => $value) {
+    $newel->setAttribute($aname,$value);
+  }
+  return $newel;
 }
 
 /*
@@ -1395,29 +1453,36 @@ function _shivanode_add_googledoc($preview) {
  *      to send an html5 message to the parent base page to insert the new data entry and then closes the popup.
  */
 function _shivanode_data_elements_submit($form, &$form_state) {
-  $ssurl = $form_state['values']['newss'];
-  $sstitle = $form_state['complete form']['spreadsheets']['newss'][$ssurl]['#title'] . ' (Data)';
-  $ssurl = str_replace('spreadsheets.google.com/ccc', 'docs.google.com/spreadsheet/ccc', $ssurl);
+  dpm($form_state);
+  //dpm($form, 'form');
+  $ssurl = $form_state['input']['newss'];
+  $sstype = $form_state['input']['newsstype'];
+  $sstitle = $form_state['input']['newsstitle'];
+  $ctype = (preg_match('/mydata\/([^\/]+)/', $form['#action'], $match)) ? '/' . $match[1] : '';
+  $nid = $ssurl; // by default assume it is an existing datanode and the nid is passed as ssurl;
+  // if sstype is 'gid', then it's a spreadsheet that has not been added.
+  if($sstype == 'gid') {
+    $ssurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $ssurl;
+    $newel = _shivanode_create_shiva_data_node($sstitle, $ssurl);
+    $nid = $newel->nid;
+  }
+  // redirect from popup form. The query ?insert={new node id} is to close the popup and insert the data id
+  $form_state['redirect'] = 'node/add/shivanode/' . $nid . $ctype;
+}
+
+function _shivanode_create_shiva_data_node($title, $url) {
   $newel = new stdClass();
   $newel->type = 'shivanode';
   node_object_prepare($newel);
-  $newel->title = $sstitle;
+  $newel->title = $title;
   $newel->language  = LANGUAGE_NONE;
   $newel->shivanode_description[$newel->language][0]['value']   = 'Added programmatically in order to create a visualization';
   $newel->shivanode_element_type[$newel->language][0]['value'] = 1;
   $newel->shivanode_access[$newel->language][0]['value'] = 1;
-  $newel->shivanode_json[$newel->language][0]['value'] = '{"dataSourceUrl":"' . $ssurl . '","title":"' . $sstitle . '","shivaId":"0","shivaMod":"' . 
+  $newel->shivanode_json[$newel->language][0]['value'] = '{"dataSourceUrl":"' . $url . '","title":"' . $title . '","shivaId":"0","shivaMod":"' . 
       date('D, j F Y') . '","shivaGroup":"Data"}';
   node_save($newel);
-  // redirect from popup form. The query ?insert={new node id} is to close the popup and insert the data id
-  $form_state['redirect'] = array(
-    'node/' . $newel->nid,
-    array(
-      'query' => array(
-        'insert' => $newel->nid,
-      ),
-    ),
-  );
+  return $newel;
 }
 
 /*
@@ -1543,7 +1608,7 @@ function _shivanode_greset_form_submit($form, &$form_state) {
     unset($_SESSION['gdoc_token']); 
   }
   drupal_set_message( check_plain(t('Google account authorization has been reset.')) );
-  drupal_goto($base_root . $base_path . 'list/my-data');
+  drupal_goto($base_root . $base_path . 'mydata');
 }
 
 function _get_shivaframe_url($opt, $nid = '') {
@@ -1601,6 +1666,9 @@ function _get_shivaframe_url($opt, $nid = '') {
       break;
     case 13: // Timeglider
       $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
+      break;
+    case 14: // Timeglider
+      $player =  variable_get('shivanode_poster_editor', SHIVA_POSTER_EDITOR);
       break;
   }
   if (strpos($player, 'http://') === FALSE && $opt > 1) {
@@ -2063,6 +2131,15 @@ function _shivanode_get_tags() {
     $tags[$tag->tid] = $tag;
   }
   return $tags;
+}
+
+/**
+ *  _shivanode_add_gid($gid, $type): Called from the My Data list, this function is connected to the menu url: /data/add/gid/
+ *      Adds a Google doc and creates a node from it.
+ */
+function _shivanode_add_gid($gid = 'none', $type = 'none') {
+  if($gid == 'none') { drupal_goto('mydata'); }
+  
 }
 
 /* _shivanode_add_data_correspondence($node) :

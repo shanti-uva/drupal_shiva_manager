@@ -204,6 +204,20 @@ select#elementType {
   display: none;
 }
 
+/* Generic Button Style: This should be in Theme */
+input[type="reset"], input[type="submit"], input[type="button"]  {
+	cursor: pointer;
+	background: -moz-linear-gradient(center top , #FFFFFF 0%, #DDDDDD 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+  border-color: #DDDDDD #BBBBBB #999999;
+  border-image: none;
+  border-radius: 11px 11px 11px 11px;
+  border-style: solid;
+  border-width: 1px;
+  color: #333333;
+  padding: 1px 6px 2px;
+  margin: 4px 3px;
+}
+
 input.nobutton {
 	cursor: pointer;
   background-color: transparent;
@@ -241,6 +255,10 @@ p.table-note {
   margin: 6px 6px;
   font-size: small;
   font-style: italic;
+}
+/* Datatables pager styles */
+.dataTables_paginate {
+    margin-left: -190px;
 }
 
 form.node-shivanode-form, form.node-shivanode-form .form-item {

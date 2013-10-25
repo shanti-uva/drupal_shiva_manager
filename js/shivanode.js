@@ -204,7 +204,21 @@
 			
 		} // End of attach function
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
-
+	
+	// Drupal Behaviors shivaDataElementSelect: for attach js to data entry select buttions
+	Drupal.behaviors.shivaDataElementSelect = {
+		attach: function(context, settings) {
+			$('.visualize-button').mousedown(function() {
+				var $this = jQuery(this);
+				var form = $this.parents('form');
+				form.find('*[name=newss]').attr('value', $this.nextAll().eq(1).attr('value'));
+				form.find('*[name=newsstype]').attr('value', $this.nextAll().eq(1).attr('name'));
+				form.find('*[name=newsstitle]').attr('value', $this.next().attr('value'));
+				//console.info(form);
+			});
+		}
+	};
+	
 	// Use custom Drupal.Shivanode object for functions that are called at various times.
 	Drupal.Shivanode = {};
 	Drupal.Shivanode.debug = { 
