@@ -420,7 +420,7 @@ function shivanode_node_insert($node) {
  */
 function shivanode_node_delete($node) {
   $etype = _shivanode_get_element_type($node);
-  dpm($etype, 'type');
+  //dpm($etype, 'type');
   if ($etype == "Data") {
     $nid = $node->nid;
     $results = db_select('shivanode_links', 'l')
@@ -1076,7 +1076,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       drupal_goto('mydata/'. $sntype);
     }
     $submitVal = t('Save');
-    dpm(array('typematch' => $typematch, 'did' => $did, 'sntype' => $sntype), 'parsed url');
+    //dpm(array('typematch' => $typematch, 'did' => $did, 'sntype' => $sntype), 'parsed url');
   }
   
   // Make a json object from json string if set, otherwise set jobj to FALSE

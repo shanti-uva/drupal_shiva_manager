@@ -1453,7 +1453,7 @@ function _add_DOM_attributes($newel, $atts = array()) {
  *      to send an html5 message to the parent base page to insert the new data entry and then closes the popup.
  */
 function _shivanode_data_elements_submit($form, &$form_state) {
-  dpm($form_state);
+  //dpm($form_state);
   //dpm($form, 'form');
   $ssurl = $form_state['input']['newss'];
   $sstype = $form_state['input']['newsstype'];
