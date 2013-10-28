@@ -219,6 +219,17 @@
 		}
 	};
 	
+	// Go to shiva teaser's link (the visualization) when .info overlay is clicked
+	Drupal.behaviors.shivaTeasers = {
+		attach: function(context, settings) {
+			$('div.shiva-teaser .info-wrapper').click(function() {
+				$(this).parents('div.shiva-teaser').find('.shiva-teaser-title a').get(0).click();
+				console.info('clicked');
+				console.info($(this).parents('div.shiva-teaser').find('.shiva-teaser-image a'));
+			});
+		}
+	};
+	
 	// Use custom Drupal.Shivanode object for functions that are called at various times.
 	Drupal.Shivanode = {};
 	Drupal.Shivanode.debug = { 

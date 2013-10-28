@@ -2671,6 +2671,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'image' => array('label' => t('Image') , 'variable' =>  'sngen-image'),
     'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
     'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
+    'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
     'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
     'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
   );

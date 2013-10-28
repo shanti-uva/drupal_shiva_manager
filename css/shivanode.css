@@ -402,6 +402,49 @@ div.shiva-teaser .shiva-teaser-title {
 	overflow: hidden;
 }
 
+div.shiva-teaser .shiva-teaser-image {
+  opacity: 1;
+	transition: opacity .25s ease-in-out;
+	-moz-transition: opacity .25s ease-in-out;
+	-webkit-transition: opacity .25s ease-in-out;
+}
+
+div.shiva-teaser:hover .shiva-teaser-image {
+    opacity: 0.35;
+}
+
+div.shiva-teaser .info-wrapper {
+	position: relative;
+	margin-top: -245px;
+	width: 225px;
+	height: 250px;
+	opacity: 0;
+	transition: opacity .25s ease-in-out;
+	-moz-transition: opacity .25s ease-in-out;
+	-webkit-transition: opacity .25s ease-in-out;
+	background: rgba(0,0,0,.75);
+	cursor: pointer;
+}
+
+div.shiva-teaser .info {
+	position: relative;
+	top: 80px;
+	text-align: center;
+	opacity: 0;	
+	transition: opacity .25s ease-in-out;
+	-moz-transition: opacity .25s ease-in-out;
+	-webkit-transition: opacity .25s ease-in-out;
+	color: #ddd;
+}
+
+div.shiva-teaser:hover .info-wrapper {
+	opacity: 1;
+}
+
+div.shiva-teaser:hover .info {
+	opacity: 1;
+}
+
 /* For custom User Profiles */
 div.shanti-profile-pic .panel-pane {
   height: 100px;
