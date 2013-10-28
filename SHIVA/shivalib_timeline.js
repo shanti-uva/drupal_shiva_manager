@@ -40,8 +40,9 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
     function handleQueryResponse(response) {
       // Added 1-25-13 to flag query response errors. Assuming it is due to permissions not set to share Gdoc.
       if(response.isError()) {
-        alert("Unable to connect to the designated spreadsheet!  \n" +
-          "Either your internet connection is down, the spreadsheet is not properly shared, or the url is faulty.");
+        alert("Either your internet connection is down or the Google spreadsheet that  \n" +
+          "holds the data for this visualization has not been properly shared.\n" +
+          "The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");
           return;
       }
       var i,j,key,s=0;
@@ -78,17 +79,17 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       if (typeof(stimeline.options.min_zoom) == "undefined" ||
            stimeline.options.min_zoom == "" || 
            stimeline.options.min_zoom == "0") {
-              stimeline.options.min_zoom = 1;
+              stimeline.options.min_zoom = 1
       }
       if (typeof(stimeline.options.max_zoom) == "undefined" ||
            stimeline.options.max_zoom == "" || 
            stimeline.options.max_zoom == "0") {
-              stimeline.options.max_zoom = 99;
+              stimeline.options.max_zoom = 99
       }
       if (typeof(stimeline.options.initial_zoom) == "undefined" ||
            stimeline.options.initial_zoom == "" || 
            stimeline.options.initial_zoom == "0") {
-              stimeline.options.initial_zoom = 50;
+              stimeline.options.initial_zoom = 50
       }
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
@@ -248,7 +249,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       }
     }
   }
-};
+}
 
 //  SIMILE
 
@@ -347,7 +348,7 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 		 	shivaLib.SendReadyMessage(true);											
  	     }
   	}
-};
+}
 
 SHIVA_Show.prototype.TimeActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
@@ -359,4 +360,4 @@ SHIVA_Show.prototype.TimeActions=function(msg)						// REACT TO SHIVA ACTION MES
 			}
 	$("#"+shivaLib.container).timeline('resize');  						// Resize after setting height
 	}
-};
+}

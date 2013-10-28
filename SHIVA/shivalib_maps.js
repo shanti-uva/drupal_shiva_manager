@@ -145,7 +145,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 		if (items[i].layerType == "MarkerSet") {						// MarkerSet layer
 			this.items[i].obj=[];										// Array to hold icons/lines
 			this.markerData=i;											// Holds array index temporarily for cb
-			this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});
+			this.GetSpreadsheet(items[i].layerSource,true,null,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});
 			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity
@@ -312,7 +312,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			if (items[i].visible == "true") {
 				this.items[i].obj=[];
 				this.markerData=i;
-				this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});
+				this.GetSpreadsheet(items[i].layerSource,true,null,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});
 				}
 			continue;
 			}

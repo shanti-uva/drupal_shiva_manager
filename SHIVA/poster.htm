@@ -102,6 +102,11 @@
 		$("#cb1").button({text: true, icons: { primary: "ui-icon-pencil"}});
 		$("#cb2").button({text: true, icons: { primary: "ui-icon-shuffle"}});
 		$("#cb3").button({text: true, icons: { primary: "ui-icon-image"}});
+		$("#toolbar").buttonset();
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
+		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 
 		ReEdit();
 		ShowHelp("startup");
@@ -120,11 +125,6 @@
 			str+="</select>"; 
 			$("#saveAsDiv").html(str);
 			}
-		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
-		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
-		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
-		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
-		$("#toolbar").buttonset();
 	});
 
 	function SetMode(type)
