@@ -124,7 +124,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }).on('click', function(d){
                 //More SEA events
                 console.log(d.text + " : " +  d.freq);
-                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click", d.text + "|" + d.freq);
                 $('.listEntry').css('backgroundColor','white');
                 $(this).css('backgroundColor', 'rgba(255,255,105,0.5)');
             });
@@ -168,11 +168,11 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             //Bind Events for SHIVA Messages
             d3.selectAll('.word').on("click", function(d) {
                 console.log(d.text + " : " +  d.freq);
-                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click", d.text + "|" + d.freq);
             });
             //ready
             if(!wcloud.ready){
-                shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
+                shivaLib.SendShivaMessage("ShivaWord=ready");
                 wcloud.ready = true;   
             }
         };

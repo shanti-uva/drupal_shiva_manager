@@ -51,6 +51,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			this.imageMob.audioStart+=items[i].dur-0;										// Add time
 		this.imageMob.numMobs=items.length;													// Number of mobs
    		clearInterval(shivaLib.imageMob.interval);											// Clear timer
+		shivaLib.imageMob.interval=0;														// Clear var
+
 		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='shivaLib.DrawImage()'/>"); // Add image
 		if (act < items.length-1)															// If not last image
 			$(con).append("<img id='"+this.container+"Img2' "+"' src='"+items[act+1].url+"' style='display:none' />");	// Preload next image
@@ -154,7 +156,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 			clearInterval(shivaLib.imageMob.interval);								// Clear timer
 			shivaLib.imageMob.start=new Date().getTime();							// Set start
 			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
-		  	shivaLib.SendShivaMessage("ShivaImage=play|"+window.name);				// Playing
+		  	shivaLib.SendShivaMessage("ShivaImage=play");							// Playing
 			});	
 		}
  	if (mob.url != $("#"+mob.div).attr('src'))	{									// If not same url
@@ -166,8 +168,9 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
-	  	shivaLib.SendShivaMessage("ShivaImage=pause|"+window.name);					// Pause
+	  	shivaLib.SendShivaMessage("ShivaImage=pause");								// Pause
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
+		shivaLib.imageMob.interval=0;												// Clear var
 		mob.start=0;																// Stop recursing for some reason
 		shivaLib.AnimateDiv("next");												// Get next pic
  		return;
@@ -202,7 +205,15 @@ SHIVA_Show.prototype.ImageActions=function(msg)									// REACT TO SHIVA ACTION
 		if (v[1] == "100") 															// If forcing 100%
 			shivaLib.options.width=shivaLib.options.height="100%";					// Set values
 		shivaLib.DrawImage();														// Redraw image
-	}
+		}
+	else if (v[0] == "ShivaAct=play") {   											// PLAY
+		if (!shivaLib.imageMob.interval)											// If not playing
+			$("#"+this.container+"PlyBut").trigger("click");						// Trigger play								
+		}
+	else if (v[0] == "ShivaAct=pause") {   											// PAUSE
+		if (shivaLib.imageMob.interval)												// If not paused
+			shivaLib.DrawImage();													// Redraw image to pause
+		}
 }
 
                       

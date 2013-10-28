@@ -191,7 +191,7 @@ VIZ.prototype.Init = {
 			domElement.className = 'shiva-node-label';
 			domElement.innerHTML = node.name;
 			domElement.onclick = function(){
-				shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
+				shivaLib.SendShivaMessage("ShivaNetwork=click",node.id);				
 				rgraph.onClick(node.id,{});
 			};
 			var style = domElement.style;
@@ -269,7 +269,7 @@ VIZ.prototype.Init = {
 			style.top = (top + 10) + 'px';
 			style.display = '';
 			domElement.onclick = function(){
-				shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
+				shivaLib.SendShivaMessage("ShivaNetwork=click",node.id);				
 			};
 		};
 
@@ -352,7 +352,7 @@ VIZ.prototype.Init = {
 			$jit.util.addEvent(domElement, 'click', function () {
 				ht.onClick(node.id, {
 					onComplete: function() {
-						shivaLib.SendShivaMessage("ShivaNetwork=click|"+window.name+"|"+node.id);				
+						shivaLib.SendShivaMessage("ShivaNetwork=click",node.id);				
 						ht.controller.onComplete();
 					}
 				});

@@ -161,15 +161,23 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
- 	shivaLib.SendShivaMessage("ShivaChart=ready|"+window.name); 			// Send ready message to EvA
+ 	shivaLib.SendShivaMessage("ShivaChart=ready"); 							// Send ready message to EvA
   }
 
-SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE 
+SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
 {
+	var id;
+//	if (window.frameElement)												// If framed
+//		id=window.frameElement.id;											// Get id there
+//	else																	// else
+		id=window.name;														// Get from name
+	var str=src+"|"+id;														// Add src and window						
+	if (msg)																// If more to it
+		str+="|"+msg;														// Add it
 	if (window.parent)														// If has a parent
-		window.parent.postMessage(msg,"*");									// Send message to parent wind
+		window.parent.postMessage(str,"*");									// Send message to parent wind
 	else																	// Local	
-		window.postMessage(msg,"*");										// Send message to wind
+		window.postMessage(str,"*");										// Send message to wind
 }
 
 SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
@@ -689,15 +697,16 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 		}
 	else  																// Google doc
 	    wrap.draw();													// Draw chart
+ 	
  	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
   	google.visualization.events.addListener(wrap,"select", function(r) { 
-  		var o=wrap.getChart().getSelection()[0];
-   		var row="-", col="-";
-   		if ((o) && (o.row != undefined))
-   			row=o.row;
-   		if ((o) && (o.column != undefined))
-   			col=o.column;
-  		_this.SendShivaMessage("ShivaChart=data|"+window.name+"|"+row+"|"+col); 
+  		var o=wrap.getChart().getSelection()[0];						// Get element clicked
+   		var row="-", col="-";											// Clear
+   		if ((o) && (o.row != undefined))								// If a row
+   			row=o.row;													// Set it
+   		if ((o) && (o.column != undefined))								// If a col
+   			col=o.column;												// Set it
+  		_this.SendShivaMessage("ShivaChart=data",row+"|"+col); 			// Send EVA message
    		});
 }
 
@@ -813,7 +822,7 @@ SHIVA_Show.prototype.Prompt=function(title, message, def, id)
 	$("#shiva_dialogDiv").html(str);
 }
 
-SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
+SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra, values)
 {
 	var	str="<select id='"+id+"'";
 	if (multi)
@@ -825,6 +834,8 @@ SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
 		str+="<option";
 		if (sel == items[i])
 			str+=" selected='selected'"
+		if (values)
+			str+=" value='"+values[i]+"'";
 		str+=">"+items[i]+"</option>";
 		}	
 	return str+"</select>"

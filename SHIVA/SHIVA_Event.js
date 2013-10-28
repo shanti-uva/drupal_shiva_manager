@@ -408,7 +408,7 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 		return;																// Don't add to cue
 	this.player.cue(o.start,function() 	{ 									// A cue
 		_this.Draw(num,true); 												// Add start cue
-		shivaLib.SendShivaMessage("ShivaPlayer=Event-"+num);				// Send message
+		shivaLib.SendShivaMessage("ShivaPlayer=event",num);					// Send message
  		 });		
 	if (o.end)																// If an end set
 		this.player.cue(o.end,function() { _this.Draw(num,false); });		// Add end cue
@@ -593,7 +593,7 @@ SHIVA_Event.prototype.SetPoller=function(val) 							// SET POLLER BAR
 	$("#shivaPoller").data("val",val);										// Save value
 	var	now=this.player.currentTime();										// Get time
 	now=Math.round(now*1000)/1000;											// Hundreths only
-	shivaLib.SendShivaMessage("ShivaVideo=poller|"+Math.round(val)+"|"+now);// Send message
+	shivaLib.SendShivaMessage("ShivaVideo=poller",Math.round(val)+"|"+now);	// Send message
 }
 
 SHIVA_Event.prototype.CreateEventBody=function(def, num) 				// CREATE EVENT BODY

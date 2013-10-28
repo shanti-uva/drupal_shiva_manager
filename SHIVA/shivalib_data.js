@@ -612,7 +612,7 @@ var dal = function(){
     return this;
 };
 
-SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	GET GOOGLE DOCS SPREADSHEET
+SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader) 		//	GET GOOGLE DOCS SPREADSHEET
 {
 	if (url.indexOf("google.com") != -1) {
 		var query=new google.visualization.Query(url);							
@@ -633,18 +633,24 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	
         });
 	}
     function handleQueryResponse(response) {
-	    var i,j,o;
+	    var i,j,o,lab;
 		var data=response.getDataTable();
 		var cols=data.getNumberOfColumns();
 		var rows=data.getNumberOfRows();
  		var keys=new Array();
 		var theData=new Array();
-		if (fields) {
+		if (addHeader || fields) {
 			for (i=0;i<cols;++i) {
-			 	if (!$.trim(data.getColumnLabel(i)))
+			 	lab=$.trim(data.getColumnLabel(i));
+			 	if (!lab)
 			 		break;
-				keys.push($.trim(data.getColumnLabel(i)));
+				keys.push(lab);
+				}
+			cols=keys.length;
+			if (addHeader)
+				theData.push(keys);
 			}
+		if (fields) {
 			for (i=0;i<rows;++i) {
 				o={};
 				for (j=0;j<keys.length;++j) 
@@ -654,7 +660,7 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	
 		}
 		else{
 			for (i=0;i<rows;++i) {
- 				o=new Array();
+ 				o=[];
 				for (j=0;j<cols;++j) 
 					o.push(data.getValue(i,j));
    				theData.push(o);

@@ -23,7 +23,9 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		}
 	if (!this.posterScale)																// If first time
    		this.posterScale=2;																// Init
-	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
+	if ((options.shivaGroup == "Poster") && (!this.eva))								// If poster and no eva
+		this.eva=new EvA();																// Alloc it															
+	var str="<div id='posterDiv' style='position:absolute;";							// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
  	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
@@ -37,27 +39,20 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 								}});	 
 	
-/*	
-	if (!this.g)																		// If no graphics lib
-		this.g=new SHIVA_Graphics();													// Allocate it
-	this.g.CreateCanvas("posterCanvas","posterDiv");									// Create canvas
-	$("#posterCanvas").css({ position:"absolute" });
-	$("#posterCanvas").attr("width",$("#posterDiv").css("width")).attr("height",$("#posterDiv").css("height"));						// Scale canvas to fit poster
-	var ctx=$("#posterCanvas")[0].getContext('2d');										// Get context
-	this.g.DrawBar(ctx, 0, 1, 0, 0, 100, 200)
-*/	
 	if (options.dataSourceUrl) {														// If a back img spec'd
 		str="<img src='"+options.dataSourceUrl+"' ";									// Name
 		str+="height='100%' width='100%'>";												// Size
 		$("#posterDiv").append(str);													// Add image to poster
 		}	
 	this.DrawPosterOverview();															// Draw overview, if enabled
-	if (this.posterMode != "Connect") {													// If editing
+	if (this.posterMode != "Connect") {													// If editing or viewing
 		this.DrawPosterPanes(-1,"draw");												// Draw panes
 		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
+		if ((this.posterMode != "Edit") && (this.options.eva))							// If not editing
+			this.eva.Run(this.options.eva);												// Run Eva
 		}
 	var v=options.pos.split("|");														// Get start pos
 	this.PositionPoster(v[0],v[1],v[2]);												// Set position
@@ -164,7 +159,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 								}
 							 });		
 		$("#posterOverBox").resizable({ containment:"parent",						// Resizable
@@ -184,7 +179,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 									shivaLib.PositionPoster();							// Redraw
 									if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
-								  		shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  		shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 									}
 								}); 
 			}
@@ -286,3 +281,351 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 										});
 		}	
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   EvA METHODS 
+//   Documentation: https://docs.google.com/document/d/1Q42_K0Li7ZDtXfY27neZuo7aENZ-yGybKAYMFNBTGqg/edit
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function EvA() 														// CONSTRUCTOR
+{
+	this.ondos=new Array();												// Hold ondo statements
+	this.data=new Array();												// Holds table data
+	if (window.addEventListener) 
+		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
+	else
+		window.attachEvent("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
+}
+
+EvA.prototype.Run=function(ondoList) 								// RUN
+{
+	var i,o;
+	this.data=[];														// Clear table data
+	for (i=0;i<this.ondos.length;++i) {									// For each ondo
+		o=this.ondos[i];												// Point at ondo
+		o.done=0;														// Not done yet
+		if (o.on == "init")												// If an init
+			this.RunOnDo(o);									// Run it
+		}
+	}
+
+/*	var i,j,k,v,vv,o;
+	var _this=this;														// Point at mixer obj
+ 	var ud=ondoList.split("||");										// Split into rows
+  	for (i=0;i<ud.length;++i) {											// For each row
+ 		v=ud[i].split("|");												// Split by value pair
+		if (v.length < 2)												// If not enough elements
+			continue;													// Skip
+		o={};															// New obj
+		for (j=0;j<v.length;++j) {										// For each pair
+			vv=v[j].split("~");											// Split pair
+			o[vv[0]]="";												// Start with nothing
+			for (k=1;k<vv.length;++k) {									// For each sub
+				o[vv[0]]+=vv[k];										// Add it in
+				if (k < vv.length-1)									// If not last one
+					o[vv[0]]+=":";										// Add : back in
+				}
+			}
+		this.AddOnDo(o);												// Add to list and run if an init
+		}	
+*/
+
+EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
+{
+	var str,o,i;
+	var to=ondo.to;														// Save to
+	var from=ondo.from;													// Save to
+	if (!isNaN(to))    	to="posterFrame-"+(to-1);						// True iframe ids
+	if (!isNaN(from)) 	from="posterFrame-"+(from-1);					// True iframe ids
+	switch(ondo.Do) {													// Route on type
+		case "load": 													// Load an iframe
+			str=ondo.src;												// Set url
+			if (!to.match(/posterFrame-/)) {							// If loading a data file							
+	   			shivaLib.GetSpreadsheet(str,false,null,function(data){	// Get spreadsheet data
+					ondo.ready=true;									// Done
+					shivaLib.eva.data[ondo.to]=data;					// Save data in table def'd by 'to'
+					},true);											// Add fields too
+				break;
+				}
+			if (ondo.src.indexOf("e=") == 0)							// An eStore
+				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
+			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
+				str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
+			else if (ondo.src.indexOf("E=") == 0)						// eStore test
+				str="//127.0.0.1:8020/SHIVA/go.htm?e="+ondo.src.substr(2);	// Make url
+			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
+				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
+			$("#"+to).attr("src",str);									// Set src
+				break;
+		case "fill": 													// Fill an iframe
+			if ((!ondo.src) || (!this.data[ondo.src]))					// No src
+				break;													// Quit
+			str="ShivaAct=data|";										// Base			
+			str+=this.TableToString(this.data[ondo.src])				// Add table data
+			this.SendMessage(to,str);									// Send message to iframe
+			break;
+		case "tell": 													// Run an action
+			str="ShivaAct="+ondo.src;									// Add base
+			for (i=1;i<7;++i) {											// For each possible param
+				if (ondo["p"+i]) 										// If it is set
+					str+="|"+ondo["p"+i];								// Add it
+				}
+
+	trace(str)
+			this.SendMessage(to,str);									// Send message to iframe
+			break;
+		case "call": 													// Run a callback
+			window[to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
+			break;
+		case "filter": 													// Run a query
+			this.data[ondo.to]=[];										// New array
+			str=ondo.query;												// Copy query
+			str=str.replace(/\$p2/g,ondo.p2);							// Replace with var
+			str=str.replace(/\$p3/g,ondo.p3);							// Replace with var
+			str=str.replace(/\$p4/g,ondo.p4);							// Replace with var
+			str=str.replace(/\$p5/g,ondo.p5);							// Replace with var
+			str=str.replace(/\$p6/g,ondo.p6);							// Replace with var
+			this.Query(this.data[ondo.from],this.data[ondo.to],str,ondo.fields,ondo.sort);	// Run query on table
+			break;
+		}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   MESSAGING  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
+{
+	var from;
+	var i,o,n=this.ondos.length;
+//	trace(e.data)
+	var v=e.data.split("|");											// Get parts
+	v[0]=v[0].split("=")[1];											// Strip prefix
+
+	for (i=0;i<n;++i) {													// For each ondo
+		o=this.ondos[i];												// Point at it
+		from=o.from;													// Copy
+		if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);				// True iframe ids
+		if (o.on == "ready") { 											// A ready message
+			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {	// If it matches source and not done yet
+				o.done++;												// Mark it done
+				this.RunOnDo(o);										// Do it
+				}
+			}
+		else if ((v[1] == from) && (v[0] != "ready"))					// If it matches source
+			this.HandleOnEvent(o,e.data);								// Handle it
+		}
+}
+
+EvA.prototype.HandleOnEvent=function(ondo, data) 					// HANDLE INCOMING EVENT
+{
+	var run=new Object();												// New run obj
+	for (o in ondo)														// For each field in on field
+		run[o]=ondo[o];													// Add to run obj
+	if ((!run.p1) && (run.Do == "call")) {								// If params not defined for a callback
+		var v=data.split("|");											// Get on params
+		if (v[1] != undefined)	run.p1=v[1];							// Add param from on
+		if (v[2] != undefined)	run.p2=v[2];							// Add 
+		if (v[3] != undefined)	run.p3=v[3];							// Add 
+		if (v[4] != undefined)	run.p4=v[4];							// Add 
+		if (v[5] != undefined)	run.p5=v[5];							// Add 
+		if (v[6] != undefined)	run.p6=v[6];							// Add 
+		}	
+	this.RunOnDo(run);													// Run it
+}
+
+EvA.prototype.SendMessage=function(con, msg) 						// SEND HTML5 MESSAGE TO IFRAME
+{
+	var win=document.getElementById(con).contentWindow;					// Point at iframe	
+	win.postMessage(msg,"*");											// Send message to container
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   DATA TABLES  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+EvA.prototype.TableToString=function(table) 						// SAVE TABLE AS STRING
+{
+	var i,j,val,str="[";
+	var cols=table[0].length-1;											// Number of fields
+	var rows=table.length-1;											// Number of rows
+	for (i=0;i<=rows;++i) {												// For each event
+		str+="[";														// Begin row
+		for (j=0;j<=cols;++j) { 										// For each value
+			val=table[i][j];											// Get value
+			if ((isNaN(val)) || (!val)) {								// If not a number or blank		
+				str+="\""+val+"\"";										// Add value
+				}
+			else														// A number
+				str+=val;												// Add it
+			if (j != cols)												// If not last
+				str+=",";												// Add comma
+			}
+		str+="]";														// End row
+		if (i != rows)													// If not last
+			str+=",";													// Add comma
+		}
+	return str+"]";														// Return stringified array
+}
+
+EvA.prototype.Query=function(src, dst, query, fields, sort) 		// RUN QUERY
+{
+	var v,j,i=0;
+	var allFields=false;												// Assume selected fields
+	var nAnds=0;														// Assume no AND clauses yet
+	if (!src || !dst)													// No data
+		return;															// Quit
+	var n=src.length;													// Length of table
+	var clause=new Array();												// Holds clauses
+	var ands=new Array();												// Holds hits of AND clauses
+	var ors=new Array();												// Holds hits of OR clauses
+
+	if ((!fields) || (fields == "*")) { 								// If no fields spec'd
+		fields=src[0];													// Return all fields
+		allFields=true;													// Fast track
+		}
+	else																// Only these fields
+		fields=fields.split("+");										// Split buy '+'
+	if ((!query) || (query == "*"))										// If no query spec'd
+		query="* * *";													// Return all rows
+
+	var o=new Object();													// Create obj
+	clause.push(o);														// Add 1st clause
+	o.type="AND";														// 1st is AND
+	v=query.split(" ");													// Tokenize
+	while (i < v.length) {												// For each token	
+		o.hits=[];														// No hits yet
+		o.field=v[i++];													// Field
+		o.cond=v[i++];													// Condition
+		o.what=v[i++];													// Field
+		if ((i < v.length) && (v[i] != "AND") && (v[i] != "OR"))		// Must have space in what word phrase
+			o.what+=" "+v[i++];											// Ad next what word
+		if (i < v.length) {												// For each token
+			o={};														// Fresh obj
+			o.type=v[i++];												// Type
+			clause.push(o);												// Add new clause
+			}
+		}	
+	for (i=0;i<clause.length;++i) {										// For each clause
+		o=clause[i];													// Point at clause
+		h=ands;															// Point at ands array to store hits
+		if (o.type == "OR")												// Unless it's an OR
+			h=ors;														// Point at ors array
+		else															// An AND
+			nAnds++;													// Add to count
+		for (j=0;j<src[0].length;++j) 									// For each field
+			if (o.field == src[0][j]) {									// If name matches
+				o.field=j;												// Replace name with num
+				break;													// Quit looking
+				}
+		for (j=1;j<n;++j) {												// If each row
+			if (o.cond == "*")	{										// Always
+				h.push(j-1);											// Add it to clause									
+				}
+			if (o.cond == "LT")	{										// Less than
+				if (src[j][o.field] < o.what)							// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			else if (o.cond == "GT") {									// Greater than
+				if (src[j][o.field] > o.what)							// A hit
+					h.push(j-1);										// Add it to clause		
+				}							
+			if (o.cond == "LE")	{										// Less than or equal
+				if (src[j][o.field] <= o.what)							// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			else if (o.cond == "GE") {									// Greater than or equal
+				if (src[j][o.field] >= o.what)							// A hit
+					h.push(j-1);										// Add it to clause		
+				}							
+			if (o.cond == "EQ")	{										// Equal
+				if (src[j][o.field] == o.what)							// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			if (o.cond == "NE")	{										// Not equal
+				if (src[j][o.field] != o.what)							// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			if (o.cond == "LK")	{										// Like
+				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) != -1)	// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			if (o.cond == "NL")	{										// Not like
+				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) == -1)	// A hit
+					h.push(j-1);										// Add it to clause									
+				}
+			}
+		}
+
+	var results=new Array();											// Make new array to hold results
+	if (nAnds == 1) 													// If just one AND clauses
+		results=ands;													// Take hits from ands
+	else {																// Multiple AND clauses
+		var thisOne;
+		n=ands.length;													// Number of AND hits
+		var matches=1;													// Set matches counter
+		for (i=0;i<n;++i) {												// For each and hit
+			thisOne=ands[i];											// Point at current and hit
+			for (j=i+1;j<n;++j) {										// For following ands
+				if (ands[j] == thisOne)									// A match
+					++matches;											// Add to count
+				if (matches == nAnds)	{								// Enough to add row to results	
+					results.push(ands[i]);								// Add to results
+					matches=1;											// Reset matches
+					break;												// Stop looking for this one
+					}
+				}
+			}
+		}
+	n=results.length;													// Number of hits
+	if (ors.length) {													// If any OR clauses
+		for (i=0;i<ors.length;++i) {									// For each or hit
+			for (j=0;j<n;++j) 											// For each result
+				if (ors[i] == results[j])								// If already in
+					break;												// Quit
+			if (j == n)													// Didn't have it already
+				results.push(ors[i]);									// Add to results
+			}
+		}
+	
+	n=fields.length;													// Number of fields
+	if (allFields) {													// If doing all fields
+		for (i=0;i<results.length;++i) 									// For each result
+			dst.push(src[results[i]]);									// Add row
+		}
+	else{																// Selected fields
+		var ids=new Array();
+		for (i=0;i<n;++i) { 											// For each desired field
+			for (j=0;j<src[0].length;++j) 								// For each possible field
+				if (fields[i] == src[0][j]) {							// If name matches
+					ids[i]=j;											// Replace name with num
+					break;												// Quit looking
+					}
+			}
+		for (i=0;i<results.length;++i) {								// For each result
+			o=[];														// New array
+			for (j=0;j<n;++j) 	{										// For each result
+				o.push(src[results[i]+1][ids[j]]);						// Add data (skip header)
+			}
+			dst.push(o);												// Add row
+			}
+		}
+	
+	if (sort) {															// If sorting
+		var dir=-1;														// Assume ascending
+		if (sort.charAt(0) == "-") {									// If neg	
+			dir=1;														// Sort descending
+			sort=sort.substr(1);										// Eemove '-'
+			}
+		for (j=0;j<n;++j) 												// For each field
+			if (sort == src[0][j]) {									// If name matches
+				sort=j;													// Replace name with num
+				break;													// Quit looking
+				}
+		dst.sort(function(a,b) { return a[sort] > b[sort]?-1*dir:1*dir });	// Sort it
+		}
+	dst.splice(0,0,fields);												// Set header
+}
+
+	

@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
   	<script type="text/javascript" src="shivalib-min.js"></script>
   	<script type="text/javascript" src="shivalib_poster.js"></script>
+	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
@@ -59,6 +60,7 @@
 	
 	var props={
 		pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
+		eva: 						{	def:'', 			opt:'hidden',			des:'data'},
 		height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
 		width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
 		backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
@@ -72,7 +74,7 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
-		style: 						{	def:'border:3px solid white', 	opt:'string',	des:'CSS styling'}, 
+		style: 						{	def:'border:3px solid white', opt:'string',	des:'CSS styling'}, 
 	}
 	
 	var helpText=new Array();
@@ -135,7 +137,7 @@
 
 	function shivaEventHandler(e)
 	{
-		trace(e.data)
+//		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -310,273 +312,171 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	CONNECT
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-var g=new SHIVA_Graphics();
 
+function onChangeEva()
+{
+	$("#propInput"+1).val(data);
+	shivaLib.options.eva=data;
+	$("#cb3").trigger("click");
+}
+		
 function DrawConnections()												// DRAW PROXIES/LINES
 {
-		var win=document.getElementById("posterFrame-0").contentWindow;			// Point at iframe	
-		win.postMessage("ShivaAct=id|posterFrame-0","*");						// Send message to container
+	$("#posterOverDiv").remove();											// Remove overview
+	shivaLib.DrawLayerControlBox(null,false);								// Hide control box
+	$("#posterDiv").draggable("destroy");									// Diable dragging
+	$("#posterDiv").css({"left":"0px","top":"0px"});						// Position poster	
+	AddEntryLine("init");													// Put up button
+}	
+
+function AddEntryLine(mode)												// ADD NEW EVA LINE
+{
+	if (mode != "init")	{													// If not initting
+		shivaLib.Sound("ding");												// Click
+		shivaLib.eva.ondos.push( {on:"init",from:"",Do:"load",src:"",to:"",query:""} );	// Put dummy data
+		}
+	var str="<br/><div style='font-size:medium;text-shadow:1px 1px #ccc'><b>&nbsp;&nbsp;SHIVA Poster connections:</b></div><br/>";
+	for (var i=0;i<shivaLib.eva.ondos.length;++i)							// For each ondo
+		str+=CreateEntryLine(i);												// Draw line
+	str+="<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<button onclick='AddEntryLine()'>Add new connection</button>";
+	$("#posterDiv").html(str);												// Show menu
+}
+
+function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
+{
+	var i,o,str,sel;
+	var panes=["Poster"];													// Holds list of pane names
+	var tables=[];															// Holds list of table names
+	var scripts=[];															// Holds list of script names
+	var actions=["data","goto","hide","load","marker","pause","play","resize","show","time"];	// Holds list of action names
+
+	for (i=1;i<=shivaLib.items.length;++i)									// For each pane
+		panes.push("Pane-"+i)												// Add to list
+	for (i=0;i<shivaLib.eva.ondos.length;++i) {								// For each ondo
+		o=shivaLib.eva.ondos[i];											// Point at ondo
+		if (((o.Do == "load") && (!o.src.match(/^[em]=/i))) || (o.Do == "filter")) // If loading data
+			tables.push(o.to);												// Add to list
+		}
+	o=shivaLib.eva.ondos[num];												// Point at undo
+	var str="<div id='evaLine"+num+"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When ";	// Div start								
+	str+=shivaLib.MakeSelect("fromSel"+num+"",false,panes,panes[o.from]," onchange='onEvaEntryChange(this.id)'",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+	str+=" is ";	
+	if (o.on == "init")		sel="starting";
+	if (o.on == "click")	sel="clicked";
+	if (o.on == "ready")	sel="ready";
+	str+=shivaLib.MakeSelect("onSel"+num+"",false,["starting","clicked","ready"],sel," onchange='onEvaEntryChange(this.id)'",["init","click","ready"]);
+	str+=" then ";	
+	str+=shivaLib.MakeSelect("DoSel"+num+"'",false,["load","fill","filter","tell","script","call"],o.Do," onchange='onEvaEntryChange(this.id)'");
+	panes.shift();															// Remove poster from panes list
+	if (o.Do == "load") {
+		str+=" this ";	
+		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='4' style='text-align:center' value='"+o.src+"'>";
+		if (o.src) {														// If a src
+			str+=" into ";	
+			if (o.src.match(/^[em]=/i)) {									// If a pane src
+				if (!o.to)	o.to=1;
+				str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+				}
+			else															// Must be a data source
+				str+=" table named <input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+			}
+		}
+	else if (o.Do == "fill") {
+		str+=" this ";	
+		if (!o.to)	o.to=1;
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" from ";	
+		if (!o.src && tables.length)	o.src=tables[0];
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
+		str+=" if ";	
+		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
+		}
+	else if (o.Do == "filter") {
+		str+=" this ";	
+		if (!o.src && tables.length)	o.src=tables[0];
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
+		str+=" to a table named ";	
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+=" if ";	
+		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
+		}
+	else if (o.Do == "tell") {												// Send event to pane
+		str+=" this ";	
+		if (!o.to)	o.to=1;
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		if (!o.src && actions.length)	o.src=actions[0];
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,actions,o.src," onchange='onEvaEntryChange(this.id)'");
+		str+=" using ";														// Using
+		sel="";																// Null it
+		for (i=1;i<8;++i)													// For each possible p param
+			if (o["p"+i])													// If exists
+				sel+=o["p"+i]+",";											// Add to string
+		if (sel)															// If something there
+			sel=sel.substr(0,sel.length-1);									// Lop off last ,
+		str+="<input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
+		}
+	else if (o.Do == "script") {											// Create script
+		str+=" named ";	
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+=" using ";	
+		str+="<textarea id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' rows='1' cols='20' style='vertical-align:top'>"+o.src+"</textarea>";
+		}
+	else if (o.Do == "call") {											// call script
+		str+=" this ";	
+		if (!o.to)	o.to=1;
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,scripts,s[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" with params ";												// Using params
+		sel="";																// Null it
+		for (i=1;i<8;++i)													// For each possible p param
+			if (o["p"+i])													// If exists
+				sel+=o["p"+i]+",";											// Add to string
+		if (sel)															// If something there
+			sel=sel.substr(0,sel.length-1);									// Lop off last ,
+		str+="<input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
+		}
+	str+="&nbsp;&nbsp;&nbsp;<img id='"+num+"' src='trashdot.gif' title='Remove this connection' onclick='onEvaDelete(this.id)'></div>";
+	return str;																// Return string
+}
 	
-
-//	shivaLib.DrawPoster();													// Redraw background
-//	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
-//	DrawLinks();															// Draw link lines first
-//	DrawItems();															// Draw items
-}
-
-function DrawLinks()													// DRAW LINK LINES
+function onEvaDelete(id)											// ON EVA DELETE
 {
-	var i,o,v,k=0,dir,dir2,dir3;
-	var leftToRight;
-	var fx,fy,tx,ty,fr,fi,te,ti,dx,dy;
-	var ctx=$("#links")[0].getContext('2d');								// Get context
-	var xMax=$("#links")[0].width;											// Init max wid to cur wid
-	var yMax=$("#links")[0].height;											// And hgt
-	ctx.clearRect(0,0,xMax,yMax);											// Erase canvas
-	for (i=0;i<shivaLib.cvs.elements.length;++i) {							// For each element
-		xMax=Math.max(xMax,shivaLib.cvs.elements[i].px+200);				// Get max x
-		yMax=Math.max(xMax,shivaLib.cvs.elements[i].py);					// Get max y
+	$("#evaLine"+id).remove();											// Kill it
+	shivaLib.eva.ondos.splice(id,1);									// Remove from array
+	shivaLib.Sound("delete");											// Click
+}
+	
+function onEvaEntryChange(id)										// ON EVA LINE OPTION CHANGE
+{
+	var i,j,str="";
+	var num=$("#"+id).parent()[0].id.substr(7);							// Get row num
+	var o=shivaLib.eva.ondos[num];										// Point at ondo
+	if (id.match(/fromSel/))		o.from=$("#"+id).val();				// Set value
+	else if (id.match(/toSel/))		o.to=$("#"+id).val();				// Set value
+	else if (id.match(/DoSel/))		o.Do=$("#"+id).val();				// Set value
+	else if (id.match(/onSel/))		o.on=$("#"+id).val();				// Set value
+	else if (id.match(/srcSel/))	o.src=$("#"+id).val();				// Set value
+	else if (id.match(/querySel/))	o.query=$("#"+id).val();			// Set value
+	else if (id.match(/pSel/)) {										// P params
+		v=$("#"+id).val().split(",");									// Split by bar
+		for (i=0;i<v.length;++i)										// For each part
+			o["p"+(i+1)]=v[i];											// Set value
 		}
-	$("#links")[0].width=xMax;												// Set new wid
-	$("#links")[0].heigt=yMax;												// Set new hgt
-	for (i=0;i<items.length;++i) {											// For each action
-		dleftToRight=leftToRight=true;										// Assume l-r
-		dir2=dir=2;															// Dir divisors
-		v=String(items[i].from).split(".");									// From array
-		fe=v[0];		fi=v[1];											// Split into element/item
-		v=String(items[i].to).split(".");									// To array
-		te=v[0];		ti=v[1];											// Split into element/item
-		if ((shivaLib.cvs.elements[fe].pv == false) || (shivaLib.cvs.elements[te].pv == false))		// If not visible
-			continue;														// Skip
-		fx=Number(shivaLib.cvs.elements[fe].px)+75;										// Center from x
-		fy=Number(shivaLib.cvs.elements[fe].py)+Number(shivaLib.cvs.elements[fe].ph)-15;				// Y
-		tx=Number(shivaLib.cvs.elements[te].px)+75;										// To X
-		ty=Number(shivaLib.cvs.elements[te].py)+Number(shivaLib.cvs.elements[te].ph)-15;				// Y
-		if (items[i].type == "fill") {										// If a data fill
-			if (shivaLib.cvs.elements[items[i].dat].pv == false)							// If not visible
-				continue;													// Skip
-			dx=Number(shivaLib.cvs.elements[items[i].dat].px)+52;						// Center X
-			dy=Number(shivaLib.cvs.elements[items[i].dat].py)+48;						// Y
-			if (dx < fx)													// If data left of control
-				leftToRight=false;											// Set l-r flag to false
-			if (dx > tx) 													// If data left of control
-				dleftToRight=false;											// Set d l-r flag to false
-			}
-		else if (tx < fx)													// If a set and left of control
-			dleftToRight=leftToRight=false;									// Set l-r flag to false
-		if (fi != 0)  														// If coming from a sub-item 
-			fy-=(shivaLib.cvs.elements[fe].ph)-(fi*17)-33;								// Line up with item
-		if (ti != 0) 														// If going to a sub-itmem
-			ty-=(shivaLib.cvs.elements[te].ph)-(ti*17)-33;								// Align verically w/ item
-		if (leftToRight)													// If 'to' is to the right
-			fx+=78,tx-=74,dir2=-2;											// Set sides
-		else																// On left	
-			fx-=76,tx+=76,dir=-2;											// Set sides
-		if (items[i].type == "fill") {										// If a data fill
-			if (shivaLib.cvs.elements[items[i].dat].px > shivaLib.cvs.elements[te].px)				// If right of data
-				tx=shivaLib.cvs.elements[te].px+150,dir2=2;
-			var x=[fx,fx+(100/dir),dx,dx,dx,tx+(100/dir2),tx];				// Route line
-			var y=[fy,fy,dy,dy,dy,ty,ty];									// thru data icon
-			}
-		else{																// Set action
-			var x=[fx,fx+(100/dir),tx+(100/dir2),tx];						// Draw S-shaped
-			var y=[fy,fy,ty,ty];											// line
-			}
-		g.DrawPolygon(ctx,-1,.75,x,y,itemCols[(k)%items.length],2,true);	// Draw line, varying color
-		dx=4;																// Offset for whole
-		if (ti != 0) 														// If going to a sub-itmem
-			dx=12;															// Bigger offset
-		if (dleftToRight)													// If l-r
-			g.DrawTriangle(ctx,itemCols[(k++)%items.length],1,tx-dx,ty,4,"right")
-		else																// R-l
-			g.DrawTriangle(ctx,itemCols[(k++)%items.length],1,Number(tx)+dx,ty,4,"left")
+	$("#"+id).parent().html(CreateEntryLine(num));						// Redraw Eva line
+	for (i=0;i<shivaLib.eva.ondos.length;++i)	{						// For each line
+		o=shivaLib.eva.ondos[i];										// Point at ondo
+		str+="on~"+o.on+"`";		str+="Do~"+o.Do+"`";	str+="to~"+o.to+"`";		// Concat string
+		str+="from~"+o.from+"`";	str+="query~"+o.query+"`";			// Concat string
+		str+="src~"+o.src+"`";
+		for (j=1;j<8;++j)												// For each param
+			if (o["p"+j] != undefined)									// If something there
+				str+="p"+j+"~"+o["p"+j]+"`";							// Add param
+		str+="`";														// Line end
 		}
+	$("#propInput"+1).val(str);											// Set control
+	shivaLib.options.eva=str;											// Set value
 }
 
-function DrawItems()													// DRAW ELEMENT PROXIES
-{
-	var o,v,p;
-	var i,j,knum;
-	var str,lab,title;
-	for (i=0;i<items.length;++i) {
-		num=i;
-		k=0;
-		o=items[i];
-		while (1) {
-			if (!o["item-"+(Number(k)+1)])
-				break;
-			else
-				++k;
-			}
-		if ((o.shivaTitle) && (o.shivaTitle.length > 22))
-			title=o.shivaTitle.substr(0,22)+"...";
-		else
-			title=o.shivaTitle;
-		if (o.shivaGroup == "Data") {
-			str="<div id='element"+i+"' style='position:absolute;left:"+o.px+"px;top:"+o.py+"px'>";
-			str+="<p id='item"+i+"-0' align='center'><img src='dataicon.gif'><br/><b>"+o.shivaTitle+"</b></p>";
-			$("#containerDiv").append("</div>"+str)
-			$("#item"+i+"-0").css("padding","4px").addClass("rounded-corners");
-			$("#element"+num).draggable({drag:ElementMove,cursor:'move'});
-			o.ph=96;				
-			}
-		else{
-			str="<div id='element"+i+"' style='position:absolute;left:"+o.px+"px;top:"+o.py+"px;width:150px;'>";
-			str+="<p style='text-shadow:1px 1px white' align='center'><b>"+title+"</b></p>";
-			for (j=1;j<=k;++j) {
-				if (o.shivaGroup == "Control") {
-					v=o["item-"+j].split(";");
-					for (var ii=0;ii<v.length;++ii) {
-						p=v[ii].split(":");
-						lab=p[1];
-						if ((p[0] == "label") && (p[1])) break;
-						if ((p[0] == "def")   && (p[1])) break;
-						}
-					}
-				else{
-					s=o["item-"+j].indexOf("name:");
-					e=o["item-"+j].indexOf(";",s);
-					lab=o["item-"+j].substring(s+5,e)
-					}
-				str+="<div id='item"+i+"-"+j+"' style='position:absolute;width:166px;height:12px' class='linkButton'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+lab+"</div>";
-				}
-			str+="<div align='center' id='item"+i+"-0'style='position:absolute;width:133px;height:12px;' class='linkButton' >Whole element</div>";
-			$("#containerDiv").append("</div>"+str)
-			$("#element"+i).addClass("rounded-corners");
-			$("#element"+num).css("background-color","#eee").css('border',"1px solid #999");
-			$("#element"+i).css("background","-webkit-linear-gradient(top, #dfdfdf 0%, #f0f0f0 100%)")
-			$("#element"+num).draggable({drag:ElementMove,cursor:'move'});
-			o.pn=k;
-			o.ph=(k*17)+22+27+16;
-			$("#element"+num).css("height",o.ph);
-			for (j=0;j<=k;++j) {
-				$("#item"+num+"-"+j).draggable({stop:StopItemDrag,start:StartItemDrag,drag:ItemDrag,cursor:'e-resize'});
-				StopItemDrag("","","#item"+num+"-"+j);
-				$("#item"+num+"-"+j).addClass("rounded-corners").css("background-color","#ccc").css('border',"1px solid #999");
-				}
-			}
-		}
-}
-
-function ItemDrag(e,ui)
-{
-	var i,inum;
-	var id="#"+e.target.id;
-	var num=id.substring(5,id.indexOf("-"));
-	var eid="#element"+num;
-	var x=Number(ui.position.left)+Number($(eid).css("left").replace(/px/g,""))+Number(dragOffX);
-	var y=Number(ui.position.top )+Number($(eid).css("top").replace(/px/g,""));
-	if (curDragElement != -1) {
-		if (shivaLib.cvs.elements[curDragElement].shivaGroup == "Data")
-			$("#item"+curDragElement+"-"+curDragItem).css("border","none");
-		else
-			$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #999");
-		}
-	curDragItem=curDragElement=-1;
-	for (i=0;i<shivaLib.cvs.elements.length;++i) {
-		if ((x >= shivaLib.cvs.elements[i].px) && (x < shivaLib.cvs.elements[i].px+150) && (i != num) &&
-			(y >= shivaLib.cvs.elements[i].py) && (y < shivaLib.cvs.elements[i].py+shivaLib.cvs.elements[i].ph)) {
-			curDragElement=i;
-			curDragItem=0;
-			inum=Math.floor((y-Number($("#element"+i).css("top").replace(/px/g,"")))/17);
-			if ((inum > 0) && (inum < shivaLib.cvs.elements[i].pn+1))
-				curDragItem=inum;
-			break;
-			}
-		}
-	$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #990000");
-}
-
-function StartItemDrag(e,ui)
-{
-	var id="#"+e.target.id;
-	var eid="#element"+id.substring(5,id.indexOf("-"));
-	$(eid).css("z-index",1000);
-	$(id).css("z-index",1001)
-	dragOffX=e.pageX-$("#containerDiv").css("left").replace(/px/g,"")-$(eid).css("left").replace(/px/g,"")-$(id).css("left").replace(/px/g,"");
-	dragOffY=e.pageY-$("#containerDiv").css("top" ).replace(/px/g,"")-$(eid).css("top" ).replace(/px/g,"")-$(id).css("top" ).replace(/px/g,"");
-}
-
-function StopItemDrag(e,ui,id)
-{
-	var y,s;
-	$("#item"+curDragElement+"-"+curDragItem).css("border","1px solid #999");
-	if (!id) 
-		id="#"+e.target.id;
-	var num=id.substring(5,id.indexOf("-"));
-	var inum=id.substring(id.indexOf("-")+1);
-	if (curDragItem != -1) {
-		var o=new Object();
-		o.from=num+"."+inum;
-		o.to=curDragElement+"."+curDragItem;
-		o.alpha=100;
-		o.vis=true;
-		if (shivaLib.cvs.elements[curDragElement].shivaGroup == "Data"){
-			o.type="fill";
-			o.fld="";
-			o.query="";
-			o.dat=curDragElement;
-			curDataDrag=items.length;
-			selectedItems[0]=items.length;
-			items.push(o);
-			ShowElements();
-			$(id).append("<div id='dragdir' align='center' style='position:absolute;top:-16px;left:171px;width:8px;background:#eee'><font color='#990000'>Drag this over element to fill with data</font></div>");
-			$("#dragdir").css("border","1px solid #990000").css("padding","4px").addClass("rounded-corners");
-			shivaLib.Sound("click");
-			return;
-			}
-		else
-			o.type="set";
-		if (curDataDrag != -1) {
-			if (curDragElement != -1) { 
-				items[curDataDrag].to=o.to;
-				$("#dragdir").remove();
-				DrawLinks();
-				shivaLib.Sound("ding");
-				}
-			}		
-		else{
-			selectedItems[0]=items.length;
-			items.push(o);
-			ShowElements();
-			DrawLinks();
-			shivaLib.Sound("ding");
-			}
-		}
-	else{
-		if (curDataDrag != -1) {
-			items.pop();
-			$("#dragdir").remove();
-			shivaLib.Sound("delete");
-			}			
-		}
-	curDragItem=curDragElement=-1;
-	if ((s=id.indexOf("-0")) != -1) {
-		y=shivaLib.cvs.elements[num].ph-22;
-		$("#element"+num).css("z-index","auto");
-		$(id).css("left","9px");
-		}
-	else{
-		y=Number(10)+(inum*17);
-		$(id).css("left","-9px");
-		}
-	$(id).css("top",y+"px");
-	$(id).css("z-index","auto");
-	dragOffX=dragOffY=0;
-	curDataDrag=-1;	
-	SetDataChanged(true);
-}
-
-function ElementMove(e,ui)
-{
-	var j=e.target.id.substr(7);
-	shivaLib.cvs.elements[j].px=Number(ui.position.left);
-	shivaLib.cvs.elements[j].py=Number(ui.position.top)
-	DrawLinks();
-}
-		
-		
+	
 		
 </script>
 </body></html>
