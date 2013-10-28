@@ -1066,10 +1066,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if(!isset($form['#node']->nid)) {
     $is_new_el = TRUE;
     $typematch = preg_match('/add\/shivanode\/([^\/]+)\/?([^\/]*)/', current_path(), $match);
-    $did = ($typematch && is_numeric($match[1])) ? $match[1] : FALSE;
-    $snnewtype = (is_numeric($match[1])) ? $match[2] : $match[1];
-    if($snnewtype == '') {$snnewtype = 'chart';}
-    $sntype = ucfirst($snnewtype);
+    if($typematch && count($match) > 1) { 
+      $did = ($typematch && is_numeric($match[1])) ? $match[1] : FALSE;
+      if(count($match) > 2) { 
+        $snnewtype = (is_numeric($match[1])) ? $match[2] : $match[1];
+        if($snnewtype == '') {$snnewtype = 'chart';}
+        $sntype = ucfirst($snnewtype);
+      }
+    }
     
     // If it's a data-based visualization without a data node id   at the end, redirect to data list
     if (strpos(SHIVA_DATA_VISUALIZATIONS,$sntype) > -1 && $did == FALSE) {
