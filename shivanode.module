@@ -420,7 +420,6 @@ function shivanode_node_insert($node) {
  */
 function shivanode_node_delete($node) {
   $etype = _shivanode_get_element_type($node);
-  //dpm($etype, 'type');
   if ($etype == "Data") {
     $nid = $node->nid;
     $results = db_select('shivanode_links', 'l')
@@ -1077,12 +1076,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     
     // If it's a data-based visualization without a data node id   at the end, redirect to data list
     if (strpos(SHIVA_DATA_VISUALIZATIONS,$sntype) > -1 && $did == FALSE) {
-      drupal_goto('mydata/'. $sntype);
+      drupal_goto('mydata/'. strtolower($sntype));
     }
     $submitVal = t('Save');
-    //dpm(array('typematch' => $typematch, 'did' => $did, 'sntype' => $sntype), 'parsed url');
   }
-  
+  if($sntype == '') { $sntype = 'Chart';}
   // Make a json object from json string if set, otherwise set jobj to FALSE
   $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
             strlen($form['shivanode_json']['und'][0]['value']['#default_value']) > 0) ? 

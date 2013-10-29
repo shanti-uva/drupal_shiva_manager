@@ -256,6 +256,7 @@ p.table-note {
   font-size: small;
   font-style: italic;
 }
+
 /* Datatables pager styles */
 .dataTables_paginate {
     margin-left: -190px;

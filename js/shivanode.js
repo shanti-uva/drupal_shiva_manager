@@ -214,7 +214,9 @@
 				form.find('*[name=newss]').attr('value', $this.nextAll().eq(1).attr('value'));
 				form.find('*[name=newsstype]').attr('value', $this.nextAll().eq(1).attr('name'));
 				form.find('*[name=newsstitle]').attr('value', $this.next().attr('value'));
-				//console.info(form);
+				if(jQuery('html').hasClass('lightpop')) {
+					form.find('*[name=ispopup]').attr('value', 'true');
+				}
 			});
 		}
 	};
@@ -224,8 +226,6 @@
 		attach: function(context, settings) {
 			$('div.shiva-teaser .info-wrapper').click(function() {
 				$(this).parents('div.shiva-teaser').find('.shiva-teaser-title a').get(0).click();
-				console.info('clicked');
-				console.info($(this).parents('div.shiva-teaser').find('.shiva-teaser-image a'));
 			});
 		}
 	};
@@ -802,14 +802,14 @@
 		var jobj = JSON.parse(json); 
 		// Set IFrame height and width corresponding to the visualization if it is larger
 		if(typeof(jobj.width) == "string" && !isNaN(jobj.width)) {
-		  vwidth = jobj.width * 1
+		  vwidth = jobj.width * 1;
 		  if (vwidth > 900) {
 		    $('#shivaEditFrame').css('width','');
         $('#shivaEditFrame').width(vwidth + 350);
 		  }
 		}
 		if(typeof(jobj.height) == "string" && !isNaN(jobj.height)) {
-      vheight = jobj.height * 1
+      vheight = jobj.height * 1;
       if (vheight > 900) {
         $('#shivaEditFrame').css('height','');
         $('#shivaEditFrame').height(vheight +  150);
@@ -870,7 +870,7 @@
 							//alert("Error testing KML layer url (" + o.replace("item","Layer") +  ")");
 							if(typeof(console) == "object") { console.info(e); }
 						}
-					})
+					});
 				}
 			}
 		}
@@ -885,7 +885,7 @@
        $('#use-kml-link a').click();
        break;
 	  }
-	}
+	};
 	
 	Drupal.Shivanode.putFile = function(type, fileurl) {
 	  // If the html element has a class "lightpop" it is the popup list, so send it to the main drupal page

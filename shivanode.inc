@@ -1295,6 +1295,10 @@ function _shivanode_data_elements($form, &$form_state) {
     '#type' => 'hidden',
     '#value' => '',
   );
+  $markup['ispopup'] = array(
+    '#type' => 'hidden',
+    '#value' => '',
+  );
   // Call function below to get HTML from view, tweak it and insert in this form
   $viewmarkup = _shivanode_gdocs_view();
   $markup['addedview'] = array(
@@ -1356,7 +1360,6 @@ function _shivanode_data_elements($form, &$form_state) {
 function _shivanode_gdocs_view() {
   
   $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
-  //dpm($preview, 'preview');
   $xml = new DOMDocument();
   $xml->preserveWhiteSpace = false;
   $xml->loadXML($viewMarkup);
@@ -1421,7 +1424,6 @@ function _shivanode_gdocs_view() {
         'name' => 'title',
         'value' => $title,
       ));
-      //dpm($xml->saveXML($titleinput), 'title ele');
       $gidinput = _add_DOM_attributes($xml->createElement('input'), array(
         'type' => 'hidden',
         'name' => 'gid',
@@ -1435,7 +1437,6 @@ function _shivanode_gdocs_view() {
     }
   }
   $xhtml = $xml->saveXML();
-  //dpm($xhtml);
   return $xhtml;
 }
 
@@ -1454,12 +1455,11 @@ function _add_DOM_attributes($newel, $atts = array()) {
  *      to send an html5 message to the parent base page to insert the new data entry and then closes the popup.
  */
 function _shivanode_data_elements_submit($form, &$form_state) {
-  //dpm($form_state);
-  //dpm($form, 'form');
   $ssurl = $form_state['input']['newss'];
   $sstype = $form_state['input']['newsstype'];
   $sstitle = $form_state['input']['newsstitle'];
-  $ctype = (preg_match('/mydata\/([^\/]+)/', $form['#action'], $match)) ? '/' . $match[1] : '';
+  $ispopup = $form_state['input']['ispopup'];
+  $ctype = (preg_match('/mydata\/([^\/\?]+)/', $form['#action'], $match)) ? '/' . $match[1] : '';
   $nid = $ssurl; // by default assume it is an existing datanode and the nid is passed as ssurl;
   // if sstype is 'gid', then it's a spreadsheet that has not been added.
   if($sstype == 'gid') {
@@ -1467,8 +1467,16 @@ function _shivanode_data_elements_submit($form, &$form_state) {
     $newel = _shivanode_create_shiva_data_node($sstitle, $ssurl);
     $nid = $newel->nid;
   }
-  // redirect from popup form. The query ?insert={new node id} is to close the popup and insert the data id
-  $form_state['redirect'] = 'node/add/shivanode/' . $nid . $ctype;
+
+  if($ispopup == 'true') {
+    // redirect from popup form. The query ?insert={new node id} is to close the popup and insert the data id
+    //$form_state['redirect'] = 'node/add/shivanode/' .  $ctype . '?insert=' .  $nid;
+    drupal_goto('node/add/shivanode/' .  $ctype, array(
+      'query' => array('insert' => $nid),
+    ));
+  } else { 
+    $form_state['redirect'] = 'node/add/shivanode/' . $nid . $ctype;
+  }
 }
 
 function _shivanode_create_shiva_data_node($title, $url) {
