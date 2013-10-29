@@ -236,7 +236,8 @@ function _shivanode_element_typelist($byName = FALSE) {
     */
   );
   if($byName === TRUE) {
-    $options = array( 
+    $options = array_flip($options); // What about when localized in a different language? Will this still work?
+    /*$options = array( 
       'Canvas' => 9,
       'Control' => 8,
       'Chart' => 7,
@@ -250,7 +251,7 @@ function _shivanode_element_typelist($byName = FALSE) {
       'Subway' => 4,
       'Timeline' => 13,
       'Video' => 6,
-    );
+    );*/
   }
   return $options;
 }
