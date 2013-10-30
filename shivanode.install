@@ -908,4 +908,20 @@ function shivanode_update_7005() {
   $snimgdir = drupal_get_path('module', 'shivanode') . '/images/';
   file_unmanaged_copy($snimgdir . 'pencil.png', 'public://shivanode/pencil.png');
   file_unmanaged_copy($snimgdir . 'trash.gif', 'public://shivanode/trash.gif');
+  
+  /**
+   * Generic code to add image at at latter time:
+   *
+  global $base_url; 
+  $imgkey = 'sngen-wcloud';  // name of variable and image file
+  $path = 'public://shivanode';
+  $snimgdir = $base_url . '/' . drupal_get_path('module', 'shivanode') . '/images/';
+  $imgfn = $imgkey . '.png';
+  $url = $snimgdir . $imgfn;
+  $file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
+  variable_set($imgkey, $file->fid);
+
+   * 
+   */
+  
 }

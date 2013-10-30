@@ -2657,7 +2657,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
     'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
     'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
-    'wcloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),
+    'word cloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),
   );
   if ($type == 'ALL') {
     return $imgs;
