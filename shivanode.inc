@@ -1236,17 +1236,10 @@ function _shivanode_data_elements($form, &$form_state) {
   $sntypelabel = ($sntype == 'all' || $sntype == 'popup') ? 'Charts, Images, Networks, and Timeline': ucfirst($sntype);
   //_shivanode_check_google_login();
   
-  if($sntype == 'popup') {
-    $markup = array(
-      '#prefix' => '<div id="data-element-popup">',
-      '#suffix' => '</div>',
-    );
-  } else {
-    $markup = array(
-      '#prefix' => '<div id="data-element-page">',
-      '#suffix' => '</div>',
-    );
-  }
+  $markup = array(
+    '#prefix' => '<div id="data-element-page">',
+    '#suffix' => '</div>',
+  );
   
   /*
   $markup['instruct'] = array(
@@ -1304,6 +1297,7 @@ function _shivanode_data_elements($form, &$form_state) {
   $markup['addedview'] = array(
     '#type' => 'markup',
     '#markup' => $viewmarkup,
+    //'#prefix' => '<div class=""'
   );
   $markup['submitbutton'] = array(
     '#type' => 'submit',

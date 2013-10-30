@@ -77,6 +77,30 @@ div.sn-share-button img {
   vertical-align: middle;
 }
 
+/** CSS for Superfish Main Menu */
+#block-superfish-1 {
+	top: -19px;
+}
+
+.sfHover ul {
+	border: 2px groove #4F6975;
+	border-top-style: none;
+	position: relative;
+	top: 19px !important;
+	margin: 6px;
+	background-color: #C5CED1;
+}
+
+.sf-menu li a {
+	padding: 2px 4px;
+	border-radius: 8px;
+}
+
+.sf-menu li a:hover {
+	background: white;
+	text-decoration: none;
+}
+
 /** CSS for SHARE page Tabs **/
 #sharetabs {
 	font-size:90%;
