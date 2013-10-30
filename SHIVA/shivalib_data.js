@@ -482,8 +482,19 @@ var dal = function(){
                         break;
                 }
                 //try to autodetect escape delimiter
-                quote = (data.split("\"").length >= data.split("\'").length) ? "\\\"" : "\\\'";
+                var dq = data.split("\"");
+                var sq = data.split("\'");
+                quote = (dq.length >= sq.length) ? "\\\"" : "\\\'";
+                var d = [];
                 //parse
+                if(quote == "\\\""){
+                    d = dq;
+                    sq.length = 0;
+                }
+                else{
+                    d = sq;
+                    dq.length = 0;
+                }
                 var space = "\\s*";
                 var cells = data.replace(RegExp(space + quote + "?" + space + cellDelim + space + quote + "?", 'g'), function(capture) {
                     return capture.replace(RegExp(cellDelim), "___DELIM___");
@@ -492,7 +503,11 @@ var dal = function(){
                 var row = 0;
                 dst[0] = [];
                 var len = cells.length;
-                var in_quote = quote.slice(1);
+                var in_quote = false;
+                var quote_left = RegExp('^'+quote+'.*[^'+quote+']$');
+                var quote_right = RegExp('^[^'+quote+'].*'+quote+'$');
+                var partial = "";
+                var dr = 0;
                 for (var i = 0; i < len; i++) {
                     var cell = cells[i];
                     if (/\n/g.test(cell)) {
@@ -509,7 +524,22 @@ var dal = function(){
                         } else {
                             dst[row].push(cell);
                         }
-                    } else
+                    } 
+                    else if(in_quote){
+                       if(quote_right.test(cell)){
+                            dst[row][dr] += cell;
+                            in_quote = false;
+                       }
+                       else{
+                           dst[row][dr]+=cell+',';
+                       } 
+                    }
+                    else if(quote_left.test(cell)){
+                        dst[row].push(cell+',');
+                        dr = dst[row].length-1;
+                        in_quote = true;
+                    }
+                    else
                         dst[row].push(cell);
                 }
             }
@@ -611,6 +641,7 @@ var dal = function(){
     };
     return this;
 };
+
 
 SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader) 		//	GET GOOGLE DOCS SPREADSHEET
 {
