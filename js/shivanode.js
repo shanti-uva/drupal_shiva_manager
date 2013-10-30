@@ -845,6 +845,12 @@
     } else {
       $('#iframe_container legend a.sn-helplink').hide(); // if help URL not defined, hide the link
     }
+    // Reset Title and Breadcrumbs
+    var newtitle = 'Create a ' + sntype;
+		var pts = jQuery('.breadcrumb').html().split('› ');
+		pts[pts.length - 1] = newtitle;
+		jQuery('.breadcrumb').html(pts.join('› '));
+    $('#page-title').text(newtitle);
 	};
 	
 	Drupal.Shivanode.checkKMLUrls = function(jobj) {

@@ -230,6 +230,7 @@ function _shivanode_element_typelist($byName = FALSE) {
     5 => t('Timeline (Deprecated)'),
     13 => t('Timeline'),
     6 => t('Video'),
+    15 => t('Word Cloud'),
     /*
     8 => 'Control',
     9 => 'Canvas',
@@ -237,21 +238,6 @@ function _shivanode_element_typelist($byName = FALSE) {
   );
   if($byName === TRUE) {
     $options = array_flip($options); // What about when localized in a different language? Will this still work?
-    /*$options = array( 
-      'Canvas' => 9,
-      'Control' => 8,
-      'Chart' => 7,
-      'Data' => 1,
-      'Draw' => 11,
-      'Earth' => 12,
-      'Image' => 2,
-      'Map' => 3,
-      'Network' => 10,
-      'Poster' => 14,
-      'Subway' => 4,
-      'Timeline' => 13,
-      'Video' => 6,
-    );*/
   }
   return $options;
 }
@@ -266,26 +252,7 @@ function _shivanode_element_typelist($byName = FALSE) {
  */
 function _shivanode_options_list($option = NULL) {
   $options = array(
-    t('Visualizations') => array(
-      7 => t('Chart'),
-      1 => t('Data'),
-      11 => t('Draw'),
-      12 => t('Earth'),
-      2 => t('Image'),
-      3 => t('Map'),
-      10 => t('Network'),
-      14 => t('Poster'),
-      4 => t('Subway'),
-      5 => t('Timeline (deprecated)'), // was simile = "Timeline"
-      13 => t('Timeline'),
-      6 => t('Video'),
-    ),
-   /*
-    t('Other') => array(
-         8 => t('Control'),
-         9 => t('Canvas'),
-       ),*/
-   
+    t('Visualizations') => _shivanode_element_typelist(),  
   );
   if (isset($option)) {
     if (!is_numeric($option)) {
@@ -587,6 +554,15 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR),
     '#required' => TRUE,
   );
+  
+  $form['shivanode_url_settings']['shivanode_wcloud_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Word Cloud Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR),
+    '#required' => TRUE,
+  );
+
   // Reset buttons uses the validate function to reset data
   $form['actions']['default_values'] = array(
     '#type' => 'button',
@@ -759,6 +735,7 @@ function _shivanode_admin_settings_validate($form, &$form_state) {
     $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
     $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
     $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
+    $form_state['input']['shivanode_wcloud_editor'] = SHIVA_WCLOUD_EDITOR;
   
     drupal_set_message(t('All values have been reset to their default'));
     drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
@@ -1670,8 +1647,11 @@ function _get_shivaframe_url($opt, $nid = '') {
     case 13: // Timeglider
       $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
       break;
-    case 14: // Timeglider
+    case 14: // Poster
       $player =  variable_get('shivanode_poster_editor', SHIVA_POSTER_EDITOR);
+      break;
+    case 15: // Word Cloud
+      $player =  variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR);
       break;
   }
   if (strpos($player, 'http://') === FALSE && $opt > 1) {
@@ -2677,6 +2657,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
     'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
     'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
+    'wcloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),
   );
   if ($type == 'ALL') {
     return $imgs;

@@ -57,6 +57,9 @@ define('SHIVA_CONTROL_EDITOR', 'control.htm');
 // default URL for Canvas Editor
 define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
+// default URL for Word Cloud Editor
+define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
+
 // default Iframe Height for Full Display of Shiva visualization
 define('SHIVA_IFRAME_HEIGHT', 800);
 
@@ -1043,7 +1046,7 @@ function shivanode_add_og_user_role($form, &$form_state) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
-  
+
   // Get the last part of the URL to determing what we are showing
   $action = $form['#action']; // the action url as stored in form
   $action_url_parts = explode('/', $action);
@@ -1080,7 +1083,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     }
     $submitVal = t('Save');
   }
-  if($sntype == '') { $sntype = 'Chart';}
+  if($sntype == '') { $sntype = t('Chart');}
+  if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
+  drupal_set_title(t('Create a @type', array('@type' => $sntype)));
+  
   // Make a json object from json string if set, otherwise set jobj to FALSE
   $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
             strlen($form['shivanode_json']['und'][0]['value']['#default_value']) > 0) ? 
@@ -1307,6 +1313,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
                   $form_state['node']->shivanode_element_type['und'][0]['value']:
                   $elTypes[$sntype]; 
 
+  //dpm(array('eltypes' => $elTypes, 'sntype' => $sntype));
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
   $iframeUrl = _get_shivaframe_url($typeVal, $nid);   
   
@@ -1372,6 +1379,7 @@ function shivanode_element_change($form, $form_state) {
 function shivanode_get_help_link($typeVal = 7) {
   global $base_root, $base_path;
   $helpurls = array(
+      'SHIVA' => 'https://wiki.shanti.virginia.edu/display/KB/SHIVA',
       'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
       'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
       'Bar Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
@@ -1392,15 +1400,20 @@ function shivanode_get_help_link($typeVal = 7) {
       'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
       'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
       'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
+      'Poster' => '',
       'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
       'Timeline' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
       'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
-      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ'
+      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ',
+      'Word Cloud' => ''
   );
-  $typeStr = _shivanode_options_list($typeVal);
-  $helpStr = ($typeStr == "Chart") ? 'Pie Chart' : $typeStr;
+
+  $helpStr = ($typeVal == '') ? 'SHIVA' : _shivanode_options_list($typeVal);
+  if ($helpStr == 'Chart') { $helpStr = 'Pie Chart'; }
+  if ($helpStr == 'Wcloud') { $helpStr = 'Word Cloud'; }
+
   $style = (1 == 2 && is_theme('seven')) ? ' style="margin-left: 85px !important; "' : '';
-  if ($helpStr == "Data" || !isset($helpurls[$helpStr])) {
+  if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
     return '';
   } else {
     return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ' .
