@@ -52,7 +52,7 @@
   <?php endif; ?>
   
   <?php if ($pager): ?>
-    <?php print $pager; ?>
+    <?php /* print $pager;*/ ?> <!-- for pager on top of page -->
   <?php endif; ?>
   
   <?php if ($rows): ?>
