@@ -79,6 +79,7 @@ div.sn-share-button img {
 
 /** CSS for Superfish Main Menu */
 #block-superfish-1 {
+	position: relative;
 	top: -19px;
 }
 
@@ -468,6 +469,11 @@ div.shiva-teaser:hover .info-wrapper {
 
 div.shiva-teaser:hover .info {
 	opacity: 1;
+}
+
+div.shiva-teaser .info a:hover, div.shiva-teaser .info a:visited {
+	color: white;
+	text-decoration: underline;
 }
 
 /* For custom User Profiles */
