@@ -134,6 +134,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 			if (!$("#accord").length)												// If in go.htm
 				mob.curMob=0;														// Back to the top
 			$("#"+shivaLib.container+"PlyBut").show();								// Show play button
+		  	shivaLib.SendShivaMessage("ShivaImage=done");							// Done
 			return;																	// Quit
 	 		}
 	 	}
@@ -168,7 +169,6 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
-	  	shivaLib.SendShivaMessage("ShivaImage=pause");								// Pause
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
 		shivaLib.imageMob.interval=0;												// Clear var
 		mob.start=0;																// Stop recursing for some reason

@@ -10052,12 +10052,12 @@ tg.validateOptions = function (widget_settings) {
         // Added by ndg for SHIVA
        $('.timeglider-ticks').bind('drag',function() {
           var scope = MED.getScope();
-          shivaLib.SendShivaMessage("ShivaTime=time", scope.focusMS + "|" + scope.leftMS + "|" + scope.rightMS);
+          shivaLib.SendShivaMessage("ShivaTime=move", scope.focusMS + "|" + scope.leftMS + "|" + scope.rightMS);
         });
         // binds opening event modals to messaging ndg added for SHIVA
         $('.timeglider-timeline-event').live('click', function() {
            var teid = ($(this).attr('id').split('-')).pop();
-           shivaLib.SendShivaMessage("ShivaTime=event" , teid);
+           shivaLib.SendShivaMessage("ShivaTime=click" , teid);
          });
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);

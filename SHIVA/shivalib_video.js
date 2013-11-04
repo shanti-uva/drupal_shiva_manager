@@ -82,8 +82,29 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
+   		setInterval(onVideoTimer,400);	
    	}
 
+  	function onVideoTimer(e) {												// VIDEO TIMER HANDLER
+		if ($("#shivaNotesDiv").length) {									// If open
+			var t,i,next;
+			var now=shivaLib.player.currentTime();							// Get current time
+			for (i=0;i<500;++i) {											// Loop
+				if (!$("#ntc-"+i).length)									// If no more                                  
+					break;													// Quit
+	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
+				if (now > t) {												// Post start
+	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
+					if (now < next) {										// If before next
+						$("#ntx-"+i).focus();								// Set focus
+		            	break;                                              // Quit	            		}
+	            		}
+       				}
+       			}
+       		}
+	}
+	
+  
   	function drawOverlay()	{
    		shivaLib.DrawOverlay();
    		}		
@@ -146,19 +167,22 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 		return;																// Turn it off
 	var con=$("#"+this.container);											// Point at video player container	
 	str="<div id='shivaNotesDiv' style='position:absolute;padding:8px;overflow-y:auto;";	// Div
-	str+="width:500px;height:"+(con.height()-16)+"px;";							// Set sizing
-	str+="background-color:#f8f8f8;border:1px solid;";						// Set coloring
+	str+="width:500px;height:"+(con.height()-16)+"px;";						// Set sizing
+	str+="background-color:#f8f8f8;border:1px solid #ccc;box-shadow:4px 4px 8px #ccc;";			// Set coloring
 	var top=con.offset().top;												// Get top
 	var left=con.offset().left+con.width()+16;								// Get left
 	str+="top:"+top+"px;left:"+left+"px;'>";								// Set position
 	str+="<table id='shivaNotesTbl' width='100%'>";							// Table
 	var ts="color:#009900;cursor:crosshair";								// Timecode style
 	var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px"; // Note style	
-	str+="<div style='text-align:center;font-size:medium;text-shadow:1px 1px #ccc'><b>SHIVA Notes</b></div><hr>";
-	str+="<img src='savedot.gif'style='position:absolute;top:8px;left:494px' id='shivaNotesSave'>";
+	str+="<div style='text-align:center;font-size:medium;><img src='shivalogo16.png' style='vertical-align:middle'><b> SHIVA Notes</b></div><hr>";
+	str+="<div style='position:absolute;top:0px;left:0px;width:100%;text-align:right'><br/><img src='savedot.gif' id='shivaNotesSave' title='Save notes'>&nbsp; &nbsp;</div>";
 	str+="<tr><td width='36' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>";
-	str+="</table></div>";													// End
-	$('body').append(str);													// Add to dom								
+	str+="</table>";														// End
+	str+="<div style='text-align:right'><br/><br/><input type='checkbox' id='notesPause'/>Pause video while typing?";
+//	str+="<br/>Filter by: <input type='input' id='notesFilter' size='10'/></div>";
+	
+	$('body').append(str+"</div>");													// Add to dom								
 	$("#shivaNotesDiv").draggable();										// Make draggable
 	$("#ntx-0").focus();													// Focus on first one
 	
@@ -172,24 +196,36 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 					});			
 		
 	$("#shivaNotesTbl").on("keydown", function(e) {							// Handle key down
-		if (e.keyCode == 13) {												// Enter
+		var cap=false;														// Don't cap
+		var rowNum=e.target.id.split("-")[1];								// Get rownum
+		if ($("#"+e.target.id).val().length > 80)							// If past limit
+			cap=true;														// Let's cap line
+		if ((e.keyCode == 13) || (cap)) {									// Enter on capping a line
 			var ts="color:#009900;cursor:crosshair";						// Timecode style
 			var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px";	// Note style	
-			var id=$("#shivaNotesTbl tr").length+1;							// If of next row
+			var id=$("#shivaNotesTbl tr").length;							// If of next row
 			var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";
 			$("#shivaNotesTbl").append(str);								// Add row
 			$("#ntx-"+id).focus();											// Focus on new one
+			if ($("#notesPause").prop('checked') && !cap) 					// If checked and not capped
+				shivaLib.player.play();										// Resume player
+			if (cap)														// If line is capped
+				$("#ntc-"+id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
 			}
 		else if ((e.keyCode == 8) || (e.keyCode == 46)) {					// Delete
 			var id="#"+e.target.id;											// Get id
 			if ((!$(id).val()) && (id != "#ntx-0")) {						// No more chars left sand not 1st row
-				$("#"+e.target.id).parent().parent().remove();				// Delete row
+				id="ntx-"+(id.substr(5)-1);									// Last row										
+				$("#"+id).focus();											// Focus there to prevent page back action
+				$("#"+e.target.id).parent().parent().remove();				// Delete
 				}			
 			}
-		else if (!$("#"+e.target.id).val()) {								// A key and nothing in the field yet
-			var id="#ntc-"+e.target.id.split("-")[1];						// Make id for tc field
-			$(id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
-			$(id).click(function(e){										// Add click handler
+		else if (!$("#ntx-"+rowNum).val()) {								// A key and nothing in the field yet
+			$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
+			if ($("#notesPause").prop('checked')) 							// If checked
+				shivaLib.player.pause();									// Pause player
+			
+			$("#ntc-"+rowNum).click(function(e){							// Add click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
 				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo
  						var v=time.split(":");								// Reconstruct from parts into seconds
@@ -197,8 +233,22 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 							v[1]=v[0],v[0]=0;								// Pad it
 						time=Math.max(Number(v[0]*60)+Number(v[1]),.25);	// Make into seconds
 						}
-					shivaLib.player.currentTime(time);						// Cue player
+					if (e.shiftKey)											// If shift key pressed
+						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
+					else
+						shivaLib.player.currentTime(time);						// Cue player
+					});
+			$("#ntc-"+rowNum).dblclick(function(e){							// Add  d-click handler
+				   	var time=$("#"+e.target.id).text();						// Get time
+				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo
+ 						var v=time.split(":");								// Reconstruct from parts into seconds
+						if (v.length == 1)									// Only seconds
+							v[1]=v[0],v[0]=0;								// Pad it
+						time=Math.max(Number(v[0]*60)+Number(v[1]),.25);	// Make into seconds
+						}
+					shivaLib.player.play(time);								// Play
 					});
 			}
 		});
 };
+

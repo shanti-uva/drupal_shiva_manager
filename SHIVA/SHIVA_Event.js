@@ -278,7 +278,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value))'";
-	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
@@ -489,6 +489,7 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 			break;
 		case "ask": 														// Ask for response
 		case "menu": 														// Menu dialog
+		case "find": 														// Find dialog
 			if (params == undefined)										// If not just updating
 				$("#shivaEventDiv").append(str);							// Add to general event div								
 			$("#shivaEvent-"+num).css("border-radius",rad);					// Add corner style
@@ -499,6 +500,10 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 				o.player="pause";											// Pause player
 			$("#shivaEvent-"+num).html(this.CreateEventBody(o.text,num));	// Set content								
 			$("#shivaContinue-"+num).click( function() { _this.CloseEvent(this.id) } );
+			if (o.type == "find") {
+				$("#shivaEventDiv").append("<div style='width:100%;height:100%' id='shivaEventDivFinder-"+num+"'></div>");
+				$("#shivaEventDivFinder-"+num).click( function(e) { _this.CloseEvent(this.id, e.offsetX,e.offsetY); } );
+				}
 			break;
 		case "poller": 														// Poller
 			if (params == undefined)										// If not just updating
@@ -635,7 +640,7 @@ SHIVA_Event.prototype.CreateEventBody=function(def, num) 				// CREATE EVENT BOD
 	return str+"</p>";
 }
 
-SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
+SHIVA_Event.prototype.CloseEvent=function(id, p1, p2) 					// CLOSE EVENT
 {
 	var i,v;
 	mustBeCorrect=false;
@@ -671,15 +676,30 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 			}
 
 		}
-	if (o.type == "ask") {													// If an ask event
+
+//>>320-180-50|popup(That's a good one!)|popup(That's not one I picked)
+
+	if ((o.type == "ask") || (o.type == "find")) {							// If an ask or find event
 		var s,e,now=0;
 		if (this.player)													// If player 
 			now=this.player.currentTime();									// Get time
 		for (i=1;i<lines.length;++i) {										// For each line
+			var doit=false;
 			v=lines[i].split("|")											// Get sub-parts
-			s=this.par.TimecodeToSeconds(v[0].split("-")[0]);				// Start
-			e=this.par.TimecodeToSeconds(v[0].split("-")[1]);				// End
-			if ((now >= s) && (now <= e)) {									// In range
+			if (o.type == "ask") {											// If an ask
+				s=this.par.TimecodeToSeconds(v[0].split("-")[0]);			// Start
+				e=this.par.TimecodeToSeconds(v[0].split("-")[1]);			// End
+				if ((now >= s) && (now <= e)) 								// In range
+					doit=true;												// Trigger actions
+				}
+			else if (o.type == "find") {									// If a find
+				var x=v[0].split("-")[0];									// Get x
+				var y=v[0].split("-")[1];									// Get y
+				var d=v[0].split("-")[2]/2;									// Get delta
+				if ((p1 > x-d) && (p1 < x+d) && (p2 > y-d) && (p2 < y+d))	// In range	
+					doit=true;
+				}
+			if (doit) {														// If a go	
 				if (v[1])													// If a go defined
 					this.EventRouter(v[1].replace(/\*/g,""),""); 			// Run events(s)
 				$("#shivaEvent-"+num).hide();								// Hide it
@@ -697,7 +717,8 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 				this.modalEvent=-1;											// Clear modal event flag
 				}
 			}
-		this.SaveResponse(num,$("#shivaAskDiv-"+num).val());				// Save response
+		if (o.type == "ask") 												// If an ask
+			this.SaveResponse(num,$("#shivaAskDiv-"+num).val());			// Save response
 		}
 }
 
@@ -705,6 +726,8 @@ SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO A
 {
 	var name;
 	var o=this.events[num];													// Point at event
+	if (!o.response)														// Not response set
+		return;																// Quit
 	var res=o.response;														// Get response
 	var s=res.indexOf("(");													// Param start
 	var e=res.indexOf(")");													// Param end
@@ -751,7 +774,7 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	if (this.player && visible && o.start) {								// If player is active and not a named event
 		if (this.player.paused()) 											// If paused
 			return this.HideAll();											// Clear all and quit
-		else if ((o.type == "ask") || (o.type == "menu"))					// Ask or menu event
+		else if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))	// Ask, find or menu event
 			this.modalEvent=num;											// Set modal flag
 		}
 	if (o.type == "canvas") 												// A canvas event
@@ -875,6 +898,7 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 		$("#shivaPopupDiv").css("-moz-border-radius","8px");				// Mozilla
 		$("#shivaPopupDiv").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaPopupDiv").draggable();									// Draggable
+		$("#shivaPopupDiv").delay(6000).fadeOut(400);						// Close after 6 seconds
 		}
 	else return false;														// Not a special event
 	return true;															// Got one

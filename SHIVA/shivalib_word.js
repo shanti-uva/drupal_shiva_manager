@@ -160,7 +160,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             if (wcloud.options.wordlist == "true") {
                 $('#cloudShowListButton').show();
             }
-            
+ 			shivaLib.SendReadyMessage(true);           
             //add colors if necessary
             if(typeof wcloud.options.spectrum != "undefined" && wcloud.options.spectrum!="")
                 wcloud.colorize(wcloud.options.spectrum);
@@ -280,7 +280,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             });
         };
     }
-};
+}
 
 SHIVA_Show.prototype.WordActions = function(msg) {
     var m = msg.split('=')[1];
@@ -322,4 +322,4 @@ SHIVA_Show.prototype.WordActions = function(msg) {
             this.wcloud.buildLayout(this.wcloud.d);
         break;
     }
-};
+}

@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 {
-	var str;
+	var str,i,j,k,o,v,vv;
 	var options=this.options;
 	var container=this.container;
 	var con="#"+container;
@@ -23,8 +23,26 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		}
 	if (!this.posterScale)																// If first time
    		this.posterScale=2;																// Init
-	if ((options.shivaGroup == "Poster") && (!this.eva))								// If poster and no eva
-		this.eva=new EvA();																// Alloc it															
+	if (options.shivaGroup == "Poster") {												// If poster
+		if (!this.eva)																	// If no eva
+			this.eva=new EvA();															// Alloc it															
+	  	this.eva.ondos=new Array();														// Clear ondos
+		if (options.eva) {																// If some options
+			var ud=options.eva.split("``");												// Split into rows
+		  	for (i=0;i<ud.length;++i) {													// For each row
+		 		v=ud[i].split("`");														// Split by value pair
+				if (v.length < 2)														// If not enough elements
+					continue;															// Skip
+				o={};																	// New obj
+				for (j=0;j<v.length;++j) {												// For each pair
+					vv=v[j].split("~");													// Split pair
+					o[vv[0]]=vv[1];														// Add it in
+					}
+				this.eva.ondos.push(o);													// Add to list and run if an init
+				}
+			}
+		}
+	
 	var str="<div id='posterDiv' style='position:absolute;";							// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
@@ -87,7 +105,6 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 	var t=$("#"+shivaLib.container).position().top;										// Top boundary
 	var b=t-0+(h/s-h);																	// Bottom boundary
 	$("#posterDiv").draggable("option",{ containment: [r,b,l,t] } );					// Reset containment
-//	$("#posterCanvas").attr("width",1600+"px").attr("height",1200+"px");						// Scale canvas to fit poster
 }
 
 SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
@@ -214,7 +231,10 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
 		else if (u) {																	// Something else
 			if (!isNaN(u))																// If a number
-				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
+				u="go.htm?e="+u;														// Add file base
+			else if (u.match(/e=/))														// An eStore	
+				u="go.htm?"+u;															// Add file base
+			u+="&if="+i;																// Add id
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
 				str+="scrolling='no' ";													// Inhibit it
@@ -309,27 +329,6 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 		}
 	}
 
-/*	var i,j,k,v,vv,o;
-	var _this=this;														// Point at mixer obj
- 	var ud=ondoList.split("||");										// Split into rows
-  	for (i=0;i<ud.length;++i) {											// For each row
- 		v=ud[i].split("|");												// Split by value pair
-		if (v.length < 2)												// If not enough elements
-			continue;													// Skip
-		o={};															// New obj
-		for (j=0;j<v.length;++j) {										// For each pair
-			vv=v[j].split("~");											// Split pair
-			o[vv[0]]="";												// Start with nothing
-			for (k=1;k<vv.length;++k) {									// For each sub
-				o[vv[0]]+=vv[k];										// Add it in
-				if (k < vv.length-1)									// If not last one
-					o[vv[0]]+=":";										// Add : back in
-				}
-			}
-		this.AddOnDo(o);												// Add to list and run if an init
-		}	
-*/
-
 EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 {
 	var str,o,i;
@@ -380,7 +379,8 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			s.id="scr-"+ondo.to;										// Set id same a fname
 			s.setAttribute('type','text/javascript');					// JS
 			str="function "+ondo.to+"(p1,p2,p3,p4,p5,p6,p7){";			// Function header
-			s.appendChild(document.createTextNode(str+ondo.src+"}"));	// Add text node
+			str+=ondo.src.replace(/&apos;/g,"\'").replace(/&quot;/g,"\"").replace(/&br;/g,"\n");	// Unescape ', ", & \n
+			s.appendChild(document.createTextNode(str+"}"));			// Add text node
 			document.getElementsByTagName('head').item(0).appendChild(s);	// Add to DOM
 	 		break;
 		case "call": 													// Run a callback
@@ -406,18 +406,17 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 //	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	v[0]=v[0].split("=")[1];											// Strip prefix
-
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it
 		from=o.from;													// Copy
 		if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);				// True iframe ids
 		if (o.on == "ready") { 											// A ready message
-			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {	// If it matches source and not done yet
+			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {		// If it matches source and not done yet
 				o.done++;												// Mark it done
 				this.RunOnDo(o);										// Do it
 				}
 			}
-		else if ((v[1] == from) && (v[0] != "ready"))					// If it matches source
+		else if ((v[1] == from) && (v[0] == o.on))						// If it matches source and type
 			this.HandleOnEvent(o,e.data);								// Handle it
 		}
 }

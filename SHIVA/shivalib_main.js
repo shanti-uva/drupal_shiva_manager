@@ -162,15 +162,13 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
  	shivaLib.SendShivaMessage("ShivaChart=ready"); 							// Send ready message to EvA
-  }
+}
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
 {
-	var id;
-//	if (window.frameElement)												// If framed
-//		id=window.frameElement.id;											// Get id there
-//	else																	// else
-		id=window.name;														// Get from name
+	var id=window.name;														// Get from name
+	if (!id) 																// Firefox/IE issue
+		id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);	// Extract id
 	var str=src+"|"+id;														// Add src and window						
 	if (msg)																// If more to it
 		str+="|"+msg;														// Add it
@@ -194,6 +192,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
 			shivaLib.msgAction[i].Do(i);									// Run callback
+	if (!shivaLib.options)													// If no options
+		return;																// Quit
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
 		if (shivaLib.options.shivaGroup == "Map")							// If a map action
 			shivaLib.MapActions(e.data);									// Route
@@ -706,7 +706,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    			row=o.row;													// Set it
    		if ((o) && (o.column != undefined))								// If a col
    			col=o.column;												// Set it
-  		_this.SendShivaMessage("ShivaChart=data",row+"|"+col); 			// Send EVA message
+  		_this.SendShivaMessage("ShivaChart=click",row+"|"+col); 		// Send EVA message
    		});
 }
 
@@ -834,7 +834,7 @@ SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra, values)
 		str+="<option";
 		if (sel == items[i])
 			str+=" selected='selected'"
-		if (values)
+		if (values && values[i])
 			str+=" value='"+values[i]+"'";
 		str+=">"+items[i]+"</option>";
 		}	
