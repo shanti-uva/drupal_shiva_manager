@@ -1234,10 +1234,11 @@ function _shivanode_data_elements($form, &$form_state) {
   */
   
   if( $sntype != 'all' ){
-    $markup['h2'] = array(
+    /*$markup['h2'] = array(
       '#type' => 'markup',
       '#markup' => t('<h2>@type Visualizations</h2>', array('@type' => $sntypelabel)),
-    );
+    );*/
+    drupal_set_title(t('Choose Data for @type Visualizations', array('@type' => $sntypelabel)));
   }
   $markup['p'] = array(
     '#type' => 'markup',
