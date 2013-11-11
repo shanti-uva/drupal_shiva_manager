@@ -1301,7 +1301,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if (($is_new_el && $did != FALSE) || $urlsuffix == 'edit') {
     $dataNodeId = ($is_new_el) ? $did : _shivanode_get_data_element($form);
     // a number at the end of /node/add/shivanode is an nid of a data node to use for new shivanode
- 
     if ($dataNodeId) {
       _shivanode_add_datalink($form, $dataNodeId, $is_new_el);
     } 

@@ -642,14 +642,29 @@ var dal = function(){
     return this;
 };
 
+console.info('outside get spread');
 
 SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader) 		//	GET GOOGLE DOCS SPREADSHEET
 {
+	console.info('in get spreadsheet 2');
 	if (url.indexOf("google.com") != -1) {
 		var query=new google.visualization.Query(url);							
 		query.send(handleQueryResponse);
 	}
 	else{
+		 $.ajax({
+        type : 'GET',
+        url : 'proxy.php',
+        data : {
+            url : url,
+        },
+        async : false
+    }).complete(function(d) {
+        var csv = jQuery.csv.toObjects(d.responseText);
+				callback(csv, url);
+				return;
+    });
+		
 	    var DAL = new dal();
 	    var dst = new Array();
         DAL.loadDelimited(url, dst, true, function(data){

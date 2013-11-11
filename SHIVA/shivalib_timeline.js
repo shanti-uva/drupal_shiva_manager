@@ -16,7 +16,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
-
+console.info('new3');
   stimeline.events=null;
   stimeline.options=this.options;
   stimeline.container=this.container;
