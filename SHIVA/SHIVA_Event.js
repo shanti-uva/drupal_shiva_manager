@@ -40,10 +40,10 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	var _this=this;															// Save 'this' locally
 	if ($("#shivaEventEditorDiv").length) {									// If already on
 		$("#shivaEventEditorDiv").remove();									// Remove it
-		this.player.off("timeupdate",$.proxy(_this.DrawEventDots,this));	// Kill handler
+		shivaLib.VideoEvent("remove","timeupdate",$.proxy(_this.DrawEventDots,this));	// Kill handler
 		return;																// Quit
 		}
-	this.player.on("timeupdate",$.proxy(_this.DrawEventDots,this));			// Redraw dots on player change
+	shivaLib.VideoEvent("add","timeupdate",$.proxy(_this.DrawEventDots,this));	// Redraw dots on player change
 	var con="#"+this.container;
 	var w=$(con).css("width").replace(/px/,"");
 	var h=$(con).css("height").replace(/px/,"")
@@ -54,7 +54,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	str+="width:"+w+"px;left:"+l+"px;top:"+t+"px;height:55px'>";	
 	$("body").append(str);													// Add to body							
 	w=w-16;
-	var dur=this.par.SecondsToTimecode(this.player.duration()*this.scale);	// Get bar duration
+	var dur=this.par.SecondsToTimecode(shivaLib.VideoDuration()*this.scale);// Get bar duration
 	$("#shivaEventEditorDiv").append("<div id='shivaEventSlider' style='border:none;height:2px;position:relative;left:14px;top:41px;width:100px'/>");
 	$("#shivaEventSlider").slider({ value:100-(this.scale*100),max:95});	// Init scaler
 	$("#shivaEventEditorDiv").css("border-radius","6px");					// Add corner style
@@ -65,7 +65,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	$("#shivaEventSlider .ui-slider-range").css("background","#999");
 	$("#shivaEventSlider").bind("slidechange",$.proxy(function(event, ui) {	// Add handler
 		this.scale=1-($("#shivaEventSlider").slider("option","value")/100);	// Get slider start
-		var d=this.par.SecondsToTimecode(_this.player.duration()*+_this.scale);	// Get bar duration
+		var d=this.par.SecondsToTimecode(shivaLib.VideoDuration()*+_this.scale);	// Get bar duration
 		$("#shivaTimescale").text("Show: "+d);								// Show span
 		this.DrawEventDots();												// Redraw bar
 		},this));
@@ -84,15 +84,15 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	
 	$("#shivaTimebarDiv").bind("click",function(e) { 					// HANDLE CLICK STOP
 		var x=e.pageX-8-$("#shivaEventEditorDiv").css("left").replace(/px/,"")	// Position in bar
-		x=x/w*_this.player.duration()*_this.scale;							// Absolute time
+		x=x/w*shivaLib.VideoDuration*_this.scale;							// Absolute time
 		});
 	
 	$("#shivaTimebarDiv").dblclick( function(e) { 						// SET TIME
 		var x=e.clientX-$("#"+_this.par.container).css("left").replace(/px/,"")-8;
 		var wid=$("#shivaTimebarDiv").width();								// Width
 		x=Math.max(Math.min(x,wid),0);										// Cap 0-wid
-		x=x/wid*_this.player.duration()*_this.scale;						// Absolute time from bar
-		_this.player.currentTime(x);										// Set time
+		x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
+		shivaLib.VideoTime(x);												// Set time
 		});
 }
 
@@ -101,8 +101,8 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 	var i,o,s,e,x=0,w,str;	
 	$("#shivaTimebarDiv").empty();
 	var _this=this;															// Save 'this' locally
-	var dur=this.player.duration();											// Get clip duration
-	var now=this.player.currentTime();										// Get current time
+	var dur=shivaLib.VideoDuration();										// Get clip duration
+	var now=shivaLib.VideoTime();											// Get current time
 	var wid=$("#shivaTimebarDiv").width();									// Width of time bar
 	var end=(dur*this.scale)+now;											// End
 	for (i=0;i<this.events.length;++i) {									// For each event
@@ -122,9 +122,9 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			x=((s-now)/dur)*wid/this.scale;									// Start x, account for now	
 		else																// If scrolling
 			x=(s/dur)*wid/this.scale;										// Start x		
-		w=Math.max(14,((e-s)/dur)*wid/this.scale)-1;							// Width
-		str="<div id='shivaEventDot-"+i+"' style='position:absolute;text-align:center;";
-		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;";
+		w=Math.max(15,((e-s)/dur)*wid/this.scale)-1;							// Width
+		str="<div id='shivaEventDot-"+i+"' style='position:absolute;text-align:center;cursor:pointer;";
+		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;margin:0px;";
 		str+="border-radius:8px;-moz-border-radius:8px;background-color:#ccc;border:1px #eee solid'";
 		str+="title='"+o.type.toUpperCase()+" "+o.start;					// Tool tip
 		if (o.end)															// If an end
@@ -138,13 +138,13 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 		$("#shivaEventDot-"+i).bind("drag",function(event,ui) { 
 			ui.position.top=0; 												// Force in track
 			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
-			x=x/wid*_this.player.duration()*_this.scale;					// Absolute time from bar
+			x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
 			$("#shivaTimecode").text(_this.par.SecondsToTimecode(x+now));	// Show position
 			});
 		$("#shivaEventDot-"+i).bind("dragstop",function(event,ui) { 		// Handle drag stop
 			o=_this.events[this.id.substr(14)];								// Point at event
 			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
-			x=x/wid*_this.player.duration()*_this.scale;					// Absolute time from bar
+			x=x/wid*shivaLib.VideoDuration()*_this.scale;					// Absolute time from bar
 			if (_this.scale < 1)											// If not showing all
 				x+=now;														// Add start
 			_this.Do("Move event");											// Save undo
@@ -170,7 +170,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		num=this.events.length-1;											// Point at it	
 		this.events[num].type="popup";										// Set type
 		this.events[num].frame={ closer:true,draggable:true };				// Default frame
-		this.events[num].start=this.par.SecondsToTimecode(this.player.currentTime());	// Set start
+		this.events[num].start=this.par.SecondsToTimecode(shivaLib.VideoTime());// Set start
 		this.CreateEventDisplay(num);										// Add display
 		this.AddToCue(num);													// Add to player
 		newEvent=true;														// A new event
@@ -254,6 +254,26 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 				$("#sq"+i+"b").val(v[1]);									// Set action
 			}
 		}
+	else if (o.type == "find") {											// Deconstruct find
+		var lines=o.text.split(">>");										// Split into lines
+		if (lines[0]) {														// If exists
+			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+			$("#sqpr").val(lines[0]);										// Set prompt
+			}
+		v=lines[1].split("|");												// Get sub-parts
+		if (v[0]) {															// If exists
+			var vv=v[0].split("-");											// Chop up x-y-d
+			var s=vv[0];													// Get 1st part
+			if (!v[0].match(/--/))											// If spatial										
+				s+=","+vv[1];												// Add y
+			$("#sf3").val(s);												// Set target
+			$("#sf4").val(vv[2]);											// Set delta
+			}
+		if (v[1]) 															// If exists
+			$("#sf1").val(v[1]);											// Set success
+		if (v[2]) 															// If exists
+			$("#sf2").val(v[2]);											// Set failure
+		}
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
 	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
@@ -273,11 +293,11 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	this.SetEventHelp();													// Set help's
 }
 
-SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL CONTROLS
+SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL CONTROLS
 {
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
-	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value))'";
+	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value));	shivaLib.ev.SetEventHelp(); '";
 	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
@@ -285,13 +305,21 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL
 	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
 	str+="<tr><td>Has close button? &nbsp;</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
 	if (etype == "menu") {
-		str+="<input type='hidden' id='text'/>";
-		str+="<tr><td>Prompt</td><td><textarea rows='2' style='width:160px' id='sqpr'/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?</td></tr>";
+		str+="<input type='hidden' id='text'>";
+		str+="<tr><td>Prompt</td><td><textarea rows='2' style='width:160px' id='sqpr'/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</td></tr>";
 		str+="<tr><td>Answer 1</td><td><input type='text' style='width:160px' id='sq1a'/> <input type='text' size='10' id='sq1b'/> <input type='checkbox' id='sq1c'/></td></tr>";
 		str+="<tr><td>Answer 2</td><td><input type='text' style='width:160px' id='sq2a'/> <input type='text' size='10' id='sq2b'/> <input type='checkbox' id='sq2c'/></td></tr>";
 		str+="<tr><td>Answer 3</td><td><input type='text' style='width:160px' id='sq3a'/> <input type='text' size='10' id='sq3b'/> <input type='checkbox' id='sq3c'/></td></tr>";
 		str+="<tr><td>Answer 4</td><td><input type='text' style='width:160px' id='sq4a'/> <input type='text' size='10' id='sq4b'/> <input type='checkbox' id='sq4c'/></td></tr>";
 		str+="<tr><td>Answer 5</td><td><input type='text' style='width:160px' id='sq5a'/> <input type='text' size='10' id='sq5b'/> <input type='checkbox' id='sq5c'/></td></tr>";
+		}
+	else if (etype == "find") {
+		str+="<input type='hidden' id='text'>";
+		str+="<tr><td>Prompt</td><td><textarea rows='2' style='width:160px' id='sqpr'/></tr>";
+		str+="<tr><td>On success</td><td><input type='text' id='sf1'/></td></tr>";
+		str+="<tr><td>On failure</td><td><input type='text' id='sf2'/></td></tr>";
+		str+="<tr><td>Target</td><td><input type='text' id='sf3'/></td></tr>";
+		str+="<tr><td>Fudge factor</td><td><input type='text' id='sf4'/></td></tr>";
 		}
 	else
 		str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
@@ -333,7 +361,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		else																// Normal						
 			o[keys[i]]=val;													// Add to obj
 		}
-	if (o.type == "menu") {													// Construct text from menu parts
+	if (o.type == "menu") {													// Construct text from parts
 		o.text=$("#sqpr").val();											// Prompt
 		for (i=0;i<5;++i)													// For each question
 			if ($("#sq"+i+"a").val()) {										// If an answer title
@@ -344,6 +372,21 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 				o.text+=$("#sq"+i+"b").val();								// Add action
 			}				
 		}
+	else if (o.type == "find") {											// Construct text from parts
+		o.text=$("#sqpr").val();											// Prompt
+		var str=$("#sf3").val();											// Get target
+		if (str.match(/,/))	{												// If spatial
+			str=str.replace(/,/g,"-");										// Use hyphen
+			o.text+=">>"+str+"-"+$("#sf4").val(); 							// Add coords
+			}
+		else																// Temporal
+			o.text+=">>"+str+"--"+$("#sf4").val(); 							// Add time
+		if ($("#sf1").val())												// If set
+			o.text+="|"+$("#sf1").val();									// Add success
+		if ($("#sf2").val())												// If set
+			o.text+="|"+$("#sf2").val();									// Add failure
+		}				
+
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
 	o.frame.draggable=($("#frame-draggable").attr("checked") == "checked"); // Set checkbox
@@ -406,12 +449,12 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 	var o=this.events[num];													// Point at event
 	if (!o.start)															// If no start defined
 		return;																// Don't add to cue
-	this.player.cue(o.start,function() 	{ 									// A cue
+	shivaLib.VideoCue("add",o.start,function() { 							// A cue
 		_this.Draw(num,true); 												// Add start cue
 		shivaLib.SendShivaMessage("ShivaPlayer=event",num);					// Send message
  		 });		
 	if (o.end)																// If an end set
-		this.player.cue(o.end,function() { _this.Draw(num,false); });		// Add end cue
+		shivaLib.VideoCue("add",o.end,function() {_this.Draw(num,false);});	// Add end cue
 }
 
 SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVENT DISPLAY
@@ -500,10 +543,6 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 				o.player="pause";											// Pause player
 			$("#shivaEvent-"+num).html(this.CreateEventBody(o.text,num));	// Set content								
 			$("#shivaContinue-"+num).click( function() { _this.CloseEvent(this.id) } );
-			if (o.type == "find") {
-				$("#shivaEventDiv").append("<div style='width:100%;height:100%' id='shivaEventDivFinder-"+num+"'></div>");
-				$("#shivaEventDivFinder-"+num).click( function(e) { _this.CloseEvent(this.id, e.offsetX,e.offsetY); } );
-				}
 			break;
 		case "poller": 														// Poller
 			if (params == undefined)										// If not just updating
@@ -596,7 +635,7 @@ SHIVA_Event.prototype.SetPoller=function(val) 							// SET POLLER BAR
 	else																	// Positive
 		$("#shivaPoller").css("background-color","#009900").css("top",(t-d+h)+"px"); // Green, above middle
 	$("#shivaPoller").data("val",val);										// Save value
-	var	now=this.player.currentTime();										// Get time
+	var	now=shivaLib.VideoTime();												// Get time
 	now=Math.round(now*1000)/1000;											// Hundreths only
 	shivaLib.SendShivaMessage("ShivaVideo=poller",Math.round(val)+"|"+now);	// Send message
 }
@@ -609,6 +648,8 @@ SHIVA_Event.prototype.CreateEventBody=function(def, num) 				// CREATE EVENT BOD
 		str+="<img src='"+o.url+"' style='vertical-align:middle'/> ";		// Add icon image		
 	if (o.title)															// If a title spec'd
 		str+="<span style='text-align:center;text-shadow:1px 1px white'><b>"+o.title+"</b></span><br/><br/>";
+	if (def == undefined)													// If no def
+		def="";																// Pur in null string														
 	def=def.replace(/Hint:/g,"hint:");										// Force tags l/c
 	if (!def.match(/hint:/g)) 												// If no hint tag defined
 		if (def.match(/>>/g)) 												// And an option(s)
@@ -674,51 +715,38 @@ SHIVA_Event.prototype.CloseEvent=function(id, p1, p2) 					// CLOSE EVENT
 				this.modalEvent=-1;											// Clear modal event flag
 				}
 			}
-
 		}
-
-//>>320-180-50|popup(That's a good one!)|popup(That's not one I picked)
-
-	if ((o.type == "ask") || (o.type == "find")) {							// If an ask or find event
+	else if (o.type == "find") {											// If a find event
 		var s,e,now=0;
 		if (this.player)													// If player 
-			now=this.player.currentTime();									// Get time
-		for (i=1;i<lines.length;++i) {										// For each line
-			var doit=false;
-			v=lines[i].split("|")											// Get sub-parts
-			if (o.type == "ask") {											// If an ask
-				s=this.par.TimecodeToSeconds(v[0].split("-")[0]);			// Start
-				e=this.par.TimecodeToSeconds(v[0].split("-")[1]);			// End
-				if ((now >= s) && (now <= e)) 								// In range
-					doit=true;												// Trigger actions
-				}
-			else if (o.type == "find") {									// If a find
-				var x=v[0].split("-")[0];									// Get x
-				var y=v[0].split("-")[1];									// Get y
-				var d=v[0].split("-")[2]/2;									// Get delta
-				if ((p1 > x-d) && (p1 < x+d) && (p2 > y-d) && (p2 < y+d))	// In range	
-					doit=true;
-				}
-			if (doit) {														// If a go	
-				if (v[1])													// If a go defined
-					this.EventRouter(v[1].replace(/\*/g,""),""); 			// Run events(s)
-				$("#shivaEvent-"+num).hide();								// Hide it
-				this.EventRouter(o.done,"");								// Run events(s)
-				this.modalEvent=-1;											// Clear modal event flag
-				break;														// Stop searching
-				}
+			now=shivaLib.VideoTime();										// Get time
+		var doit=false;														// Assume incorrect response
+		v=lines[1].split("|")												// Temporal
+		if (!v[0].match(/--/)) {											// If not a -- must be spatial	
+			var x=v[0].split("-")[0];										// Get x
+			var y=v[0].split("-")[1];										// Get y
+			var d=v[0].split("-")[2]/2;										// Get delta
+			if ((p1 > x-d) && (p1 < x+d) && (p2 > y-d) && (p2 < y+d))		// In range	
+				doit=true;
 			}
-		if (i >= lines.length) {											// Incorrect frame
-			if ((lines[1]) && (lines[1].split("|")[2]))						// If a wrong answer defined
-				this.EventRouter(lines[1].split("|")[2].replace(/\*/g,""),""); 	// Run events(s)
-			if (!mustBeCorrect) {											// If any time will do to move on
-				$("#shivaEvent-"+num).hide();								// Hide it
-				this.EventRouter(o.done,"");								// Run events(s)
-				this.modalEvent=-1;											// Clear modal event flag
-				}
+		else{																// Temporal
+			s=this.par.TimecodeToSeconds(v[0].split("--")[0]);				// Start
+			e=v[0].split("--")[1];											// Delta
+			if ((now >= s-e) && (now <= s+e)) 								// In range
+				doit=true;													// Trigger actions
 			}
-		if (o.type == "ask") 												// If an ask
-			this.SaveResponse(num,$("#shivaAskDiv-"+num).val());			// Save response
+		if (doit && v[1])													// If correct
+			this.EventRouter(v[1].replace(/\*/g,""),""); 					// Run events(s)
+		else if (!doit && v[2])												// If wrong
+			this.EventRouter(v[2].replace(/\*/g,""),""); 					// Run events(s)
+		$("#shivaEvent-"+num).hide();										// Hide it
+		this.EventRouter(o.done,"");										// Run events(s)
+		this.modalEvent=-1;													// Clear modal event flag
+		}
+	else if (o.type == "ask") {												// If an ask
+		this.SaveResponse(num,$("#shivaAskDiv-"+num).val());				// Save response
+		$("#shivaEvent-"+num).hide();										// Hide it
+		this.EventRouter(o.done,"");										// Run events(s)
 		}
 }
 
@@ -772,13 +800,27 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	$("#shivaDrawDiv").css('pointer-events','none');						// Inibit pointer clicks if menu gone
  	var o=this.events[num];													// Point at event
 	if (this.player && visible && o.start) {								// If player is active and not a named event
-		if (this.player.paused()) 											// If paused
+		if (shivaLib.VideoPaused()) 										// If paused
 			return this.HideAll();											// Clear all and quit
 		else if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))	// Ask, find or menu event
 			this.modalEvent=num;											// Set modal flag
 		}
 	if (o.type == "canvas") 												// A canvas event
 		window.postMessage("ShivaTrigger="+this.container.substr(4)+","+(num+1)+",clicked","*");
+	else if (o.type == "find") {											// A find
+		if (!(o.text.split(">>")[1].split("|")[0].match(/--/)))	{			// If spatial										
+ 			var _this=this;													// Point at this
+ 			$("#shivaEventDiv").append("<div style='width:100%;height:100%;cursor:crosshair;background-color:white;opacity:0;z-index:2510' id='shivaEventDivFinder-"+num+"'></div>");
+			$("#shivaEventDivFinder-"+num).click(function(e) {
+				if (e.offsetX == undefined) { 								//  Firefox doesn't support offsetX
+					e.offsetX=e.clientX-$("#containerDiv").position().left;	// Use clientX
+					e.offsetY=e.clientY-$("#containerDiv").position().top;	// and sub pos 
+					}
+ 				_this.CloseEvent(this.id,e.offsetX,e.offsetY); 				// Close event
+				$("#"+this.id).remove();									// Remove event capture div
+				});
+			}
+ 		}
 	else if (o.type == "iframe") {											// An iframe
 		str="<iframe src='"+o.url+"' id='shivaIframe-"+num+"'";				// Opening and src
 		if (o.frame){														// If a frame
@@ -818,18 +860,18 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 		var e=o.player.indexOf(")");										// Param end
 		if ((s != -1) && (e != -1))											// If well-formed
 			param=o.player.substring(s+1,e).replace(/%/g,"");				// Extract param			
-		if (o.player.toLowerCase().indexOf("play") != -1) {					// Play
+		if (o.player.match(/^play/i)) {										// Play
 			if (param)														// If a time set
-				this.player.play(param);									// Play from that
+				shivaLib.VideoPlay(param);									// Play from that
 			else															// No time set
-				this.player.play();											// Play from current spot
+				shivaLib.VideoPlay();										// Play from current spot
 			}
-		else if (o.player.toLowerCase() == "pause")	this.player.pause();	// Pause
-		else if (o.player.toLowerCase().indexOf("volume") != -1)			// Volume
-			this.player.volume(param/100);									// Set volume
-		else if (o.player.toLowerCase().indexOf("load") != -1) {			// Load new clip
-			this.player.media.src=param;									// Set new source
-			this.player.load(); 											// Load
+		else if (o.player.match(/^pause/i))	
+			shivaLib.VideoPause();											// Pause
+		else if (o.player.match(/^volume/i))								// Volume
+			shivaLib.VideoVolume(param/100);								// Set volume
+		else if (o.player.match(/^load/i)) {								// Load new clip
+			shivaLib.VideoLoad(param); 										// Load
 			}
 		}															
 }
@@ -859,7 +901,7 @@ SHIVA_Event.prototype.EventRouter=function(id, type) 					// HANDLE CLICK/HOVER 
 			params=str.substring(s+1,e)										// Extract params
   		var v=str.split("+");												// Split by +
 		for (var i=0;i<v.length;++i) {										// For each event
-	  		if (this.SpecialEvent(v[i]))									// If a special event, run it
+	  		if (this.SpecialEvent(v[i])) 									// If a special event, run it
  				continue;													// Then continue
 			if (params) 													// If params set
 	 			this.CreateEventDisplay(this.FindEventById(v[i]),params);	// Update event
@@ -875,19 +917,19 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 	var e=id.indexOf(")");													// Param end
 	if ((s != -1) && (e != -1))												// If well-formed
 		param=id.substring(s+1,e).replace(/%/g,"");							// Extract param			
-	if (id == "pause()")					this.player.pause();			// Pause
-	else if (id.indexOf("play") != -1) {									// Play
+	if (id.match(/^pause/i))												// If pause				
+		shivaLib.VideoPause();												// Pause
+	else if (id.match(/play/i)) {											// Play
 		if (param)															// If a time set
-			this.player.play(param);										// Play from that
+			shivaLib.VideoPlay(param);										// Play from that
 		else																// No time set
-			this.player.play();												// Play from current spot
+			shivaLib.VideoPlay();											// Play from current spot
 		}
-	else if (id.indexOf("load(") != -1)	{									// Load new clip	
-		this.player.media.src=param;										// Set url			
-		this.player.load();													// Load
-		}
-	else if (id.indexOf("volume(") != -1)	this.player.volume(param/100);	// Volume
-	else if (id.indexOf("popup(") != -1) {									// Popup	
+	else if (id.match(/^load/i))											// Load new clip	
+		shivaLib.VideoLoad(param);											// Load
+	else if (id.match(/^volume/i)) 											// If volume
+		shivaLib.Videovolume(param/100);									// Volume
+	else if (id.match(/popup/i)) {											// Popup	
 		$("#shivaPopupDiv").remove();										// Remove existing one
 		str="<div id='shivaPopupDiv' style='position:absolute;width:200px;padding:8px;";	// Div
 		str+="border:1px solid; left:200px;top:100px'>";					// End style
@@ -898,7 +940,7 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 		$("#shivaPopupDiv").css("-moz-border-radius","8px");				// Mozilla
 		$("#shivaPopupDiv").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaPopupDiv").draggable();									// Draggable
-		$("#shivaPopupDiv").delay(6000).fadeOut(400);						// Close after 6 seconds
+		$("#shivaPopupDiv").delay(5000).fadeOut(400);						// Close after 6 seconds
 		}
 	else return false;														// Not a special event
 	return true;															// Got one
@@ -939,38 +981,48 @@ SHIVA_Event.prototype.CSSPixel=function(size) 							//	ADD PX to SIZE IF NEEDED
 SHIVA_Event.prototype.SetEventHelp=function()
 {
 	var helpText=new Array();
-	helpText['shapes']="The 'Shape' tab allows for configuring the dimensions of your event as well as some of the basic behavior of that event on the page.";
-	helpText['frame-top']="Click on the text box to the right and enter a number that will set the where the top of your event dialog box begins. This is a pixel value the establishes an offset relative to the top of the video player.";
-	helpText['frame-left']="Click on the text box to the right and enter a number that will set the where the left side of your event dialog box begins. This is a pixel value the establishes an offset relative to the left side of the video player.";
-	helpText['frame-width']="Click on the text box to the right and enter a number that sets the width of your event dialog box.";
-	helpText['frame-height']="Click on the text box to the right and enter a number that sets the height of your event dialog box.";
-	helpText['frame-radius']="Click on the text box to the right and enter a value that sets the amount that your event dialog box's corners are rounded. This is a value in pixels that represents the radius of the circle that determines the curve of your box's corners.";
-	helpText['frame-draggable']="Use the check-box to the right to choose whether or not your event dialog box is draggable.";
-	helpText['colors']="The 'Colors' tab allows for configuring text color, border color, background color, and the opacity of the event dialog box.";
-	helpText['frame-color']="Click on the text box to the right to set the font color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
-	helpText['frame-background-color']="Click on the text box to the right to set the background color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
-	helpText['frame-border']="Click on the text box to the right to set the border color for you event dialog box. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color value in the text box.";
-	helpText['frame-opacity']="Use the slider-bar to the right to set the opacity of your event dialog box. A value of 0 (left) will be totally transparent, and a value of 100 (right) will be fully opaque.";
-	helpText['actions']="The 'Action' tab allows for configuring how your event dialog box responds to various kinds of user actions.";
-	helpText['click']="Click on the text box to the right and enter a value that determines what action to trigger when a user clicks on your event dialog box.";
-	helpText['hover']="Click on the text box to the right and enter a value that determines what action to trigger when a user hovers over your event dialog box.";
-	helpText['done']="Click on the text box to the right and enter a value that determines what action to trigger when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
-	helpText['response']="Click on the text box to the right and enter a value that determines how to store user input when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
-	helpText['player']="Click on the text box to the right and enter a value that determines the behavior of the video player when the event first opens. Use 'pause' to pause the video player or leave the box blank to allow the video player to keep playing.";
-	helpText['times']="The 'Time' tab allows for configuring various aspects of the timing for your video event.";
-	helpText['start']="Click on the text box to the right and enter a value that determines the starting time for your video event. This should be in the form mm:ss, e.g. 00:05.";
-	helpText['end']="Click on the text box to the right and enter a value that determines the ending time for your video event. This should be in the form mm:ss, e.g. 00:05.";
-	helpText['fadein']="Click on the text box to the right and enter a value that sets the duration of the fade in for your video event. This should be a number of seconds.";
-	helpText['fadeout']="Click on the text box to the right and enter a value that sets the duration of the fade out for your video event. This should be a number of seconds.";
-	helpText['content']="The 'Content' tab allows for configuring what text, images, and other content to display in your video event.";
-	helpText['type']="Use the drop-down menu to the right to choose what type of event you would like to use. ";
-	helpText['id']="Click on the text box to the right and enter a value that determines the id of this video event.";
-	helpText['title ']="Click on the text box to the right and enter a title for your video event.";
-	helpText['url']="Click on the text box to the right and enter a the web URL of an image to optionally add an image to your video event.";
-	helpText['frame-scroller']="Use the check-box to the right to choose whether or not your event dialog box has scrollbars.";
-	helpText['frame-closer']="Use the check-box to the right to choose whether or not your event dialog box has a close button.";
-	helpText['text']="Click on the text box to the right and enter a value that sets the text in the body of your video event.";
-	
+	helpText['shapes']="For configuring the dimensions of your event as well as some of the basic behavior of that event on the page.";
+	helpText['frame-top']="Where the top of your event dialog box begins. This is a pixel value the establishes an offset relative to the top of the video player.";
+	helpText['frame-left']="Where the left side of your event dialog box begins. This is a pixel value the establishes an offset relative to the left side of the video player.";
+	helpText['frame-width']="The width of your dialog box. Can be set to auto.";
+	helpText['frame-height']="The height of your dialog box. Can be set to auto.";
+	helpText['frame-radius']="The amount that your event dialog box's corners are rounded. This is a value in pixels that represents the radius of the circle that determines the curve of your box's corners.";
+	helpText['frame-draggable']="Is  dialog box draggable?";
+	helpText['colors']="For configuring text color, border color, background color, and the opacity of the event dialog box.";
+	helpText['frame-color']="The font color for your event dialog box. Enter a hexadecimal color value in the text box, or a color name, such as black or red.";
+	helpText['frame-background-color']="The background color for your event dialog box. Enter a hexadecimal color value in the text box, or a color name, such as black or red.";
+	helpText['frame-border']="The border of the dialog in CSS.";
+	helpText['frame-opacity']="The opacity of your event dialog box. A value of 0 (left) will be totally transparent, and a value of 100 (right) will be fully opaque.";
+	helpText['actions']="For configuring how your event dialog box responds to various kinds of user actions.";
+	helpText['click']="What action to trigger when a user clicks on your event dialog box.";
+	helpText['hover']="What action to trigger when a user hovers over your event dialog box.";
+	helpText['done']="What action to trigger when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
+	helpText['response']="How to store user input when a user finishes interacting with your event dialog box. Note this only applies to events like 'ask' and 'menu' that actually require user interaction.";
+	helpText['player']="The behavior of the video player when the event first opens. Use 'pause' to pause the video player or leave the box blank to allow the video player to keep playing.";
+	helpText['times']="For configuring various aspects of the timing for your event.";
+	helpText['start']="The starting time for your event. This should be in the form mm:ss, e.g. 00:05.";
+	helpText['end']="The ending time for your event. This should be in the form mm:ss, e.g. 00:05.";
+	helpText['fadein']="The duration of the fade in for your event. This should be a number of seconds.";
+	helpText['fadeout']="The duration of the fade out for your  event. This should be a number of seconds.";
+	helpText['content']="For configuring what text, images, and other content to display in your event.";
+	helpText['type']="Use the drop-down menu to choose what type of event you would like to use. ";
+	helpText['id']="The name for this  event.";
+	helpText['title ']="The title for the event.";
+	helpText['url']="The web URL of an image to optionally add an image to your event.";
+	helpText['frame-scroller']="Should your event popup box has scrollbars?";
+	helpText['frame-closer']="Should your event popup box have a close button?";
+	helpText['text']="The text in the body of your event.";
+	helpText['sqpr']="Type the prompt the viewer will see in the popup box.";
+	helpText['sq1a']="Text of answer."; helpText['sq1b']="Action to occur when answer is chosen."; helpText['sq1c']="Click if answer is correct one.";
+	helpText['sq2a']="Text of answer."; helpText['sq2b']="Action to occur when answer is chosen."; helpText['sq2c']="Click if answer is correct one.";
+	helpText['sq3a']="Text of answer."; helpText['sq3b']="Action to occur when answer is chosen."; helpText['sq3c']="Click if answer is correct one.";
+	helpText['sq4a']="Text of answer."; helpText['sq4b']="Action to occur when answer is chosen."; helpText['sq4c']="Click if answer is correct one.";
+	helpText['sq5a']="Text of answer."; helpText['sq5b']="Action to occur when answer is chosen."; helpText['sq5c']="Click if answer is correct one.";
+	helpText['sf1']="Action to occur when user clicks in desired area.";		
+	helpText['sf2']="Action to occur when user does NOT click in area.";
+	helpText['sf3']="Point on video screen to click on x,y or timecode to find";		
+	helpText['sf4']="Number of pixels user can click next x,y and still be correct, or seconds from the timecode.";
+
 	var id;
 	for (id in helpText) {
 		$("#"+id).attr("title",helpText[id]);

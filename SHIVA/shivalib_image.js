@@ -107,10 +107,14 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 	   		str+=" class='image"+i+"'></a></li>";
 	   		}
 	    str+="</ul></div></div></div>";
-	    $("#"+container).html(str);
-	  	$('.ad-gallery').adGallery()[0].settings.effect=transition;
-	    $("#gallery").css("background","#ddd");
-		$(".ad-gallery").css("width",wid) 
+	    $("#"+container).html(str);																// Add slideshow
+	  	$('.ad-gallery').adGallery()[0].settings.effect=transition;								// Set transition style
+	    $("#gallery").css("background","#ddd");													// Gray b/g
+		if (wid.match(/%/)) {																	// If a percent
+			wid=wid.replace(/%/,"")/100;														// Lop off % and turn to val
+			wid=$("#"+container).width()*wid;													// Get a real #
+			}
+		$(".ad-gallery").css("width",wid+"px");													// Set wid 
  	}
 
 }  // Closure end

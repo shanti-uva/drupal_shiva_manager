@@ -161,7 +161,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
- 	shivaLib.SendShivaMessage("ShivaChart=ready"); 							// Send ready message to EvA
+	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
+	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
 }
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
@@ -211,6 +212,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.NetworkActions(e.data);								// Route
 		else if (shivaLib.options.shivaGroup == "WordCloud")				// If an wordcloud action
 			shivaLib.WordActions(e.data);									// Route
+		else if (shivaLib.options.shivaGroup == "Control")					// If an control action
+			shivaLib.ControlActions(e.data);								// Route
 		}
 }
 
@@ -670,7 +673,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
         ops.series.push(o);
         }
  	var wrap=new google.visualization.ChartWrapper(ops);				// Get google chart obj
-	this.map=wrap;														// Save prt in map
+	this.map=wrap;														// Save ptr in map
  	if (ops.dataSourceUrl) 												// If a data source spec'd
  		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");		// Restore special chars
  	wrap.setOptions(ops);												// Set options
@@ -679,19 +682,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
     	shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data) {	// Get spreadsheet data
 			ops.dataSourceUrl=ops.query="";								// Null source/query out
 		  	wrap.setOptions(ops);										// Re-set options
-			var d = {cols: [], rows: []};
-			var keys = Object.keys(data[0]);
-			for (var i=0;i<keys.length;i++)
-			    d.cols.push({label:keys[i], type:(typeof data[0][keys[i]])});
-			d.rows = [];
-			for (var i=0; i<data.length; i++){
-			    var cell = [];
-			    for (var j=0; j<keys.length; j++){
-			        cell.push({v:data[i][keys[j]]});
-			    }
-			    d.rows.push({c:cell});
-			} 
-			wrap.setDataTable(d);										// Add the data
+			wrap.setDataTable(data);									// Add the data
 		    wrap.draw();												// Draw chart
   			});
 		}

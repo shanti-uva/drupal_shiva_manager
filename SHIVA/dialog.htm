@@ -171,7 +171,7 @@
 		else
 			window.attachEvent("message",shivaEventHandler);
 		if (!shivaLib.drupalMan) {
-			var str="Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
 			str+="<option>Choose format</option>";
 			str+="<option>WordPress</option>";
 			str+="<option>eStore</option>";
@@ -273,10 +273,10 @@
 			if ((s=query.indexOf("&chartType=")) != -1)
 				if ((e=query.indexOf("&",s+1)) != -1)
 					controlType=query.substring(s+11,e);
-				controlType=controlType;
+			controlType=controlType;
 			}
+		shivaLib.SetAttributes(props[controlType],items,controlType != "TimeSlider");
 		var it=shivaLib.ReEdit(jsonData,props[controlType]);
-		var o=new Object();
 		if (it) 
 			items=it;
 		shivaLib.SetAttributes(props[controlType],items,controlType != "TimeSlider");
@@ -357,12 +357,6 @@
 			$("#accord").accordion({ active: cur });
 		Draw();
 	}
-
-
-///////// GUI   //////////
-
-	function trace(str) { console.log(str) };
-	
 		
 </script>
 </body></html>

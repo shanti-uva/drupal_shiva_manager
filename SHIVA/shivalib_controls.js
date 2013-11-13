@@ -57,24 +57,18 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$("#stp"+i).button({ text: true, icons: { primary: "ui-icon-triangle-1-e" }});
 		}
 
-	function DrawTimeSlider(items)
+	function DrawTimeSlider(items)											// TIMESLIDER
 	{
-		var str="";
-		var dd=con+"Int";
-		$(dd).remove();
-		$(con).append("<div id='"+dd.substr(1)+"'/>");
-		$(con).css("height","30px");		
-		$(con).css("width","30px");		
-		options.orientation=options.orientation.toLowerCase();
-		options.step=Number(options.step);
-		if (options.orientation == "vertical") {
-			$(dd).css("height",options.size+"px");
-			$(con).css("height",options.size+"px");
-			}
-		else{		
-			$(dd).css("width",options.size+"px");
-			$(con).css("width",options.size+"px");
-			}
+		var dd=con+"Int";														// Id of slider
+		$(dd).remove();															// Remove old one, if there
+		$(con).append("<div id='"+dd.substr(1)+"'/>");							// Add slider div
+		$(con).css( { height:null,width:null } );								// Scale according to content size
+		options.orientation=options.orientation.toLowerCase();					// Force l/c
+		options.step-=0;	options.max-=0;		options.min-=0;					// Force as numbers
+		if (options.orientation == "vertical") 									// If vertical
+			$(dd).css("height",options.size+"px");								// Set height
+		else																	// Horizontal
+			$(dd).css("width",options.size+"px");								// Set width
 		if (options.type == "Bar")
 			options.range="min";
 		else if (options.type == "Range")
@@ -95,7 +89,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			sliderContext=mc.getContext('2d');
 			}
 		$(dd).slider("destroy");
-		$(dd).slider(options);
+		$(dd).slider(options);													// Set slider
+
 		$(dd).bind("slidestop", function(e, ui) { 								// On slide stop
 			var which=-1;														// Assume 1st
 			var val=ui.value;													// Get value
@@ -105,7 +100,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				which=0;														// Set name
 				val=ui.values[1];												// Use 2nd val
 				}
-			shivaLib.SendShivaMessage("ShivaSlider="+(which+1)+"|"+val);		// Send message
+			shivaLib.SendShivaMessage("ShivaSlider=click",(which+1)+"|"+val);	// Send message
  			});
 		DrawSliderTicks();
 	}
@@ -201,10 +196,10 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				$("#sel"+i).click(function(){
 					var ch=this.checked?"checked":"unchecked"
 					var id=this.id.substr(3)
-					shivaLib.SendShivaMessage("ShivaSelect="+id+"|"+ch)
+					shivaLib.SendShivaMessage("ShivaSelect=click",id+"|"+ch)
 					});
 			else
-				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+this.id.substr(3)+"|checked")});
+				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect=click",this.id.substr(3)+"|checked")});
 			} 
  		
 		$(con).css("text-align","left");		
@@ -223,7 +218,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		var o,i,v,sty,str="";
 		var dd="#"+container+"Dlg";
 		$(dd).remove();
-		$(con).append("<div id='"+container+"Dlg' style='border:1px solid #999;padding:8px;background-color:#f8f8f8;text-align:left' class='rounded-corners'/>");
+		$(con).append("<div id='"+container+"Dlg' style='width:auto;border:1px solid #999;padding:8px;background-color:#f8f8f8;text-align:left' class='rounded-corners'/>");
 		for (o in options){
        		v=options[o];
     		if (v == "true") 	v=true;
@@ -304,24 +299,25 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			if ((sty == "radio") || (sty == "image") || (sty == "button")) 
 				$("#"+o.name).click(function(){ 
 					var id=this.id.substr(5)
-					shivaLib.SendShivaMessage("ShivaDialog="+id+"|checked")
+					shivaLib.SendShivaMessage("ShivaDialog=click",id+"|checked")
 					});
 			else if (sty == "checkbox") 
 				$("#"+o.name).click(function(){ 
 					var id=this.id.substr(5)
 					var ch=this.checked?"checked":"unchecked"
-					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ch)
 					});
 			else if ((sty == "input") || (sty == "combo"))				
 				$("#"+o.name).change(function(){ 
 					var id=this.id.substr(5)
 					var ch=this.value;
-					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ch)
 					});
 			else if (sty == "range") {
-					var ops={ min:0, max:100, value:o.def, slide:function(event,ui) {											
+				if (o.def == "false")	o.def=0;
+				var ops={ min:0, max:100, value:o.def-0, stop:function(event,ui) {											
 					var id=this.id.substr(5)
-					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ui.value)
+					shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ui.value)
 					}};    
 				$("#"+o.name).slider(ops);	
 				}										
@@ -373,7 +369,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$("#Clo"+dd.substr(1)).click(function(){
 				var id=this.id.substr(3);
 				$("#"+id).hide();
-				shivaLib.SendShivaMessage("ShivaDialog="+options.title+"|closed");
+				shivaLib.SendShivaMessage("ShivaDialog=close",options.title);
 				});
 			}
 		}
@@ -391,7 +387,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$("#stp"+num).attr("checked",true);
 		$("#shiva_stepq").remove();
 		var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";
-		shivaLib.SendShivaMessage("ShivaStep="+num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);
+		shivaLib.SendShivaMessage("ShivaStep=click",num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);
 		if (obj.items[num].ques.indexOf("|") != -1) {
 			str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";
 			var v=obj.items[num].ques.split("|");
@@ -424,3 +420,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	}
 
 
+SHIVA_Show.prototype.ControlActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+}

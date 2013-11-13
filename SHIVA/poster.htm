@@ -74,7 +74,8 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
-		style: 						{	def:'border:3px solid white', opt:'string',	des:'CSS styling'}, 
+		caption: 					{	def:'', 			opt:'string',			des:'Caption'}, 
+		style: 						{	def:'border:3px solid white', opt:'string',	des:'CSS styling'}
 	}
 	
 	var helpText=new Array();
@@ -89,14 +90,15 @@
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
 	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
-	helpText['CSS styling']="CSS formatted styling for pane box, with multiple styles separated by |'s. i.e. <i>border=2px solid white|background=black</i>";
+	helpText['Caption']="Caption that will appear underneath pane when viewed.";
+	helpText['Height of poster']="The height of the player box where the montage will play in";
 	helpText['OVERVIEW']="Samples:<br><br>375-Pie chart<br>390=Map<br>392-Earth<br>393-Montage<br>394-Video<br>395-Timeline<br>404-Sample poster<br>405-Word<br>406-Network<br><br>https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldFBoYjZfWkdSLVBkRTY2QTNDS2lWVWc&usp=drive_web#gid=0";
 	
 ///// INIT  /////////////
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
-		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 	  	SetAttributes(false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
@@ -117,7 +119,7 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
-		if (!shivaLib.drupalMan) {
+  		if (!shivaLib.drupalMan) {
 			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
 			str+="<option>Choose format</option>";
 			str+="<option>WordPress</option>";

@@ -6,12 +6,9 @@
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="/test/jquery.csv-0.71.js"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"},{"name":"earth","version":"1"}]}'></script>
 	<script type="text/javascript" src="shivalib-min.js"></script>
 	<script type="text/javascript" src="SHIVA_Event.js"></script>
-	<script type="text/javascript" src="shivalib_data_tg.js"></script>
-	<script type="text/javascript" src="shivalib_timeline.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="css/jquery.ad-gallery.css">
   	<link type="text/css" rel="stylesheet" href="css/timeline1.css" media="all" id="timelineCSS"/> 
@@ -45,6 +42,7 @@
 
 <script>
 
+	var resize=false;													
 	var shivaLib=null;
 	shivaGo();
 	
@@ -53,6 +51,10 @@
 		var pair;
 		var options=new Object();											
 		var query=window.location.search.substring(1);						// Get query string
+		if (query.match(/srs=100/))	{										// If a resize tag in query
+			resize=true;													// Set resizing
+			query=query.substr(8);											// Lop off tag
+			}
 		query=query.replace(/%5E/g,"^").replace(/%5e/g,"^").replace(/%C2%AE/g,"&reg").replace(/%20/g," ").replace(/%60/g,"`");
 		query=query.replace(/%3E/g,">").replace(/%3e/g,">").replace(/%3c/g,"<").replace(/%3C/g,"<").replace(/``/g,"#");;
 		var vars=query.split("&");											// Split into vars
@@ -91,11 +93,19 @@
 	
 	function shivaDataWrapper(data)										// HANDLE GETJSON DATA FROM DRUPAL
 	{
+		if (resize){														// If resizing to 100%
+			if (data.width)  data.width="100%";								// Set width
+			if (data.height) data.height="100%";							// Set height
+			}
 		shivaLib.Draw(data);												// Draw element
 	}
 
 	function easyFileDataWrapper(data)									// HANDLE GETJSON DATA FROM ESTORE
 	{
+		if (resize){														// If resizing to 100%
+			if (data.width)  data.width="100%";								// Set width
+			if (data.height) data.height="100%";							// Set height
+			}
 		shivaLib.Draw(data);												// Draw element
 	}
 	
