@@ -1073,7 +1073,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $arg2  = (count(arg()) > 4) ? arg(4) : FALSE;
     $arg3  = (count(arg()) > 5) ? arg(5) : FALSE;
     if(count(arg()) > 3) { 
-      $did = (is_numeric($arg1)) ? $match[1] : FALSE;
+      $did = (is_numeric($arg1)) ? $arg1 : FALSE;
       if(count(arg()) > 3) { 
         $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
         if($snnewtype == '') {$snnewtype = 'chart';}
