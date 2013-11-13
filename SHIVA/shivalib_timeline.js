@@ -30,6 +30,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 	this.GetSpreadsheet(stimeline.options.dataSourceUrl,true,stimeline.options.query,$.proxy(ProcessTimelineData, this)); 
 	
 	function ProcessTimelineData(data) {
+		console.info(data);
     eventData={ events:new Array() };
     // process event
     for(var n in data) {

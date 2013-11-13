@@ -1070,5 +1070,11 @@
 	      clearInterval(Drupal.Shivanode.sntempint);
 	    }
 	  }, 500);
-	}
+	};
+	
+	Drupal.Shivanode.setChartType = function(index) {
+		//alert('testing: ' + index);
+		// Add code to change chart type
+	};
+	
 }) (jQuery);
