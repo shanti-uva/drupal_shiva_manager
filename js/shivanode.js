@@ -1072,9 +1072,8 @@
 	  }, 500);
 	};
 	
-	Drupal.Shivanode.setChartType = function(index) {
-		//alert('testing: ' + index);
-		// Add code to change chart type
+	Drupal.Shivanode.setChartType = function(ctype) {
+		Drupal.Shivanode.ShivaMessage('shivaEditFrame', 'SetChartType=' + ctype);
 	};
 	
 }) (jQuery);
