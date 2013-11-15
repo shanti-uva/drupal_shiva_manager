@@ -1332,24 +1332,26 @@ function _shivanode_data_elements($form, &$form_state) {
 function _shivanode_gdocs_view() {
   
   $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
+  
   $xml = new DOMDocument();
   $xml->preserveWhiteSpace = false;
   $xml->loadXML($viewMarkup);
-  
+    
   $xpathstr = '//div[@class="view-content"]//tbody/tr';
   $xpath = new DOMXPath($xml);
   $result = $xpath->evaluate($xpathstr);
+  
   foreach($result as $row) {
     $cell3 = $row->childNodes->item(2);
     $txt = $cell3->childNodes->item(0);
     $info = explode('|$|', trim($txt->wholeText));
-    $button = _add_DOM_attributes($xml->createElement('input'), array(
+    /*$button = _add_DOM_attributes($xml->createElement('input'), array(
         'type' => 'submit',
         'name' => 'op',
         'value' => t('Visualize'),
         'class' => 'form-submit visualize-button',
         'id' => 'submit-' . $info[1],
-      ));
+      ));*/
       $titleinput = _add_DOM_attributes($xml->createElement('input'), array(
         'type' => 'hidden',
         'name' => 'title',
@@ -1360,9 +1362,10 @@ function _shivanode_gdocs_view() {
         'name' => 'nid',
         'value' => $info[1],
       ));
-    $cell3->replaceChild($button, $txt);
+    //$cell3->replaceChild($button, $txt);
     $cell3->appendChild($titleinput);
     $cell3->appendChild($nidinput);
+    $cell3->appendChild(_shivanode_gdocs_view_select($xml));
   }
   $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
   $xpath = new DOMXPath($xml);
@@ -1384,13 +1387,13 @@ function _shivanode_gdocs_view() {
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
       $datecell->replaceChild(new DOMText('n/a'), $datecell->childNodes->item(0));
       //<input type="submit" name="op" value="I&#039;m a little button" class="form-submit" />
-      $button = _add_DOM_attributes($xml->createElement('input'), array(
+      /*$button = _add_DOM_attributes($xml->createElement('input'), array(
         'type' => 'submit',
         'name' => 'op',
         'value' => t('Visualize'),
         'class' => 'form-submit visualize-button',
         'id' => 'submit-' . $gid,
-      ));
+      ));*/
       $titleinput = _add_DOM_attributes($xml->createElement('input'), array(
         'type' => 'hidden',
         'name' => 'title',
@@ -1401,15 +1404,49 @@ function _shivanode_gdocs_view() {
         'name' => 'gid',
         'value' => $gid,
       ));
-      $linkcell->appendChild($button);
+      //$linkcell->appendChild($button);
       $linkcell->appendChild($titleinput);
       $linkcell->appendChild($gidinput);
+      $linkcell->appendChild(_shivanode_gdocs_view_select($xml));
+      
       $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
       $tbody->appendChild($rowclone);
     }
   }
   $xhtml = $xml->saveXML();
+
   return $xhtml;
+}
+
+/**
+ * _shivanode_gdocs_view_select returns a DOM 
+ */
+function _shivanode_gdocs_view_select($xml) {
+      
+  $select = array(
+    '#type' => 'select',
+    '#multiple' => FALSE,
+    '#required' => FALSE,
+    '#empty_option' => t('Visualize as ...'),
+    '#empty_value' => 0,
+    '#default_value' => 0,
+    '#options' => array(
+      'Annotated Time Line',
+      'Area Chart',
+      'Bar Chart',
+      'Candlestick Chart',
+      'Column Chart',
+      'Gauge',
+      'Geo Chart',
+      'Line Chart'
+      // NEED TO ADD OTHERS....
+    ),
+  );
+  $select = form_process_select($select);
+  $select = drupal_render($select);
+  $selectFrag = $xml->createDocumentFragment(); 
+  $res = $selectFrag->appendXML($select); 
+  return $selectFrag; 
 }
 
 function _add_DOM_attributes($newel, $atts = array()) {
