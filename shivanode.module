@@ -1090,9 +1090,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       $url = 'mydata/'. strtolower($sntype);
       if($ctype) { $url .= '/' . $ctype; }
       drupal_goto($url);
-    } else {
-      dpm(array(SHIVA_DATA_VISUALIZATIONS,$sntype, $did, $nodata));
-    }
+    } 
     $submitVal = t('Save');
   }
   if($sntype == '') { $sntype = t('Chart');}
