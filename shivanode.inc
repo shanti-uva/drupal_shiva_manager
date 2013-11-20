@@ -1203,10 +1203,11 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  *      this function produces the content displayed in a popup for choosing which data entries
  *
  */
-function _shivanode_data_page($type=FALSE) {
+function _shivanode_data_page($type=FALSE, $ctype=FALSE) {
   global $base_root, $base_path;
   if(!preg_match('/chart|image|network|timeline/', strtolower($type))) { $type = FALSE; }
   $sntypelabel = ($type) ? ucfirst($type) : t('Charts, Images, Networks, and Timeline');
+  if($ctype) { $sntypelabel = ucfirst($ctype); }
   $markup = array(
     '#prefix' => '<div id="data-element-page">',
     '#suffix' => '</div>',
@@ -1219,22 +1220,24 @@ function _shivanode_data_page($type=FALSE) {
     '#prefix' => '<form action="' . $baseurl . (($type) ? '/nd/' . $type : '') . '">',
     '#suffix' => '</form>',
   );
+  
   $markup['p'] = array(
     '#type' => 'markup',
-    '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file. Below is a list of all the spreadsheets you have registered with this site as well as all, if permitted, all the spreadsheets in your Google Doc account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p>', 
+    '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file.  Below is a list of all the spreadsheets you have registered with this site as well as all the spreadsheets in your Google Doc account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p>', 
                     array('@type' => $sntypelabel)),
-    
-    /*t('This list allows you to specify the data that you would like to call upon for the Shiva visualization on which you are currently working. ' . 
-                            'Shiva visualizations draw upon Shiva Data entries, which are typically created from Google Doc spreadsheets. ' .
-                            'The first section of this page shows you Shiva Data entries that you have personally created and also allows you see Shiva ' .
-                            'Data entries  others have created and shared with groups to which you belong.  ' .
-                            'The second section of this page shows your Google spreadsheets that you have not yet imported into Shiva. ' .
-                            'To make a visualization from one of these spreadsheets, choose the radio button next to it ' .
-                            'and click the &lsquo;Add Spreadsheet&rsquo; button.') */
   );
   
+  $link = shivanode_get_help_link($sntypelabel, 'link');
+  if ($link != '') {
+    $markup['help'] = array(
+      '#type' => 'markup',
+      '#markup' => '<p>' . t('For a description of how to format a spreadsheet, see the documentation for ') . $link . '.</p>',
+    );
+  }
+  
+  
   // Call function below to get HTML from view, tweak it and insert in this form
-  $viewmarkup = _shivanode_gdocs_view($type);
+  $viewmarkup = _shivanode_gdocs_view($type, $ctype);
   $markup['addedview'] = array(
     '#type' => 'markup',
     '#markup' => $viewmarkup,
@@ -1409,7 +1412,7 @@ function _shivanode_data_elements($form, &$form_state) {
  *    The buttons are modified by JS () to set the newss, newsstype, and newsstitle hidden elements when clicked before submission
  *    See JS at:  Drupal.behaviors.shivaDataElementSelect in shivanode.js
  */
-function _shivanode_gdocs_view($vistype='') {
+function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
   
   $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
   
@@ -1447,7 +1450,7 @@ function _shivanode_gdocs_view($vistype='') {
     $cell3->appendChild($nidinput);*/
     $title = $info[0];
     $nid = $info[1];
-    $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $title, 'nid', $nid);
+    $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
   }
   $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
@@ -1483,7 +1486,7 @@ function _shivanode_gdocs_view($vistype='') {
       //$linkcell->appendChild($button);
       $linkcell->appendChild($titleinput);
       $linkcell->appendChild($gidinput);*/
-      $linkcell->appendChild(_shivanode_gdocs_view_select($xml, $vistype, $title, 'gid', $gid ));
+      $linkcell->appendChild(_shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'gid', $gid ));
       
       $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
       $tbody->appendChild($rowclone);
@@ -1498,18 +1501,26 @@ $done = 0;
 /**
  * _shivanode_gdocs_view_select returns a DOM 
  */
-function _shivanode_gdocs_view_select($xml, $vistype, $title, $type, $id) {
+function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id) {
   $sform = drupal_get_form('_shivanode_data_use_form');
   if($vistype) {
     unset($sform['vistypeselect']);
-    $sform['submit']['#value'] = t('Visualize as @type', array('@type' => ucfirst($vistype)));
+    $label = ($ctype) ? ucfirst($ctype) : ucfirst($vistype);
+    $sform['submit']['#value'] = t("Visualize as @type", array('@type' => $label));
     $sform['submit']['#prefix'] = '';
     $sform['submit']['#suffix'] = '';
     $sform['vistype'] = array(
       '#type' => 'hidden',
-      '#name' => 'dataid',
+      '#name' => 'vistype',
       '#value' => $vistype,
     );
+    if($ctype) {
+      $sform['ctype'] = array(
+        '#type' => 'hidden',
+        '#name' => 'ctype',
+        '#value' => $ctype,
+      );
+    }
   }
   $sform['datatitle'] = array(
     '#type' => 'hidden',
@@ -1558,6 +1569,9 @@ function _shivanode_data_use_form_submit($form, &$form_state) {
   $ctype = '';
   if (isset($form_state['input']['vistype'])) {
     $vistype = $form_state['input']['vistype'];
+    if(isset($form_state['input']['ctype'])) {
+      $ctype = $form_state['input']['ctype'];
+    }
   } else {
     $types =_shivanode_types_using_gdocs();
     $selected = $form_state['input']['vistypeselect'];
