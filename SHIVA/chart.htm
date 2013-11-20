@@ -294,8 +294,10 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-		else if (e.data.indexOf("SetChartType=") == 0) 
-			SetAttributes(e.data.substr(13),true);	
+		else if (e.data.indexOf("SetChartType=") == 0) {
+		  	$("select#chartType").val(e.data.substr(13));
+				SetAttributes(e.data.substr(13),true);
+			}	
 	}
 
 	function SaveData(mode)

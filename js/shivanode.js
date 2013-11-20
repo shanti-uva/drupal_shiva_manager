@@ -26,11 +26,12 @@
 			
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
-			  setTimeout(function() {
+				console.info("took interval out here");
+			 /* setTimeout(function() {
 			    setInterval(function() { 
 		            Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
 		        }, 500);
-			  }, 10000);
+			  }, 10000);*/
 				// When there's a validation error, reload the type of iframe
 				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
 					$('#shivaEditFrame').attr('src', Drupal.Shivanode.IframeSrcUrl);
@@ -201,7 +202,16 @@
 					return false;
 				});
 			}
-			
+			// if ctype param is there then send message to shivaEditFrame to change the chart type
+			if(window.location.search.indexOf('ctype=') > -1) {
+				var pts = window.location.search.split('ctype=');
+				window.frames['shivaEditFrame'].onload = function() {
+					var ctype = decodeURIComponent(pts[1].replace('Organization', 'Org'));
+					var funct = "Drupal.Shivanode.setChartType('" + ctype + "'); Drupal.Shivanode.insertDataElement('preset');";
+					setTimeout(funct, 800);
+				};
+				
+			}
 		} // End of attach function
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
 	
@@ -449,6 +459,7 @@
 		
 		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it if editing
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
+			console.info("ready message received");
 			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
@@ -788,9 +799,15 @@
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
+		var jobj = JSON.parse(json); 
 	  // This is called every .5 secs. If JSON is the same, then return
     if (Drupal.Shivanode.latestJSON == json) {
-      return;
+    	if(jobj.dataSourceUrl != $('chosen_data_element_url').text()) {
+    		jobj.dataSourceUrl = $('chosen_data_element_url').text();
+    		json = JSON.stringify(jobj);
+    	} else {
+    		return;
+    	}
     }
 		Drupal.Shivanode.latestJSON = json;
   	// if Drupal.Shivanode.embedCallType is set to 'json', means Lightbox Frame is requesting JSON so set it.
@@ -799,7 +816,6 @@
 			Drupal.Shivanode.embedCallType = '';
 		}
   	// Otherwise, it's the Shiva Manager asking for the JSON of an visualization to store
-		var jobj = JSON.parse(json); 
 		// Set IFrame height and width corresponding to the visualization if it is larger
 		if(typeof(jobj.width) == "string" && !isNaN(jobj.width)) {
 		  vwidth = jobj.width * 1;
@@ -818,7 +834,8 @@
 		Drupal.Shivanode.checkKMLUrls(jobj);
 		var jdurl = jobj.dataSourceUrl;
 		// if there's no dataSourceUrl and a data entry is linked with the present edit form, then add that info
-		if(typeof(jdurl) == 'string' && jdurl == '' && $('#data_sheet_in_use').length == 1) {
+		if((Drupal.Shivanode.IDE && Drupal.Shivanode.IDE.url == 'preset') || (typeof(jdurl) == 'string' && jdurl == '' && $('#data_sheet_in_use').length == 1)) {
+			Drupal.Shivanode.IDE = null;
 			jobj.dataSourceUrl = $('#chosen_data_element_url').text();
 			if(typeof(jobj.title) != 'string' || jobj.title == '') {
 				jobj.title = $('#chosen_data_element_title').text();

@@ -54,8 +54,12 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// VIDEO WRAPPER ///////////////////////////////////////////////////
 
 	this.VideoPlay=function(time) {											// PLAY A CLIP
-		if (time != undefined)												// If a time set
+		if (time != undefined) {												// If a time set
 			shivaLib.player.play();											// Start it playing first for some unknown reason
+			time=""+time;													// Cast to string
+ 			if (time.match(/:/))											// If a timecode
+ 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
+			}
 		shivaLib.player.play(time);											// Send timecode
 		}
 
@@ -84,8 +88,12 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
   		}
 
 	this.VideoTime=function(time) {											// GET/SET CURRENT TIME
- 		if (time != undefined) 												// If setting time
-		   	shivaLib.player.currentTime(time);								// Send timecode
+ 		if (time != undefined) {											// If setting time
+ 			time=""+time;													// Cast to string
+ 			if (time.match(/:/))											// If a timecode
+ 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
+		   	shivaLib.player.currentTime(time-0);							// Send timecode
+			}
 		else																// Getting time
 			time=shivaLib.player.currentTime();								// Get time
 		return(time);														// Return time
@@ -139,28 +147,29 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
    		setInterval(onVideoTimer,400);	
    	}
 
-  	function onVideoTimer(e) {												// VIDEO TIMER HANDLER
-		if ($("#shivaNotesDiv").length) {									// If open
+  	function onVideoTimer(e) {										// VIDEO TIMER HANDLER
+		if ($("#shivaNotesDiv").length) {								// If open
 			var t,i,j,next;
-			var now=shivaLib.VideoTime();									// Get current time
-			for (i=0;i<500;++i) {											// Loop
-				if (!$("#ntc-"+i).length)									// If no more                                  
-					break;													// Quit
-				$("#ntc-"+i).css("color","#009900");						// Clear it
-	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
-				if (now >= t) {												// Post start
+			var now=shivaLib.VideoTime();								// Get current time
+			for (i=0;i<500;++i) {										// Loop
+				if (!$("#ntc-"+i).length)								// If no more                                  
+					break;												// Quit
+				$("#ntc-"+i).css("color","#009900");					// Clear it
+	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());		// Convert to seconds      
+				if (now >= t) {											// Post start
 	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
-					if (now < next) {										// If before next
-						$("#ntc-"+i).css("color","#ff0000");				// Highlight it
-			            break;                                             	// Quit
+					if (now < next) {									// If before next
+						$("#ntc-"+i).css("color","#ff0000");			// Highlight it
+			            break;                                         	// Quit
 	            		}
        				}
        			}
        		}
 	}
 	
-  	function drawOverlay()	{
-   		shivaLib.DrawOverlay();
+  	function drawOverlay()	{										// ON TIME CHANGE										
+		if (!$("#shivaDrawPaletteDiv").length)							// If not drawing
+   			shivaLib.DrawOverlay();										// Refresh overlay
    		}		
 }
   

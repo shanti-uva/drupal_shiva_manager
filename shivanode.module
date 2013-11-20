@@ -207,8 +207,9 @@ function shivanode_menu() {
   $items['mydata'] = array(
     'title' => 'Choose Your Data',
     'description' => 'List of Available Shiva Data Entries',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_data_elements'),
+    /*'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_data_elements'),*/
+    'page callback' => '_shivanode_data_page',
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
@@ -1068,25 +1069,24 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // if the node with the form does not have an nid, we are creating a new shivanode node. Set variables accordingly
   if(!isset($form['#node']->nid)) {
     $is_new_el = TRUE;
-    $typematch = preg_match('/add\/shivanode\/([^\/]+)\/?([^\/]*)/', current_path(), $match);
     $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;
     $arg2  = (count(arg()) > 4) ? arg(4) : FALSE;
-    $arg3  = (count(arg()) > 5) ? arg(5) : FALSE;
+    //$arg3  = (count(arg()) > 5) ? arg(5) : FALSE;
     if(count(arg()) > 3) { 
       $did = (is_numeric($arg1)) ? $arg1 : FALSE;
-      if(count(arg()) > 3) { 
+      if(count(arg()) > 4) { 
         $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
         if($snnewtype == '') {$snnewtype = 'chart';}
         $sntype = ucfirst($snnewtype);
         // use /add/shivanode/nd/timeline, /add/shivanode/nd/chart/ etc. to skip the data choosing step for those types of visualizations
-        if($arg1 == 'nd') {
+        /*if($arg1 == 'nd') {
           $nodata = TRUE;
           if($sntype == 'Chart') {
             drupal_add_js('jQuery(document).ready(function () { Drupal.Shivanode.setChartType(' . $arg3 . '); });',
               array('type' => 'inline', 'scope' => 'footer', 'weight' => 5)
             );
           }
-        } 
+        }*/ 
       }
     }
     

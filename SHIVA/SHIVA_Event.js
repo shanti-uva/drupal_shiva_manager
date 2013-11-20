@@ -43,7 +43,12 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 		shivaLib.VideoEvent("remove","timeupdate",$.proxy(_this.DrawEventDots,this));	// Kill handler
 		return;																// Quit
 		}
-	shivaLib.VideoEvent("add","timeupdate",$.proxy(_this.DrawEventDots,this));	// Redraw dots on player change
+	shivaLib.VideoEvent("add","timeupdate",$.proxy(function() {
+			if (shivaLib.VideoTime() != _this.lastUpdatedDotTime){			// If time changed
+				_this.DrawEventDots();										// Redraw dots on player change
+				_this.lastUpdatedDotTime=shivaLib.VideoTime();				// Then is now
+				}
+			},this));
 	var con="#"+this.container;
 	var w=$(con).css("width").replace(/px/,"");
 	var h=$(con).css("height").replace(/px/,"")
@@ -73,27 +78,14 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	str+="left:125px;top:35px;color:#ccc''>Show: "+dur+"</div>";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaEventEditorDiv").append("<div id='shivaTimecode' style='position:absolute;left:"+(w/2-12)+"px;top:35px;color:#ccc'/>");
-	str="<div id='shivaTimebarDiv' style='position:absolute;";			
-	str+=";width:"+w+"px;left:8px;top:10px;height:16px;";
+	str="<div id='shivaTimebarDiv' style='position:absolute;-moz-user-select: none;-khtml-user-select:none;-webkit-user-select:none;";			
+	str+="width:"+w+"px;left:8px;top:10px;height:16px;";
 	str+="border-radius:3px;-moz-border-radius:3px;background-color:#999'/>";
 	str+="<img src='addeventdot.gif' style='position:absolute;left:"+(w-8)+"px;top:33px' onclick='shivaLib.ev.EditEvent(-1)'/>";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
 	$("#shivaEventEditorDiv").slideDown();									// Slide it on
 	this.DrawEventDots();													// Draw doys
-	
-	$("#shivaTimebarDiv").bind("click",function(e) { 					// HANDLE CLICK STOP
-		var x=e.pageX-8-$("#shivaEventEditorDiv").css("left").replace(/px/,"")	// Position in bar
-		x=x/w*shivaLib.VideoDuration*_this.scale;							// Absolute time
-		});
-	
-	$("#shivaTimebarDiv").dblclick( function(e) { 						// SET TIME
-		var x=e.clientX-$("#"+_this.par.container).css("left").replace(/px/,"")-8;
-		var wid=$("#shivaTimebarDiv").width();								// Width
-		x=Math.max(Math.min(x,wid),0);										// Cap 0-wid
-		x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
-		shivaLib.VideoTime(x);												// Set time
-		});
 }
 
 SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
@@ -109,11 +101,11 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 		o=this.events[i];													// Point at event
 		if (!o.start)														// No start
 			continue;														// Continue
-		s=this.par.TimecodeToSeconds(o.start);								// Get start
+		s=shivaLib.TimecodeToSeconds(o.start);								// Get start
 		if ((s > end) && (this.scale < 1))									// After timespan and not showing all
 			continue;														// Continue
 		if (o.end) 															// If an end defined
-			e=this.par.TimecodeToSeconds(o.end);								// Get end
+			e=shivaLib.TimecodeToSeconds(o.end);							// Get end
 		else																// A singleton
 			e=s;															// End=start													
 		if ((e < now) && (this.scale < 1))									// Before timespan and not showing all
@@ -122,7 +114,7 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			x=((s-now)/dur)*wid/this.scale;									// Start x, account for now	
 		else																// If scrolling
 			x=(s/dur)*wid/this.scale;										// Start x		
-		w=Math.max(15,((e-s)/dur)*wid/this.scale)-1;							// Width
+		w=Math.max(15,((e-s)/dur)*wid/this.scale)-1;						// Width
 		str="<div id='shivaEventDot-"+i+"' style='position:absolute;text-align:center;cursor:pointer;";
 		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;margin:0px;";
 		str+="border-radius:8px;-moz-border-radius:8px;background-color:#ccc;border:1px #eee solid'";
@@ -133,30 +125,39 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			str+=" ("+o.id+")";												// Add id
 		str+="'>"+(i+1)+"</div>";											// Event num
 		$("#shivaTimebarDiv").append(str);
-		$("#shivaEventDot-"+i).dblclick( function(e) { _this.EditEvent(this.id.substr(14));  }).draggable();
-		
-		$("#shivaEventDot-"+i).bind("drag",function(event,ui) { 
-			ui.position.top=0; 												// Force in track
-			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
-			x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
-			$("#shivaTimecode").text(_this.par.SecondsToTimecode(x+now));	// Show position
-			});
-		$("#shivaEventDot-"+i).bind("dragstop",function(event,ui) { 		// Handle drag stop
-			o=_this.events[this.id.substr(14)];								// Point at event
-			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
-			x=x/wid*shivaLib.VideoDuration()*_this.scale;					// Absolute time from bar
-			if (_this.scale < 1)											// If not showing all
-				x+=now;														// Add start
-			_this.Do("Move event");											// Save undo
-			w=_this.par.TimecodeToSeconds(o.end)-_this.par.TimecodeToSeconds(o.start);// Save dur
-			o.start=_this.par.SecondsToTimecode(x);							// Set time
-			if (o.end)														// If an end defined
-				o.end=_this.par.SecondsToTimecode(x+w); 						// Set time
-			_this.UpdatePlayerEvents();										// Update player
-			$("#shivaTimecode").text("");									// Clear timecode display
-			});
-		}			
-	$("#shivaTimebarDiv").scrollLeft((now/dur)*wid/this.scale);				// Scroll it
+
+		$("#shivaEventDot-"+i).dblclick( function(e) { 						// Handle double-click
+			var id=this.id.substr(14);										// Get id
+			var time=shivaLib.TimecodeToSeconds(_this.events[id].start)-1; 	// Back up one second
+			shivaLib.VideoTime(time);										// Set time
+			_this.EditEvent(id);  											// Edit the event
+				});
+	
+		$("#shivaEventDot-"+i).draggable( {									// Make dots draggable			
+				 drag: function(e,ui) {										// Handle drag				
+						ui.position.top=0; 									// Force in track
+						x=Math.max(Math.min(ui.position.left,wid),0);		// Cap 0-wid
+						x=x/wid*shivaLib.VideoDuration()*_this.scale;		// Absolute time from bar
+						$("#shivaTimecode").text(_this.par.SecondsToTimecode(x)); // Show position
+						},
+				stop: function(event,ui) { 									// Handle drag stop
+						o=_this.events[this.id.substr(14)];					// Point at event
+						x=Math.max(Math.min(ui.position.left,wid),0);		// Cap 0-wid
+						x=x/wid*shivaLib.VideoDuration()*_this.scale;		// Absolute time from bar
+						if (_this.scale < 1)								// If not showing all
+							x+=now;											// Add start
+						_this.Do("Move event");								// Save undo
+						w=_this.par.TimecodeToSeconds(o.end)-_this.par.TimecodeToSeconds(o.start);// Save dur
+						o.start=_this.par.SecondsToTimecode(x);				// Set time
+						if (o.end)											// If an end defined
+							o.end=_this.par.SecondsToTimecode(x+w); 		// Set time
+						_this.UpdatePlayerEvents();							// Update player
+						$("#shivaTimecode").text("");						// Clear timecode display
+						}
+				});
+					
+		$("#shivaTimebarDiv").scrollLeft((now/dur)*wid/this.scale);			// Scroll it
+		}
 }
 
 SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
@@ -274,11 +275,31 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		if (v[2]) 															// If exists
 			$("#sf2").val(v[2]);											// Set failure
 		}
+	else if (o.type == "draw") {											// Get drawing
+		var x=$("#containerDiv").css("left").replace(/px/,"")-0;			// Get left side of video
+		x+=$("#containerDiv").width()-0+8;									// Set right
+		$("#shivaLightBoxDiv").css("left",x+"px");							// Move background
+		$("#shivaLightBoxIntDiv").css("left","8px");						// Move dialog
+		shivaLib.AddOverlay(o.text);										// Get draw data
+		shivaLib.dr.segs=shivaLib.overlay;									// Set drawing segs
+		shivaLib.DrawOverlay();												// Reshow
+		}
+
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
 	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#text").val($("#text").val().replace(/&apos;/g,"'"));				// &apos; -> '
 	$("#title").val($("#title").val().replace(/&apos;/g,"'"));				// &apos; -> '
+	if ($("#sqpr").length) {												// If exists
+		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'"));			// &apos; -> '
+		$("#sqpr").val($("#sqpr").val().replace(/&quot;/g,"\""));			// &quot; -> '
+		}
+	for (i=1;i<6;++i) 														// For eaxch possible answer
+		if ($("#sq"+i+"a").length) {										// If exists
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'"));// &apos; -> '
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&quot;/g,"\""));// &aquot; -> '
+			}
+
 	o=o.frame;																// Point at field
 	for (key in o)															// For each field member
 		$("#frame-"+key).val(o[key]);										// Set field
@@ -298,7 +319,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value));	shivaLib.ev.SetEventHelp(); '";
-	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","draw","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
@@ -320,6 +341,14 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 		str+="<tr><td>On failure</td><td><input type='text' id='sf2'/></td></tr>";
 		str+="<tr><td>Target</td><td><input type='text' id='sf3'/></td></tr>";
 		str+="<tr><td>Fudge factor</td><td><input type='text' id='sf4'/></td></tr>";
+		}
+	else if (etype == "draw") {
+		str+="<input type='hidden' id='text'>";								// Holds drawing data
+		str+="<tr><td>Freehand drawing</td><td><input type='button' onclick='shivaLib.Annotate()' value='Draw/Edit'/></td></tr>";
+		var x=$("#containerDiv").css("left").replace(/px/,"")-0;			// Get left side of video
+		x+=$("#containerDiv").width()-0+8;									// Set right
+		$("#shivaLightBoxDiv").css("left",x+"px");							// Move background
+		$("#shivaLightBoxIntDiv").css("left","8px");						// Move dialog
 		}
 	else
 		str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
@@ -386,7 +415,16 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		if ($("#sf2").val())												// If set
 			o.text+="|"+$("#sf2").val();									// Add failure
 		}				
-
+	else if (o.type == "draw") {											// Get data from draw tool
+		if (shivaLib.dr) {													// If drawing lib open
+			o.text=shivaLib.dr.SaveDrawData(false);							// Get drawing data
+			shivaLib.dr.segs=[];											// Clear segs
+			}
+		shivaLib.overlay=[];												// Clear data from memory
+		shivaLib.DrawOverlay();												// Redraw	
+		$("#shivaDrawDiv").html("");										// Clear draw div
+		$("#shivaDrawPaletteDiv").remove();									// Close drawing tool
+		}
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
 	o.frame.draggable=($("#frame-draggable").attr("checked") == "checked"); // Set checkbox
@@ -530,7 +568,7 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 				str+="<div style='text-align:center;border:none;color:"+tcol+"'><b>"+o.title+"</b></div>";	// Add title
 			$("#shivaEvent-"+num).html(str);								// Set content							
 			break;
-		case "ask": 														// Ask for response
+		case "ask": 														// Ask dialog
 		case "menu": 														// Menu dialog
 		case "find": 														// Find dialog
 			if (params == undefined)										// If not just updating
@@ -790,6 +828,9 @@ SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS
 		if ($("#shivaIframe-"+i).length)									// If an iframe
 			$("#shivaIframe-"+i).remove();									// Remove it from DOM	
 		}
+	shivaLib.overlay=[];													// Clear draw data
+	$("#shivaDrawDiv").html("");											// Clear draw div
+	shivaLib.DrawOverlay();													// Reshow
 }
 
 SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
@@ -845,6 +886,15 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			$("#shivaIframe-"+num).remove();								// Remove it from DOM	
 		return;																// Quit		
 		}	 
+	else if (o.type == "draw") {											// A drawing
+		if (visible)														// Show
+			shivaLib.AddOverlay(o.text);									// Get draw data
+		else{																// Hide
+			shivaLib.overlay=[];											// Clear data
+			$("#shivaDrawDiv").html("");									// Clear draw div
+			}
+		shivaLib.DrawOverlay();												// Reshow
+		}
 	var fade=0;																// Assume no fade
 	if (visible) {															// If making visible
 		if (o.fadein)	fade=o.fadein*1000;									// If set, use it
@@ -1020,8 +1070,8 @@ SHIVA_Event.prototype.SetEventHelp=function()
 	helpText['sq5a']="Text of answer."; helpText['sq5b']="Action to occur when answer is chosen."; helpText['sq5c']="Click if answer is correct one.";
 	helpText['sf1']="Action to occur when user clicks in desired area.";		
 	helpText['sf2']="Action to occur when user does NOT click in area.";
-	helpText['sf3']="Point on video screen to click on x,y or timecode to find";		
-	helpText['sf4']="Number of pixels user can click next x,y and still be correct, or seconds from the timecode.";
+	helpText['sf3']="Point on video screen to click on x,y or timecode to find. Find x,y by clicking on video and hold Control key.";		
+	helpText['sf4']="Number of pixels can click near target and still be correct, or seconds from the target.";
 
 	var id;
 	for (id in helpText) {

@@ -28,8 +28,6 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	this.selectedItems=new Array();
 	this.selectedDot=-1;													
 	this.segs=new Array();
-	this.startTime="0:0";													// Start time
-	this.endTime="end";														// End time
 	if (shivaLib.overlay)													// If an overlay already
 		this.segs=shivaLib.overlay;											// Use it
 	this.closeOnMouseUp=false;												// Flag to close seg after drag-drawing
@@ -55,14 +53,13 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 
 SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW 
 {
+	this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');						// Get context
 	var hgt=$("#"+this.container).css("height").replace(/px/g,"");			// Get height
 	var top=$("#"+this.container).css("top").replace(/px/g,"");				// Get top
 	if (top == "auto")	top=0;												// Use 0
 	var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;		// Get left
 	if ($("#shivaDrawPaletteDiv").length == 0) {							// If no palette
 		var h=225;															// Default height
-		if (shivaLib.player)												// If over a player										
-			h+=16;															// Add space for start/end times
 		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
 		$("#shivaDrawPaletteDiv").addClass("propTable");					// Style same as property menu
@@ -71,6 +68,13 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 		}
 	this.SetTool(0);														// Draw lines
 	this.DrawMenu();														// Draw menu
+}
+
+SHIVA_Draw.prototype.Clear=function() 									//	CLEAR DRAWING
+{
+	shivaLib.overlay=[];													// Clear data from memory
+	this.segs=[];															// Clear list
+	$("#shivaDrawDiv").html("");											// Clear draw div
 }
 
 SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
@@ -141,7 +145,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	var str="<p style='text-shadow:1px 1px white' align='center'><b>";	str+=preface+titles[tool]+"</b></p>";
 	str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='shivaLib.dr.SetTool(-1)'/>";
 	str+="<table style='font-size:xx-small'>"
-	if (tool < 3) {
+	if (tool < 3) {				// LINE, BOX, CIR
 		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		if (tool == 2)
 			str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
@@ -151,9 +155,11 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 			}		
 		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
+		if (tool != 0)
+			str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
 		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
 		}
-	else if (tool == 3) {
+	else if (tool == 3) {		// TEXT
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
 		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
@@ -161,14 +167,14 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr height='20'><td>&nbsp;&nbsp;Text size</td><td><div style='width:82px;margin-left:6px' id='textSize'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";
 		}
-	else if (tool == 4) {
+	else if (tool == 4) {		// IMAGE
 		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
 		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
 		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
-	else if (tool == 6) {
+	else if (tool == 6) {		// IDEA
 		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Oval</option><option>Circle</option></select></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
@@ -187,11 +193,6 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
 	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
 	str+="</span></div>";	
-	if (shivaLib.player) {
-		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:220px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
-		str+="<img src='enddot.gif'   style='position:absolute;left:150px;top:220px' onclick='shivaLib.dr.SetVal(\"endTime\")'/>";
-		str+="<p id='startEndTime' align='center' style='position:absolute;left:40px;top:214px;width:108px;color:#777'/>";
-		}
 	$("#shivaDrawPaletteDiv").html(str);	
 	$("#shivaDrawPaletteDiv").css("font-size","xx-small");	
 	$("#sdtb"+(this.curTool+1)).attr("checked","checked");					// Check current tool button
@@ -245,7 +246,6 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#restSize").slider("value",this.textSize); 							// Set edge width
 	$("#textAlign").val(this.textAlign); 									// Set text align
 	$("#imageURL").val(this.imageURL); 										// Set image url
-	$("#startEndTime").text(this.startTime+" -> "+this.endTime);			// Set times
 	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
 	$("#ideaShape").val(this.ideaShape); 									// Set idea shape
 	$("#ideaBackCol").val(this.ideaBackCol); 								// Set idea back col
@@ -320,7 +320,7 @@ SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
 		for (j=0;j<o.x.length;++j)	{										// For each point
 			scol="#fff";													// Hollow marker
 			if ((this.selectedDot == j) && (col == "#ff0000"))				// If this is the selected dot
-				scol=col;													// Make it solid
+				scol=col;													// Make it solid		
 			shivaLib.g.DrawCircle(this.ctx,scol,1,o.x[j],o.y[j],4,col,1);	// Draw marker
 			}
 		}
@@ -340,8 +340,6 @@ SHIVA_Draw.prototype.AddDot=function(x,y,up) 							// ADD DOT
 		o.y=new Array();													// y
 		o.alpha=this.alpha;													// Alpha
 		o.curve=this.curve;													// Curved path?
-		if (shivaLib.player)												// If over a player
-			o.s=this.startTime,o.e=this.endTime;							// Set time
 		if (o.type < 3) {													// Line/Box/Cir
 			o.color=this.color;												// Set color from property menu
 			o.edgeColor=this.edgeColor;										// Edge color
@@ -402,14 +400,6 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 			val="#"+val;													// Add it
 		}
 	var num=this.curSeg;													// Get index
-	if ((prop == "startTime") || (prop == "endTime")) {						// If a time
-		var time=shivaLib.player.currentTime();								// Get time
-		val=Math.floor(time/60)+":";										// Mins
-		val+=Math.ceil(time%60);											// Secs
-		this[prop]=val;														// Set property
-		this.DrawMenu();													// Redraw menu
-		shivaLib.Sound("click");											// Click
-		}
 	this[prop]=val;															// Set property
 	if ((this.curTool < 3) && (num != -1)) {								// If in polygon, cir, or bar
 		this.segs[num].curve=this.curve;									// Set prop
@@ -456,10 +446,6 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 				this.segs[num].edgeWidth=this.edgeWidth;					// from 
 				this.segs[num].alpha=this.alpha;							// each
 				this.segs[num].imageURL=this.imageURL;						// property
-				}
-			if (shivaLib.player) {											// If over a player
-				this.segs[num].s=this.startTime;							// Set start
-				this.segs[num].e=this.endTime;								// Set end
 				}
 			}
 		this.DrawOverlay();													// Draw segments
@@ -794,8 +780,6 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 			}
 		this.selectedItems.push(seg);										// Add seg to selects
 		this.alpha=o.alpha;													// Everyone has alpha
-		this.startTime=o.s;													// Everyone has start
-		this.endTime=o.e;													// Everyone has end
 		this.curve=o.curve;													// Everyone has curce
 		if (o.type < 3)	{													// Line, cir, box	
 			this.arrow=o.arrow;												
@@ -883,8 +867,6 @@ SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE
 		o.ideaLeft=this.segs[num].ideaLeft+off;								// Same x
 		o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32+off);	// Put under parent
 		}
-	if (shivaLib.player)													// If over a player
-		o.s=this.startTime,o.e=this.endTime;								// Set time
 	num=this.selectedItems[0]=this.segs.length;;							// Set select
 	this.segs.push(o);														// Add idea
 	shivaLib.Sound("ding");													// Ding sound

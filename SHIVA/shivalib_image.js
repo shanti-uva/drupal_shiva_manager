@@ -80,16 +80,21 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			this.AnimateDiv("start");														// Draw image at start pos
 		if ((options.autoplay == "true") && (!$("#accord").length))							// If autoplay in go.htm
 			$("#"+this.container+"PlyBut").trigger("click");								// Trigger play								
+		this.SendReadyMessage(true);														// Send ready messge										
 		}
 		
  	  function GetSpreadsheetData(url, imgHgt, showImage, showSlide, trans, wid) {			// GET DATA FROM SPREADSHEET
 
 		shivaLib.GetSpreadsheet(url,false,null,function(data) {								// Get spreadsheet data
   	     	AddImages(data,imgHgt,showImage,showSlide,trans,wid);							// Add images to gallery
-		 	shivaLib.SendReadyMessage(true);												// Sedn ready message
+		 	shivaLib.SendReadyMessage(true);												// Send ready message
   	    	});
  		}
 
+  
+  http://127.0.0.1:8020/SHIVA/go.htm?shivaGroup=Poster&item-1=name:Pane-1;data:250|437|285;url:599;asp:654;layerTitle:Montage;scrollbars:false;caption:Montage%20-%20Demo;style:border`3px%20solid%20white&item-2=name:Pane-2;data:250|438|621;asp:1000;url:610;layerTitle:Network;scrollbars:false;caption:Network%20-%20Demo;style:border`3px%20solid%20white&item-3=name:Pane-3;data:272|720|284;asp:610;url:500;layerTitle:Video%20-%20Demo;scrollbars:false;caption:Video%20-%20Demo;style:border`3px%20solid%20white&item-4=name:Pane-4;asp:764;data:356|761|588;url:586;layerTitle:Timeline%20-%20Demo;scrollbars:false;caption:Timeline%20-%20Demo;style:border`3px%20solid%20white&pos=1000|500|500&eva=&height=900&width=1400&backCol=fffcf2&dataSourceUrl=https://lh6.googleusercontent.com/-O-8_RgU9WCU/UoYskYStOyI/AAAAAAAAL_0/gwopG2GnaLo/w1440-h900-no/Creative-Sanford-Background-300.png&overview=true&grid=false&controlbox=false&ud=false
+   
+  
    	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)				// ADD IMAGES TO GALLERY
  	{
 		var str="<div id='gallery' class='ad-gallery'>"

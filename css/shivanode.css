@@ -102,6 +102,19 @@ div.sn-share-button img {
 	text-decoration: none;
 }
 
+.sf-menu li.menuparent li a {
+	width: 90%;
+}
+
+.sf-menu li.menuparent li.menuparent span.sf-sub-indicator { margin-left: 150px; }
+
+.sf-menu li.menuparent li.menuparent ul { 
+	border: 1px solid #4F6975;
+  margin-left: -35px !important;
+  margin-top: -20px !important;
+  padding-top: 10px !important;
+}
+
 /** CSS for SHARE page Tabs **/
 #sharetabs {
 	font-size:90%;
@@ -417,13 +430,13 @@ ul.shivanode-spreadsheets li * {
 div.shiva-teaser {
 	position: relative;
 	float: left;
-	margin: 4px;
+	margin: 6px;
 	padding: 4px;
 	box-shadow: 4px 6px 6px #aaa;
 }
 
 div.shiva-teaser .shiva-teaser-title {
-	width: 220px;
+	width: 150px;
 	white-space: nowrap;
 	overflow: hidden;
 }
@@ -441,9 +454,9 @@ div.shiva-teaser:hover .shiva-teaser-image {
 
 div.shiva-teaser .info-wrapper {
 	position: relative;
-	margin-top: -245px;
-	width: 225px;
-	height: 250px;
+	margin-top: -170px;
+	width: 155px;
+	height: 170px;
 	opacity: 0;
 	transition: opacity .25s ease-in-out;
 	-moz-transition: opacity .25s ease-in-out;
@@ -454,7 +467,9 @@ div.shiva-teaser .info-wrapper {
 
 div.shiva-teaser .info {
 	position: relative;
-	top: 80px;
+	top: 25%;
+	width: 80%;
+	left: 10%;
 	text-align: center;
 	opacity: 0;	
 	transition: opacity .25s ease-in-out;
@@ -471,8 +486,11 @@ div.shiva-teaser:hover .info {
 	opacity: 1;
 }
 
-div.shiva-teaser .info a:hover, div.shiva-teaser .info a:visited {
+div.shiva-teaser .info a {
 	color: white;
+}
+
+div.shiva-teaser .info a:hover, div.shiva-teaser .info a:visited {
 	text-decoration: underline;
 }
 
