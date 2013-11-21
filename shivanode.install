@@ -927,11 +927,11 @@ function shivanode_update_7005() {
 }
 
 /**
- *   Add a custom field to shivanode content type for visualization subtypes. Populate with chartType value from JSON when available.
+ *   Add a custom field to shivanode content type for visualization subtypes. Admin will need to batch save all existing shivanodes to populate this field.
  */
 function shivanode_update_7006() {
-  $t = get_t();
   if(!field_read_field('shivanode_subtype')) {
+    $t = get_t();
     $sn_subtype_field = array(
       'field_name'  => 'shivanode_subtype',
       'type' => 'text',
@@ -949,24 +949,5 @@ function shivanode_update_7006() {
       ),
     );
     field_create_instance($sn_subtype_instance);
-    
-    $query = db_select( 'node', 'n' );
-    $query->condition( 'n.type', 'shivanode' )->fields('n', array('nid', 'title'));
-    $result = $query->execute();
-    $n=0;
-    foreach( $result as $row ) {
-      $node = node_load($row->nid);
-      $json = $node->shivanode_json[LANGUAGE_NONE][0]['value'];
-      $json = json_decode($json);
-      if(isset($json->chartType)) {
-        $stype = $json->chartType;
-        $stype = preg_replace('/([A-Z])/',' $1', $stype); // Add a space before each capital letter because spaces are stripped out.
-        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
-        node_save($node);
-        $n++;
-      }
-    }
-    
-    return t('Subtype field has been added to Shivanode. @n nodes had that field automatically populated from JSON.', array('@n' => $n));
   }
 }

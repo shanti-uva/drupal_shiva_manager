@@ -516,8 +516,11 @@ function shivanode_node_update($node) {
     if($json && isset($json->chartType)) {
       $stype = $json->chartType;
       $stype = preg_replace('/([A-Z])/',' $1', $stype); // Add a space before each capital letter because spaces are stripped out.
-      $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
-      node_save($node);
+      if($stype != $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] ) {
+        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
+        node_save($node);
+        drupal_set_message(t('Updated shivanode subtype to @type', array('@type' => $stype)));
+      }
     }
   }
 }
