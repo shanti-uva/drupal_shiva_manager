@@ -33,6 +33,10 @@ function _shivanode_installed_fields() {
         'allowed_values_function' => '_shivanode_element_typelist',
       ),
     ),
+    'shivanode_subtype' => array(
+      'field_name'  => 'shivanode_subtype',
+      'type' => 'text',
+    ),
     'shivanode_access' => array(
       'field_name'  => 'shivanode_access',
       'type' => 'list_integer',
@@ -119,6 +123,14 @@ function _shivanode_installed_instances() {
           'default_value' => 7,
         ),
         'weight' => 10,
+      ),
+    ),
+    'shivanode_subtype' => array(
+      'field_name'  => 'shivanode_subtype',
+      'label'  => $t('Visualization Subtype'),
+      'required' => 0,
+      'widget' => array(
+        'type' => 'text',
       ),
     ),
     'shivanode_access' => array(

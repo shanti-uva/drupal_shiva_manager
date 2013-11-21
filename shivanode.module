@@ -509,7 +509,16 @@ function shivanode_node_update($node) {
           _shivanode_add_data_correspondence($node); 
         }
       }
-    } 
+    }
+    
+    /** Add or adjust subtype field **/
+    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
+    if($json && isset($json->chartType)) {
+      $stype = $json->chartType;
+      $stype = preg_replace('/([A-Z])/',' $1', $stype); // Add a space before each capital letter because spaces are stripped out.
+      $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
+      node_save($node);
+    }
   }
 }
 
@@ -1169,7 +1178,19 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        'onmousedown' => 'alert("You cannot change the type of an existing Shiva Visualization. \nPlease use the Create Visualization link to create a new Visualization instead.");',
     );
   }
-
+  
+  // Subtype field. Disable field change as it is set automatically
+  if(isset($form['shivanode_subtype'])) {
+    $form['shivanode_subtype']['#disabled'] = TRUE;
+    $form['shivanode_subtype'][LANGUAGE_NONE][0]['value']['#description'] = t('This field is automatically populated by the chart type chosen in the form above and will be updated upon saving.');
+    
+    // Don't even show to non-administrators
+    if(!user_access('access shivanode view settings')) {
+       $form['shivanode_subtype'][LANGUAGE_NONE][0]['#prefix'] = '<div style="display: none;">';
+       $form['shivanode_subtype'][LANGUAGE_NONE][0]['#suffix'] = '</div>';
+    }
+  }
+  
   // Permission Value (calls JS to enforce only Public and Private)
   $form['shivanode_access']['und'] += array(
     '#attributes' => array('onchange' => 'Drupal.Shivanode.checkPermissionsValue(jQuery(this).val());'),
