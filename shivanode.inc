@@ -1227,11 +1227,11 @@ function _shivanode_data_page($type=FALSE, $ctype=FALSE) {
                     array('@type' => $sntypelabel)),
   );
   
-  $link = shivanode_get_help_link($sntypelabel, 'link');
+  $link = _shivanode_get_help_link($sntypelabel, t('@type visualization type',  array('@type' => $sntypelabel)));
   if ($link != '') {
     $markup['help'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('For a description of how to format a spreadsheet, see the documentation for ') . $link . '.</p>',
+      '#markup' => '<p>' . t('For a description of how to format a spreadsheet, see the documentation for the ') . $link . '.</p>',
     );
   }
   
@@ -2858,6 +2858,63 @@ function _shivanode_add_ms_metafix() {
 }
 
 /**
+ * Function get Help link
+ *    Returns the html link code for the help page depending on the shivanode type value sent to function
+ */
+function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
+  global $base_root, $base_path;
+  $helpurls = array(
+      'SHIVA' => 'https://wiki.shanti.virginia.edu/display/KB/SHIVA',
+      'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
+      'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+      'Bar Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+      'Candlestick Chart' => 'https://wiki.shanti.virginia.edu/x/MgLLAQ',
+      'Chart' => 'https://wiki.shanti.virginia.edu/x/N5y1AQ',
+      'Column Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
+      'Combo Chart' => 'https://wiki.shanti.virginia.edu/x/WQLLAQ',
+      'Gauge' => 'https://wiki.shanti.virginia.edu/x/EADLAQ',
+      'Geo Chart' => 'https://wiki.shanti.virginia.edu/x/XALLAQ',
+      'Line Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
+      'Motion Chart' => 'https://wiki.shanti.virginia.edu/x/fgLLAQ',
+      'Org Chart' => 'https://wiki.shanti.virginia.edu/x/dQDAAQ',
+      'Pie Chart' => 'https://wiki.shanti.virginia.edu/x/ZQHLAQ',
+      'Scatter Chart' => 'https://wiki.shanti.virginia.edu/x/ZgDGAQ',
+      'Table' => 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
+      'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
+      'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
+      'Earth' => 'https://wiki.shanti.virginia.edu/x/J5XRAQ',
+      'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
+      'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
+      'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
+      'Poster' => '',
+      'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
+      'Timeline' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
+      'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
+      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ',
+      'Word Cloud' => ''
+  );
+  
+  $helpStr = 'SHIVA'; 
+  if (is_numeric($typeVal)) { 
+     $helpStr = _shivanode_options_list($typeVal);
+    if ($helpStr == 'Chart') { $helpStr = 'Pie Chart'; }
+    if ($helpStr == 'Wcloud') { $helpStr = 'Word Cloud'; }
+  } else {
+    $helpStr = $typeVal;
+  }
+  if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
+    return '';
+  } else {
+    if($linkStr) {
+      return '<a href="' . $helpurls[$helpStr] . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';
+    } else { 
+      return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ><img src="' . 
+                $base_root . '/' .  drupal_get_path('module','shivanode') . '/images/help-bluer-3d-16px.png" /></a>';
+    }
+  }
+}
+
+/**
  * _shivanode_get_generic_image_info($type): 
  *    A function that returns the variable name for the generic image of a certain type of visualization
  *    These Drupal variables contain the FID for the generic thumbnail for that type of visualization
@@ -2890,6 +2947,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
     'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
     'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
+    'poster' => array('label' => t('Subway'), 'variable' =>  'sngen-subway'),  
     'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
     'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
     'word cloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),

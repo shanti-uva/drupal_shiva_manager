@@ -1333,7 +1333,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        l(t("here"), $iframeUrl, array('attributes' => array('target' => '_blank'))) . '.</p>':'';
 
   $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
-        $sntype . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        $sntype . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" style="overflow: auto;" frameborder="0" onmouseout="Drupal.Shivanode.getJSON();"> </iframe></fieldset>' .
@@ -1373,68 +1373,12 @@ function shivanode_element_change($form, $form_state) {
   $typeStr = _shivanode_options_list($typeVal);
   $iframeUrl = _get_shivaframe_url($typeVal);
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
-        $typeStr  . shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        $typeStr  . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .
         '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
   return $iframe;
-}
-
-/**
- * Function get Help link
- *    Returns the html link code for the help page depending on the shivanode type value sent to function
- */
-function shivanode_get_help_link($typeVal = 7, $style='icon') {
-  global $base_root, $base_path;
-  $helpurls = array(
-      'SHIVA' => 'https://wiki.shanti.virginia.edu/display/KB/SHIVA',
-      'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
-      'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
-      'Bar Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
-      'Candlestick Chart' => 'https://wiki.shanti.virginia.edu/x/MgLLAQ',
-      'Column Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
-      'Combo Chart' => 'https://wiki.shanti.virginia.edu/x/WQLLAQ',
-      'Gauge' => 'https://wiki.shanti.virginia.edu/x/EADLAQ',
-      'Geo Chart' => 'https://wiki.shanti.virginia.edu/x/XALLAQ',
-      'Line Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
-      'Motion Chart' => 'https://wiki.shanti.virginia.edu/x/fgLLAQ',
-      'Org Chart' => 'https://wiki.shanti.virginia.edu/x/dQDAAQ',
-      'Pie Chart' => 'https://wiki.shanti.virginia.edu/x/ZQHLAQ',
-      'Scatter Chart' => 'https://wiki.shanti.virginia.edu/x/ZgDGAQ',
-      'Table' => 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
-      'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
-      'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
-      'Earth' => 'https://wiki.shanti.virginia.edu/x/J5XRAQ',
-      'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
-      'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
-      'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
-      'Poster' => '',
-      'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
-      'Timeline' => 'https://wiki.shanti.virginia.edu/x/tZy1AQ',
-      'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
-      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ',
-      'Word Cloud' => ''
-  );
-  
-  $helpStr = 'SHIVA'; 
-  if (is_numeric($typeVal)) { 
-     $helpStr = _shivanode_options_list($typeVal);
-    if ($helpStr == 'Chart') { $helpStr = 'Pie Chart'; }
-    if ($helpStr == 'Wcloud') { $helpStr = 'Word Cloud'; }
-  } elseif (is_string($typeVal) & $typeVal != '') {
-    $helpStr = $typeVal;
-  }
-  if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
-    return '';
-  } else {
-    if($style == 'link') {
-      return '<a href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" >' . $helpStr . '</a>';
-    } else { 
-      return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ><img src="' . 
-                $base_root . '/' .  drupal_get_path('module','shivanode') . '/images/help-bluer-3d-16px.png" /></a>';
-    }
-  }
 }
 
 /*
