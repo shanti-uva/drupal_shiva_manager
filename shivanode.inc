@@ -2947,7 +2947,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
     'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
     'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
-    'poster' => array('label' => t('Subway'), 'variable' =>  'sngen-subway'),  
+    'subway' => array('label' => t('Subway'), 'variable' =>  'sngen-subway'),  
     'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
     'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
     'word cloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),
