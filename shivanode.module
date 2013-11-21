@@ -519,7 +519,6 @@ function shivanode_node_update($node) {
       if($stype != $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] ) {
         $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
         node_save($node);
-        drupal_set_message(t('Updated shivanode subtype to @type', array('@type' => $stype)));
       }
     }
   }
