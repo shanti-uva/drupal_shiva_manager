@@ -35,7 +35,18 @@ function _shivanode_installed_fields() {
     ),
     'shivanode_subtype' => array(
       'field_name'  => 'shivanode_subtype',
-      'type' => 'text',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_subtypelist',
+      ),
     ),
     'shivanode_access' => array(
       'field_name'  => 'shivanode_access',
@@ -129,8 +140,21 @@ function _shivanode_installed_instances() {
       'field_name'  => 'shivanode_subtype',
       'label'  => $t('Visualization Subtype'),
       'required' => 0,
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'module' => 'list',
+          'type' => 'list_default',
+        ),
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 1,
+      ),
       'widget' => array(
-        'type' => 'text',
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
       ),
     ),
     'shivanode_access' => array(
@@ -252,6 +276,53 @@ function _shivanode_element_typelist($byName = FALSE) {
     $options = array_flip($options); // What about when localized in a different language? Will this still work?
   }
   return $options;
+}
+
+/** 
+ * Returns list of subtypes for all visualization. Initial array each item has a label (1) and then it's json value (2)
+ * A call without parameters returns an array of labels, _shivanode_subtypelist('json') returns an array of json values, and
+ * _shivanode_subtypelist('index', 'rgraph') will return the index for the second item. Search value can be either label or json val.
+ */
+function _shivanode_subtypelist($type='label', $search=FALSE) {
+  $types = array('label', 'json', 'index');
+  $typeval = array_search($type, $types);
+  $options = array(
+    1 => array(t('Annotated Timeline'), 'AnnotatedTimeLine'),
+    2 => array(t('Area Chart'), 'AreaChart'),
+    3 => array(t('Bar Chart'), 'BarChart'),
+    4 => array(t('Candlestick Chart'), 'CandlestickChart'),
+    5 => array(t('Column Chart'), 'ColumnChart'),
+    6 => array(t('Gauge'), 'Gauge'),
+    7 => array(t('Geo Chart'), 'GeoChart'),
+    8 => array(t('Line Chart'), 'LineChart'),
+    9 => array(t('Motion Chart'), 'MotionChart'),
+    10 => array(t('Organization Chart'), 'OrgChart'),
+    11 => array(t('Pie Chart'), 'PieChart'),
+    12 => array(t('Scatter Chart'), 'ScatterChart'),
+    13 => array(t('Table'), 'Table'),
+    14 => array(t('Tree Map'), 'TreeMap'),
+    15 => array(t('Radial Graph'), 'rgraph'),
+    16 => array(t('Forced Directed'), 'forcedir'),
+    17 => array(t('Hyper Tree'), 'hypertree'),
+    18 => array(t('Slideshow'), 'Slideshow'),
+    19 => array(t('Image Montage'), 'Montage'),
+    20 => array(t('Zoomable Image'), 'Zoomable'),
+    21 => array(t('Combo Chart'), 'ComboChart'),
+  );
+  if($type == 'index') {
+    if(!$search) { return FALSE; } // If no search string, no match
+    foreach($options as $key => $value) {
+      if($value[0] == $search || $value[1] == $search) {
+        return $key;
+      }
+    }
+    return FALSE;  // no match
+  } else {
+    foreach($options as $key => &$value) {
+      $value = $value[$typeval];
+    }
+    return $options; // return "filtered" options
+  }
 }
 
 /**

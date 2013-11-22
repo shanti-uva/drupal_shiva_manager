@@ -342,6 +342,9 @@ function shivanode_permission() {
     'access shivanode view json' => array(
       'title' => t('Show the JSON text in uneditable div when editing node.'),
     ),
+    'access shivanode view subtype' => array(
+      'title' => t('Show the uneditable subtype field in Shivanode create/edit form.'),
+    ),
   ); 
 }
 
@@ -510,17 +513,6 @@ function shivanode_node_update($node) {
         }
       }
     }
-    
-    /** Add or adjust subtype field **/
-    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
-    if($json && isset($json->chartType)) {
-      $stype = $json->chartType;
-      $stype = preg_replace('/([A-Z])/',' $1', $stype); // Add a space before each capital letter because spaces are stripped out.
-      if($stype != $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] ) {
-        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stype;
-        node_save($node);
-      }
-    }
   }
 }
 
@@ -529,7 +521,7 @@ function shivanode_node_update($node) {
  *    Generic thumbnails are set in shivanode.install 7005 and shivanode.inc
  */
 function shivanode_node_presave($node) {
-  if($node->type == 'shivanode') { 
+  if($node->type == 'shivanode') {
     $lang = (isset($node->language)) ? $node->language : 'und';
     if(!isset($node->field_image[$lang][0])) {
       $type = strtolower(_get_shivanode_type($node));
@@ -542,6 +534,17 @@ function shivanode_node_presave($node) {
       }
       if($fid = _shivanode_get_generic_image_info($type)) {
         $node->field_image[$lang][0]['fid'] = $fid;
+      }
+    }
+    /** Add or adjust subtype field **/
+    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
+    if($json && isset($json->chartType)) {
+      $stype = $json->chartType;
+      $stind = _shivanode_subtypelist('index', $stype);
+      if(!$stind || $stind == '') {
+        drupal_set_message(t("Not subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
+      } else {
+        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
       }
     }
   }
@@ -1078,6 +1081,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
   $ctype = FALSE; // Chart type variable
   // if the node with the form does not have an nid, we are creating a new shivanode node. Set variables accordingly
+  $ptitle = '';
   if(!isset($form['#node']->nid)) {
     $is_new_el = TRUE;
     $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;
@@ -1103,10 +1107,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       drupal_goto($url);
     } 
     $submitVal = t('Save');
+    $ptitle = t('Create a @type', array('@type' => $sntype));
+  } else {
+    $ptitle = t('Edit Shivanode: @title', array('@title'=> $form['#node']->title));
   }
   if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
-  drupal_set_title(t('Create a @type', array('@type' => $sntype)));
+  
+  drupal_set_title($ptitle);
   
   // Make a json object from json string if set, otherwise set jobj to FALSE
   $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
@@ -1184,12 +1192,12 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // Subtype field. Disable field change as it is set automatically
   if(isset($form['shivanode_subtype'])) {
     $form['shivanode_subtype']['#disabled'] = TRUE;
-    $form['shivanode_subtype'][LANGUAGE_NONE][0]['value']['#description'] = t('This field is automatically populated by the chart type chosen in the form above and will be updated upon saving.');
+    $form['shivanode_subtype'][LANGUAGE_NONE]['#description'] = t('This field is automatically populated by the subtype chosen in the form above and will be updated upon saving.');
     
     // Don't even show to non-administrators
-    if(!user_access('access shivanode view settings')) {
-       $form['shivanode_subtype'][LANGUAGE_NONE][0]['#prefix'] = '<div style="display: none;">';
-       $form['shivanode_subtype'][LANGUAGE_NONE][0]['#suffix'] = '</div>';
+    if(!user_access('access shivanode view subtype')) {
+       $form['shivanode_subtype'][LANGUAGE_NONE]['#prefix'] = '<div style="display: none;">';
+       $form['shivanode_subtype'][LANGUAGE_NONE]['#suffix'] = '</div>';
     }
   }
   

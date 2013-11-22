@@ -931,23 +931,49 @@ function shivanode_update_7005() {
  */
 function shivanode_update_7006() {
   if(!field_read_field('shivanode_subtype')) {
-    $t = get_t();
-    $sn_subtype_field = array(
-      'field_name'  => 'shivanode_subtype',
-      'type' => 'text',
-    );
-    field_create_field($sn_subtype_field);
     
-    $sn_subtype_instance = array(
+    module_load_include('inc', 'shivanode'); // load shivanode.inc for _shivanode_get_generic_image_info() function
+    $t = get_t();
+    $stype_field = array(
+      'field_name'  => 'shivanode_subtype',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_subtypelist',
+      ),
+    );
+    field_create_field($stype_field);
+    
+    $stype_instance = array(
       'field_name'  => 'shivanode_subtype',
       'label'  => $t('Visualization Subtype'),
       'required' => 0,
       'entity_type' => 'node',
       'bundle' => 'shivanode',
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'module' => 'list',
+          'type' => 'list_default',
+        ),
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 1,
+      ),
       'widget' => array(
-        'type' => 'text',
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
       ),
     );
-    field_create_instance($sn_subtype_instance);
+    field_create_instance($stype_instance);
   }
 }
