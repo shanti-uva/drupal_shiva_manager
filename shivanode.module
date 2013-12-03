@@ -1086,7 +1086,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $is_new_el = TRUE;
     $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;
     $arg2  = (count(arg()) > 4) ? arg(4) : FALSE;
-    if($arg1) { 
+    if($arg1) {
+      if($arg1 == 'nd') { $nodata = TRUE; } 
       $did = (is_numeric($arg1)) ? $arg1 : FALSE;
       if($arg2) { 
         $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
