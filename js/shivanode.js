@@ -26,7 +26,7 @@
 			
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
-				console.info("took interval out here");
+				//console.info("took interval out here");
 			 /* setTimeout(function() {
 			    setInterval(function() { 
 		            Drupal.Shivanode.ShivaMessage('shivaEditFrame','GetJSON'); 
@@ -459,7 +459,6 @@
 		
 		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it if editing
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
-			console.info("ready message received");
 			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 

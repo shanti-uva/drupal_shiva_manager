@@ -182,6 +182,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         dateTime=Date.parse(dt)+50000000;
         dt = new Date(dateTime);
       }*/
+      if (typeof(dt) == "undefined" || dt == null) { return ''; }
       var mn = padZero(dt.getMonth() + 1);
       var dy = padZero(dt.getDate());
       var hrs = padZero(dt.getHours());
