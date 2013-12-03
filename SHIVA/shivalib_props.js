@@ -42,7 +42,7 @@ SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SA
 			if (!this.overlay)
 				str=str.substring(0,str.length-3)+"\",\n";	
 				}
-			if (this.overlay)
+			if (this.overlay && this.dr)
 				str+=this.dr.SaveDrawData(true);
 			if (this.ev && this.ev.events.length) {
 				var group=this.options.shivaGroup;

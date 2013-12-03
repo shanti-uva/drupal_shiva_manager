@@ -39,6 +39,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	{
 		var i;
 		var dd=container+"Stp";
+		$(con).height(40);
 		var str="<span id='"+dd+"'>";
 		for (i=0;i<items.length;++i) { 
 			str+="<input type='radio' id='stp"+i+"' name='stepper'"; 
@@ -59,37 +60,47 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 
 	function DrawTimeSlider(items)											// TIMESLIDER
 	{
+		var hgt=40,wid=40;
 		var dd=con+"Int";														// Id of slider
 		$(dd).remove();															// Remove old one, if there
 		$(con).append("<div id='"+dd.substr(1)+"'/>");							// Add slider div
-		$(con).css( { height:null,width:null } );								// Scale according to content size
 		options.orientation=options.orientation.toLowerCase();					// Force l/c
 		options.step-=0;	options.max-=0;		options.min-=0;					// Force as numbers
-		if (options.orientation == "vertical") 									// If vertical
-			$(dd).css("height",options.size+"px");								// Set height
-		else																	// Horizontal
-			$(dd).css("width",options.size+"px");								// Set width
-		if (options.type == "Bar")
-			options.range="min";
-		else if (options.type == "Range")
-			options.range=true;
-		if ((!options.def) && (options.type == "Range"))
-			options.def="25,75";
-		if (options.def.indexOf(",") == -1)
-			options.value=Number(options.def);
-		else{
-			options.values=new Array();
-			options.values[0]=Number(options.def.split(",")[0]);
-			options.values[1]=Number(options.def.split(",")[1]);
-			}	
-		if (!$('#sliderBack').length) {
-			var mc=document.createElement('canvas'); 
-			mc.setAttribute('id','sliderBack'); 
-			$(dd).append(mc)
-			sliderContext=mc.getContext('2d');
+		if (options.orientation == "vertical") {								// If vertical
+			$(dd).css("height","100%");											// Set slider height
+			hgt=$(con).height();												// Set con height
+			if (shivaLib.options.height)										// If height set by go.htm
+				hgt=shivaLib.options.height;									// Use it
 			}
-		$(dd).slider("destroy");
-		$(dd).slider(options);													// Set slider
+		else{																	// Horizontal
+			$(dd).css("width","100%");											// Set slider width
+			wid=$(con).width();													// Set con width
+			if (shivaLib.options.width)											// If width set by go.htm
+				wid=shivaLib.options.width;										// Use it
+			}
+		$(con).width(wid);														// Resize container
+		$(con).height(hgt);														// Resize container
+		if (options.type == "Bar")												// If a bar
+			options.range="min";												// Set to min
+		else if (options.type == "Range")										// If a dula slider
+			options.range=true;													// Set range
+		if ((!options.def) && (options.type == "Range"))						// If no def set for range
+			options.def="25,75";												// Set def
+		if (options.def.indexOf(",") == -1)										// If not a range
+			options.value=Number(options.def);									// Set single def
+		else{																	// A range
+			options.values=new Array();											// Alloc array
+			options.values[0]=Number(options.def.split(",")[0]);				// Add min
+			options.values[1]=Number(options.def.split(",")[1]);				// Add max
+			}	
+		if (!$('#sliderBack').length) {											// If no back yet
+			var mc=document.createElement('canvas'); 							// Create canvas
+			mc.setAttribute('id','sliderBack'); 								// Set id
+			$(dd).append(mc)													// Add to DOM
+			sliderContext=mc.getContext('2d');									// Get draw context
+			}
+		$(dd).slider("destroy");												// Kill old slider
+		$(dd).slider(options);													// Set new slider
 
 		$(dd).bind("slidestop", function(e, ui) { 								// On slide stop
 			var which=-1;														// Assume 1st
@@ -101,6 +112,18 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				val=ui.values[1];												// Use 2nd val
 				}
 			shivaLib.SendShivaMessage("ShivaSlider=click",(which+1)+"|"+val);	// Send message
+ 			});
+
+		$(dd).bind("slide", function(e, ui) { 									// On slide
+			var which=-1;														// Assume 1st
+			var val=ui.value;													// Get value
+			if (ui.values)														// If a range
+				val=ui.values[0];												// Get 1st slider value
+			if (ui.value != val) {												// If second slider
+				which=0;														// Set name
+				val=ui.values[1];												// Use 2nd val
+				}
+			shivaLib.SendShivaMessage("ShivaSlider=move",(which+1)+"|"+val);	// Send message
  			});
 		DrawSliderTicks();
 	}
@@ -117,15 +140,16 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		var max=Number(options.max);
 		var isVert=(options.orientation == "vertical");
 		if (isVert)
-			hgt=options.size;
+			hgt=$(con).height();
 		else
-			wid=options.size;
+			wid=$(con).width();
 		$('#sliderBack').attr('width',wid);
 		$('#sliderBack').attr('height',hgt);
-		var inc=Number(options.size/(n+1));
+		var inc=Number(Math.max(hgt,wid)/(n+1));
 		var pos=inc;
 		var tinc=Math.abs(max-min)/(n+1);
 		var tpos=tinc;
+		sliderContext.fillStyle=options.textCol;
 		if (!isVert)
 			sliderContext.textAlign="center";
 		for (i=0;i<n;++i) {
@@ -143,7 +167,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 					}
 				val=Number(val)+min;
 				if (isVert)
-					sliderContext.fillText(val,18,Number(options.size)-pos+3);
+					sliderContext.fillText(val,18,Number(hgt)-pos+3);
 				else	
 					sliderContext.fillText(val,pos,25);
 				}
@@ -171,6 +195,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		var i,o,nChars=0;
 		var dd=container+"Sel";
 		var str="<span id='"+dd+"'>";
+		$(con).height(40);
 		for (i=0;i<items.length;++i) { 
 			o=items[i];
 			nChars+=o.label.length+5;
@@ -225,6 +250,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
     		if (v == "false") 	v=false;
 			options[o]=v;
 			}
+		
+		$(con).width(options.width)
 		if ((options.draggable) && (!_this.editMode))
 			$(dd).draggable();
 		if (options.title)		
@@ -356,8 +383,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$(dd).css("height",options.height+"px");
 			$(content).css("height",options.height-min+"px");
 			}
-		if ((options.draggable) && (!_this.editMode))
-			$(dd).draggable();
 		if ((options.text) && (options.style == "Text"))				
 			$(content).html(options.text);
 		if (options.scroller)  			$(content).css("overflow","scroll").css("overflow-x","hidden"); 
@@ -420,6 +445,14 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	}
 
 
-SHIVA_Show.prototype.ControlActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+SHIVA_Show.prototype.ControlActions=function(msg)					// REACT TO SHIVA ACTION MESSAGE
 {
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaAct=resize") { 									// RESIZE
+		if (v[1] == "100") {											// If forcing 100%
+			$("#containerDiv").width("100%");							// Set container 100%
+			$("#containerDiv").height("100%");							// Set container 100%
+			}
+		shivaLib.DrawControl();											// Redraw control
+		}
 }

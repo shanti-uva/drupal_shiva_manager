@@ -67,7 +67,9 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();
-   else if (group == 'WordCloud')
+	else if (group == 'HTML')
+		this.DrawHTML();
+   	else if (group == 'WordCloud')
         this.DrawWordCloud();
   	else if (group == 'Poster')
         this.DrawPoster();
@@ -162,6 +164,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
+	if (this.options.height && this.options.width)							// If height and width defined
+		asp=this.options.height/this.options.width;							// Calc asp
 	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
 }
 
@@ -214,6 +218,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.WordActions(e.data);									// Route
 		else if (shivaLib.options.shivaGroup == "Control")					// If an control action
 			shivaLib.ControlActions(e.data);								// Route
+		else if (shivaLib.options.shivaGroup == "HTML")						// If an HTML action
+			shivaLib.HTMLActions(e.data);									// Route
 		}
 }
 
@@ -560,6 +566,33 @@ SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATT
 	this.Sound("click");																	// Click
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	HTML
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_Show.prototype.DrawHTML=function() 												//	DRAW HTML
+{
+	$("#"+this.container).width("100%");													// Set width
+	$("#"+this.container).height("100%");													// Set height
+	var w=$("#"+this.container).width();													// Get true width
+	var sca=w/this.options.oWid;															// Get scale
+	$("#"+this.container).html(this.options.html.replace(/&quot;/g,"\""));					// Add to container
+	$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});
+	$("#"+this.container).css({"font-family":"Verdana,Geneva,sans-serif","font-size":"small","padding":"16px"});
+	this.SendReadyMessage(true);															// Send ready message									
+}
+
+SHIVA_Show.prototype.HTMLActions=function(msg)											// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");																	// Split msg into parts
+	if (v[0] == "ShivaAct=resize")  														// RESIZE
+		this.DrawHTML();																	// Redraw
+	else if (v[0] == "ShivaAct=data") {														// DATA
+		}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	WEBPAGE
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -877,6 +910,27 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 }
 
 
+SHIVA_Show.prototype.LinkToAnchor=function(str) 						// CONVERT LINKS TO ANCHORS
+{
+	var i,v,vv,url,title;
+	if (str.match(/href=/)) 												// If an embedded <a> tag
+		return str;															// Don't convert
+
+	if (str.match(/http/)) {												// If an embedded url
+		v=(str+" ").match(/http.?:\/\/.*?\s/ig);							// Extract url(s)
+		for (i=0;i<v.length;++i) {											// For each url
+			
+			v[i]=$.trim(v[i]);												// Trim it
+			vv=v[i].split("|");												// Split by bar
+			url=title=vv[0];												// Get url/title 
+			if (vv.length > 1) 												// If a title spec'd
+				title=vv[1].replace(/_/g," ");								// Get separate title and restore spaces
+			str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+url+"' target='_blank'>"+title+"</a> ");	// Replace with anchor tag
+			}
+		}
+	return str;																// Return converted string
+}
+
 SHIVA_Show.prototype.Clone=function(obj) 								// CLONE OBJECT/ARRAY
 {
     var i;
@@ -965,6 +1019,10 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			alert("Please type your email");								// Alert
 			return;															// Don't save
 			}						
+		if (!isNaN(email)) {												// If just a number
+			shivaLib.LoadEasyFile(email, callback);							// Load it directly
+			return;															// Quit
+			}	
 		document.cookie="ez-email="+email;									// Save email in cookie
 		var dat={ email:email };											// Set email to look for
 		if (type != "all")													// If not loading all
@@ -1047,6 +1105,17 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 				$("#containerDiv").height($("#containerDiv").height()*100);	// Restore it
 			});	
 		}
+}
+
+SHIVA_Show.prototype.LoadEasyFile=function(num, callback) 				// GET SINGLE EASYFILE 
+{
+	var str="http://www.primaryaccess.org/REST/geteasyfile.php";			// eStore url
+	shivaLib.ezcb=callback;													// Set callback
+	shivaLib.ezmode=num;	 												// Set ID
+	$.ajax({ url: str, data:{id:num}, dataType:'jsonp' });					// Get jsonp
+	$("#shivaLightBoxDiv").remove();										// Close lightbox
+	if ($("#containerDiv").height() < 10)									// If a shrunken frame (Earth kluge)
+		$("#containerDiv").height($("#containerDiv").height()*100);			// Restore it
 }
 
 function easyFileListWrapper(data)										// LOAD EASY FILE LIST

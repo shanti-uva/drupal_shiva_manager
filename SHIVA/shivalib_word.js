@@ -113,7 +113,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                     border : '5px solid #EEE',
                     backgroundColor : 'white',
                     overflow: 'scroll',
-                    padding: '5px',
+                    padding: '5px'
                 }
             }).hide());
             }

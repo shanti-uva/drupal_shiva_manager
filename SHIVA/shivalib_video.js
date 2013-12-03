@@ -100,9 +100,16 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	}
 
 	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
-		if (mode == "add") 													// If adding a new cue
+		if (mode == "add") {												// If adding a new cue
 			shivaLib.player.cue(time,callback);								// Add end cue
- 		}
+			shivaLib.player.numCues++;										// Add to count
+			}
+ 		else if (mode == "delete") {										// If removing them
+			for (var i=0;i<shivaLib.player.numCues;++i)						// For each cue
+ 				shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
+			shivaLib.player.numCues=0;										// Reset count
+			}
+  		}
 
 	this.VideoEvent=function(mode, type, callback) {						// SET VIDEO EENT
 		if (mode == "add") 													// If adding a new cue
@@ -112,21 +119,23 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		}
 		
 ////////////////////////// EVENTS ///////////////////////////////////////////////////
-
-	this.VideoEvent("add","timeupdate",drawOverlay);
-	this.VideoEvent("add","loadeddata",onVidLoaded);
-	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});
-	this.VideoEvent("add","playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});
-	this.VideoEvent("add","pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});
 	
-	if (this.ev) 
-		t=this.ev.events;
-	else
-		t=options["shivaEvents"];
-	this.ev=new SHIVA_Event(this);
-	if ((t) && (t.length))	
-		this.ev.AddEvents(t);
-	this.SendReadyMessage(true);											
+	if (this.ev) 															// If event lib is already loaded
+		t=this.ev.events;													// Get events from lib
+	else																	// Else
+		t=options["shivaEvents"];											// Get from options array
+	this.ev=new SHIVA_Event(this);											// Alloc event library
+	if ((t) && (t.length))	{												// If any events
+		this.ev.AddEvents(t);												// Add them
+		this.ev.HideAll(0);													// Hide boxes after load
+		}
+	this.SendReadyMessage(true);											// Ready										
+
+	this.VideoEvent("add","timeupdate",drawOverlay);						// Draw overlay when time changes
+	this.VideoEvent("add","loadeddata",onVidLoaded);						// Call when video is loaded
+	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});	// When video plays til end
+	this.VideoEvent("add","playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});	// When video starts to play
+	this.VideoEvent("add","pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});	// When video is paused
 
 ////////////////////////// CALBACKS ///////////////////////////////////////////////////
 
@@ -145,6 +154,8 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
    		setInterval(onVideoTimer,400);	
+ 		if (shivaLib.ev)
+ 			shivaLib.ev.DrawEventDots();										
    	}
 
   	function onVideoTimer(e) {										// VIDEO TIMER HANDLER

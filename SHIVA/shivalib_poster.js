@@ -258,8 +258,13 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
 			else if (this.items[i].caption) {											// If a caption
-				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+this.items[i].caption+"</b>";// Show it
+				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+shivaLib.LinkToAnchor(this.items[i].caption)+"</b>";// Show it
 				$("#posterPane"+i).append(str+"</div>");								// Add div
+				}
+			if ((this.posterMode != "Edit") && (this.items[i].drag == "true")) {		// If in draggable view
+				str="<div style='position:absolute;left:0px;top:0px;width:80%;height:20px;'>";	// Make overlay div for dragging
+				$("#posterPane"+i).append(str+"</div>");								// Add div
+				$("#posterPane"+i).draggable({ containment:"parent" });					// Make draggable		
 				}
 			}
 		$("#posterFrame-"+i).height(dh);												// Set iframe height
@@ -284,7 +289,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				win.postMessage("ShivaAct=resize","*");									// Send message to container
 				}
 			}
-		if (this.posterMode != "Edit")													// If viewing
+		if (this.posterMode != "Edit") 													// If viewing
 			continue;																	// No need for interaction
 
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
@@ -424,15 +429,16 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-//	trace(e.data)
+	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
 		if (v[1].match(/posterFrame-/)) 								// A frame ready
-			if (i=v[1].substr(12)) 										// Get id
+			if ((i=v[1].substr(12)) && (v.length > 2)){					// Get id
 				if (!shivaLib.items[i].asp[i]) {						// If not set
 					shivaLib.items[i].asp=v[2];							// Set it
 					$("#itemInput"+i+"-2").val(v[2]);					// Set props
 					}
+				}
 		}
 	v[0]=v[0].split("=")[1];											// Strip prefix
 	for (i=0;i<n;++i) {													// For each ondo

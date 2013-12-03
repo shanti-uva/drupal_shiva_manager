@@ -296,7 +296,7 @@
 			ReEdit($.parseJSON(e.data.substr(8)));
 		else if (e.data.indexOf("SetChartType=") == 0) {
 		  	$("select#chartType").val(e.data.substr(13));
-				SetAttributes(e.data.substr(13),true);
+			SetAttributes(e.data.substr(13),true);
 			}	
 	}
 

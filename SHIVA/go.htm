@@ -79,7 +79,7 @@
 			window.addEventListener("message",shivaEventHandler,false);		// Listen for HTML5 messages
 		else																// New style listener
 			window.attachEvent("message",shivaEventHandler);				// Listen for HTML5 messages
-		if (vars.length > 2)												// If all options set in query string
+		if (vars.length > 2) 												// If all options set in query string
 			shivaLib.Draw(options);											// Draw it
 		else if (query.indexOf("e=") != -1) 								// If data in eStore
 			$.getJSON("http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2)+"&callback=?");	// Get data from eStore
@@ -93,19 +93,15 @@
 	
 	function shivaDataWrapper(data)										// HANDLE GETJSON DATA FROM DRUPAL
 	{
-		if (resize){														// If resizing to 100%
-			if (data.width)  data.width="100%";								// Set width
-			if (data.height) data.height="100%";							// Set height
-			}
+		if (resize)															// If resizing to 100%
+			data.width=data.height="100%";									// Set width/height
 		shivaLib.Draw(data);												// Draw element
 	}
 
 	function easyFileDataWrapper(data)									// HANDLE GETJSON DATA FROM ESTORE
 	{
-		if (resize){														// If resizing to 100%
-			if (data.width)  data.width="100%";								// Set width
-			if (data.height) data.height="100%";							// Set height
-			}
+		if (resize)															// If resizing to 100%
+			data.width=data.height="100%";									// Set width/height
 		shivaLib.Draw(data);												// Draw element
 	}
 	

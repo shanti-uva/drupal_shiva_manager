@@ -8,6 +8,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="shivalib-min.js"></script>
+	<script type="text/javascript" src="shivalib_controls.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
@@ -64,8 +65,8 @@
 	var props={
 		Dialog:{
 			title: 						{	def:'', 			opt:'string',		 	 des:'Dialog title'}, 
-			draggable: 					{	def:'true', 		opt:'true|false',		 des:'Draggable?'}, 
 			modal: 						{	def:'false', 		opt:'true|false',		 des:'Modal?'}, 
+			width: 						{	def:'auto', 		opt:'string',		 	 des:'Width'}, 
 			item: 						{	def:' ', 			opt:' |',		 		 des:'<b>Choose item to edit</b>'}, 
 			label: 						{	def:'', 			opt:'string',		 	 des:'Item label'}, 
 			type:						{	def:'Checkbox', 	opt:'Button|Checkbox|Combo|Image|Input|Line|Radio|Range|Text', des: 'Item type'},
@@ -81,13 +82,13 @@
 			min: 						{	def:'0', 			opt:'number',			 des:'Minimum value'},
 			max: 						{	def:'100', 			opt:'number',			 des:'Maximum value'},
 			orientation: 				{	def:'Horizontal', 	opt:'Horizontal|Vertical',des:'Orientation'},
-			size: 						{	def:'300', 			opt:'number',			 des:'Size of time slider'},
 			step: 						{	def:'1', 			opt:'number',			 des:'Snap increment'},
 			type:						{	def:'Single', 		opt:'Bar|Range|Single',  des:'Slider type'},
 			def: 						{	def:'', 			opt:'string',		 	 des:'Start time'}, 
 			title: 						{	def:'', 			opt:'string',		 	 des:'Title'}, 
 			ticks: 						{	def:'0', 			opt:'number',		 	 des:'Number of tick marks'}, 
 			showValues: 				{	def:'false', 		opt:'true|false',		 des:'Show tick values?'}, 
+			textCol: 					{	def:'000000', 		opt:'color',		 	 des:'Text color'}, 
 			suffix: 					{	def:'', 			opt:'string',		 	 des:'Tick value suffix'}}, 
 		TimeStepper:{
 			position: 					{	def:'top-left', 	opt:'string',		 	 des:'Position'}, 
@@ -98,7 +99,6 @@
 		InfoBox:{
 			style: 						{	def:'Text', 		opt:'Text|DocViewer',	 des:'Type of InfoBox'}, 
 			title: 						{	def:'', 			opt:'string',		 	 des:'Dialog title'}, 
-			draggable: 					{	def:'true', 		opt:'true|false',		 des:'Draggable?'}, 
 			scroller: 					{	def:'false', 		opt:'true|false',		 des:'Show scroll bars?'}, 
 			closer: 					{	def:'true', 		opt:'true|false',		 des:'Closable?'}, 
 			width: 						{	def:'auto', 		opt:'string',		 	 des:'Width'}, 
@@ -136,6 +136,7 @@
 	helpText['Number of tick marks']="Click on the text box to the right and enter the number of tick marks you want to display under your slider.  If your slider has a range of 0-10 and you want the box to snap in 1 tick increments to the end, then set this number to 9.  Likewise, if your slider has a range of 0-100 and you want the box to snap in 1 tick increments to the end, then set this number to 99.  And, if your slider has a range of 0-100 and you want the box to snap in increments of 10 to the end, then set this number to 9.";
 	helpText['Show tick values?']="Click on the drop-down menu to the right to view and choose false to hide the number value of the tick marks or true to show the number value of the tick marks.";
 	helpText['Tick value suffix']="You have the option to add a suffix that will be displayed with the maximum value by clicking on the text box to the right and entering typing in a suffix for your ticks.  For example, if you enter enter % in this box and the Show tick values? box is set to true the the maximum value for the slider will be 100%.";
+	helpText['Text color']="The color that the tick text labels will be drawn.";
 	helpText['Step label']="Label for a step that will appear across the top.";
 	helpText['Step default']="The default value for a question if not actually changed.";
 	helpText['Step question']="The kind of question that will be asked at this step:<br/><br/><b>color</b> will bring up a color picker.<br/><b>text</b> where text can be typed<br/><b>option1|option2</b>, where a pulldown menu of options, separated by |'s, such as <i>true|false</i> or <i>left|right|center.</i><br/><br/>The response to the question is sent as a message. If no question is set, the step sends the step number as a message when step clicked.";
@@ -240,6 +241,8 @@
 			}
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("DataChanged=true","*");
+		$("#containerDiv").height(400);
+		$("#containerDiv").width(400);
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 		}	
 
@@ -275,11 +278,11 @@
 					controlType=query.substring(s+11,e);
 			controlType=controlType;
 			}
-		shivaLib.SetAttributes(props[controlType],items,controlType != "TimeSlider");
+		shivaLib.SetAttributes(props[controlType],items,true);
 		var it=shivaLib.ReEdit(jsonData,props[controlType]);
 		if (it) 
 			items=it;
-		shivaLib.SetAttributes(props[controlType],items,controlType != "TimeSlider");
+		shivaLib.SetAttributes(props[controlType],items,true);
 	  	$("select#controlType").val(controlType);
 	  	Draw();
 	}	

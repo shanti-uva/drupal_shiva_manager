@@ -28,6 +28,7 @@ function SHIVA_Event(parent) 											// CONSTRUCTOR
 	$('body').append(str);													// Add to dom								
 	$("#shivaEventDiv").css("z-index",1999);								// Force on top
 	this.Do("Startup");														// Save undo
+	shivaLib.player.numCues=0;												// No cues yet
 }
 
 
@@ -66,6 +67,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	$("#shivaEventEditorDiv").css("-moz-border-radius","6px");				// Mozilla
 	$("#shivaEventEditorDiv").css("background-color","#000");
 	$("#shivaEventSlider .ui-slider-handle").css("height","8px");
+	$("#shivaEventSlider .ui-slider-handle").css("cursor","pointer");
 	$("#shivaEventSlider").css("background","#ccc");
 	$("#shivaEventSlider .ui-slider-range").css("background","#999");
 	$("#shivaEventSlider").bind("slidechange",$.proxy(function(event, ui) {	// Add handler
@@ -74,14 +76,14 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 		$("#shivaTimescale").text("Show: "+d);								// Show span
 		this.DrawEventDots();												// Redraw bar
 		},this));
-	str="<div id='shivaTimescale' style='position:absolute;";			
+	str="<div id='shivaTimescale' class='unselectable' style='position:absolute;";			
 	str+="left:125px;top:35px;color:#ccc''>Show: "+dur+"</div>";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaEventEditorDiv").append("<div id='shivaTimecode' style='position:absolute;left:"+(w/2-12)+"px;top:35px;color:#ccc'/>");
 	str="<div id='shivaTimebarDiv' style='position:absolute;-moz-user-select: none;-khtml-user-select:none;-webkit-user-select:none;";			
 	str+="width:"+w+"px;left:8px;top:10px;height:16px;";
 	str+="border-radius:3px;-moz-border-radius:3px;background-color:#999'/>";
-	str+="<img src='addeventdot.gif' style='position:absolute;left:"+(w-8)+"px;top:33px' onclick='shivaLib.ev.EditEvent(-1)'/>";
+	str+="<span class='unselectable' style='position:absolute;left:"+(w-86)+"px;top:33px;color:#ccc;vertical-align:top'>Add new event &nbsp;<img src='addeventdot.gif' width='14' style='cursor:pointer' onclick='shivaLib.ev.EditEvent(-1)'/></span?";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
 	$("#shivaEventEditorDiv").slideDown();									// Slide it on
@@ -238,21 +240,24 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	if (o.type == "menu") {													// Deconstruct menu
 		var lines=o.text.split(">>");										// Split into lines
 		if (lines[0]) {														// If exists
-			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// *!!* -> LF and quot/apos
 			$("#sqpr").val(lines[0]);										// Set prompt
 			}
-		for (i=1;i<lines.length;++i) {										// For each line
-			v=lines[i].split("|");											// Get sub-parts
-			if (v[0]) {														// If exists
-				v[0]=v[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
-				$("#sq"+i+"a").val(v[0]);									// Set answer
+		for (i=1;i<lines.length+1;++i) {									// For each line
+			if (lines[i]) {													// If something there
+				lines[i]=lines[i].replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// Unescape
+				v=lines[i].split("|");										// Get sub-parts
+				if (v[0]) {													// If exists
+					v[0]=v[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+					$("#sq"+i+"a").val(v[0]);								// Set answer
+					}
+				if (v[1].charAt(0) == "*") {								// A leading *
+					v[1]=v[1].substr(1);									// Lop it off
+					$("#sq"+i+"c").attr("checked","checked");				// Set check			
+					}
+				if (v[1])													// If exists
+					$("#sq"+i+"b").val(v[1]);								// Set action
 				}
-			if (v[1].charAt(0) == "*") {									// A leading *
-				v[1]=v[1].substr(1);										// Lop it off
-				$("#sq"+i+"c").attr("checked","checked");					// Set check			
-				}
-			if (v[1])														// If exists
-				$("#sq"+i+"b").val(v[1]);									// Set action
 			}
 		}
 	else if (o.type == "find") {											// Deconstruct find
@@ -261,6 +266,8 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
 			$("#sqpr").val(lines[0]);										// Set prompt
 			}
+		if (lines[1])														// If something there
+			lines[1]=lines[1].replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// Unescape
 		v=lines[1].split("|");												// Get sub-parts
 		if (v[0]) {															// If exists
 			var vv=v[0].split("-");											// Chop up x-y-d
@@ -286,19 +293,24 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		}
 
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
-	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
-	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
-	$("#text").val($("#text").val().replace(/&apos;/g,"'"));				// &apos; -> '
-	$("#title").val($("#title").val().replace(/&apos;/g,"'"));				// &apos; -> '
-	if ($("#sqpr").length) {												// If exists
-		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'"));			// &apos; -> '
-		$("#sqpr").val($("#sqpr").val().replace(/&quot;/g,"\""));			// &quot; -> '
-		}
-	for (i=1;i<6;++i) 														// For eaxch possible answer
-		if ($("#sq"+i+"a").length) {										// If exists
-			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'"));// &apos; -> '
-			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&quot;/g,"\""));// &aquot; -> '
-			}
+	$("#text").val($("#text").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#title").val($("#title").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#done").val($("#done").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#click").val($("#click").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#hover").val($("#hover").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#done").val($("#done").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+
+	if ($("#sqpr").length)													// If exists
+		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+	
+	if ($("#sq1").length)													// If exists
+		$("#sq1").val($("#sq1").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+	if ($("#sq2").length)													// If exists
+		$("#sq2").val($("#sq2").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+
+	for (i=1;i<6;++i) 														// For each possible answer
+		if ($("#sq"+i+"a").length) 											// If exists
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\""));	// Unescape
 
 	o=o.frame;																// Point at field
 	for (key in o)															// For each field member
@@ -320,7 +332,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value));	shivaLib.ev.SetEventHelp(); '";
 	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","draw","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
-	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
+	str+="<tr><td>Calling ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
 	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
@@ -360,13 +372,7 @@ SHIVA_Event.prototype.UpdatePlayerEvents=function() 					// ADD EVENTS
 	var i,o;
 	if (!this.player)														// No player
 		return;																// Quit
-	for (i=0;i<this.events.length;++i) {									// For each event
-		o=this.events[i];													// Point at event
-		if (o.start)														// If a start event
-			this.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-		if (o.end)															// If end
-			this.player.removeTrackEvent(this.player.getLastTrackEventId());// Remove last
-		}
+	shivaLib.VideoCue("delete");											// Delete existing cues
 	for (i=0;i<this.events.length;++i) 										// For each event
 		this.AddToCue(i);													// Add them back
 	this.DrawEventDots();													// Redraw events
@@ -392,7 +398,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		}
 	if (o.type == "menu") {													// Construct text from parts
 		o.text=$("#sqpr").val();											// Prompt
-		for (i=0;i<5;++i)													// For each question
+		for (i=1;i<6;++i)													// For each question
 			if ($("#sq"+i+"a").val()) {										// If an answer title
 			o.text+=">>"+$("#sq"+i+"a").val()+"|";							// Add title
 			if ($("#sq"+i+"c").attr("checked")) 							// If correct
@@ -429,10 +435,11 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
 	o.frame.draggable=($("#frame-draggable").attr("checked") == "checked"); // Set checkbox
 	o.text=o.text.replace(/\r/g,"").replace(/\n/g,"*!!*");					// Remove CR, LF -> *!!*
-	o.text=o.text.replace(/"/g,"&quot;");									// Escape quotes
-	o.title=o.title.replace(/"/g,"&quot;");									// Escape quotes
-	o.text=o.text.replace(/'/g,"&apos;");									// Escape apost
-	o.title=o.title.replace(/'/g,"&apos;");									// Escape apost
+	o.text=o.text.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.title=o.title.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.hover=o.hover.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.click=o.click.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.done=o.done.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
 	$("#shivaEvent-"+num).remove();											// Remove display div
 	if (remove)	{															// If removing it
 		this.events.splice(num,1);											// Remove from events list
@@ -443,23 +450,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 	this.DrawEventDots();													// Update event dots
 	this.UpdatePlayerEvents();												// Update player
 }
-SHIVA_Event.prototype.UpdatePlayerEvents=function() 					// ADD EVENTS
-{
-	var i,o;
-	if (!this.player)														// No player
-		return;																// Quit
-	for (i=0;i<this.events.length;++i) {									// For each event
-		o=this.events[i];													// Point at event
-		if (o.start)														// If a start event
-			this.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-		if (o.end)															// If end
-			this.player.removeTrackEvent(this.player.getLastTrackEventId());// Remove last
-		}
-	for (i=0;i<this.events.length;++i) 										// For each event
-		this.AddToCue(i);													// Add them back
-	this.DrawEventDots();													// Redraw events
-}
-
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //   EVENT CREATION   
@@ -485,7 +476,7 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 		return;																// Quit
 	var _this=this;															// Save 'this' locally
 	var o=this.events[num];													// Point at event
-	if (!o.start)															// If no start defined
+	if (o.id)																// If an id
 		return;																// Don't add to cue
 	shivaLib.VideoCue("add",o.start,function() { 							// A cue
 		_this.Draw(num,true); 												// Add start cue
@@ -548,9 +539,10 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 			$("#shivaEvent-"+num).css("background-color","#eee").css('border',"1px solid #ccc");
 			if (o.url) 														// If an icon defined
 				str+="<img src='"+o.url+"' style='vertical-align:middle'/> "; // Add icon image		
-			str+="<span style='text-align:center;text-shadow:1px 1px white'><b>"+o.title+"</b></span>";
-			if (o.text)														// If set
-				str+="<p>"+o.text.replace(/\*!!\*/g,"<br/>")+"</p>";		// Add body text, LFs -> <br>'s
+			if (o.title)													// If title defined
+				str+="<span style='text-align:center;text-shadow:1px 1px white'><b>"+o.title+"</b></span>";
+			if (o.text)														// If text defined
+				str+="<p>"+shivaLib.LinkToAnchor(o.text.replace(/\*!!\*/g,"<br>")),"<br/>"+"</p>";	// Add body text
 			$("#shivaEvent-"+num).html(str);								// Set content								
 			break;
 		case "image": 														// Image
@@ -818,16 +810,23 @@ SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO A
 		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:name, type: "Response", title:id,data:val });
 }
 
-SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS
+SHIVA_Event.prototype.HideAll=function(now) 							// HIDE ALL EVENTS
 {
-	$("#shivaPopupDiv").remove();											// Remove popup, if there
-	for (var i=0;i<this.events.length;++i) {								// For each event
-		if (i == this.modalEvent)											// Don't hide the modal one
-			continue;														// Continue
+	var i,s,e,o;
+	for (i=0;i<this.events.length;++i) {									// For each event
+		o=this.events[i];													// Point at event
+		s=shivaLib.TimecodeToSeconds(o.start)-0;							// Get start
+		if (o.end)															// If an end set
+			e=shivaLib.TimecodeToSeconds(o.end);							// Get end
+		else																// No end
+			e=100000;														// Inifinite
+		if ((now > s) && (now <= e))										// If in it
+			continue;														// Don't hide it	
 		$("#shivaEvent-"+i).hide();											// Hide it
 		if ($("#shivaIframe-"+i).length)									// If an iframe
 			$("#shivaIframe-"+i).remove();									// Remove it from DOM	
 		}
+	$("#shivaPopupDiv").remove();											// Remove popup, if there
 	shivaLib.overlay=[];													// Clear draw data
 	$("#shivaDrawDiv").html("");											// Clear draw div
 	shivaLib.DrawOverlay();													// Reshow
@@ -839,13 +838,10 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	if ((num < 0) || (num >= this.events.length))							// If out of bounds
 		return;																// Quit
 	$("#shivaDrawDiv").css('pointer-events','none');						// Inibit pointer clicks if menu gone
- 	var o=this.events[num];													// Point at event
-	if (this.player && visible && o.start) {								// If player is active and not a named event
-		if (shivaLib.VideoPaused()) 										// If paused
-			return this.HideAll();											// Clear all and quit
-		else if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))	// Ask, find or menu event
-			this.modalEvent=num;											// Set modal flag
-		}
+   	var o=this.events[num];													// Point at event
+	this.HideAll(shivaLib.VideoTime());										// Clear inactive events
+	if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))		// Ask, find or menu event
+		this.modalEvent=num;												// Set modal flag
 	if (o.type == "canvas") 												// A canvas event
 		window.postMessage("ShivaTrigger="+this.container.substr(4)+","+(num+1)+",clicked","*");
 	else if (o.type == "find") {											// A find
@@ -884,7 +880,6 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			}
 		else																// Hide it
 			$("#shivaIframe-"+num).remove();								// Remove it from DOM	
-		return;																// Quit		
 		}	 
 	else if (o.type == "draw") {											// A drawing
 		if (visible)														// Show
@@ -895,6 +890,7 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			}
 		shivaLib.DrawOverlay();												// Reshow
 		}
+	
 	var fade=0;																// Assume no fade
 	if (visible) {															// If making visible
 		if (o.fadein)	fade=o.fadein*1000;									// If set, use it
@@ -903,6 +899,8 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	else{																	// If hiding
 		if (o.fadeout)	fade=o.fadeout*1000;								// If set, use it
 		$("#shivaEvent-"+num).fadeOut(fade);								// Fade out in to hide
+		if (o.done)															// If done action
+			this.EventRouter(o.done,"");									// Run events(s)
 		}
 	if ((o.player) && (this.player) && (visible)) {							// Player motion
 		var param="";
@@ -1056,7 +1054,7 @@ SHIVA_Event.prototype.SetEventHelp=function()
 	helpText['fadeout']="The duration of the fade out for your  event. This should be a number of seconds.";
 	helpText['content']="For configuring what text, images, and other content to display in your event.";
 	helpText['type']="Use the drop-down menu to choose what type of event you would like to use. ";
-	helpText['id']="The name for this  event.";
+	helpText['id']="The name for this  event. Use only for called events";
 	helpText['title ']="The title for the event.";
 	helpText['url']="The web URL of an image to optionally add an image to your event.";
 	helpText['frame-scroller']="Should your event popup box has scrollbars?";
