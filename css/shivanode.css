@@ -92,6 +92,10 @@ div.sn-share-button img {
 	background-color: #C5CED1;
 }
 
+.sf-menu ul ul {
+  left: 96% !important;
+}
+
 .sf-menu li a {
 	padding: 2px 4px;
 	border-radius: 8px;
