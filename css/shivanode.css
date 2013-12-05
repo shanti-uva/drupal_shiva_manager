@@ -578,6 +578,12 @@ div#sninsert-popup .closeBtn {
 	border: 3px outset;
 }
 
+table.pagerer {
+  display: block;
+  clear: both;
+  margin-left: 30% !important;
+}
+
 /* General class styles */
 /* .button-link: a class to make a button look like a regular link */
 span.button-link input {

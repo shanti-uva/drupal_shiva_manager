@@ -379,18 +379,16 @@ function shivanode_preprocess_page(&$vars) {
     }
 } 
 
-function shivanode_theme_registry_alter(&$theme_registry) {
-   $modulepath = drupal_get_path('module','shivanode');
-   if(!isset($theme_registry['page']['theme paths']) || $theme_registry['page']['theme paths'] == null) {
-     $theme_registry['page']['theme paths']  = array($modulepath .'/templates');
-   } else if(is_array($theme_registry['page']['theme paths'])) {
-     array_unshift($theme_registry['page']['theme paths'], $modulepath .'/templates');
-   } 
-   // use shivanode's version of views-view.tpl.php to add pager at top of page
-   if(isset($theme_registry['views_view'])) {
-     $theme_registry['views_view']['path'] = $modulepath .'/templates';
-   }
+function shivanode_apachesolr_search_page_alter(&$build, $search_page) {
+  //dpm(array($build, $search_page));
+  dpm(array('build' => $build, 'search page' => $search_page));
 }
+
+function shivanode_apachesolr_process_results(&$results, DrupalSolrQueryInterface $query) {
+  dpm($results, 'results');
+  dpm($query, 'query');
+}
+
 
 /**
 * Implements hook_node_access().
@@ -1494,19 +1492,85 @@ function shivanode_services_resources() {
  */
 
 function shivanode_theme() {
+ 
    return array(
     'shivanode' => array(
       'variables' => array(
         'content' => NULL,
         'type' => NULL,
         )),
+    /* Old attempt. Not used
+     *  'search_results__apachesolr_search__vissearch' => array(
+         'variables' => array('search_results' => NULL, 'module' => array()),
+         ), 
+     * */
   );
   
+}
+
+function shivanode_theme_registry_alter(&$theme_registry) {
+   $modulepath = drupal_get_path('module','shivanode');
+   if(!isset($theme_registry['page']['theme paths']) || $theme_registry['page']['theme paths'] == null) {
+     $theme_registry['page']['theme paths']  = array($modulepath .'/templates');
+   } else if(is_array($theme_registry['page']['theme paths'])) {
+     array_unshift($theme_registry['page']['theme paths'], $modulepath .'/templates');
+   } 
+   // use shivanode's version of views-view.tpl.php to add pager at top of page
+   if(isset($theme_registry['views_view'])) {
+     $theme_registry['views_view']['path'] = $modulepath .'/templates';
+   }
 }
 
 function theme_shivanode($variables) {
   return '<div class="shivanode_' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
 
-
+/**
+ * Search results theming function just creates mark up for items in the collect
+ * This is included in the node display through mb_solr_node_view (below).
+ * 
+ * OLD CODE FROM PREVIOUS ATTEMPT USING JUST APACHESOLR, BUT SWITCH TO USING SEARCH_API with APACHE SOLR
+function theme_search_results__apachesolr_search__vissearch(&$vars) {
+  $output = "<div>";
+  dpm($vars, 'vars');
+  foreach ($vars['results'] as $k => $v) {
+    //$output .=  '<li>' . $v['title'] . '</li>';
+    $node = node_load($v['node']->entity_id);
+    $fid = $node->field_image[LANGUAGE_NONE][0]['fid'];
+    $imageurl = image_style_url('shiva_teaser', file_load($fid)->uri);
+    $type = _shivanode_get_element_type($node);
+    $user = user_load($node->uid);
+    $output .= '<div class="shiva-teaser"><div class="shiva-teaser-image"><a href="' . url('node/'. $node->nid) .'"><img src="' . $imageurl . '"/></a></div>';
+    $output .= '<div class="shiva-teaser-title">' . $node->title . '</div>';
+    $output .= '<div><div class="info-wrapper"><div class="info"><a href="' . url('node/'. $node->nid) . '">' . $type . '<br/>Created by ' . $user->name . '<br/>on ' . format_date($node->created, 'short') . '</a></div></div></div>';
+    $output .= '</div>';
+  }
+  $output .= '</div>';
+  return $output;
+}
+*/
+
+/** Rewrite Author widget text to use first and last name if available 
+ *  And rewrite link for 0 item facets to perform new search on just that facet */function shivanode_facet_items_alter(&$build, &$settings) {
+  if ($settings->facet == "author:name") {
+    foreach($build as $key => $item) {
+      $uid = user_load_by_name($item['#markup']);
+      if(isset($uid->field_lname[LANGUAGE_NONE][0]['value'])) {
+        $uname = $uid->field_lname[LANGUAGE_NONE][0]['value'];
+        if(isset($uid->field_fname[LANGUAGE_NONE][0]['value'])) {
+          $uname = $uid->field_fname[LANGUAGE_NONE][0]['value'] . ' ' . $uname;
+          $build[$key]["#markup"] = $uname;
+        }
+      }
+    }
+  }
+  // if no hits for that facet, clicking on it will do new search on just that facet
+  foreach($build as $key => $item) {
+    if($item['#count'] == 0) {
+      $fq = $item['#query']['f'];
+      $param = array_pop($fq);
+      $build[$key]['#query']['f'] = array( $param );
+    }
+  }
+}
 
