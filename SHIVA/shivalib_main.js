@@ -710,7 +710,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 		}
 	else  																// Google doc
 	    wrap.draw();													// Draw chart
- 	
+ 
  	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
   	google.visualization.events.addListener(wrap,"select", function(r) { 
   		var o=wrap.getChart().getSelection()[0];						// Get element clicked

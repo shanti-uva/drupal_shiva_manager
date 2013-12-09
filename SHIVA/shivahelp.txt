@@ -8,6 +8,8 @@ Alternately, you can paste the URL provided through the Share link of your Googl
 
 ***3D chart?***From the drop-down menu to the right, choose whether or not to display a 3D version of your chart.
 
+***Pie hole size (0-1.0)***This  option should be set to a number between 0 and 1, corresponding to the ratio of radii between the hole and the chart.
+
 ***Background setting(s)***By clicking on the text box to the right a popup will appear that allows you to set the background fill color, border color, and border width. For the color options either enter a hexadecimal color in the appropriate text box value or click on the square color chip icon in that text box to launch to color picker. For 'Border width' enter a number value that sets the thickness of your border in pixels.
 
 ***Chart colors...***Click on the square color chip icon in the text box to the right to launch the color picker. This allows you to choose a series of colors. Choose a color by clicking on its shade in the color wheel or on the color bar below. Adjust the saturation and brightness using the sliders to the right. The chosen color will appear in the selected tab at the top, as well as in the preview box in the bottom right. To choose a second or subsequent color click a blank tab at the top of the color picker and follow the same steps as above. Click 'OK' when finished. For further information on using the color picker, please visit <a href='https://wiki.shanti.virginia.edu/x/KpnRAQ'>this link</a>.

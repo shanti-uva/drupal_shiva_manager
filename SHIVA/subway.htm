@@ -150,11 +150,6 @@
 	{
 		if (shivaLib.drupalMan) 
 			window.parent.postMessage("DataChanged="+mode.toString(),"*");
-		else if (!shivaLib.drupalMan) {
-			if (window.parent)
-				if (window.parent.ShivaDataChanged)
-					window.parent.ShivaDataChanged(mode);
-			}
 	} 
 
 	function EditStation(x,y)

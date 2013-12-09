@@ -64,6 +64,10 @@
 	var shivaCallBack=null;
 	var shivaLib=null;	
 	var shivaGroup='Visualization';
+	
+	var m;
+	if ((m=window.location.search.match(/chartType=(\w+)/)))				// For google charts bug
+		chartType=m[1];														// Set default chart
 
 	var props={
 		AnnotatedTimeLine:{
@@ -205,6 +209,7 @@
 			height: 					{	def:'400', 		opt:'number',		 des:'Height of chart'},
 			width: 						{	def:'500', 		opt:'number',		 des:'Width of chart'},
 			is3D: 						{	def:'false', 	opt:'false|true',	 des:'3D chart?'},
+			pieHole: 					{	def:'0', 		opt:'string',		 des:'Pie hole size (0-1.0)'},
 			title: 						{	def:'', 		opt:'string',		 des:'Title of chart'},
 			fontName: 					{	def:'Arial', 	opt:'string',		 des:'Font name'},
 			fontSize: 					{	def:'automatic',opt:'string',		 des:'Font size'},
@@ -355,6 +360,7 @@
 	{
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("ChartChanged="+type,"*");
+		window.location="chart.htm?chartType="+type.replace(/ /g,"");				// KLUDGE for bug in Google charts
 		SetAttributes(type,true);	
 	}
 

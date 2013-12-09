@@ -5,8 +5,8 @@
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHANTI Interactive Visualization Application</title>
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 	<style type="text/css">
 		body{ font-family:Verdana,Geneva,sans-serif; font-size:xx-small;	}
 	</style>
@@ -18,17 +18,9 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	  $(document).ready(function() { Init(); });
+
+	$(document).ready(function() { Init(); });
 	  
-	var shivaDataChanged=false;
-	function shivaSetUnload(on) { window.onbeforeunload = (on) ? function() {return "Any changes will be lost.";} : null; }
-
-	function ShivaDataChanged(mode)
-	{
-		shivaDataChanged=mode;
-//		shivaSetUnload(mode);
-	}
-
  	 var _gaq = _gaq || [];
 	  _gaq.push(['_setAccount', 'UA-26255176-1']);
 	  _gaq.push(['_trackPageview']);
@@ -43,14 +35,6 @@
 	{
 		window.name="topWindow";
 		SetMenu();
-		$('#tabs').tabs( {
-	    	load:function(event,ui) {
-	        	$('a', ui.panel).click(function() {
-	            	$(ui.panel).load(this.href);
-	            	return false;
-	        		});
-	    		}
-			});
 		$(document).bind("shivaMessage",shivaMessageHandler);
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
@@ -65,53 +49,47 @@
 	
 	function shivaMessageHandler(e,o)
 	{	
-		console.log(o)
-	}
-	
-	function OpenTab(which)
-	{
-		$("#tabs").tabs("select",which);
+//		console.log(o)
 	}
 		
 	function SetMenu()
 	{
 		var str="<ul>";
-		if ($.browser.webkit) {
-			str+="<li><a href='#cha'>Charts</a></li>";
-			str+="<li><a href='#map'>Maps</a></li>";
-			str+="<li><a href='#ear'>Earth</a></li>";
-			}
-		else{
-			str+="<li><a href='#ear'>Earth</a></li>";
-			str+="<li><a href='#map'>Maps</a></li>";
-			str+="<li><a href='#cha'>Charts</a></li>";
-			}
-		str+="<li><a href='#tim'>Timelines</a></li>";
-		str+="<li><a href='#vid'>Videos</a></li>";
-		str+="<li><a href='#img'>Images</a></li>";
-		str+="<li><a href='#net'>Network</a></li>";
-		str+="<li><a href='#sub'>Subway</a></li>";
-		str+="<li><a href='#wrd'>Words</a></li>";
-		str+="<li><a href='#edt'>Text</a></li>";
-		str+="<li><a href='#dia'>Controls</a></li>";
-		str+="<li><a href='#pos'>Poster</a></li>";
-		str+="<li><a href='#abt'>About</a></li>";
+		str+="<li><a href='#ifr'>Charts</a></li>";
+		str+="<li><a href='#ifr'>Maps</a></li>";
+		str+="<li><a href='#ifr'>Earth</a></li>";
+		str+="<li><a href='#ifr'>Timelines</a></li>";
+		str+="<li><a href='#ifr'>Videos</a></li>";
+		str+="<li><a href='#ifr'>Images</a></li>";
+		str+="<li><a href='#ifr'>Network</a></li>";
+		str+="<li><a href='#ifr'>Subway</a></li>";
+		str+="<li><a href='#ifr'>Words</a></li>";
+		str+="<li><a href='#ifr'>Text</a></li>";
+		str+="<li><a href='#ifr'>Controls</a></li>";
+		str+="<li><a href='#ifr'>Poster</a></li>";
+		str+="<li><a href='#ifr'>About</a></li>";
 		str+="</ul>";
-		str+="<div id='ear'><p><iframe id='shivaEar' src='earth.htm'     width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='cha'><p><iframe id='shivaCha' src='chart.htm'     width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='map'><p><iframe id='shivaMap' src='map.htm'       width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='tim'><p><iframe id='shivaTim' src='timeglider.htm' width='100%' height='1000' style='margin:0px;border:none' ></iframe></p></div>";
-		str+="<div id='vid'><p><iframe id='shivaVid' src='video.htm'  	 width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='img'><p><iframe id='shivaImg' src='image.htm'     width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='sub'><p><iframe id='shivaSub' src='subway.htm'    width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='wrd'><p><iframe id='shivaWrd' src='wordcloud.htm' width='100%' height='1000' style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='edt'><p><iframe id='shivaDrw' src='textedit.htm'  width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='net'><p><iframe id='shivaNet' src='network.htm'   width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='dia'><p><iframe id='shivaCon' src='dialog.htm'    width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='pos'><p><iframe id='shivaPos' src='poster.htm'    width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
-		str+="<div id='abt'><p><iframe id='shivaAbt' src='about.htm' 	 width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
+		str+="<div id='ifr'><p><iframe id='shivaIf' src='chart.htm' width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
 		$('#tabs').html(str);	
+		
 		$('#tabs').tabs();
+		$('#tabs').tabs().click(function(e) {
+			switch (e.target.id) {
+				case "ui-id-1":	 $("#shivaIf").prop("src","chart.htm");			break;
+				case "ui-id-2":	 $("#shivaIf").prop("src","map.htm");			break;
+				case "ui-id-3":	 $("#shivaIf").prop("src","earth.htm");			break;
+				case "ui-id-4":	 $("#shivaIf").prop("src","timeglider.htm");	break;
+				case "ui-id-5":	 $("#shivaIf").prop("src","video.htm");			break;
+				case "ui-id-6":	 $("#shivaIf").prop("src","image.htm");			break;
+				case "ui-id-7":	 $("#shivaIf").prop("src","network.htm");		break;
+				case "ui-id-8":	 $("#shivaIf").prop("src","subway.htm");		break;
+				case "ui-id-9":  $("#shivaIf").prop("src","wordcloud.htm");		break;
+				case "ui-id-10": $("#shivaIf").prop("src","textedit.htm");		break;
+				case "ui-id-11": $("#shivaIf").prop("src","dialog.htm");		break;
+				case "ui-id-12": $("#shivaIf").prop("src","poster.htm");		break;
+				case "ui-id-13": $("#shivaIf").prop("src","about.htm");			break;
+				}			
+			});
 	}
 	
 	
