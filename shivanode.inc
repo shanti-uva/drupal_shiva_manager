@@ -1296,11 +1296,17 @@ function _shivanode_data_page($type=FALSE, $ctype=FALSE) {
     '#suffix' => '</div>',
   );
   $baseurl = url('node/add/shivanode');
+  if($type) {
+    $baseurl .= '/nd/' . $type;
+    if($ctype) {
+      $baseurl .= '/?ctype=' . $ctype;
+    }
+  }
   $markup['skip'] = array(
     '#type' => 'submit',
     '#value' => t('Skip this step!'),
     '#name' => '',
-    '#prefix' => '<form action="' . $baseurl . (($type) ? '/nd/' . $type : '') . '">',
+    '#prefix' => '<form action="' . $baseurl . '">',
     '#suffix' => '</form>',
   );
   

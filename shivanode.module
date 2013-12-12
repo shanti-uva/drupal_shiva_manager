@@ -1574,3 +1574,55 @@ function theme_search_results__apachesolr_search__vissearch(&$vars) {
   }
 }
 
+/*
+ * hook_user_insert does not work with _shivanode_user_check_name because it's saving user twice, but
+ * cannot figure a way to add user fname and lname otherwise. Yuji is checkint to see if Shibboleth passes info
+ * 
+function shivanode_user_insert(&$edit, $account, $category) {
+  dpm($edit);
+  $edit['field_fname'] = 'afirstname';
+  $edit['field_lname'] = 'SOMELASTNAME';
+}
+
+// Works with hook_user_update but that would only happen if user was edited and then saved
+
+function shivanode_user_update(&$edit, $account, $category) {
+  _shivanode_user_check_name($account);
+}
+
+function _shivanode_user_check_name($account) {
+   dpm('in user check name');
+  if (!isset($account->field_fname[LANGUAGE_NONE][0]['value']) || !isset($account->field_lname[LANGUAGE_NONE][0]['value'])) {
+    //dpm(array('edit' => $edit, 'account' => $account, 'category' => $category));
+    $whois = shell_exec("whois -h whois.virginia.edu " . $account->name);
+    $pattern = "/Name:\s+([^\n\r]+)[\n\r]/";
+    if(preg_match($pattern, $whois, $matches)) {
+      $fullname = $matches[1];
+      if($fullname && strlen($fullname) > 1) {
+        $names = explode(' ', $fullname);
+        $fname = $names[0];
+        $lname = array_pop($names);
+        if(preg_match('/Jr|Sr|I+|IV/', $lname)) {
+          $lname = array_pop($names);
+        }
+        $lname = str_replace(',', '', $lname);
+        $changed = 0;
+        $u = user_load($account->uid);
+        $change = 0;
+        if(!isset($account->field_fname[LANGUAGE_NONE][0]['value'])) {
+          $account->field_fname[LANGUAGE_NONE][0]['value'] = $fname;
+          $changed = 1;
+        }
+        if(!isset($account->field_lname[LANGUAGE_NONE][0]['value'])) {
+          $account->field_lname[LANGUAGE_NONE][0]['value'] = $lname;
+          $changed = 1;
+        }
+        if($changed == 1) {
+          user_save($account);
+        }
+      }
+    }
+  }
+}
+
+*/

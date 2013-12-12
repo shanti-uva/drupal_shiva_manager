@@ -181,12 +181,12 @@
 		          }
 	            $('#use-data-element-link a').click();
 	  			Drupal.Shivanode.setShivaCookie('Drupal.Shivanode.popup', 'done', 1);
-  			  }
-		    }
-		    
-		    // Code to activate JQuery Tabs in the Share embed page
-		    if($('#sharetabs').length > 0) {
-			    $('#sharetabs div').hide();
+			  }
+	    }
+	    
+	    // Code to activate JQuery Tabs in the Share embed page
+	    if($('#sharetabs').length > 0) {
+			  $('#sharetabs div').hide();
 				$('#sharetabs div:first').show();
 				$('#sharetabs ul li:first').addClass('active');
 				$('#sharetabs .sharethis-wrapper').show();
@@ -210,7 +210,6 @@
 					var funct = "Drupal.Shivanode.setChartType('" + ctype + "'); Drupal.Shivanode.insertDataElement('preset');";
 					setTimeout(funct, 800);
 				};
-				
 			}
 		} // End of attach function
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
@@ -745,7 +744,9 @@
 	 * 					isnew = whether or not it is a new visualization and the add/shivanode page has not yet been called
 	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
 	 */
+	console.info('new at setdataelement');
 	Drupal.Shivanode.setDataElement = function(did, isnew) {
+	  console.info('in set data element');
 	  if(self == top && window.location.search.indexOf('insert=') > -1) {
 	    isnew = true;
 	  }
@@ -797,8 +798,10 @@
 	};
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
+	console.info('new at setDrupalJSON');
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
 		var jobj = JSON.parse(json); 
+		console.info({'jobjinsetDrupal': jobj});
 	  // This is called every .5 secs. If JSON is the same, then return
     if (Drupal.Shivanode.latestJSON == json) {
     	if(jobj.dataSourceUrl != $('chosen_data_element_url').text()) {
