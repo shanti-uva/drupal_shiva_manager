@@ -1,0 +1,4 @@
+name = SHIVA External Documentation Module
+description = A way to view external documentation wikis on site
+package = SHANTI Shiva
+core = 7.x

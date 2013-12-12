@@ -1,0 +1,165 @@
+<?php
+
+function extdocs_menu() {
+  
+  $items = array();
+  
+  // Menu item for configuration settings
+  $items['admin/config/content/extdocs'] = array(
+    'title' => 'SHIVA External Documentation Settings',
+    'description' => 'Configuration for External Documentation Wiki',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('extdocs_admin_settings'),
+    'access callback' => 'extdocs_user_is_admin',
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+  );
+  
+  $items['wikidoc'] = array(
+    'title' => 'SHIVA External Documentation URL',
+    'description' => 'Base URL for External Documentation',
+    'page callback' => 'extdoc_display',
+    'access callback' => 'is_auth_user',
+  );
+  
+  return $items;
+}
+
+function extdocs_user_is_admin() {
+  global $user;
+  if (in_array('administrator', array_values($user->roles))) {
+    return TRUE;
+  }
+   return FALSE;
+}
+
+function extdocs_admin_settings($form, &$form_state) {
+  $form['extdoc_wiki_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Documentation URL'),
+    '#default_value' => variable_get('extdoc_wiki_url'),
+    '#size' => 60,
+    '#maxlength' => 512,
+  );
+  
+  $form['extdoc_selector'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CSS Selector for Element to Use'),
+    '#description' => t('XPath for finding root element to use for content.'),
+    '#default_value' => variable_get('extdoc_selector'),
+    '#size' => 60,
+    '#maxlength' => 128,
+  );
+  
+  $form['extdoc_imgbase'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Base url for images in documentation'),
+    '#default_value' => variable_get('extdoc_imgbase'),
+    '#size' => 60,
+    '#maxlength' => 128,
+  );
+  
+  $form['extdoc_css'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Custom CSS'),
+    '#description' => t('Use this area to add custom css styles for embedded documentation content. All embeded content will be within a div.doc-content'),
+    '#default_value' => variable_get('extdoc_css'),
+    '#attributes' => array('style' => 'font-size: 80%;'),
+    '#rows' => 20,
+  );
+  
+  $form['extdoc_globalimportant'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use !important for all styles'),
+    '#default_value' => variable_get('extdoc_globalimportant'),
+  );
+  return system_settings_form($form);
+}
+
+function extdoc_display() {
+  $wikiurl = variable_get('extdoc_wiki_url');
+  $selector = variable_get('extdoc_selector');
+  $imgbase = variable_get('extdoc_imgbase');
+  $custcss = variable_get('extdoc_css');
+  $globalimp = variable_get('extdoc_globalimportant');
+  
+  
+  // Ignore if wikiurl is not set
+  if(!$wikiurl || $wikiurl == '') {
+    drupal_goto();
+  }
+  
+  // Construct Wiki page url from settings
+  $args = arg();
+  array_shift($args);
+  $url = $wikiurl . '/' . implode('/', $args);
+  
+  // Make DOMDocument out the HTML page
+  libxml_use_internal_errors(true);
+  $xml = new DOMDocument();
+  $xml->loadHTMLFile($url);
+  $xml->preserveWhiteSpace = false;
+  
+  // Remove nested style commands
+  $xpathstr = '//style';
+  $xpath = new DOMXPath($xml);
+  $styles = $xpath->evaluate($xpathstr);
+  foreach($styles as $style) {
+    $style->nodeValue = '';
+  }
+  
+  // Fix Relative link URLs to use extdoc links
+  // Get Relative Path from base url
+  $path = preg_replace('/https?\:\/\//', '', $wikiurl);
+  $ppts = explode('/', $path);
+  array_shift($ppts);
+  $path = '/' . implode('/', $ppts);
+  // Find a links and update href
+  $xpathstr = '//a';
+  $xpath = new DOMXPath($xml);
+  $links = $xpath->evaluate($xpathstr);
+  foreach($links as $link) {
+    $href = $link->getAttribute('href');
+    //$link->setAttribute('sh:path', $path);
+    $href = str_replace($path, '/wikidoc/', $href);
+    $link->setAttribute('href', $href);
+  }
+  
+  // Fix Image URLs by adding base from settings
+  $xpathstr = '//img';
+  $xpath = new DOMXPath($xml);
+  $imgs = $xpath->evaluate($xpathstr);
+  foreach($imgs as $img) {
+    $src = $img->getAttribute('src');
+    $img->setAttribute('src', $imgbase . $src);
+  }
+  
+  // Get Page Header and set in Drupal
+  $xpath = new DOMXPath($xml);
+  $result = $xpath->evaluate($selector); // $selector is xpath set in the setting for module
+  $result = $result->item(0);
+  $pgtitle = $result->textContent;
+  drupal_set_title($pgtitle);
+  $breadcrumb = array(
+    l('Home', '/'),
+    'Documentation',
+  );
+  drupal_set_breadcrumb($breadcrumb);
+  // Get page content to return at end of function
+  $xpathstr = '//div[@class="wiki-content"]';
+  $xpath = new DOMXPath($xml);
+  $page = $xpath->evaluate($xpathstr);
+  $result = $xml->saveHTML($page->item(0));
+  
+  // Create Render array with custom css and return it
+  if($globalimp) {
+    $custcss = str_replace(';', ' !important;', $custcss);
+    $custcss = str_replace('!important !important;', ' !important;', $custcss);
+  }
+  $element = array(
+    '#type' => 'markup',
+    '#prefix' => '<style>' . $custcss . '</style>',
+    '#markup' => '<div class="doc-content">' . $result . '</div>',
+  );
+  
+  return $element;
+}
