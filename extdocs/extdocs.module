@@ -137,6 +137,7 @@ function extdoc_display() {
     }
     $href = str_replace($path, '/wikidoc/', $href);
     $link->setAttribute('href', $href);
+    $link->setAttribute('target', '');
   }
   
   // Fix Image URLs by adding base from settings
