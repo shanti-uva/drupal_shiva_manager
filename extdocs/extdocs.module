@@ -119,7 +119,22 @@ function extdoc_display() {
   $links = $xpath->evaluate($xpathstr);
   foreach($links as $link) {
     $href = $link->getAttribute('href');
-    //$link->setAttribute('sh:path', $path);
+    //$link->setAttribute('sh:path', $path); 
+    if(strpos($href, '/x/' ) > 0) {
+      $headers = get_headers($href);
+      $headers = array_reverse($headers);
+      foreach($headers as $header) {
+        if (strpos($header, 'Location: ') === 0) {
+          $href = str_replace('Location: ', '', $header);
+          $href = str_replace($wikiurl, '', $href);
+          if(substr($href,0,1) != '/') { $href = '/' . $href; }
+          $href = '/wikidoc' . $href;
+          $pts = explode(';', $href);
+          $href = $pts[0];
+          break;
+        }
+      }
+    }
     $href = str_replace($path, '/wikidoc/', $href);
     $link->setAttribute('href', $href);
   }
