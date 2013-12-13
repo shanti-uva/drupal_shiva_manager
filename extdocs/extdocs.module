@@ -170,7 +170,9 @@ function extdoc_display() {
   $imgs = $xpath->evaluate($xpathstr);
   foreach($imgs as $img) {
     $src = $img->getAttribute('src');
-    $img->setAttribute('src', $imgbase . $src);
+    if(substr($src, 0, 4) != 'http') {
+      $img->setAttribute('src', $imgbase . $src);
+    }
   }
   
   // Get Page Header and set in Drupal
