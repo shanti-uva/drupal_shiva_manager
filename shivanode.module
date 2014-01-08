@@ -202,7 +202,15 @@ function shivanode_menu() {
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
-  
+  // Menu item for adding redirecting from popup when using an already added gdoc
+  $items['data/add/nid'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Add a Google Spreadsheet',
+    'description' => 'Adds a Google Spreadsheet as a data node and uses it',
+    'page callback' => '_shivanode_add_datanid',
+    'access callback' => 'is_auth_user',
+    'file' => 'shivanode.inc',
+  );
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
   $items['mydata'] = array(
     'title' => 'Choose Your Data',

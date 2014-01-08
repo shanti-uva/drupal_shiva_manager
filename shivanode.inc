@@ -2389,6 +2389,30 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   }
 }
 
+/**
+ *  _shivanode_add_datanid($gid, $type): Called from the My Data list, this function is connected to the menu url: /data/add/nid/
+ *      Redirects to url to form using a data node
+ */
+function _shivanode_add_nid($nid = NULL, $type = NULL) {
+  $vtype = 'chart';
+  $ctype = '';
+  if($type < 15) {
+    $ctype = _shivanode_types_using_gdocs($type); 
+  } else {
+    $vtype = strtolower(_shivanode_types_using_gdocs($type));
+  }
+  if($vtype == 'slideshow') { $vtype = 'image'; }
+  if($ctype == '') {
+    drupal_goto('node/add/shivanode/' . $nid . '/' . $vtype);
+  } else {
+     drupal_goto('node/add/shivanode/' . $nid . '/' . $vtype, array(
+        'query' => array(
+          'ctype' => $ctype,
+        ),
+     ));
+  }
+} 
+
 /* _shivanode_add_data_correspondence($node) :
  *     adds or updates the shivanode_links table with an entry linking the given node with it's data entry
  *    $node: the node being added or updated, when submitted a data_id field is added to the node object with 

@@ -358,12 +358,12 @@
 
 	function ChangeChart(type)
 	{
-	  var pr = '';
+		var url="chart.htm?chartType="+type.replace(/ /g,"");		// KLUDGE for bug in Google charts
 		if (shivaLib.drupalMan) {
-		  window.parent.postMessage("ChartChanged="+type,"*");
-		  pr = '&pr=d';
-		}
-		window.location="chart.htm?chartType="+type.replace(/ /g,"")+pr;				// KLUDGE for bug in Google charts
+			window.parent.postMessage("ChartChanged="+type,"*");
+			url+="&pr=d";											// KLUDGE
+			}
+		window.location=url;										// KLUDGE
 		SetAttributes(type,true);	
 	}
 

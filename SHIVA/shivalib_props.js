@@ -558,9 +558,10 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 //	QUERY EDITOR
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function SHIVA_QueryEditor(source, query, returnID,fieldNames) 										
+function SHIVA_QueryEditor(source, query, returnID, fieldNames, callback) 										
 {
 	this.advancedMode=false;
+	this.autoShow=true;
 	$("#dataDialogDiv").dialog("destroy");
 	$("#dataDialogDiv").remove();
 	shivaLib.qe=this;
@@ -599,10 +600,16 @@ function SHIVA_QueryEditor(source, query, returnID,fieldNames)
 				$(this).dialog("destroy");
 				$("#dataDialogDiv").remove();
 				$("#propInput0").trigger("onchange");
+				if (callback) 
+					callback(thisObj.query);
 				},
 			'Cancel': function() {
 				$(this).dialog("destroy");
 				$("#dataDialogDiv").remove();
+				if (callback) {
+					callback(query);
+					return;
+					}
 				}
 			}
 		}
@@ -642,7 +649,7 @@ SHIVA_QueryEditor.prototype.DrawQuery=function()
 	var thisObj=this;
 	if (this.advancedMode) {
 		str="<textArea id='curQuery' rows='4' cols='50' />";
-		str+="<p><input type='checkbox' id='advedit' checked='checked' onclick='shivaLib.qe.AdvancedMode(false)'> Advanced editing mode";
+		str+="<p><input type='checkbox' id='advedit' checked='checked' onclick='shivaLib.qe.AdvancedMode(false)'> Advanced edit mode";
 		str+="<p><Button id='queryAdvEdit'>Test</button> ";
 		str+="Click <a href='http://code.google.com/apis/chart/interactive/docs/querylanguage.html' target='_blank'>here</a> for information on formatting</p></p>";
 		str+="<br/><div id='testShowDiv'/>"
@@ -680,13 +687,23 @@ SHIVA_QueryEditor.prototype.DrawQuery=function()
 	str+="<option>none</option>";
 	for (i=0;i<this.curFields.length;++i)	str+="<option>"+this.curFields[i]+"</option>";
 	str+="</select></td></tr>";
-	str+="</table><p><input type='checkbox' id='advedit' onclick='shivaLib.qe.AdvancedMode(true)'/> Advanced editing mode</p>";
+	str+="</table><p><input type='checkbox' id='advedit' onclick='shivaLib.qe.AdvancedMode(true)'/> Advanced edit mode";
+	str+=" <input type='checkbox' id='qAutoShow'";
+	if (this.autoShow) str+=" checked='checked'";
+	str+=">Auto-show</p>";
 	str+="<div id='curQuery' style='overflow:auto'><span style='color:#999'><b>"+q+"</b></span></div>";
 	str+="<br/><div id='testShowDiv'/>"
 	$("#dataDialogDiv").html(str);
 	$("#sel").val(select.split(","));
 	$("#ord").val(order);
-	this.TestQuery();
+	if (this.autoShow)
+		this.TestQuery();
+
+	$("#qAutoShow").click(function() {
+		shivaLib.qe.autoShow=!shivaLib.qe.autoShow;
+		shivaLib.qe.DrawQuery();
+		});
+		
 }
 
 SHIVA_QueryEditor.prototype.TestQuery=function() 

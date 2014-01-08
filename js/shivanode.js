@@ -1111,14 +1111,16 @@
     var dtype = p.find('span[class="mydtype"]').text();
     var vtype = $(el).val();
     if($('html.lightpop').length == 1) {
-      var url = '';
+      var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
       // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
       if(dtype == 'gid') {
         url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
-        var cmd = 'SetUrl=' + url;
-        window.parent.postMessage(cmd,'*');
-        window.parent.Lightbox.end();
-      }
+      } 
+      
+      var cmd = 'SetUrl=' + url;
+      window.parent.postMessage(cmd,'*');
+      window.parent.Lightbox.end();
+      
     } else { 
       $('input[name="did"]').attr('value', did);
       $('input[name="dtitle"]').attr('value', dtitle);
