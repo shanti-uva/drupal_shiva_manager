@@ -209,6 +209,7 @@
 					var ctype = decodeURIComponent(pts[1].replace('Organization', 'Org'));
 					var funct = "Drupal.Shivanode.setChartType('" + ctype + "'); Drupal.Shivanode.insertDataElement('preset');";
 					setTimeout(funct, 800);
+					window.frames['shivaEditFrame'].onload = null; // Only do it once. 
 				};
 			}
 		} // End of attach function
@@ -744,9 +745,7 @@
 	 * 					isnew = whether or not it is a new visualization and the add/shivanode page has not yet been called
 	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
 	 */
-	console.info('new at setdataelement');
 	Drupal.Shivanode.setDataElement = function(did, isnew) {
-	  console.info('in set data element');
 	  if(self == top && window.location.search.indexOf('insert=') > -1) {
 	    isnew = true;
 	  }
@@ -798,10 +797,8 @@
 	};
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
-	console.info('new at setDrupalJSON');
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
 		var jobj = JSON.parse(json); 
-		console.info({'jobjinsetDrupal': jobj});
 	  // This is called every .5 secs. If JSON is the same, then return
     if (Drupal.Shivanode.latestJSON == json) {
     	if(jobj.dataSourceUrl != $('chosen_data_element_url').text()) {
@@ -968,14 +965,16 @@
 						if(btext.match(/save|update|preview|delete/)) { retval = null; }
 					}
 					return retval;
-				}
+				};
 			}
 		} else {
-			$(window).unbind('beforeunload');
+			$(window).unbind('onbeforeunload');
 		}
 	};
 
-	Drupal.Shivanode.setUrl = function(url) {
+	Drupal.Shivanode.setUrl = function(url, confirm) {
+	  confirm = (typeof(confirm) == "undefined") ? true : confirm;
+	  if(confirm == false) { window.onbeforeunload = null; }
 		var hash = window.location.hash;
 		if (hash.indexOf('#overlay=') > -1) {
 			window.location.hash = '#overlay=' + url.substr(url.indexOf('node/'));
@@ -1093,6 +1092,39 @@
 	
 	Drupal.Shivanode.setChartType = function(ctype) {
 		Drupal.Shivanode.ShivaMessage('shivaEditFrame', 'SetChartType=' + ctype);
+	};
+	
+	/*
+	 * setSelectedType: Function called from /mydata/ page when a visualization type is selected for a particular data sheet.
+	 *   If one is viewing the page, then this function sets the hidden form input values for did (data id), title, and type, 
+	 *     and then submits the form
+	 *     See the _shivanode_gdocs_view_select and _shivanode_gdocs_view_select functions in shivanode.inc
+	 * 
+	 *   If the data selector popup is being show, then function messages parent frame to either insert the data in the form or
+	 *     if it is a gdoc that has not yet been added, go to the url to add that and then return to form with data nid.
+	 */
+	Drupal.Shivanode.setSelectedType = function(el) {
+
+	  var p = $(el).parents('.views-field');
+	  var dtitle = p.find('span[class="mydtitle"]').text();
+    var did = p.find('span[class="mydid"]').text();
+    var dtype = p.find('span[class="mydtype"]').text();
+    var vtype = $(el).val();
+    if($('html.lightpop').length == 1) {
+      var url = '';
+      // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
+      if(dtype == 'gid') {
+        url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
+        var cmd = 'SetUrl=' + url;
+        window.parent.postMessage(cmd,'*');
+        window.parent.Lightbox.end();
+      }
+    } else { 
+      $('input[name="did"]').attr('value', did);
+      $('input[name="dtitle"]').attr('value', dtitle);
+      $('input[name="dtype"]').attr('value', dtype);
+      $('input[name="did"]').parents('form').submit();
+    }
 	};
 	
 }) (jQuery);

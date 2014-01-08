@@ -207,6 +207,10 @@ div#data_sheet_in_use.messages {
   height: 2em;
 }
 
+.my-data-table .views-field-created {
+    white-space: nowrap;
+}
+
 div#use-data-element-link {
   padding-top: 24px;
 }
@@ -557,6 +561,14 @@ html.lightpop .popup, html.lightpop .form-textarea-wrapper {
 
 html.lightpop #page {
   margin-top: 0px !important;
+}
+
+html.lightpop form.skip-form {
+  display: none;
+}
+
+html.lightpop .views-field-nothing-1 {
+    max-width: 200px !important;
 }
 
 div#sninsert-popup {

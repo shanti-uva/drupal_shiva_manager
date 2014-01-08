@@ -207,9 +207,9 @@ function shivanode_menu() {
   $items['mydata'] = array(
     'title' => 'Choose Your Data',
     'description' => 'List of Available Shiva Data Entries',
-    /*'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_data_elements'),*/
-    'page callback' => '_shivanode_data_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_shivanode_data_form'),
+   // 'page callback' => '_shivanode_data_page',
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
@@ -1106,7 +1106,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       drupal_goto($url);
     } 
     $submitVal = t('Save');
-    $ptitle = t('Create a @type', array('@type' => $sntype));
+    $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : $sntype)));
   } else {
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $form['#node']->title));
   }
