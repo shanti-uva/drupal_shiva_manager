@@ -202,15 +202,17 @@ function shivanode_menu() {
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
+  
   // Menu item for adding redirecting from popup when using an already added gdoc
   $items['data/add/nid'] = array(
     'type' => MENU_NORMAL_ITEM,
-    'title' => 'Add a Google Spreadsheet',
-    'description' => 'Adds a Google Spreadsheet as a data node and uses it',
+    'title' => 'Create a Visualization with existing sheet',
+    'description' => 'Uses existing data node to create a visualization',
     'page callback' => '_shivanode_add_datanid',
     'access callback' => 'is_auth_user',
     'file' => 'shivanode.inc',
   );
+  
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
   $items['mydata'] = array(
     'title' => 'Choose Your Data',
@@ -389,12 +391,12 @@ function shivanode_preprocess_page(&$vars) {
 
 function shivanode_apachesolr_search_page_alter(&$build, $search_page) {
   //dpm(array($build, $search_page));
-  dpm(array('build' => $build, 'search page' => $search_page));
+  //dpm(array('build' => $build, 'search page' => $search_page));
 }
 
 function shivanode_apachesolr_process_results(&$results, DrupalSolrQueryInterface $query) {
-  dpm($results, 'results');
-  dpm($query, 'query');
+  //dpm($results, 'results');
+  //dpm($query, 'query');
 }
 
 
@@ -1067,6 +1069,7 @@ function shivanode_add_og_user_role($form, &$form_state) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
+
   // Get the last part of the URL to determing what we are showing
   $action = $form['#action']; // the action url as stored in form
   $action_url_parts = explode('/', $action);
@@ -1085,7 +1088,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $submitVal = t('Update');
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
-  $ctype = FALSE; // Chart type variable
+  $ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
   // if the node with the form does not have an nid, we are creating a new shivanode node. Set variables accordingly
   $ptitle = '';
   if(!isset($form['#node']->nid)) {
@@ -1363,7 +1366,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   //dpm(array('eltypes' => $elTypes, 'sntype' => $sntype));
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
   $iframeUrl = _get_shivaframe_url($typeVal, $nid);   
-  
+  // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
+  if($is_new_el && $ctype) {
+    $iframeUrl .= '&chartType=' . str_replace(' ', '', $ctype);
+  }
   $dataInst = ($typeVal == 1) ? '<p style="display: block; clear: both;">' . t("This data node stores the URL of your spreadsheet. ") . 
        t("This page allows you to change the title by which this URL is referred to in the manager or delete this reference with the Delete button below. ") .
        t("(Note that deleting this reference will not affect your Google spreadsheet.) ") . 

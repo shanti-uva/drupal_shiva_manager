@@ -2393,9 +2393,10 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
  *  _shivanode_add_datanid($gid, $type): Called from the My Data list, this function is connected to the menu url: /data/add/nid/
  *      Redirects to url to form using a data node
  */
-function _shivanode_add_nid($nid = NULL, $type = NULL) {
+function _shivanode_add_datanid($nid = NULL, $type = 11) {
   $vtype = 'chart';
   $ctype = '';
+
   if($type < 15) {
     $ctype = _shivanode_types_using_gdocs($type); 
   } else {

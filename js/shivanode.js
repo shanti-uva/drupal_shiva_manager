@@ -207,7 +207,7 @@
 				var pts = window.location.search.split('ctype=');
 				window.frames['shivaEditFrame'].onload = function() {
 					var ctype = decodeURIComponent(pts[1].replace('Organization', 'Org'));
-					var funct = "Drupal.Shivanode.setChartType('" + ctype + "'); Drupal.Shivanode.insertDataElement('preset');";
+					var funct = "Drupal.Shivanode.insertDataElement('preset');"; // had at the beginning: Drupal.Shivanode.setChartType('" + ctype + "'); 
 					setTimeout(funct, 800);
 					window.frames['shivaEditFrame'].onload = null; // Only do it once. 
 				};
@@ -1110,22 +1110,24 @@
     var did = p.find('span[class="mydid"]').text();
     var dtype = p.find('span[class="mydtype"]').text();
     var vtype = $(el).val();
+    var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
+    // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
+    if(dtype == 'gid') {
+      url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
+    } 
     if($('html.lightpop').length == 1) {
-      var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
-      // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
-      if(dtype == 'gid') {
-        url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
-      } 
-      
       var cmd = 'SetUrl=' + url;
       window.parent.postMessage(cmd,'*');
       window.parent.Lightbox.end();
       
     } else { 
+      window.location.href = url;
+      /*
       $('input[name="did"]').attr('value', did);
       $('input[name="dtitle"]').attr('value', dtitle);
       $('input[name="dtype"]').attr('value', dtype);
       $('input[name="did"]').parents('form').submit();
+      */
     }
 	};
 	
