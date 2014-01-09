@@ -383,19 +383,45 @@ function _shivanode_access_modes() {
 
 /**
  * Helper function that gets all Shiva nodes most recent first
- *
+ *  options can either be a space separated list of options or a element type number. Options include:
+ *    stype:\d+ (the number after the colon will be the element type number and will show only elements of this type)
+ *    nodata (will exclude data elements)
+ *    recent (will give most recent elements first)
+ *    mine (will return only current users nodes. This will override the following.) 
+ *    user => uid (will return for a specific uid)
+ * 
+ *  If options is just a numeric it will return only elements of that type
  */
 
-function _get_shivanodes($stype = 0) {
+function _get_shivanodes($options = array()) {
   global $user;
+  if(is_string($options)) {
+    $options = explode(' ', $options); 
+    $options = array_flip($options);
+    foreach($options as $key => $value ) {
+      if(preg_match('/stype\:(\d+)/', $key, $matches)) {
+        $options['stype'] = $matches[1];
+        break;
+      }
+    }
+  }
+  if(is_numeric($options)) { $options = array('stype' => $options); }
+  $stype = (array_key_exists('stype', $options)) ? $options['stype'] : 0;
   $uid = $user->uid;
   $query = db_select('node', 'n');
   $query->join('field_data_shivanode_element_type', 'stype', 'n.nid = stype.entity_id');
+  $query->join('field_data_shivanode_access', 'sac', 'n.nid = sac.entity_id');
   $query->fields('n')
-    ->fields('stype')
+    ->fields('stype', array('shivanode_element_type_value'))
+    ->fields('sac', array('shivanode_access_value'))
     ->condition('n.type', 'shivanode')
     ->condition('n.status', NODE_PUBLISHED);
-  if (strpos($stype, 'recent') > -1 ) {
+  if(array_key_exists('mine', $options)) {
+    $query->condition('n.uid', $user->uid);
+  } else if(array_key_exists('user', $options)) {
+    $query->condition('n.uid', $options['user']);
+  }
+  if (array_key_exists('recent', $options)) {
     $query->orderBy('n.changed', 'DESC');
   } 
   else {
@@ -408,15 +434,14 @@ function _get_shivanodes($stype = 0) {
   $results = $query->execute();
   $nodes = array();
   foreach ($results as $row) {
-    $node = node_load($row->nid);
-    if ($node->uid == $uid || _get_shivanode_access_status($node) == "Published" ||  user_access('bypass node access')) {
-      if (strpos($stype, "nodata") > -1 ) {
-        if (_get_shivanode_type($node) != "Data") {
-          $nodes[] = $node;
+    if ($row->uid == $uid || $row->shivanode_access_value == "Published" ||  user_access('bypass node access')) {
+      if (array_key_exists('nodata', $options)) {
+        if ($row->shivanode_element_type_value > 1) {
+          $nodes[] = $row; // This was returning node objects but it was too intensive to load each node.
         }
       } 
       else {
-        $nodes[] = $node;
+        $nodes[] = $row;
       }
     }
   }
@@ -1452,6 +1477,12 @@ function _shivanode_data_form_submit($form, &$form_state) {
  *    See JS at:  Drupal.behaviors.shivaDataElementSelect in shivanode.js
  */
 function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
+  // If user does not have any data nodes, add one so view will show results
+  if(count(_get_shivanodes('stype:1 mine')) == 0) {
+    $url = 'https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dGVROGVESlJWblBSc1c4RjFPTVpyamc&usp=sharing';
+    $title = 'Example Data for SHIVA';
+    _shivanode_create_shiva_data_node($title, $url);
+  }
   // Get the view of data sets
   $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
   
@@ -1480,6 +1511,11 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
   $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
   $xpath = new DOMXPath($xml);
   $result = $xpath->evaluate($xpathstr)->item(0);
+  
+  if(!is_object($result)) {
+    return $xml->saveXML(); 
+  }
+  
   $result->setAttribute('class', preg_replace('/\s*views-row-last/', '', $result->getAttribute('class')));
   $tbody = $result->parentNode;
   $rowmod = $result->getAttribute('class');

@@ -899,7 +899,6 @@
 	};
 	
 	Drupal.Shivanode.getFile = function(data) {
-	  
 	  var prms = data.split("=");
 	  Drupal.Shivanode.fileItemIndex = prms[1];
 	  switch(prms[0]) {
