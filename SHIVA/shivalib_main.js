@@ -657,6 +657,10 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 							ops[o][v[0].split(".")[0]]={};
 							ops[o][v[0].split(".")[0]][v[0].split(".")[1]]=v[1];
 							}
+						else if (v[0].indexOf("_") != -1) {
+							ops[o][v[0].split("_")[0]]={};
+							ops[o][v[0].split("_")[0]][v[0].split("_")[1]]=v[1];
+							}
 						else
 							ops[o][v[0]]=v[1];
 						}

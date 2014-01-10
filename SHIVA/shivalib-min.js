@@ -164,6 +164,7 @@ var pairs=val.split(',');for(j=0;j<pairs.length;++j){if(!pairs[j])
 continue;if(array)
 ops[o].push(pairs[j].replace(/ /g,""));else{v=pairs[j].split("=");if(o=="options")
 ops[v[0]]=v[1].replace(/ /g,"");else if(v[0].indexOf(".")!=-1){ops[o][v[0].split(".")[0]]={};ops[o][v[0].split(".")[0]][v[0].split(".")[1]]=v[1];}
+else if(v[0].indexOf("_")!=-1){ops[o][v[0].split("_")[0]]={};ops[o][v[0].split("_")[0]][v[0].split("_")[1]]=v[1];}
 else
 ops[o][v[0]]=v[1];}}}}
 if(ops[o]=='true')ops[o]=true;if(ops[o]=='false')ops[o]=false;}
@@ -430,9 +431,10 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop,baseVar)
 switch(baseVar){case"legendTextStyle":case"titleTextStyle":case"pieSliceTextStyle":case"tooltipTextStyle":aProps={fontName:{opt:'string',des:'Font'},fontSize:{opt:'string',des:'Size'},color:{opt:'color',des:'Color'}}
 break;case"chartArea":aProps={left:{opt:'string',des:'Left'},top:{opt:'string',des:'Top'},height:{opt:'string',des:'Height'},width:{opt:'string',des:'Width'}}
 break;case"backgroundColor":aProps={fill:{opt:'color',des:'Fill color'},stroke:{opt:'color',des:'Border color'},strokeWidth:{opt:'string',des:'Border width'}}
-break;case"vAxis":case"hAxis":aProps={baseline:{opt:'string',des:'Baseline'},baselineColor:{opt:'color',des:'Baseline color'},direction:{opt:'string',des:'Direction'},format:{opt:'string',des:'Axis label format'},direction:{opt:'string',des:'Direction'},logScale:{opt:'string',des:'Log scale?'},textPosition:{opt:'string',des:'Text position'},title:{opt:'string',des:'Axis title'},maxValue:{opt:'string',des:'Max value'},minValue:{opt:'string',des:'Min value'},slantedText:{opt:'string',des:'Slanted text'}}
+break;case"vAxis":case"hAxis":aProps={baseline:{opt:'string',des:'Baseline'},baselineColor:{opt:'color',des:'Baseline color'},direction:{opt:'string',des:'Direction'},format:{opt:'string',des:'Axis label format'},direction:{opt:'string',des:'Direction'},logScale:{opt:'string',des:'Log scale?'},textPosition:{opt:'string',des:'Text position'},title:{opt:'string',des:'Axis title'},viewWindow_max:{opt:'string',des:'Max value'},viewWindow_min:{opt:'string',des:'Min value'},slantedText:{opt:'string',des:'Slanted text'}}
 break;case"backgroundColors":aProps={main:{opt:'color',des:'Main Background'},eventspan:{opt:'color',des:'Event Span Background'},head:{opt:'color',des:'Header, Footer and Zoom Background'},popup:{opt:'color',des:'Popup Background'},imagelane:{opt:'color',des:'Image Lane Background'},ticklane:{opt:'color',des:'Time Ticks Background'},popuplink:{opt:'color',des:'Popup Link Background'}}
-break;case"fontColors":aProps={main:{opt:'color',des:'Main Font Color'},head:{opt:'color',des:'Header Font Color'},popup:{opt:'color',des:'Popup Font Color'},links:{opt:'color',des:'Link Font Color'}}}
+break;case"fontColors":aProps={main:{opt:'color',des:'Main Font Color'},head:{opt:'color',des:'Header Font Color'},popup:{opt:'color',des:'Popup Font Color'},links:{opt:'color',des:'Link Font Color'}}
+break;}
 for(o in aProps){str+="<tr style='height:26px' onClick='ShowHelp(\""+aProps[o].des+"\")'><td>"+aProps[o].des+"</td><td>";if(aProps[o].opt=="color"){str+="<div style='max-height:26px'><input size='14' style='position:relative;text-align:center;height:16px;top:2px' id='"+baseVar+o+"'/>";str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px;background-color:white'"
 str+=" onclick='shivaLib.ColorPicker(0,\"___"+baseVar+o+"\")' id='"+baseVar+o+"C'/>";}
 else
