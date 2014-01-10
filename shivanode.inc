@@ -1369,7 +1369,7 @@ function _shivanode_data_form($form, &$form_state) {
   $form['skip'] = array(
     '#type' => 'submit',
     '#value' => t('Skip this step!'),
-    '#name' => '',
+    '#name' => 'skipbutton',
     '#prefix' => '<form class="skip-form" action="' . $baseurl . '">',
     '#suffix' => '</form>',
   );
@@ -1439,6 +1439,12 @@ function _shivanode_data_form($form, &$form_state) {
 function _shivanode_data_form_submit($form, &$form_state) {
   
   // example url: node/add/shivanode/1635/chart?ctype=Candlestick Chart
+  // example url when skipping data choice: node/add/shivanode/nd/timeline
+  if($form_state['clicked_button']['#name'] == 'skipbutton') {
+    // if there's an arg(1) it is type of visualization, so add /nd/ (no data) and then type name
+    $type = (arg(1)) ? '/nd/' . arg(1) : ''; 
+     drupal_goto('node/add/shivanode' . $type);
+  }
   $vals = $form_state['values'];
   if(!isset($vals['did']) || $vals['did'] == '') {
     drupal_set_message('No data id was sent', 'warning');
