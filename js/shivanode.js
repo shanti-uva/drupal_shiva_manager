@@ -1102,7 +1102,7 @@
 	 *   If the data selector popup is being show, then function messages parent frame to either insert the data in the form or
 	 *     if it is a gdoc that has not yet been added, go to the url to add that and then return to form with data nid.
 	 */
-	Drupal.Shivanode.setSelectedType = function(el) {
+	Drupal.Shivanode.setSelectedType = function(el, submit) {
 
 	  var p = $(el).parents('.views-field');
 	  var dtitle = p.find('span[class="mydtitle"]').text();
@@ -1120,9 +1120,13 @@
       window.parent.Lightbox.end();
       
     } else { 
+      if($(el).val() == 0) { return; }
+      //alert($(el).val()); return;
       $('input[name="did"]').attr('value', did);
       $('input[name="dtitle"]').attr('value', dtitle);
       $('input[name="dtype"]').attr('value', dtype);
+      $('input[name="vtype"]').attr('value', $(el).val());
+      $(el).parents('form').submit();
     }
 	};
 	

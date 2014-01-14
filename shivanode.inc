@@ -1445,7 +1445,7 @@ function _shivanode_data_form_submit($form, &$form_state) {
     $type = (arg(1)) ? '/nd/' . arg(1) : ''; 
      drupal_goto('node/add/shivanode' . $type);
   }
-  $vals = $form_state['values'];
+  $vals = $form_state['input'];
   if(!isset($vals['did']) || $vals['did'] == '') {
     drupal_set_message('No data id was sent', 'warning');
     return;
@@ -1463,13 +1463,22 @@ function _shivanode_data_form_submit($form, &$form_state) {
   }
    
   $url = array('node/add/shivanode/' . $nid);
-  if($vals['vtype']) {
-    $url[0] .= '/' . $vals['vtype'];
+  $ctype = FALSE;
+  if(arg(1)) {
+    $url[0] .= '/' . arg(1);
+    if(arg(2)) { $ctype = arg(2); }
+  } else if($vals['vtype']) {
+    $mytype = _shivanode_types_using_gdocs($vals['vtype']);
+    if($vals['vtype'] < 15) {
+      $ctype = $mytype;
+      $mytype = 'chart';
+    }
+    $url[0] .= '/' . $mytype;
   }
-  if($vals['ctype']) {
+  if($ctype) {
     $url[1] = array(
       'query' => array(
-        'ctype' => $vals['ctype'],
+        'ctype' => $ctype,
       )
     );
   }
