@@ -1120,13 +1120,9 @@
       window.parent.Lightbox.end();
       
     } else { 
-      window.location.href = url;
-      /*
       $('input[name="did"]').attr('value', did);
       $('input[name="dtitle"]').attr('value', dtitle);
       $('input[name="dtype"]').attr('value', dtype);
-      $('input[name="did"]').parents('form').submit();
-      */
     }
 	};
 	

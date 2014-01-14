@@ -1391,7 +1391,8 @@ function _shivanode_data_form($form, &$form_state) {
   
   // List GDocs
   // Call _shivanode_gdocs_view function to get HTML list of spreadsheets from view, tweak it and insert in this form
-  $viewmarkup = _shivanode_gdocs_view($type, $ctype);
+  $isSimple = (isset($_GET['format']) && $_GET['format'] == 'simple') ? TRUE : FALSE;
+  $viewmarkup = _shivanode_gdocs_view($type, $ctype, $isSimple);
   $form['addedview'] = array(
     '#type' => 'markup',
     '#markup' => $viewmarkup,
@@ -1437,10 +1438,9 @@ function _shivanode_data_form($form, &$form_state) {
 }
  
 function _shivanode_data_form_submit($form, &$form_state) {
-  
   // example url: node/add/shivanode/1635/chart?ctype=Candlestick Chart
   // example url when skipping data choice: node/add/shivanode/nd/timeline
-  if($form_state['clicked_button']['#name'] == 'skipbutton') {
+  if(isset($form_state['input']['skipbutton'])) {
     // if there's an arg(1) it is type of visualization, so add /nd/ (no data) and then type name
     $type = (arg(1)) ? '/nd/' . arg(1) : ''; 
      drupal_goto('node/add/shivanode' . $type);
@@ -1480,9 +1480,10 @@ function _shivanode_data_form_submit($form, &$form_state) {
  *    Calls a view of existing data elements and adds ones google docs to it, if one has given permission
  *    Creates visualize buttons to create a visualization using a spreadsheet when clicked.
  *    The buttons are modified by JS () to set the newss, newsstype, and newsstitle hidden elements when clicked before submission
+ *    $simple param refers to whether page is being displayed as a popup (simple = true) or not
  *    See JS at:  Drupal.behaviors.shivaDataElementSelect in shivanode.js
  */
-function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
+function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   // If user does not have any data nodes, add one so view will show results
   if(count(_get_shivanodes('stype:1 mine')) == 0) {
     $url = 'https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dGVROGVESlJWblBSc1c4RjFPTVpyamc&usp=sharing';
@@ -1509,7 +1510,12 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
     $info = explode('|$|', trim($txt->wholeText));
     $title = $info[0];
     $nid = $info[1];
-    $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
+    // if simple = true, it's a popup and just insert data node.
+    $selectFrag = $xml->createDocumentFragment(); 
+    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', true);">Visualize</a>');
+    if(!$simple) {
+      $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
+    }
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
   }
   
@@ -1540,7 +1546,12 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE) {
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
       $datecell->replaceChild(new DOMText('n/a'), $datecell->childNodes->item(0));
-      $linkcell->appendChild(_shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'gid', $gid ));
+      $selectFrag = $xml->createDocumentFragment(); 
+      $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
+      if(!$simple) {
+        $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'gid', $gid );
+      }
+      $linkcell->appendChild($selectFrag);
       
       $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
       $tbody->appendChild($rowclone);
@@ -2413,13 +2424,22 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   if(!$gid) { drupal_goto('mydata'); }
   $vtype = 'chart';
   $ctype = '';
+  $dnode = _shivanode_create_shiva_data_node($title, 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
+  if($type == "popup") {
+    $markup = array(
+      '#type' => 'markup',
+      '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
+    );
+    return $markup;
+  }
   if($type < 15) {
     $ctype = _shivanode_types_using_gdocs($type); 
   } else {
     $vtype = strtolower(_shivanode_types_using_gdocs($type));
   }
+  
   if($vtype == 'slideshow') { $vtype = 'image'; }
-  $dnode = _shivanode_create_shiva_data_node($title, 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
+  
   if($ctype == '') {
     drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
   } else {
@@ -2444,7 +2464,9 @@ function _shivanode_add_datanid($nid = NULL, $type = 11) {
   } else {
     $vtype = strtolower(_shivanode_types_using_gdocs($type));
   }
+  
   if($vtype == 'slideshow') { $vtype = 'image'; }
+
   if($ctype == '') {
     drupal_goto('node/add/shivanode/' . $nid . '/' . $vtype);
   } else {
