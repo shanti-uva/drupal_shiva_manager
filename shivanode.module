@@ -127,7 +127,7 @@ function shivanode_init() {
 }
 
 function shivanode_user_insert(&$edit, $account, $category) {
-  dpm(array(&$edit, $account, $category), "params");
+  dpm(array($edit, $account, $category), "params");
   dpm($_SESSION, 'sesson variable');
 }
 
