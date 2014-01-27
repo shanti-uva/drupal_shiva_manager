@@ -128,7 +128,9 @@ function shivanode_init() {
 
 function shivanode_user_insert(&$edit, $account, $category) {
   dpm(array($edit, $account, $category), "params");
-  dpm($_SESSION, 'sesson variable');
+  dpm($_SERVER, 'server variable');
+  dpm($_SESSION, 'session');
+  dpm($_SESSION['shib_auth_givenname'], 'given name');
 }
 
 function shivanode_user_logout($account) {
