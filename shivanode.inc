@@ -1443,8 +1443,16 @@ function _shivanode_data_form_submit($form, &$form_state) {
   if(isset($form_state['input']['skipbutton'])) {
     // if there's an arg(1) it is type of visualization, so add /nd/ (no data) and then type name
     $type = (arg(1)) ? '/nd/' . arg(1) : ''; 
-    $type = str_replace('Slideshow', 'Image', $type);
-    drupal_goto('node/add/shivanode' . $type);
+    $type = 'node/add/shivanode' . str_replace('Slideshow', 'Image', $type);
+    $options = array();
+    if(arg(2)) {
+      $options = array(
+        'query' => array(
+          'ctype' => arg(2),
+        )
+      );
+    }
+    drupal_goto($type, $options);
   }
   $vals = $form_state['input'];
   if(!isset($vals['did']) || $vals['did'] == '') {
