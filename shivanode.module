@@ -126,6 +126,11 @@ function shivanode_init() {
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
 }
 
+function shivanode_user_insert(&$edit, $account, $category) {
+  dpm(array(&$edit, $account, $category), "params");
+  dpm($_SESSION, 'sesson variable');
+}
+
 function shivanode_user_logout($account) {
   session_destroy();
   drupal_goto();
