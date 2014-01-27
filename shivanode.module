@@ -1119,7 +1119,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $submitVal = t('Save');
     $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : $sntype)));
   } else {
-    $ptitle = t('Edit Shivanode: @title', array('@title'=> $form['#node']->title));
+    $ptitle = $form['#node']->title;
+    $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
+    $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
   }
   if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
