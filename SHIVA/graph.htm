@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Graphs</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+ 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+ 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script type="text/javascript" src="d3.v3.min.js"></script>
+ 	<script type="text/javascript" src="shivalib-min.js"></script>
+	<script type="text/javascript" src="shivalib_graph.js"></script>
+
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 }
+  </style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+ 		<p><select id="chartType" onchange="ChangeChart(this.value)">
+			<option>Network</option>
+			<option>Tree</option>
+			<option>Chord</option>
+			<option>Radial</option>
+			<option>Bubble</option>
+		</select></p>
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+ 	<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+	</p>		
+ 	<div id="helpDiv"> </div>
+	<div id="outputDiv" style="width:460px"> </div>
+	</div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px"> </div>
+ 
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;
+	var shivaGroup="Graph"
+	var chartType="Network";
+	
+	var props={
+		Network:{
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdEVSSFNnOTF4OW9hUUQ3aHNNMmJxZ2c&output=html', 	opt:'string',			des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				linkDist:					{	def:'300', 			opt:'number',			des:'Node distance'},
+				linkCharge:					{	def:'-300', 		opt:'number',			des:'Node charge'},
+				linkGravity:				{	def:'10', 			opt:'number',			des:'Node gravity (0-100)'},
+				linkStrength:				{	def:'100', 			opt:'number',			des:'Node strength (0-100)'},
+				nShape:						{	def:'Circle', 		opt:'Circle|Square|Star|Triangle|Caret|Diamond|Plus',	des:'Node shape'},
+				nSize:						{	def:'20', 			opt:'number',			des:'Node size'},
+				nCol:						{	def:'none', 		opt:'color',		 	des:'Node color'},
+				eWid:						{	def:'2', 			opt:'number',		 	des:'Link line width'},
+				eCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Link color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Tree: 	{
+				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				nCol:						{	def:'b0c4de', 		opt:'color',		 	des:'Node color'},
+				eWid:						{	def:'1.5', 			opt:'number',		 	des:'Link line width'},
+				eCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Link color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Chord: {
+				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				}
+		}
+	
+	var helpText=new Array();
+	helpText['Data source URL']="Click on the spreadsheet icon to the right of 'Data source url' to access a list of your Google Docs Spreadsheets from within SHIVA. You may be prompted to authorize access (read-only) to your Google account. You should then be able to select a spreadsheet from the provided list.<br/> <br/>Alternately, you can paste the URL provided through the Share link of your Google Doc. Note you have to change the Share settings for the Spreadsheet to either 'Public' or 'Anyone with the link'. <br/><br/>See <a href='https://wiki.shanti.virginia.edu/x/o5S1AQ' target='_blank'>the Knowledge Base</a> for more information about how to create and link to network data for use in these visualizations.";
+	helpText['Height']="Enter a value in the text box to the right to set the height of the visualization.";
+	helpText['Width']="Enter a value in the text box to the right to set the width of the visualization.";
+	helpText['Background color']="In the text box to the right enter a color value that will set the color of the background of the visualization. Click on the square color chip icon in the text box to the right to launch the color picker and select a color, or type a hexadecimal color value in the text box.";
+	helpText['Node distance']="The target distance between linked nodes to the specified value. The distance between each pair of linked nodes is compared to the target distance the links are then moved towards each other, or away from each other, to converge on the desired distance.";
+	helpText['Node charge']="A negative value results in node repulsion, while a positive value results in node attraction. For graph layout, negative values should be used; for n-body simulation, positive values can be used. All nodes are assumed to be infinitesimal points with equal charge and mass.";
+	helpText['Node gravity (0-100)']="A virtual spring connecting each node to the center of the layout's size. Near the center of the layout, the gravitational strength is almost zero, avoiding any local distortion of the layout; as nodes get pushed farther away from the center, the gravitational strength becomes strong in linear proportion to the distance.";
+	helpText['Node strength (0-100)']="Sets the strength (rigidity) of links to the set value.";
+	helpText['Node shape']="Use the drop-down menu to the right to set the default shape of each node. This can be set by the class field in the spreadsheet on a node-by-node basis.";
+	helpText['Node size']="In the text box to the right enter a value that sets the default radius or height of each node. This can be set by the class field in the spreadsheet on a node-by-node basis.";
+	helpText['Node color']="In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box. This can be set by the class field in the spreadsheet on a node-by-node basis.";
+	helpText['Link color']="In the text box to the right enter a value that sets the default color of link lines. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.This can be set by the class field in the spreadsheet on a link-by-link basis.";
+	helpText['Link line width']="In the text box to the right enter a value that sets the default link line width in pixels. This can be set by the class field in the spreadsheet on a link-by-link basis.";
+	helpText['Font size']="Click on the text box to the right and enter a number that sets the font size of node labels in pixels.";
+	helpText['Font color']="In the text box to the right enter a value that will determine the font color of node labels. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color code in the text box.";
+	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
+
+///// INIT  /////////////
+	
+	$(document).ready(function() {
+  		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	shivaLib.SetAttributes(props[chartType]);
+		shivaLib.callback=Draw;
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
+		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
+		$("#toolbar").buttonset();
+	
+	});
+
+	function ChangeChart(type)
+	{
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("ChartChanged="+type,"*");
+		$("#containerDiv").html("");
+		SetAttributes(type,false);	
+		Draw();
+	}
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+
+	function Draw(mode)
+	{	
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,null,props[chartType],chartType);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		if (jsonData) {
+			if (jsonData.chartType)
+				chartType=jsonData.chartType;
+			}
+		else{
+			var s,e;
+			var query=window.location.search.substring(1);
+			if ((s=query.indexOf("&chartType=")) != -1)
+				if ((e=query.indexOf("&",s+1)) != -1)
+					chartType=query.substring(s+11,e);
+			}
+		SetAttributes(chartType);	
+		$("#chartType").val(chartType);
+		Draw();
+	}
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Powered by D3<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function SetAttributes(type,keep)
+	{
+		chartType=type;
+		shivaLib.SetAttributes(props[type]);
+	}	
+	
+</script>
+</body></html>

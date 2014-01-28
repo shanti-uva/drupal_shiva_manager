@@ -293,6 +293,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			continue;																	// No need for interaction
 
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
+										aspectRatio:!(shivaLib.items[i].url.match(/http/)),
 										stop:function(event,ui) {						// On resize stop
 											var i=event.target.id.substr(10);			// Extract id
 											var v=shivaLib.items[i].data.split("|");	// Get parts
@@ -300,8 +301,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];				// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);			// Put in menu
 											if (shivaLib.items[i].url.match(/http/)) { 					// If not a shiva module
-												var asp=ui.size.height/ui.size.width;					// Get aspect
-											 	asp=Math.round(shivaLib.items[i].asp*1000);				// Set asp string
+												var asp=Math.round(ui.size.height/ui.size.width*1000);	// Set asp string
 												shivaLib.items[i].asp=asp;								// Set new asp
 												$("#itemInput"+i+"-2").val(asp);						// Set props
 												}
