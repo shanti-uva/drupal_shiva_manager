@@ -23,7 +23,7 @@
 			else {
 				window.attachEvent('message', Drupal.Shivanode.shivaMessageHandler);
 			}
-			
+			  
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
 				//console.info("took interval out here");
@@ -102,42 +102,7 @@
 					}
 				});
 			}
-			 
-			/* Old code for when embed page had a drop down list (commented out 2013-04-05)
-			// If it's an embed code pop-up, add change to the select
-						// to relay the request for the appropriate get function and put its result in the text area
-						// the object Drupal.Shivanode.node is embeded in popup window by the Drupal _shivanode_node_embed_page($nid) function
-						// it contains values for nid (node id), title, json, and player.
-						$('#snembedselect').change(function() {
-					 var choice = $(this).val();
-						  var url = Drupal.Shivanode.node.player + "?m=//" + window.location.host + Drupal.settings.basePath 
-												 + 'data/json/' + Drupal.Shivanode.node.nid;
-						  var jobj = JSON.parse(Drupal.Shivanode.node.json);
-						  var retval = '';
-					 switch (choice) {
-					  case 'cf':
-						retval = '{iframe:src=' + url + '|width=' + jobj.width + '|height=' + jobj.height + '}Your browser does not support iframes{iframe}';
-						break;
-						 case 'wp':
-							 retval = "[iframe src='" + url + "']";
-							 break;
-						 case 'link':
-							 retval = '<a href="' + url + '">' + Drupal.Shivanode.node.title + '</a>';
-							 break;
-						 case 'if':
-							 retval = '<iframe src="' + url + '" height="' + jobj.height + '" width="' + jobj.width + '"></iframe>';
-							 break;
-						 case 'json':
-							 retval = Drupal.Shivanode.node.json;
-							 break;
-						 default:
-							 retval = url;				
-							 break;
-					 }
-					 $('#sn-embedcode-area').val(retval); 
-				  });*/
-			
-			
+			   
 			// if format=simple then hide header footer and sidenavs
 			var ss = window.location.search;
 			if(ss.indexOf('format=simple') > -1) {
