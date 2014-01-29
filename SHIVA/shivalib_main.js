@@ -169,7 +169,7 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE TO DRUPAL MANAGER
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
-		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind	
+		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
 	if (this.options.height && this.options.width)							// If height and width defined
 		asp=this.options.height/this.options.width;							// Calc asp

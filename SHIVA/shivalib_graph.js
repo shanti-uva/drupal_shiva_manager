@@ -29,18 +29,18 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 	function zoomed() {													// ZOOM HANDLER
  		d3Scale=d3.event.scale;											// Set current scale
- 		if (d3Scale > 1)												// If zoomed in
+ 		if (d3Scale != 1)												// If zoomed
  			svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
-		else															// Else
-  			svg.attr("transform","scale("+d3Scale+")");					// Just set scale
-	  	}
- 	
+		else
+ 			svg.attr("transform","translate("+[0,0]+") scale("+d3Scale+")");	// Set scale and translate
+
+		} 	
 	var svg=d3.select(con)												// Add SVG to container div
 		.append("svg")													// Add SVG shell
 		.attr("width",w).attr("height",h)								// Set size
 		.append("g")													// Needed for pan/zoom	
-		.call(d3.behavior.zoom().scaleExtent([.05,10]).on("zoom",zoomed)) // Set zoom
-			
+		.call(d3.behavior.zoom().scaleExtent([1,10]).center([w/2,h/2]).on("zoom",zoomed)) // Set zoom
+	 		
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
     	.attr("id","underLayer")										// Set id
@@ -131,19 +131,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			edges.enter()												// Enter
 				.append("line")											// Add line
 				.style("stroke", function(d, i) {						// Edge col
-					if (d.style && styles[d.style].eCol)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].eCol)	// If a style spec'd
 						return styles[d.style].eCol;					// Get col from data
 					else												// Default
 						return options.eCol;							// Set wid
 						})									
 				.style("stroke-width", function(d, i) {					// Edge width
-					if (d.style && styles[d.style].eWid)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].eWid)	// If a style spec'd
 						return styles[d.style].eWid;					// Get col from options
 					else												// Default
 						return options.eWid;							// Set wid
 					})									
 				.style("opacity", function(d, i) {						// Alpha
-					if (d.style && styles[d.style].alpha)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].alpha) // If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 						})
 
@@ -165,27 +165,27 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			nodes.enter()												// Enter
 				.append(function(d,i) {									// Add shape
 					shape=options.nShape;								// Set shape
-					if (d.style && styles[d.style].shape)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].shape) // If a style spec'd
 						shape=styles[d.style].shape;					// Get shape from options
 					return document.createElementNS("http://www.w3.org/2000/svg",shape.toLowerCase() != "circle"?"polygon":"circle");	// Create svg based on shape
 					})
 				.attr("points",function(d,i) {							// Add points
 					shape=options.nShape;								// Set shape
-					if (d.style && styles[d.style].shape)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].shape) // If a style spec'd
 						shape=styles[d.style].shape;					// Get shape from options
 					var size=options.nSize;								// Default size
-					if (d.style && styles[d.style].size)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].size)	// If a style spec'd
 						size=styles[d.style].size;						// Get size from options
 					return DrawSVGShape(shape.toLowerCase(),size);		// Create svg based on shape
 					})
 				.attr("r",function(d,i) {								// Add points
-					if (d.style && styles[d.style].size)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].size)	// If a style spec'd
 						return styles[d.style].size/2;					// Get size from options
 					else												// Default
 						return options.nSize/2;							// Return size
 					})
 				.style("fill", function(d, i) {							// Color
-					if (d.style && styles[d.style].col)					// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].col)	// If a style spec'd
 						return styles[d.style].col;						// Get col from options
 					else{												// Default	
 						if (options.nCol == "none")						// If no color set														
@@ -195,15 +195,15 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						}
 					})									
 				.style("stroke", function(d, i) {						// Edge col
-					if (d.style && styles[d.style].eCol)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].eCol)	// If a style spec'd
 						return styles[d.style].eCol;					// Get col from options
 					})									
 				.style("stroke-width", function(d, i) {					// Edge width
-					if (d.style && styles[d.style].eWid)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].eWid)	// If a style spec'd
 						return styles[d.style].eWid;					// Get col from options
 					})									
 				.style("opacity", function(d, i) {						// Alpha
-					if (d.style && styles[d.style].alpha)				// If a style spec'd
+					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
 				.call(force.drag);
@@ -226,7 +226,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				var size;									
 				labels.attr("x", function(d) { return d.x+"px"; })		// Position labels
 					.attr("y", function(d) { 							// Set top
-						if (d.style && styles[d.style].size)			// If a style spec'd
+						if (d.style && styles[d.style] && styles[d.style].size)	// If a style spec'd
 							size=styles[d.style].size;					// Get size from data
 						else											// Use default
 							size=options.nSize;							// Get size from options
