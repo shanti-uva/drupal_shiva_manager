@@ -513,7 +513,7 @@ function _shivanode_parse_json($jdata) {
 function _shivanode_admin_settings($form, &$form_state) {
   
   $form['shivanode_settings_header'] = array(
-    '#markup' => t('<h3>Shivanode URL Settings</h3>') .
+    '#markup' => t('<h3>Shivanode Basic Settings</h3>') .
       t('<p>In this form you can set the URLs for the SHIVA player (for viewing nodes) and the various SHIVA editors.</p>'),
   );
   
@@ -544,6 +544,43 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
   
+  $form['shivanode_username'] = array(
+    '#prefix' => '<div id="snuname">',
+    '#suffix' => '</div>',
+  );
+  
+  $form['shivanode_username']['shivanode_username_auto'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use Institution\'s Whois Server to Fill Out Username'),
+    '#default_value' => variable_get('shivanode_username_auto', FALSE),
+    '#required' => FALSE,
+    '#ajax' => array(
+      'callback' => '_shivanode_uname_field',
+      'wrapper' => 'snuname',
+      'method' => 'replace',
+    ),
+  );
+  
+  $prefixval = (variable_get('shivanode_username_auto', FALSE)) ? '<div>' : '<div style="display:none;">';
+  
+  $form['shivanode_username']['shivanode_whois_host'] = array(
+      '#type' => 'textfield',
+      '#title' => t('URL for WhoIs Host'),
+      '#default_value' => variable_get('shivanode_whois_host', 'whois.virginia.edu'),
+      '#prefix' => $prefixval,
+      '#suffix' => '</div>',
+      '#size' => 60,
+  );
+  
+  $form['shivanode_view_json'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'View JSON in Edit Form',
+    '#description' => t('Allow users to view the JSON format of the data in an uneditable field. ') . 
+                      t('Their role must have appropriate permissions set ') . l(t('here'), 'admin/people/permissions') . '.',
+    '#default_value' => variable_get('shivanode_view_json', FALSE),
+  );
+  
+  /*
   $form['shivanode_url_settings']['instructions_1'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('The following fields for the specific SHIVA editors can contain either a full URL includin "http://" or ' . 
@@ -622,7 +659,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR),
     '#required' => TRUE,
   );*/
-    
+   /*
   $form['shivanode_url_settings']['shivanode_timeglider_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Timeglider Editor File:'),
@@ -669,7 +706,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#size' => 50,
     '#default_value' => variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR),
     '#required' => TRUE,
-  );
+  );*/
 
   // Reset buttons uses the validate function to reset data
   $form['actions']['default_values'] = array(
@@ -679,6 +716,16 @@ function _shivanode_admin_settings($form, &$form_state) {
   );
   
   return system_settings_form($form);
+}
+
+function _shivanode_uname_field($form, $form_state) {
+  $ufieldset = $form['shivanode_username'];
+  if($ufieldset['shivanode_username_auto']['#value'] == 1) {
+    $ufieldset['shivanode_whois_host']['#prefix'] = '<div>';
+  } else {
+    $ufieldset['shivanode_whois_host']['#prefix'] = '<div style="display: none;">';
+  }
+  return $ufieldset;
 }
 
 function _shivanode_admin_settings_display($form, &$form_state) {
@@ -762,13 +809,6 @@ function _shivanode_admin_settings_display($form, &$form_state) {
     '#size' => 3,
     '#default_value' => variable_get('shivanode_min_size', SHIVA_IFRAME_DIMENSION_MINIMUM),
     '#required' => TRUE,
-  );
-  $form['shivanode_view_json'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'View JSON in Edit Form',
-    '#description' => t('Allow users to view the JSON format of the data in an uneditable field. ') . 
-                      t('Their role must have appropriate permissions set ') . l(t('here'), 'admin/people/permissions') . '.',
-    '#default_value' => variable_get('shivanode_view_json', FALSE),
   );
   
   $form['actions']['default_values'] = array(

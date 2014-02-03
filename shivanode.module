@@ -126,6 +126,27 @@ function shivanode_init() {
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
 }
 
+/**
+ * Hook_user_presave: Use UVa's whois to fill in first and last name if it does not exist.
+ */
+function shivanode_user_presave(&$edit, $account, $category) {
+  if(variable_get('shivanode_username_auto', FALSE)) {
+    $host = variable_get('shivanode_whois_host', 'whois.virginia.edu'); 
+    $name = $edit['name'];
+    if(count($edit['field_lname']['und']) == 0) {
+      $whois = shell_exec('whois -h ' . $host . ' ' . $name);
+      if(preg_match('/Name:\s+([^\n]+)/',$whois, $matches)) {
+        $name = $matches[1];
+        $name = explode(' ', $name);
+        if(count($edit['field_fname']['und']) == 0) {
+          $edit['field_fname']['und'] = array( array('value' => $name[0] ));
+        }
+        $edit['field_lname']['und'] = array( array('value' => array_pop($name) ));
+      }
+    }
+  }
+}
+
 function shivanode_user_logout($account) {
   session_destroy();
   drupal_goto();
@@ -158,8 +179,8 @@ function shivanode_menu() {
     'file' => 'shivanode.inc',
   );
   
-  $items['admin/config/content/shivanode/urls'] = array(
-    'title' => 'URLs',
+  $items['admin/config/content/shivanode/basic'] = array(
+    'title' => 'Basic',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -20
   );
