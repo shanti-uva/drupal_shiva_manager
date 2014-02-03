@@ -531,7 +531,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   $form['shivanode_url_settings']['shivanode_chart_viewer'] = array(
     '#type' => 'textfield',
     '#title' => t('Full URL for the SHIVA player (go.htm)'),
-    '#size' => 50,
+    '#size' => 80,
     '#default_value' => variable_get('shivanode_chart_viewer', SHIVA_VIEWER),
     '#required' => TRUE,
   );
@@ -539,7 +539,7 @@ function _shivanode_admin_settings($form, &$form_state) {
   $form['shivanode_url_settings']['shivanode_root_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Base URL (path) for the SHIVA editors:'),
-    '#size' => 50,
+    '#size' => 80,
     '#default_value' => variable_get('shivanode_root_url', SHIVA_ROOT),
     '#required' => TRUE,
   );

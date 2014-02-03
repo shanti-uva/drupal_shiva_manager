@@ -600,6 +600,11 @@ table.pagerer {
   margin-left: 30% !important;
 }
 
+/* Admin Styles */
+div.form-item-shivanode-whois-host {
+  margin: -15px 0px 0px 30px;
+}
+
 /* General class styles */
 /* .button-link: a class to make a button look like a regular link */
 span.button-link input {
