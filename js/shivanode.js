@@ -217,7 +217,7 @@
 	
 	Drupal.Shivanode.fileItemIndex = null; // The index of the item for which a file request has been made in GetFile
 	
-	Drupal.Shivanode.gettingJSON = false;
+	Drupal.Shivanode.status = "";
 	
 	Drupal.Shivanode.helplinks = {
     'Annotated Time Line': 'https://wiki.shanti.virginia.edu/x/aAHLAQ',
@@ -262,7 +262,10 @@
 	  "Timeline2":"https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dEVPbGc0N20zNndsQjE5MXFUdDVSYlE&usp=sharing",
 	  "rgraph":"https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt",
 	  "forcedir":"https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt",
-	  "hypertree":"https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt" 
+	  "hypertree":"https://docs.google.com/spreadsheet/pub?key=0AtzYXVRFwsAMdHh1MnBpZnhHSjVSNFAtY0hZUG5MYmc&output=txt",
+	  "GraphNetwork":"https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdEVSSFNnOTF4OW9hUUQ3aHNNMmJxZ2c&output=html",
+	  "GraphTree":"https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdERqTXJTbnJGUzdMamtzVUV1d0NFalE&output=html",
+	  "GraphBubble":"https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdERqTXJTbnJGUzdMamtzVUV1d0NFalE&output=html"
 	};
 	/*
 	  shivaMessageHandler(e) : A handler for HTML 5 messages to the current frame
@@ -332,7 +335,7 @@
 	  }
 	  
 	  // Determine the message and act appropriately.
-		
+
 	  // ChartChanged={chart type} : When the visualization chart is changed
 	  if (e.data.indexOf('ChartChanged=') == 0) {
 	    Drupal.Shivanode.setHelpLink(e.data.substr(13));
@@ -350,7 +353,7 @@
 	    //
 	    } else if($('#shivanode_data_nid').length > 0) {
 				// if there is a set data node, then reinsert that data
-				setTimeout("Drupal.Shivanode.insertDataElement('preset');", 1000);
+				Drupal.Shivanode.status = "chartChanged";
 			}
 			
 		// DataChanged={boolean} : When certain pages are changed
@@ -430,13 +433,17 @@
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
 				Drupal.Shivanode.jsonloaded = true;
 		  // else if adding a new element tell it to load default data (only timeglider needs this)
-			} else if (window.location.href.indexOf("add/shivanode") > -1) {
+			} else if (window.location.href.indexOf("add/shivanode") > -1 && Drupal.Shivanode.status != "chartChanged") {
 			   Drupal.Shivanode.ShivaMessage("shivaEditFrame", "LoadDefaultData");
 			}
 			if(typeof(Drupal.Shivanode.networkJSON) != "undefined") {
 				Drupal.Shivanode.putJSON('shivaEditFrame', Drupal.Shivanode.networkJSON);
 				delete Drupal.Shivanode.networkJSON;
 			} 
+			if(Drupal.Shivanode.status == "chartChanged") {
+        Drupal.Shivanode.status = "";
+			  Drupal.Shivanode.insertDataElement('preset');
+			}
 			
 		// GetKML={layerid} : Set the data entry in the Iframe using the data entries ID.
     } else if (e.data.indexOf('GetFile=') == 0) {
@@ -485,12 +492,12 @@
 		} else if(typeof(jsonparam) == "string" && jsonparam != "") {
 			var jobjSent = JSON.parse(jsonparam);
 			url = jobjSent.dataSourceUrl;
-			title = jobjSent.title;
+			title = (typeof(jobjSent.dataSourceTitle) != "undefined") ? jobjSent.dataSourceTitle : jobjSent.title;
 		}
 		// Parse JSON into object and validate data
 		var jobj = JSON.parse(json); //var jobj = $.evalJSON(json);
 		if(typeof(jobj.dataSourceUrl) != 'undefined') { jobj.dataSourceUrl = url; }
-		if(typeof(jobj.title) != 'undefined') { jobj.title = title.replace(' (Data)',''); }
+		if(typeof(jobj.title) == 'undefined' || jobj.title == '' ) { jobj.title = title.replace(' (Data)',''); }
 		if(typeof(jobj.shivaMod) != 'undefined') {
 			var dt = new Date;
 			jobj.shivaMod = dt.toDateString();
@@ -499,6 +506,7 @@
 		// When not preset (preset means the shivanode_data_nid is already set and we are reinserting the data into the entry form)
 		// Then add the markup in the node create/edit form
 		if (ispreset == false ) {
+		  console.trace();
 			$("#data_sheet_in_use").html('<input id="shivanode_data_nid" name="shivanode_data_nid" type="hidden" value="' + jobj.did + '" /> ' +
 				'<strong>Data Used: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
 				'<span id= "chosen_data_element_url" class="hidden">' + url + '</span>' +
@@ -593,10 +601,10 @@
 	 * 		This calls the editor iframe which response with the message GetJSON={json string}
 	 */
 	Drupal.Shivanode.getJSON = function() {
-	  if(Drupal.Shivanode.gettingJSON == true) {
+	  if(Drupal.Shivanode.status == "gettingJSON") {
 	    return;
 	  }
-	  Drupal.Shivanode.gettingJSON = true;
+	  Drupal.Shivanode.status = "gettingJSON";
 		var frm = 'shivaEditFrame';
 		Drupal.Shivanode.ShivaMessage(frm,'GetJSON');
 	};	
@@ -702,14 +710,14 @@
 		
 		} else if (typeof(mode) == "string" && typeof(Drupal.Shivanode.dataChanged) == "string" && Drupal.Shivanode.dataChanged != mode) {
 			Drupal.Shivanode.chartChanged = true;
-			if(!Drupal.Shivanode.loadJS) {
+			if(!Drupal.Shivanode.loadJS && Drupal.Shivanode.status != "chartChanged") {
 			  Drupal.Shivanode.getJSON();
 			}
 		} else {
 			Drupal.Shivanode.dataChanged = mode;
 			Drupal.Shivanode.chartChanged = false;
 			Drupal.Shivanode.setUnloadConfirm(true);
-      if(!Drupal.Shivanode.loadJS) {
+      if(!Drupal.Shivanode.loadJS && Drupal.Shivanode.status != "chartChanged") {
         Drupal.Shivanode.getJSON();
       }
 		}
@@ -775,25 +783,32 @@
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
-    Drupal.Shivanode.gettingJSON = false;
+    Drupal.Shivanode.status = "";
 		var jobj = JSON.parse(json); 
-		
+		// if IDE.url is "preset" insert attached data node url into json
+		if(Drupal.Shivanode.IDE && Drupal.Shivanode.IDE.url && Drupal.Shivanode.IDE.url == "preset") {
+		  jobj.dataSourceUrl = $('#chosen_data_element_url').text();
+		  //Drupal.Shivanode.IDE = null;
+		}
 		if(typeof(jobj.dataSourceUrl) != "undefined") { 
       Drupal.Shivanode.checkForDefaultUrl(jobj.dataSourceUrl);
     }
-    
+    json = JSON.stringify(jobj);
 		// If "new" json is the same as old "latestJSON" then return
     if (Drupal.Shivanode.latestJSON == json) {
     		return;
     }
     
-    // if new DataSourceURL sent from Iframe, then just replace the URL and don't revert to default values for other fields
+    // if new DataSourceURL sent from Iframe, then just replace the URL, Data title, and DID in the current JSON 
+    // and don't revert to default values for other fields
     if(typeof(jobj.isNewDSU) != "undefined" && jobj.isNewDSU == true) {
       var oldjson = JSON.parse(Drupal.Shivanode.latestJSON);
       oldjson.dataSourceUrl = jobj.dataSourceUrl;
-      json = oldjson;
-      Drupal.Shivanode.putJSON('shivaEditFrame', json);
-      return;
+      oldjson.dataSourceTitle = jobj.title;
+      oldjson.did = jobj.did;
+      json = JSON.stringify(oldjson);
+      jobj = JSON.parse(json);
+      Drupal.Shivanode.IDE.json = json;
     }
     
     // Set the latestJSON variable

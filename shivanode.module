@@ -27,6 +27,9 @@ define('SHIVA_DRAW_EDITOR', 'draw.htm');
 // default URL for Earth Editor
 define('SHIVA_EARTH_EDITOR', 'earth.htm');
 
+// default URL for GRAPH Editor
+define('SHIVA_GRAPH_EDITOR', 'graph.htm');
+
 // default URL for Image Editor
 define('SHIVA_IMAGE_EDITOR', 'image.htm');
 
@@ -1442,6 +1445,7 @@ function shivanode_element_change($form, $form_state) {
   $iframeUrl = _get_shivaframe_url($typeVal);
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $typeStr  . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .

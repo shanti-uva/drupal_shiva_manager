@@ -258,6 +258,7 @@ function _shivanode_element_typelist($byName = FALSE) {
     1 => t('Data'),
     11 => t('Draw'),
     12 => t('Earth'),
+    16 => t('Graph'),
     2 => t('Image'),
     3 => t('Map'),
     10 => t('Network'),
@@ -580,7 +581,6 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_view_json', FALSE),
   );
   
-  /*
   $form['shivanode_url_settings']['instructions_1'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('The following fields for the specific SHIVA editors can contain either a full URL includin "http://" or ' . 
@@ -609,6 +609,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#title' => t('Name of the Earth Editor File:'),
     '#size' => 50,
     '#default_value' => variable_get('shivanode_earth_editor', SHIVA_EARTH_EDITOR),
+    '#required' => TRUE,
+  );
+
+  $form['shivanode_url_settings']['shivanode_graph_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Graph Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_graph_editor', SHIVA_GRAPH_EDITOR),
     '#required' => TRUE,
   );
 
@@ -659,7 +667,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR),
     '#required' => TRUE,
   );*/
-   /*
+
   $form['shivanode_url_settings']['shivanode_timeglider_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Timeglider Editor File:'),
@@ -706,7 +714,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#size' => 50,
     '#default_value' => variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR),
     '#required' => TRUE,
-  );*/
+  );
 
   // Reset buttons uses the validate function to reset data
   $form['actions']['default_values'] = array(
@@ -867,12 +875,13 @@ function _shivanode_admin_settings_thumbs($form, &$form_state) {
 function _shivanode_admin_settings_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#id'] == 'edit-default-values') {
     // Viewer and Editor URLS
-    $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
+   $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
     $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
     $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
     $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
     $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
     $form_state['input']['shivanode_earth_editor'] = SHIVA_EARTH_EDITOR;
+    $form_state['input']['shivanode_graph_editor'] = SHIVA_GRAPH_EDITOR;
     $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
     $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
     $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
@@ -1749,6 +1758,7 @@ function _shivanode_types_using_gdocs($val = FALSE) {
     'Scatter Chart',
     'Table',
     'Tree Map',
+    'Graph',
     'Slideshow',
     'Network',
     'Timeline'
@@ -2010,6 +2020,9 @@ function _get_shivaframe_url($opt, $nid = '') {
       break;
     case 15: // Word Cloud
       $player =  variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR);
+      break;
+    case 16: // Graph
+      $player =  variable_get('shivanode_graph_editor', SHIVA_GRAPH_EDITOR);
       break;
   }
   if (strpos($player, 'http://') === FALSE && $opt > 1) {
