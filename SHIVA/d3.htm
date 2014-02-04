@@ -6,9 +6,8 @@
 		<title>D3 Testbed</title>
 		<script type="text/javascript" src="d3.v3.min.js"></script>
 		<style type="text/css">
-		
 
-    </style>
+ </style>
   </head>
   <body>
     <div id="body">
@@ -19,151 +18,116 @@
 	var options={}
 	options.lSize=12;
 	options.lCol="000";
-	options.spacing=180;
-	options.nCol="b0c4de";
-	options.eCol="ccc";
-	options.eWid=1.5;
 	options.width=800;
 	options.height=600;
 	options.trans=1000;
+	options.padding=2;
+	options.style="Grou[p";
+	options.gCol="1f77b4";
+	options.nCol="ff9333";
 	
-	////////////////////////////////////////
-	// STYLE
-	////////////////////////////////////////
-	
-	$("<style type='text/css'>.node circle{cursor:pointer;fill:#fff;stroke:#999}</style>").appendTo("head");
-	$("<style type='text/css'>.node text{font-family:sans-serif}</style>").appendTo("head");
-	$("<style type='text/css'>.link{fill:none;}</style>").appendTo("head");
+	var dataSet=null;
+	firstTime=true;	
 
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 
-	var	i=0,															// Graph globals
-		m=[20,options.spacing/2,20,options.spacing/2],					// Margins
-		w=options.width- m[1]-m[3],										// Width
-		h=options.height-m[0]-m[2],										// Height
-		vis,															// V
-		root;															// Data root
-	
-	var tree=d3.layout.tree()											// Create tree layout
-	    .size([h,w]);													// Set size
-	var diagonal=d3.svg.diagonal()										// Create link lines
-	    .projection(function(d) { return [d.y, d.x]; });				// Set projection with x/y crossed
-	vis=d3.select("#body").append("svg")								// Create SVG
-		.attr("width",w+m[1]+m[3])										// Set width
-	    .attr("height",h+m[0]+m[2])										// Height
-		.append("g")													// Add element
-	    .attr("transform","translate("+m[3]+","+m[0]+")");				// Move into margin area
-	
-	d3.json("flare.json", function(json) {
-		root=json;														// Set data root
-		root.x0=h/2;													// Center x
-		root.y0=0;														// At top
-		
-		function toggleAll(d) {											// TOGGLE NODES
-			if (d.children) {											// If node has children									
-				d.children.forEach(toggleAll);							// Toggle all cildren
-				toggle(d);												// Toggle this node
-		   		}
-		  }
-	
-		root.children.forEach(toggleAll); 								// Initialize the display to show a few nodes
-		toggle(root.children[1]);
-		toggle(root.children[1].children[2]);
-		toggle(root.children[9]);
-		toggle(root.children[9].children[0]);
-		update();														// Draw
-		});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function update()												// DRAW
-	{
-		var nodes=tree.nodes(root).reverse();							// Compute the new tree layout.
-		nodes.forEach(function(d) { d.y=d.depth*options.spacing; });	// Normalize for fixed-depth.
-		var node=vis.selectAll("g.node")								// Update the nodes
-	      .data(nodes,function(d) { return d.id || (d.id=++i); });		// Get data
+    colors = d3.scale.category10();
+	var svg=d3.select("body").append("svg")
+	    .attr("width",options.width)
+	    .attr("height",options.height)
+
+	d3.json("flare.json", function(d) { dataSet=d; redraw() });
+
+	function redraw() {												// DRAW
+		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function zoom(d, i) {
+  var k = r / d.r / 2;
+  x.domain([d.x - d.r, d.x + d.r]);
+  y.domain([d.y - d.r, d.y + d.r]);
+
+  var t = vis.transition()
+      .duration(d3.event.altKey ? 7500 : 750);
+
+  t.selectAll("circle")
+      .attr("cx", function(d) { return x(d.x); })
+      .attr("cy", function(d) { return y(d.y); })
+      .attr("r", function(d) { return k * d.r; });
+
+  t.selectAll("text")
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .style("opacity", function(d) { return k * d.r > 20 ? 1 : 0; });
+
+  node = d;
+  d3.event.stopPropagation();
+}
+		
+				var dia=Math.min(options.height,options.width)-8;			// Diameter
+				var bubble=d3.layout.pack()								// Create layout
+					.size([dia,dia])									// Set size
+		    		.padding(options.padding);							// Padding
+			  	
+				if (options.style != "Spiral")							// If not a spiral
+			  		bubble.sort(null)									// Don't sort
+			  	
+			  	var node=svg.selectAll("node")							// Select the nodes
+					.data(bubble.nodes(classes(dataSet))				// Set data							
+					.filter(function(d) { return !d.children; }))		// Filter by children
+			   
+			    node.enter().append("g")								// Add node
+			      .attr("transform",function(d) { return "translate("+d.x+","+d.y+")"; });	// Position
+			  	
+			  	node.append("title")									// Set tool tip
+			      .text(function(d) { return d.className + ": " + d.value; });	// Value
+				
+				node.append("circle")									// Add circle
+			      	.attr("r", function(d) { return d.r; })				// Set diameter
+			      	.style("fill", function(d) { return colors(d.packageName); })	// Set color
+      .on("click", function(d) { return zoom(node == d ? root : d); });
+		
+		 		node.append("text")										// Add text
+			      	.attr("dy",".3em")									// Shift
+					.attr("font-family","sans-serif")					// Sans
+					.attr("text-anchor", "middle")						// Centered
+					.attr("font-size",options.lSize+"px")				// Size
+					.attr("fill","#"+options.lCol)						// Color
+			      	.style("text-anchor","middle")						// Center
+			      	.style(unselectable)								// Unselectable
+			      	.text(function(d) { return d.className.substring(0,d.r/3); });
 	
-		var nodeEnter=node.enter().append("g")	  						// Enter any new nodes at the parent's previous position.
-			.attr("class","node")										// Set style
-			.attr("transform", function(d) { return "translate("+root.y0+","+root.x0+")"; }) // Position
-			.on("click", function(d) { toggle(d); update(d); });		// Add click handler
+				function classes(root) {								// Returns a flattened hierarchy 
+					var classes=[];
+					
+					function recurse(name, node) {
+				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+				    	else classes.push({packageName: name, className: node.name, value: node.val});
+				  		}
+				  	
+				  	recurse(null, root);
+				  	return {children: classes};
+					}
+					
+			d3.select(self.frameElement).style("height",dia+"px");
+	}
 	
-		nodeEnter.append("circle")										// Add circle
-			.attr("r",1e-6)												// Set size
-			.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
 	
-		nodeEnter.append("text")										// Add label
-			.attr("x", function(d) { return d.children || d._children ? -10 : 10; })	// Position based on children
-			.attr("dy",".3em")
-			.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; }) // Set anchor based on children
-			.text(function(d) { return d.name; })						// Set name
-			.style("fill-opacity", 1e-6)								// Transparent
-			.style("fill",options.lCol)									// Color
-			.style("font-size",options.lSize)							// Size
-			.style(unselectable);										// Unselectable
 	
-		var nodeUpdate=node.transition()	  							// Transition nodes to their new position
-			.duration(options.trans)									// Set time
-			.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move
 	
-		nodeUpdate.select("circle")										// Update circle
-			.attr("r",4.5)												// Set size
-			.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
 	
-		nodeUpdate.select("text")										// Update label
-			.style("fill-opacity",1);									// Full alpha
 	
-		var nodeExit=node.exit().transition()	  						// Transition exiting nodes to the parent's new position.
-			.duration(options.trans)									// Set time
-			.attr("transform", function(d) { return "translate("+root.y+","+root.x+")"; })	// Move to 1st dot
-			.remove();													// Remove
-	
-		nodeExit.select("circle")										// On circle exit
-			.attr("r",1e-6);											// Make really small
-	
-		nodeExit.select("text")											// On text exit
-	      .style("fill-opacity",1e-6);									// Make really transparent
-	
-		var link=vis.selectAll("path.link")	  							// Update the links…
-			.data(tree.links(nodes), function(d) { return d.target.id; });	// Set data
-	
-		link.enter().insert("path", "g")	  							// Enter any new links at the parent's previous position
-			.attr("class","link")										// Set class
-			.style("stroke",options.eCol)								// Color
-			.style("stroke-width",options.eWid)							// Width
-			.attr("d", function(d) {									// Set path data
-				var o={ x:root.x0,y:root.y0 };							// Root dot											
-		        return diagonal({source:o, target:o});					// Create diagonal
-				})
-	   
-		link.transition()	  											// Transition links to their new position
-			.duration(options.trans)									// Set time
-			.attr("d", diagonal);
-	
-	  link.exit().transition()	  										// Transition exiting nodes to the parent's new position
-			.duration(options.trans)									// Set time
-			.attr("d", function(d) {									// Set path data
-	       		var o={ x:root.x, y:root.y };							// Set dot
-	       	 	return diagonal({source:o, target:o});					// Set diagonal
-	     		})
-			.remove();
-	
-		nodes.forEach(function(d) {	  									// Stash the old positions for transition
-			d.x0=d.x;													// Save x
-			d.y0=d.y;													// Y
-			});
-		}
-	
-		function toggle(d) {											// CLICK HANDLER
-			if (d.children) {											// If it has children
-				d._children=d.children;									// Save old children
-				d.children=null;										// Clear current children
-	  			} 
-	  		else{														// If no children
-				d.children=d._children;									// Restore old children
-				d._children=null;										// Clear saved children
-			  	}
-		}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function trace(msg) { console.log(msg) };
 
     </script>
   </body>

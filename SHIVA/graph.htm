@@ -29,9 +29,8 @@
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Network</option>
 			<option>Tree</option>
-			<option>Chord</option>
-			<option>Radial</option>
 			<option>Bubble</option>
+			<option>Chord</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -76,9 +75,25 @@
 				height: 					{	def:'600', 			opt:'number',			des:'Height'},
 				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				trans: 						{	def:'1000', 		opt:'number',			des:'Transition time'}, 
+				spacing: 					{	def:'180', 			opt:'number',			des:'Branch spacing'}, 
+				depth: 						{	def:'3', 			opt:'number',			des:'Branch levels to show'}, 
 				nCol:						{	def:'b0c4de', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'1.5', 			opt:'number',		 	des:'Link line width'},
-				eCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Link color'},
+				eCol: 						{	def:'dddddd', 		opt:'color',		 	des:'Link color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Bubble: {
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdERqTXJTbnJGUzdMamtzVUV1d0NFalE&output=html', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				style: 						{	def:'Grouped', 		opt:'Grouped|Spiral|Packed',	des:'Style of graph'}, 
+				padding: 					{	def:'2', 			opt:'number',		 	des:'Bubble spacing'},
+				gCol:						{	def:'1f77b4', 		opt:'color',		 	des:'Group color'},
+				nCol:						{	def:'ff9333', 		opt:'color',		 	des:'Node color'},
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
@@ -108,6 +123,9 @@
 	helpText['Link line width']="In the text box to the right enter a value that sets the default link line width in pixels. This can be set by the class field in the spreadsheet on a link-by-link basis.";
 	helpText['Font size']="Click on the text box to the right and enter a number that sets the font size of node labels in pixels.";
 	helpText['Font color']="In the text box to the right enter a value that will determine the font color of node labels. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color code in the text box.";
+	helpText['Branch levels to show']="The maximum branch level to show, from 1 to any number deep. Setting this to 0 will show all nodes.";
+	helpText['Transition time']="The time (in milliseconds) for a branch to expand or collapse.";
+	helpText['Branch spacing']="The span that branches of different depths are drawn horizontally.";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
 ///// INIT  /////////////

@@ -257,8 +257,8 @@
 			noColor: 					{	def:'000000', 	opt:'color',		 des:'No value color'},
 			noColorValue: 				{	def:'auto', 	opt:'number',		 des:'No value color value'},
 			noHighlightColor: 			{	def:'FFFFFF', 	opt:'color',		 des:'No value highlight color'},
-			showTooltips: 				{	def:'true', 	opt:'false|true',	 des:'Show tooltips?'},
-			ud: 						{	def:'false', 	opt:'true|false',	des:'Enable user draw?'} }
+			showTooltips: 				{	def:'true', 	opt:'false|true',	 des:'Show tooltips?'}},
+			ud: 						{	def:'false', 	opt:'true|false',	des:'Enable user draw?'} 
 		};	
 
 
@@ -297,9 +297,9 @@
 			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
-		else if (e.data.indexOf("PutJSON") == 0) { 
+		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-		} else if (e.data.indexOf("SetChartType=") == 0) {
+		else if (e.data.indexOf("SetChartType=") == 0) {
 		  	$("select#chartType").val(e.data.substr(13));
 			SetAttributes(e.data.substr(13),true);
 			}	
