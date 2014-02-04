@@ -1401,6 +1401,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 
   $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $sntype . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" style="overflow: auto;" frameborder="0" > </iframe></fieldset>' . //onmouseout="Drupal.Shivanode.getJSON();"

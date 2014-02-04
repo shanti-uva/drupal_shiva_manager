@@ -774,18 +774,16 @@
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
-	  
     Drupal.Shivanode.gettingJSON = false;
 		var jobj = JSON.parse(json); 
 		
-	  // This is called every .5 secs. If JSON is the same, then return
+		if(typeof(jobj.dataSourceUrl) != "undefined") { 
+      Drupal.Shivanode.checkForDefaultUrl(jobj.dataSourceUrl);
+    }
+    
+		// If "new" json is the same as old "latestJSON" then return
     if (Drupal.Shivanode.latestJSON == json) {
-    	if(jobj.dataSourceUrl != $('chosen_data_element_url').text()) {
-    		jobj.dataSourceUrl = $('chosen_data_element_url').text();
-    		json = JSON.stringify(jobj);
-    	} else {
     		return;
-    	}
     }
     
     // if new DataSourceURL sent from Iframe, then just replace the URL and don't revert to default values for other fields
@@ -797,7 +795,9 @@
       return;
     }
     
+    // Set the latestJSON variable
 		Drupal.Shivanode.latestJSON = json;
+		
   	// if Drupal.Shivanode.embedCallType is set to 'json', means Lightbox Frame is requesting JSON so set it.
 		if (Drupal.Shivanode.embedCallType == 'json') {
 			Drupal.Shivanode.ShivaMessage('lightboxFrame', 'SetEmbed=' + json);
@@ -827,6 +827,18 @@
 			Drupal.Shivanode.doInsertDataElement(ide.url, ide.json);
 		}
 		
+	};
+	
+	Drupal.Shivanode.checkForDefaultUrl = function(dsurl) {
+	  var defaultUrls = Drupal.Shivanode.defaultDataUrls;
+	  for(var n in defaultUrls) {
+	    var url = defaultUrls[n];
+	    if(dsurl == url) {
+	      $('#sneditmessage').text(Drupal.t('Using Demo Data Source URL!')).show();
+	      return;
+	    } 
+	  }
+	  $('#sneditmessage').hide();
 	};
 	
 	Drupal.Shivanode.setHelpLink = function(sntype) {

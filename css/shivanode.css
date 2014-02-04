@@ -219,6 +219,12 @@ div#use-data-element-link a {
   padding-left: 12px;
 }
 
+div#sneditmessage {
+  margin: -10px 0px;  
+  padding-left: 40%;
+  color: red;
+}
+
 #iframe_container {
   clear: both;
   background-color: #ffffff;
