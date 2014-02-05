@@ -1613,7 +1613,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       $datecell = $rowclone->childNodes->item(1);
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
-      $datecell->replaceChild(new DOMText('n/a'), $datecell->childNodes->item(0));
+      $datecell->replaceChild(new DOMText(t('Not yet used')), $datecell->childNodes->item(0));
       $selectFrag = $xml->createDocumentFragment(); 
       $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
       if(!$simple) {
