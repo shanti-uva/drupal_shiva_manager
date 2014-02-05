@@ -630,28 +630,33 @@ function shivanode_node_view_alter(&$build) {
     }
   
     $sntype = _shivanode_get_element_type($node); // type of shiva visualization
-    $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
-    // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
-    if ($node->type == 'shivanode' && $sntype != 'Data') {
-      // If it's got a data element link, display that info
-      if ($data_id) {
-        $dnode = node_load($data_id);
-        if ($dnode && node_access('view', $dnode)) {
-          // make text to display: link if user has permission to view, otherwise just text
-          $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
-          // Put it after visualization type or assign it a weight of 12
-          $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
-          $build['data_element'] = array(
-            '#type' => 'markup',
-            '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
-                '<div class="field-label">Data Element Used:&nbsp;</div>' .
-                '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
-            '#weight' => $weight,
-          );
+    
+    if($sntype == 'Data') {
+      unset($build['field_image']); // don't show thumbnail for data elements
+    } else { 
+      $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
+      // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
+      if ($node->type == 'shivanode') {
+        // If it's got a data element link, display that info
+        if ($data_id) {
+          $dnode = node_load($data_id);
+          if ($dnode && node_access('view', $dnode)) {
+            // make text to display: link if user has permission to view, otherwise just text
+            $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
+            // Put it after visualization type or assign it a weight of 12
+            $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
+            $build['data_element'] = array(
+              '#type' => 'markup',
+              '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
+                  '<div class="field-label">Data Element Used:&nbsp;</div>' .
+                  '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
+              '#weight' => $weight,
+            );
+          }
         }
+        _shivanode_add_share_meta($node);
+        if(isset($build['field_image'])) { unset($build['field_image']); }
       }
-      _shivanode_add_share_meta($node);
-      if(isset($build['field_image'])) { unset($build['field_image']); }
     }
   }
 }
@@ -767,8 +772,8 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $width = variable_get('shivanode_default_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH));
       $jdata = _shivanode_parse_json($item['value']); // turning the json into an iframe param;
       $jobj = json_decode($item['value']); // making a PHP object of json to query
-      if($jobj->height > $height) { $height = $jobj->height; } // use visualization height and width if greater than default
-      if($jobj->width > $width) { $width = $jobj->width; }
+      if(isset($jobj->height) && $jobj->height > $height) { $height = $jobj->height; } // use visualization height and width if greater than default
+      if(isset($jobj->width) && $jobj->width > $width) { $width = $jobj->width; }
       
       // Override only applies to default full display view
       if (!isset($display['settings']['context']) || $display['settings']['context'] == "default") {
