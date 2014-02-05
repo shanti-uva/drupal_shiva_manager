@@ -3056,7 +3056,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'chart_barchart' => array('label' => t('Bar Chart'), 'variable' =>  'sngen-chart-bar'),
     'chart_candlestickchart' => array('label' =>  t('Candlestick Chart'), 'variable' =>  'sngen-chart-candle'),
     'chart_columnchart' => array('label' => t('Column Chart'), 'variable' =>  'sngen-chart-column'),
-    'chart_gauge' => array('label' => t('Guage Chart'), 'variable' =>  'sngen-chart-guage'),
+    'chart_gauge' => array('label' => t('Gauge Chart'), 'variable' =>  'sngen-chart-gauge'),
     'chart_geochart' => array('label' => t('Geo Chart'), 'variable' =>  'sngen-chart-geo'),
     'chart_linechart' => array('label' => t('Line Chart'), 'variable' =>  'sngen-chart-line'),
     'chart_motionchart' => array('label' => t('Motion Chart'), 'variable' =>  'sngen-chart-motion'),

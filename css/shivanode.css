@@ -440,6 +440,12 @@ ul.shivanode-spreadsheets li * {
 	margin-top: 0px;
 }
 
+/* Gallery link styles */
+.gallery, .mygallery { margin: 0px 3px; }
+.gallery li, .mygallery li {
+  margin: 0px 0px 0px -30px !important 
+}
+
 /* Shiva node teaser view */
 div.shiva-teaser {
 	position: relative;

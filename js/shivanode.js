@@ -161,6 +161,21 @@
 					window.frames['shivaEditFrame'].onload = null; // Only do it once. 
 				};
 			}
+			
+		  // Enable Gallery select buttons
+		  if(window.location.pathname == '/mygallery') {
+		    $('.shivagallerychooser input').val(['my']);
+		  } else {
+		    $('.shivagallerychooser input').val(['all']);
+		  }
+		  $('.shivagallerychooser input').click(function() {
+		    var val = $(this).val();
+		    if(val == 'my' ) {  
+		      window.location.href='/mygallery';
+		    } else if(val == 'all') {
+		      window.location.href='/';
+		    }
+		  });
 		} // End of attach function
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
 	
