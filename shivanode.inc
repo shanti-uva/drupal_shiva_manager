@@ -2761,7 +2761,7 @@ function _shivanode_node_embed_page($nid) {
 		'taburl' => array(
 			'#type' => 'markup',
 			'#markup' => '<div id="tab-url"><p>The public URL to view this visualization is: </p>' .
-							'<p><a href="' . $nurl . '" target="_blank">' . $nurl . '</a></p></div>'
+							'<p><a href="' . $nurl . '" target="_blank">http:' . $nurl . '</a></p></div>'
 		),
 		'tabjs' => array(
 			'#type' => 'markup',
