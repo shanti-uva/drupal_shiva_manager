@@ -787,10 +787,14 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $width = variable_get('shivanode_default_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH));
       $jdata = _shivanode_parse_json($item['value']); // turning the json into an iframe param;
       $jobj = json_decode($item['value']); // making a PHP object of json to query
+      if($jobj->height > $height) { $height = $jobj->height; } // use visualization height and width if greater than default
+      if($jobj->width > $width) { $width = $jobj->width; }
+      
       // Override only applies to default full display view
       if (!isset($display['settings']['context']) || $display['settings']['context'] == "default") {
         // if override is false or either height or weight is not defined in object,
         // then use predefined settings
+
         if ($override == TRUE ) {
           if (isset($jobj->{'height'})) {
             $height = $jobj->{'height'};
@@ -801,6 +805,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
         }
       }
       else if ($display['settings']['context'] == 'teaser') { // For Teasers automatically use the default teaser settings in jdata and iframe markup
+
         $height = variable_get('shivanode_teaser_height', (isset($display['settings']['height'])?$display['settings']['height']:SHIVA_IFRAME_HEIGHT_TEASER));
         $width = variable_get('shivanode_teaser_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH_TEASER));
       }
@@ -871,6 +876,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       if (is_numeric($width)) {
         $width += 50;
       }
+      
       $iframe .= '<iframe id="shivaViewFrame" src="' . preg_replace('/https?\:\/\//','//', $iframeurl) . '"';
       $iframe .= ' height="' . $height . '" width="' . $width . '"';
       $iframe .= ' scrolling="auto" style="overflow: auto;" frameborder="0" ' . $disStr;

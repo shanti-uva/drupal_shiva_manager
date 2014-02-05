@@ -129,7 +129,6 @@ Drupal.Shivanode.popup = {
 			function(data) {
 				var json = JSON.parse(data.json);
 				var url= Drupal.Shivanode.snviewer + '?m=' + window.location.protocol + '//' + window.location.host + Drupal.settings.basePath + 'data/json/' + nid;
-				console.info("url: " + url);
 				var pref = '';
 				var fheight = (typeof(json.height) == "undefined" || json.height < 1) ? 800 : json.height;
 				var fwidth = (typeof(json.width) == "undefined" || json.width < 1) ? 500 : json.width;

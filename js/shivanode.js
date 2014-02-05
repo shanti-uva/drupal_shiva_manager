@@ -506,7 +506,6 @@
 		// When not preset (preset means the shivanode_data_nid is already set and we are reinserting the data into the entry form)
 		// Then add the markup in the node create/edit form
 		if (ispreset == false ) {
-		  console.trace();
 			$("#data_sheet_in_use").html('<input id="shivanode_data_nid" name="shivanode_data_nid" type="hidden" value="' + jobj.did + '" /> ' +
 				'<strong>Data Used: </strong> <span id="chosen_data_element_title">' + ((title != "")?title:url) + '</span> ' +
 				'<span id= "chosen_data_element_url" class="hidden">' + url + '</span>' +
@@ -637,6 +636,7 @@
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.ShivaMessage(iframe,cmd);
 			Drupal.Shivanode.latestJSON = json;
+			Drupal.Shivanode.adjustHeightWidth(json);
 		} catch(e) {
 			if(typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
@@ -819,23 +819,11 @@
 			Drupal.Shivanode.ShivaMessage('lightboxFrame', 'SetEmbed=' + json);
 			Drupal.Shivanode.embedCallType = '';
 		}
-  	// Otherwise, it's the Shiva Manager asking for the JSON of an visualization to store
-		// Set IFrame height and width corresponding to the visualization if it is larger
-		if(typeof(jobj.width) == "string" && !isNaN(jobj.width)) {
-		  vwidth = jobj.width * 1;
-		  if (vwidth > 900) {
-		    $('#shivaEditFrame').css('width','');
-        $('#shivaEditFrame').width(vwidth + 350);
-		  }
-		}
-		if(typeof(jobj.height) == "string" && !isNaN(jobj.height)) {
-      vheight = jobj.height * 1;
-      if (vheight > 900) {
-        $('#shivaEditFrame').css('height','');
-        $('#shivaEditFrame').height(vheight +  150);
-      }
-    }
+
+		// Set IFrame height and width corresponding to the visualization 
+    Drupal.Shivanode.adjustHeightWidth(jobj);
 		Drupal.Shivanode.checkKMLUrls(jobj);
+		
 		$('#edit-shivanode-json-und-0-value').attr('readonly', false).val(JSON.stringify(jobj)).attr('readonly', true);
 		if(typeof(Drupal.Shivanode.IDE) != 'undefined' && Drupal.Shivanode.IDE != null) {
 			var ide = Drupal.Shivanode.IDE;
@@ -845,6 +833,26 @@
 		
 	};
 	
+  Drupal.Shivanode.adjustHeightWidth = function(json) {
+    // Set IFrame height and width corresponding to the visualization if it is larger
+    if(typeof(json) == "string") {json = JSON.parse(json); }
+    // Set IFrame height and width corresponding to the visualization if it is larger
+    if(typeof(json.width) == "string" && !isNaN(json.width)) {
+      vwidth = json.width * 1;
+      if (vwidth > 800) {
+        $('#shivaEditFrame').css('width','');
+        $('#shivaEditFrame').width(vwidth + 350); // add 350 for settings table on left
+      }
+    }
+    if(typeof(json.height) == "string" && !isNaN(json.height)) {
+      vheight = json.height * 1;
+      if (vheight > 900) {
+        $('#shivaEditFrame').css('height','');
+        $('#shivaEditFrame').height(vheight +  150);
+      }
+    }
+  };
+  
 	Drupal.Shivanode.checkForDefaultUrl = function(dsurl) {
 	  var defaultUrls = Drupal.Shivanode.defaultDataUrls;
 	  for(var n in defaultUrls) {
