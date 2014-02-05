@@ -2677,74 +2677,6 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
   }
 }
 
-/*
-
-function _shivanode_node_old_embed_page($nid) {
-  global $base_root, $base_path;
-  $node = node_load($nid);
-  $page = array(
-    'head' => array(
-      '#type' => 'markup',
-      '#markup' => '<h2>How To Share <i>' . $node->title . '</i></h2>',
-    ),
-    'select' => array(
-      '#type' => 'select',
-      '#title' => t('Format:'),
-      '#description' => t('Choose the format you would like to use and copy the resulting code to your site.'),
-      '#options' => array(
-        'none' => t('-- Select --'),
-        'cf' => t('Confluence'),
-        'wp' => t('Word Press'),
-        'if' => t('IFrame'),
-        'link' => t('Link'),
-        'web' => t('URL'),
-        'json' => t('JSON'),
-      ),
-      '#attributes' => array(
-        'id' => 'snembedselect'
-      ),
-    ),
-    'textarea' => array(
-      '#type' => 'textarea',
-      '#cols' => 20,
-      '#rows' => 10,
-      '#attributes' => array(
-        'id' => 'sn-embedcode-area',
-      ),
-      '#default_value' => '',
-      '#value' => '',
-    ),
-    'script' => array(
-      '#type' => 'markup',
-      '#markup' => '<script type="text/javascript"> Drupal.Shivanode.node = {
-        "nid": ' . $nid . ',
-        "title": "' . str_replace('"', '\"', $node->title) . '", 
-        "json": \'' . preg_replace("/'/","\'",_shivanode_get_json($node, FALSE)) . '\',
-        "player": "' . variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"
-      };</script>',
-    ),
-  ); 
-  
-  if(module_exists('sharethis')) {
-    // add meta tag for share image
-    // Can also be done through custom JS adding chicklets as outlined on http://support.sharethis.com/customer/portal/articles/475079-share-properties-and-sharing-custom-information
-    // but have been unable to get thumnail and node name to be shared.
-    _shivanode_add_share_meta($node);
-    $block = module_invoke('sharethis', 'block_view', 'sharethis_block');
-    $bcontent = $block['content'];
-    $bcontent = preg_replace('/node\/(\d+)\/share/','node/$1', $bcontent);
-    $bcontent = preg_replace('/stLight.options\(\{"publisher"\:"([^"]+)"/','stLight.options({"publisher":"$1", "onhover":"false", "doNotCopy":"true"', $bcontent);
-    $imgurl = _get_thumb_image($node);
-    $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
-    $page['stdiv'] = array(
-      '#type' => 'markup',
-      '#markup' => $bcontent,
-    );
-  }
-  return $page;
-}*/
-
-
 function _shivanode_node_embed_page($nid) {
 	global $base_url, $base_path;
 	$node = node_load($nid);
@@ -3073,6 +3005,7 @@ function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
       'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
       'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
       'Earth' => 'https://wiki.shanti.virginia.edu/x/J5XRAQ',
+      'Graph' => '',
       'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
       'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
       'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
@@ -3133,6 +3066,7 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
     'chart_treemap' => array('label' => t('Tree Map Chart'), 'variable' =>  'sngen-chart-tree'),
     'draw' => array('label' => t('Draw'), 'variable' =>  'sngen-draw'),
     'earth' => array('label' => t('Earth'), 'variable' =>  'sngen-earth'),
+    'graph' => array('label' => t('Graph'), 'variable' =>  'sngen-graph'),
     'image' => array('label' => t('Image') , 'variable' =>  'sngen-image'),
     'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
     'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
