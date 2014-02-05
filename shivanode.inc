@@ -2709,6 +2709,7 @@ function _shivanode_node_embed_page($nid) {
 	}
 
 	$nurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . preg_replace('/https?\:/','', $base_url) . $base_path . 'data/json/' . $nid;
+  $nurl = preg_replace('/https?:/', '', $nurl);
 	$njson = _shivanode_get_json($nid);
 	$width = $njson['width'];
 	$height = $njson['height'];
