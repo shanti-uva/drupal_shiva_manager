@@ -1,0 +1,12 @@
+name = Shiva Explore Page Feature
+description = A feature to create the Shiva Explore page
+core = 7.x
+package = Shanti Shiva
+version = 7.x-1.0
+project = shiva_explore_page_feature
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:2
+features[page_manager_pages][] = shiva_explore_page
+project path = sites/all/modules/shivanode/features

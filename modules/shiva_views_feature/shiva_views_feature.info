@@ -1,0 +1,14 @@
+name = Shiva Views Feature
+description = A Feature that contains views for Shiva data and Shiva galleries
+core = 7.x
+package = Shanti Shiva
+version = 7.x-1.0
+project = shiva_views_feature
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[views_view][] = shiva_data_sets
+features[views_view][] = shiva_vis
+features_exclude[dependencies][datatables] = datatables
+features_exclude[dependencies][views_content] = views_content
+project path = sites/all/modules/shivanode/features

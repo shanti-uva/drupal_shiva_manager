@@ -1559,7 +1559,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     _shivanode_create_shiva_data_node($title, $url);
   }
   // Get the view of data sets
-  $viewMarkup = views_embed_view('data_sets', 'panel_pane_1');
+  $viewMarkup = views_embed_view('shiva_data_sets', 'panel_pane_1');
   
   // Load it into a XML DOM Document
   $xml = new DOMDocument();
