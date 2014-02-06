@@ -11,4 +11,3 @@ features[views_view][] = shiva_data_sets
 features[views_view][] = shiva_vis
 features_exclude[dependencies][datatables] = datatables
 features_exclude[dependencies][views_content] = views_content
-project path = sites/all/modules/shivanode/features
