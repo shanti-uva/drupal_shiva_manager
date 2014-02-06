@@ -18,7 +18,7 @@ function shiva_views_feature_views_default_views() {
   $view->human_name = 'Shiva Data';
   $view->core = 7;
   $view->api_version = '3.0';
-  $view->disabled = FALSE; /* Edit this to true   to make a default view disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
@@ -301,7 +301,7 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['fields']['nid']['exclude'] = TRUE;
   $handler->display->display_options['fields']['nid']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['nid']['link_to_entity'] = 0;
-  /* Field: Thumbnail: The image file. (indexed) */
+  /* Field: Image: The image file. (indexed) */
   $handler->display->display_options['fields']['field_image_file']['id'] = 'field_image_file';
   $handler->display->display_options['fields']['field_image_file']['table'] = 'search_api_index_default_node_index';
   $handler->display->display_options['fields']['field_image_file']['field'] = 'field_image_file';
@@ -311,7 +311,7 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['fields']['field_image_file']['display'] = 'id';
   $handler->display->display_options['fields']['field_image_file']['view_mode'] = 'media_link';
   $handler->display->display_options['fields']['field_image_file']['bypass_access'] = 0;
-  /* Field: Indexed Node: Thumbnail */
+  /* Field: Indexed Node: Image */
   $handler->display->display_options['fields']['field_image']['id'] = 'field_image';
   $handler->display->display_options['fields']['field_image']['table'] = 'search_api_index_default_node_index';
   $handler->display->display_options['fields']['field_image']['field'] = 'field_image';
@@ -471,6 +471,12 @@ function shiva_views_feature_views_default_views() {
   );
   $handler->display->display_options['filters']['shivanode_element_type']['group'] = 1;
   $handler->display->display_options['path'] = 'mygallery';
+
+  /* Display: Shiva Examples */
+  $handler = $view->new_display('page', 'Shiva Examples', 'page_2');
+  $handler->display->display_options['display_description'] = 'Page for showing examples of visualization types';
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['path'] = 'examples';
   $export['shiva_vis'] = $view;
 
   return $export;
