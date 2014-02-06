@@ -88,24 +88,6 @@ function shiva_main_menu_feature_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -46,
   );
-  // Exported menu link: main-menu:node/add/shivanode
-  $menu_links['main-menu:node/add/shivanode'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'node/add/shivanode',
-    'router_path' => 'node/add/shivanode',
-    'link_title' => 'Create Visualization',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'This is a custom content type for storing, editing, and displaying a Shanti Interactive Visualization.',
-      ),
-    ),
-    'module' => 'system',
-    'hidden' => 1,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -40,
-  );
   // Exported menu link: main-menu:node/add/shivanode/chart
   $menu_links['main-menu:node/add/shivanode/chart'] = array(
     'menu_name' => 'main-menu',
@@ -581,24 +563,6 @@ function shiva_main_menu_feature_menu_default_menu_links() {
     'weight' => -40,
     'parent_path' => 'node/add/shivanode',
   );
-  // Exported menu link: main-menu:visualizations
-  $menu_links['main-menu:visualizations'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'visualizations',
-    'router_path' => 'visualizations',
-    'link_title' => 'Visualizations',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'A list of all public visualizations',
-      ),
-    ),
-    'module' => 'menu',
-    'hidden' => 1,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -48,
-  );
   // Exported menu link: main-menu:wikidoc/Annotated+Time+Line
   $menu_links['main-menu:wikidoc/Annotated+Time+Line'] = array(
     'menu_name' => 'main-menu',
@@ -1045,7 +1009,6 @@ function shiva_main_menu_feature_menu_default_menu_links() {
   t('Chart Tool');
   t('Column Chart');
   t('Contact Us');
-  t('Create Visualization');
   t('Data');
   t('Draw Tool');
   t('Drawing');
@@ -1079,7 +1042,6 @@ function shiva_main_menu_feature_menu_default_menu_links() {
   t('Tree Map');
   t('Video');
   t('Video Tool');
-  t('Visualizations');
   t('Word Cloud');
 
 
