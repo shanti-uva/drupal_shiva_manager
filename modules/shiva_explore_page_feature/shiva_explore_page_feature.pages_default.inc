@@ -84,7 +84,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Annotated Timeline</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-antime.png" alt="Annotated Timeline Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-antime.png') .'" alt="Annotated Timeline Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/aAHLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A1">Examples</a></li>
@@ -96,7 +96,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Area Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-area.png" alt="Area Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-area.png') . '" alt="Area Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/tgHLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A2">Examples</a></li>
@@ -108,7 +108,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Bar Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-bar.png" alt="Bar Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-bar.png') . '" alt="Bar Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/HQLLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A3">Examples</a></li>
@@ -120,7 +120,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Candlestick Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-candle.png" alt="Candle Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-candle.png') . '" alt="Candle Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/MgLLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A4">Examples</a></li>
@@ -132,7 +132,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Column Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-column.png" alt="Column Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-column.png') . '" alt="Column Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/HQLLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A5">Examples</a></li>
@@ -144,7 +144,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Gauge Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-gauge.png" alt="Guage Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-gauge.png') . '" alt="Guage Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/EADLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A6">Examples</a></li>
@@ -156,7 +156,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Geo Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-geo.png" alt="Geo Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-geo.png') . '" alt="Geo Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/XALLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A7">Examples</a></li>
@@ -170,7 +170,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Line Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-line.png" alt="Line Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-line.png') . '" alt="Line Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/tgHLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A8">Examples</a></li>
@@ -182,7 +182,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Motion Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-motion.png" alt="Motion Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-motion.png') . '" alt="Motion Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/fgLLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A9">Examples</a></li>
@@ -194,7 +194,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Organization Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-org.png" alt="Org Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-org.png') . '" alt="Org Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/dQDAAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A10">Examples</a></li>
@@ -206,7 +206,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Pie Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-pie.png" alt="Pie Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-pie.png') . '" alt="Pie Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/ZQHLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A11">Examples</a></li>
@@ -218,7 +218,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Scatter Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-scatter.png" alt="Scatter Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-scatter.png') .'" alt="Scatter Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/ZgDGAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A12">Examples</a></li>
@@ -230,7 +230,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Table Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-table.png" alt="Table Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-table.png') . '" alt="Table Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/tgLLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A13">Examples</a></li>
@@ -242,7 +242,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Tree Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-chart-tree.png" alt="Tree Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-tree.png') . '" alt="Tree Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/g6C1AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A14">Examples</a></li>
@@ -261,7 +261,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Poster</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/shivanode/sngen-poster.png" alt="Poster Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-poster.png') . '" alt="Poster Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><!--<a href="https://wiki.shanti.virginia.edu/x/g6C1AQ" _mce_href="https://wiki.shanti.virginia.edu/x/g6C1AQ" target="_blank">Documentation</a>-->Documentation</li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A14">Examples</a></li>
@@ -273,7 +273,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Networks</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-network.png" alt="Network Thumbnail" width="150" height="150" class="imgp_img"> 
+<li><img src="'. get_custom_image_url('sngen-network.png') . '" alt="Network Thumbnail" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/o5S1AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A10">Examples</a></li>
@@ -285,7 +285,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Subway</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/shivanode/sngen-subway.png" alt="Subway Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-subway.png') . '" alt="Subway Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/Wp21AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A4">Examples</a></li>
@@ -297,7 +297,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Timelines</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-timeline.png" alt="Timeline Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-timeline.png') . '" alt="Timeline Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/sprRAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A13">Examples</a></li>
@@ -309,7 +309,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Word Cloud</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/shivanode/sngen-wcloud.png" alt="Word Cloud Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-wcloud.png') . '" alt="Word Cloud Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><!--<a href="https://wiki.shanti.virginia.edu/x/sprRAQ" _mce_href="https://wiki.shanti.virginia.edu/x/sprRAQ" target="_blank">Documentation</a>-->Documentation</li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A15">Examples</a></li>
@@ -328,7 +328,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Video</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-video.png" alt="Video Thumbnail" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-video.png') . '" alt="Video Thumbnail" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/upy1AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A6">Examples</a></li>
@@ -340,7 +340,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Images</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-image.png" alt="Image Visualization" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-image.png') . '" alt="Image Visualization" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/VZ21AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A2">Examples</a></li>
@@ -352,7 +352,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Drawing</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-draw.png" alt="Draw Thumbnail" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-draw.png') . '" alt="Draw Thumbnail" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/DaC1AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A11">Examples</a></li>
@@ -371,7 +371,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td width="150">
 <p><strong>Maps</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-map.png" alt="Map Visualization Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-map.png') . '" alt="Map Visualization Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/cZy1AQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A3">Examples</a></li>
@@ -383,7 +383,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Earth</strong></p>
 <ul class="sf-menu explore">
-<li><img src="/sites/default/files/styles/shiva_teaser/public/shivanode/sngen-earth.png" alt="Earth Visualization Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-earth.png') . '" alt="Earth Visualization Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/J5XRAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A12">Examples</a></li>
@@ -416,4 +416,9 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 
   return $pages;
 
+}
+
+function get_custom_image_url($fname) {
+  $fname = 'public://shivanode/' . $fname;
+  return image_style_url('shiva_teaser', $fname);
 }

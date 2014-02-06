@@ -1550,6 +1550,37 @@ function theme_shivanode($variables) {
   return '<div class="shivanode_' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
 
+function shivanode_image_default_styles() {
+  $styles = array();
+
+  $styles['shiva_teaser'] = array(
+    'name' => 'shiva_teaser',
+    'label' => 'Shiva Visualization Teasers',
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array(
+          'height' => '150',
+          'width' => '',
+          'upscale' => 1,
+        ),
+        'weight' => 0,
+      ),
+      array(
+        'name' => 'image_crop',
+        'data' => array(
+          'anchor' => 'left-top',
+          'height' => '150',
+          'width' => '150',
+        ),
+        'weight' => 1,
+      ),
+    ),
+  );
+
+  return $styles;
+}
+
 /** Rewrite Author widget text to use first and last name if available 
  *  And rewrite link for 0 item facets to perform new search on just that facet */function shivanode_facet_items_alter(&$build, &$settings) {
   if ($settings->facet == "author:name") {
