@@ -119,6 +119,12 @@ div.sn-share-button img {
   padding-top: 10px !important;
 }
 
+.sf-menu.explore ul {
+  margin: 30px 0px 0px 20px;
+  border: thin solid gray;
+  background-color: #6e8a93;
+}
+
 /** CSS for SHARE page Tabs **/
 #sharetabs {
 	font-size:90%;
