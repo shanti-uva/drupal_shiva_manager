@@ -1454,7 +1454,7 @@ function _shivanode_data_form($form, &$form_state) {
     
     // if the request uri has ?format=simple in it 
     // then it's in the add data entry popup, return there;
-    $return_page = 'mydata';
+    $return_page = str_replace(' ', '%20', current_path()); // was 'mydata'
     $rui = request_uri();
     if(strpos($rui, 'format=simple') > -1) {
        $return_page  = 'node/add/shivanode?popup=dataurl'; 
