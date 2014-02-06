@@ -14,6 +14,16 @@ div.shivanode_display {
   padding: 6px;
 }
 
+.shivagallerychooser {
+  margin: 0px !important;
+  white-space: nowrap !important;
+}
+
+.shivagallerychooser br {display: none;}
+
+.shivagallerychooser select {
+  margin-left: 6px;
+}
 /* Help button in edit form
 div#sn-helplink {
   /*float: left;

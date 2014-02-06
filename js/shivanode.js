@@ -164,11 +164,11 @@
 			
 		  // Enable Gallery select buttons
 		  if(window.location.pathname == '/mygallery') {
-		    $('.shivagallerychooser input').val(['my']);
+		     $('.shivagallerychooser select[name=gallerytype]').val(['my']);
 		  } else {
-		    $('.shivagallerychooser input').val(['all']);
+		     $('.shivagallerychooser select[name=gallerytype]').val(['all']);
 		  }
-		  $('.shivagallerychooser input').click(function() {
+		  $('.shivagallerychooser select[name=gallerytype]').change(function() {
 		    var val = $(this).val();
 		    if(val == 'my' ) {  
 		      window.location.href='/mygallery';
