@@ -144,7 +144,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <td>
 <p><strong>Gauge Chart</strong></p>
 <ul class="sf-menu explore">
-<li><img src="' . get_custom_image_url('sngen-chart-gauge.png') . '" alt="Guage Chart Thumb" width="150" height="150" class="imgp_img"> 
+<li><img src="' . get_custom_image_url('sngen-chart-gauge.png') . '" alt="Gauge Chart Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
 <li><a href="https://wiki.shanti.virginia.edu/x/EADLAQ" target="_blank">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_subtype%3A6">Examples</a></li>
