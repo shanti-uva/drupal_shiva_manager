@@ -355,9 +355,9 @@ function shiva_main_menu_feature_menu_default_menu_links() {
     'parent_path' => 'node/add/shivanode/chart',
   );
   // Exported menu link: main-menu:node/add/shivanode/chart/guage
-  $menu_links['main-menu:node/add/shivanode/chart/guage'] = array(
+  $menu_links['main-menu:node/add/shivanode/chart/gauge'] = array(
     'menu_name' => 'main-menu',
-    'link_path' => 'node/add/shivanode/chart/guage',
+    'link_path' => 'node/add/shivanode/chart/Gauge',
     'router_path' => 'node/add/shivanode',
     'link_title' => 'Gauge Chart',
     'options' => array(
