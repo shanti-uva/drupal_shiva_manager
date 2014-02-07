@@ -1503,7 +1503,7 @@ function _shivanode_data_form_submit($form, &$form_state) {
     }
     drupal_goto($type, $options);
   }
-  $vals = $form_state['input'];
+  $vals = &$form_state['input'];
   if(!isset($vals['did']) || $vals['did'] == '') {
     drupal_set_message('No data id was sent', 'warning');
     return;
@@ -1648,7 +1648,7 @@ function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id
     '#empty_value' => 0,
     '#default_value' => 0,
     '#options' => _shivanode_types_using_gdocs(),
-    '#attributes' => array('onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this));', 'class' => array('myclass ' . $divid)),
+    '#attributes' => array('onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 'class' => array('myclass ' . $divid)),
   );
   if($vistype) {
     unset($sform['visselect']);
@@ -2496,6 +2496,7 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   if(!$gid) { drupal_goto('mydata'); }
   $vtype = 'chart';
   $ctype = '';
+
   $dnode = _shivanode_create_shiva_data_node($title, 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
   if($type == "popup") {
     $markup = array(

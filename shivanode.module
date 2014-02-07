@@ -438,7 +438,10 @@ function shivanode_node_access($node, $op, $account) {
  *   Save shivanode_link record linking visualization node with data node
  */
 function shivanode_node_insert($node) {
-  _shivanode_add_data_correspondence($node);
+  $sntype = strtolower(_get_shivanode_type($node));
+  if($sntype != 'data') {
+    _shivanode_add_data_correspondence($node);
+  }
 }
 
 /*
@@ -545,6 +548,7 @@ function shivanode_node_presave($node) {
     $lang = (isset($node->language)) ? $node->language : 'und';
     if(!isset($node->field_image[$lang][0])) {
       $type = strtolower(_get_shivanode_type($node));
+      if($type == 'data') { return; }
       if($type == 'chart') {
         $json = _shivanode_get_json($node);
         $subtype = strtolower($json['chartType']);
@@ -1084,7 +1088,6 @@ function shivanode_add_og_user_role($form, &$form_state) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
-
   // Get the last part of the URL to determing what we are showing
   $action = $form['#action']; // the action url as stored in form
   $action_url_parts = explode('/', $action);

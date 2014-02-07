@@ -9,6 +9,7 @@
  */
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
+
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
 			setTimeout(function () {$('body').css('padding-top', '0px');}, 50);
 			
@@ -367,7 +368,6 @@
 	    	Drupal.Shivanode.networkJSON = json;
 	    //
 	    } else if($('#shivanode_data_nid').length > 0) {
-				// if there is a set data node, then reinsert that data
 				Drupal.Shivanode.status = "chartChanged";
 			}
 			
@@ -652,6 +652,7 @@
 			Drupal.Shivanode.ShivaMessage(iframe,cmd);
 			Drupal.Shivanode.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
+			Drupal.Shivanode.status = 'puttingJSON';
 		} catch(e) {
 			if(typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
@@ -1133,30 +1134,32 @@
 	 *     if it is a gdoc that has not yet been added, go to the url to add that and then return to form with data nid.
 	 */
 	Drupal.Shivanode.setSelectedType = function(el, submit) {
-
+    if (typeof(submit) == "undefined") { submit = false; }
 	  var p = $(el).parents('.views-field');
 	  var dtitle = p.find('span[class="mydtitle"]').text();
     var did = p.find('span[class="mydid"]').text();
     var dtype = p.find('span[class="mydtype"]').text();
     var vtype = $(el).val();
-    var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
-    // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
-    if(dtype == 'gid') {
-      url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
-    } 
+
     if($('html.lightpop').length == 1) {
+      var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
+      // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
+      if(dtype == 'gid') {
+        url = '/data/add/gid/' + did + '/' + vtype + '/' + dtitle;
+      } 
       var cmd = 'SetUrl=' + url;
       window.parent.postMessage(cmd,'*');
       window.parent.Lightbox.end();
       
     } else { 
+      
       if($(el).val() == 0) { return; }
-      //alert($(el).val()); return;
       $('input[name="did"]').attr('value', did);
       $('input[name="dtitle"]').attr('value', dtitle);
       $('input[name="dtype"]').attr('value', dtype);
       $('input[name="vtype"]').attr('value', $(el).val());
-      $(el).parents('form').submit();
+      if(submit) { $(el).parents('form').submit(); }
+      
     }
 	};
 	
