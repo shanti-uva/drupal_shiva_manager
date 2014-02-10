@@ -15,7 +15,7 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 			data:  { url : url },											// Add url
 			async: false }													// Async									
 		).complete(handleCSVResponse); 										// Callback
-		}
+	}
 
    function handleCSVResponse(response) {								// HANDLE INCOMING DATA
 	    var i,j,o,lab;
