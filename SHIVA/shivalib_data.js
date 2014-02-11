@@ -9,7 +9,6 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 		query.send(handleGoogleResponse);									// Fetch data
 		}
 	else{																	// A CSV
-	  console.info('url: ' + url);
 		$.ajax({															// Fetch file
 			type:  'GET',													// a GET
 			url:   'proxy.php',												// Use proxy for cross-domain issue
@@ -19,8 +18,6 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 	}
 
    function handleCSVResponse(response) {								// HANDLE INCOMING DATA
-     console.info("handling reponse");
-     console.info(response);
 	    var i,j,o,lab;
 		var keys=new Array();												
 		var theData=new Array();
@@ -59,7 +56,6 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
   				theData.push(o);											// Add row
 				}
 			}
-		console.info(theData);
 		callback(theData,url);												// Send to callback
 	}			
 
