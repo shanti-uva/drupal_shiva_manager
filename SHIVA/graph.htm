@@ -216,7 +216,7 @@
 			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
-		else if (e.data.indexOf("PutJSON") == 0) 
+		else if (e.data.indexOf("PutJSON") == 0)
 			ReEdit($.parseJSON(e.data.substr(8)));
 	}
 
@@ -234,20 +234,27 @@
 
 	function ReEdit(jsonData)
 	{
-		if (jsonData) {
-			if (jsonData.chartType)
-				chartType=jsonData.chartType;
-			}
-		else{
-			var s,e;
-			var query=window.location.search.substring(1);
-			if ((s=query.indexOf("&chartType=")) != -1)
-				if ((e=query.indexOf("&",s+1)) != -1)
-					chartType=query.substring(s+11,e);
-			}
-		SetAttributes(chartType);	
-		$("#chartType").val(chartType);
-		Draw();
+	  if (jsonData) {
+      if (jsonData.chartType)
+        chartType=jsonData.chartType;
+      }
+    else{
+      var s,e;
+      var query=window.location.search.substring(1);
+      if ((s=query.indexOf("&chartType=")) != -1)
+        if ((e=query.indexOf("&",s+1)) != -1)
+          chartType=query.substring(s+11,e);
+      }
+    SetAttributes(chartType,false);
+    shivaLib.ReEdit(jsonData,props[chartType]);
+    for (var i=0;i<$("#chartType option").length;i++) 
+      if ($("#chartType option")[i].text.replace(/ /g,"") == chartType) {
+        chartType=$("#chartType option")[i].text;
+          $("select#chartType").val(chartType);
+          break;
+        }
+    chartType=chartType.replace(/ /g,"");
+    Draw();
 	}
 
 	function ShowHelp(att)

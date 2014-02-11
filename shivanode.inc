@@ -308,7 +308,12 @@ function _shivanode_subtypelist($type='label', $search=FALSE) {
     18 => array(t('Slideshow'), 'Slideshow'),
     19 => array(t('Image Montage'), 'Montage'),
     20 => array(t('Zoomable Image'), 'Zoomable'),
-    21 => array(t('Combo Chart'), 'ComboChart'),
+    21 => array(t('Network'), 'Network'),
+    22 => array(t('Tree'), 'Tree'),
+    23 => array(t('Bubble'), 'Bubble'),
+    24 => array(t('Stream'), 'Stream'),
+    25 => array(t('Parallel'), 'Parallel'),
+    21 => array(t('Chord'), 'Chord'),
   );
   if($type == 'index') {
     if(!$search) { return FALSE; } // If no search string, no match
