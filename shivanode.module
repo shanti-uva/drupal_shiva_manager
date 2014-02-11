@@ -100,7 +100,7 @@ define('SHIVA_SHOW_JSON', FALSE);
 define('SHIVA_DEFAULT_IMAGE_FIELD', NULL); 
 
 // Data-based Visualizations
-define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Image|Network|Timeline');
+define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Graph|Image|Network|Timeline');
 
 /**
  * Implements hook_init.
