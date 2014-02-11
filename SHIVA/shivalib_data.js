@@ -11,7 +11,7 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 	else{																	// A CSV
 	  console.info('url: ' + url);
 		$.ajax({															// Fetch file
-			type:  'POST',													// a GET
+			type:  'GET',													// a GET
 			url:   'proxy.php',												// Use proxy for cross-domain issue
 			data:  { url : url },											// Add url
 			async: false }													// Async									
