@@ -1369,7 +1369,7 @@ function _shivanode_data_form($form, &$form_state) {
   $ctype = (isset($args[2])) ? $args[2] : FALSE;
   
   // Set display strings
-  if(!preg_match('/chart|image|network|timeline/', strtolower($type))) { $type = FALSE; }
+  if(!preg_match('/' . strtolower(SHIVA_DATA_VISUALIZATIONS) . '/', strtolower($type))) { $type = FALSE; }
   $sntypelabel = ($type) ? ucfirst($type) : t('Charts, Images, Networks, and Timeline');
   if($ctype) { $sntypelabel = ucfirst($ctype); }
   
