@@ -893,6 +893,32 @@ SHIVA_Show.prototype.ConvertDateToJSON=function(dateTime)
 	return v[0];
 }
 
+SHIVA_Show.prototype.FormatDate=function(date, format) 					//	FORMAT DATE STRING
+{
+	var mos=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+	var d=new Date(date);													// Parse into date format
+	var t=d.toString().match(/.{16}(.{8})/)[1];								// Get time
+	if (format)																// If defined
+		format=format.toLowerCase();										// Force lc
+	if (format == "m/d/y")													// Based on format...												
+		return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();		// Return string
+	else if (format == "m/y")
+		return (d.getMonth()+1)+"/"+d.getFullYear();
+	else if (format == "mo d, y")
+		return mos[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
+	else if (format == "mo, y")
+		return mos[d.getMonth()]+" "+d.getFullYear();
+	else if (format == "mo d, y h:m")
+		return mos[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear()+" "+t.substring(0,5);
+	else if (format == "m/d/y h:m:s")
+		return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()+" "+t;
+	else if (format == "m/d/y h:m")
+		return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()+" "+t.substring(0,5);
+	else (format == "y")
+		return d.getFullYear();
+}
+
+
 SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY AS STRING
 {
 	var i,o,oo,str="[",key,val;

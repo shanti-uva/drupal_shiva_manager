@@ -2,132 +2,242 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-		<title>D3 Testbed</title>
+		<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="d3.v3.min.js"></script>
+		<script type="text/javascript" src="shivalib-min.js"></script>
+		<title>D3 Testbed</title>
 		<style type="text/css">
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 
- </style>
+		 </style>
   </head>
   <body>
-    <div id="body">
-      <div id="footer">
-     </div>
-    <script type="text/javascript">
+ 
+ 	<div id="containerDiv" style="position:absolute;top:20px;left:20px;height:600px;width:1800px"> </div>
+
+  <script type="text/javascript">
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SETUP
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	var options={}
 	options.lSize=12;
-	options.lCol="000";
+	options.lCol="000000";
 	options.width=800;
-	options.height=600;
-	options.trans=1000;
-	options.padding=2;
-	options.style="Grou[p";
-	options.gCol="1f77b4";
-	options.nCol="ff9333";
+	options.height=400;
+	options.chartType="Parallel";
+	options.hCol="4682B4";
+	options.backCol="ffffff"
 	
-	var dataSet=null;
-	firstTime=true;	
-
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	var con="#containerDiv"												// Container
+	
+	
+	var firstTime=true;													// If first time
+	var id=0;															// Id counter
+	var d3Zoom;															// D3 zoom obj
+	var maxDepth=0;
+	var overTree,selectTree	
 
-    colors = d3.scale.category10();
-	var svg=d3.select("body").append("svg")
-	    .attr("width",options.width)
-	    .attr("height",options.height)
+	var h=options.height;
+	var w=options.width;
+	var	shivaLib=new SHIVA_Show("containerDiv");
+	
+	if (options.backCol == "none")										// If  transparent
+		$(con).css("background-color","transparent");					// Set background color
+	else																// Normal color
+		$(con).css("background-color","#"+options.backCol);				// Set background color
+	$(con).width(options.width);	$(con).height(options.height);		// Set size
 
-	d3.json("flare.json", function(d) { dataSet=d; redraw() });
 
-	function redraw() {												// DRAW
-		
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	function zoomed(d) {												// ZOOM HANDLER
+ 		var tp=d3.event.translate;										// Translation
+ 		var scale=d3.event.scale;										// Scale
+  		svgSelect.attr("transform","translate("+tp+") scale("+scale+")");	// Do it
+ 		} 	
 
-	function zoom(d, i) {
-  var k = r / d.r / 2;
-  x.domain([d.x - d.r, d.x + d.r]);
-  y.domain([d.y - d.r, d.y + d.r]);
-
-  var t = vis.transition()
-      .duration(d3.event.altKey ? 7500 : 750);
-
-  t.selectAll("circle")
-      .attr("cx", function(d) { return x(d.x); })
-      .attr("cy", function(d) { return y(d.y); })
-      .attr("r", function(d) { return k * d.r; });
-
-  t.selectAll("text")
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .style("opacity", function(d) { return k * d.r > 20 ? 1 : 0; });
-
-  node = d;
-  d3.event.stopPropagation();
-}
-		
-				var dia=Math.min(options.height,options.width)-8;			// Diameter
-				var bubble=d3.layout.pack()								// Create layout
-					.size([dia,dia])									// Set size
-		    		.padding(options.padding);							// Padding
-			  	
-				if (options.style != "Spiral")							// If not a spiral
-			  		bubble.sort(null)									// Don't sort
-			  	
-			  	var node=svg.selectAll("node")							// Select the nodes
-					.data(bubble.nodes(classes(dataSet))				// Set data							
-					.filter(function(d) { return !d.children; }))		// Filter by children
-			   
-			    node.enter().append("g")								// Add node
-			      .attr("transform",function(d) { return "translate("+d.x+","+d.y+")"; });	// Position
-			  	
-			  	node.append("title")									// Set tool tip
-			      .text(function(d) { return d.className + ": " + d.value; });	// Value
+	var svg=d3.select(con)												// Add SVG 
+		.append("svg")													// Add SVG shell
+		.attr("width",options.width).attr("height",options.height)		// Set size
+		.append("g")													// Add group	
 				
-				node.append("circle")									// Add circle
-			      	.attr("r", function(d) { return d.r; })				// Set diameter
-			      	.style("fill", function(d) { return colors(d.packageName); })	// Set color
-      .on("click", function(d) { return zoom(node == d ? root : d); });
+ 				
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DATA
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	var dataSet=[];
+ 	
+ 
+		d3.csv("data1.csv", function(data) {
+			var t=[],o=[];
+			for (x in data[0])	o.push(x);
+			t.push(o)
+			data.forEach(function(d,i) {
+				var o=[]
+				for (x in d)	o.push(d[x]);
+				t.push(o)
+				})
+			data=t;
+////			
+			dataSet=[];													// Init as array 
+			var i,j;
+			var nRows=data.length;										// Number of rows
+			var nSets=data[0].length;									// Number of datasets
+			for (i=1;i<nRows;++i) {										// For each row
+				var o={};												// New obj
+				o.name=data[i][0];										// Set field name as key
+				for (j=1;j<nSets;++j) 									// For each field
+					o[data[0][j]]=data[i][j]-0;							// Set value
+				dataSet.push(o);										// Add item
+				}
+ ////
+ 		 	redraw();
+		})
+	
+ 	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DRAW
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		 		node.append("text")										// Add text
-			      	.attr("dy",".3em")									// Shift
-					.attr("font-family","sans-serif")					// Sans
-					.attr("text-anchor", "middle")						// Centered
-					.attr("font-size",options.lSize+"px")				// Size
-					.attr("fill","#"+options.lCol)						// Color
-			      	.style("text-anchor","middle")						// Center
-			      	.style(unselectable)								// Unselectable
-			      	.text(function(d) { return d.className.substring(0,d.r/3); });
-	
-				function classes(root) {								// Returns a flattened hierarchy 
-					var classes=[];
+	function redraw() {												// DRAW
+
+		// PARALLEL /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		if (options.chartType == "Parallel") {							// Parallel coords
+	    	var y={};
+		    var dragging={};
+			var marg=options.lSize*2;									// Margin width
+			var x=d3.scale.ordinal().rangePoints([0,options.width],1);	// X scale
+			var line=d3.svg.line();										// Lines
+			var axis=d3.svg.axis().orient("left").ticks(4).outerTickSize(0); // Axes
+
+		   	svg.attr("transform", "translate("+marg+","+marg+")");		// Move
+		   	
+		  	x.domain(dimensions=d3.keys(dataSet[0]).filter(function(d) {		// Extract the list of dimensions and create a scale for each.
+		  	  	return d != "name" && (y[d]=d3.scale.linear()					// If not a name, scale data point
+		        	.domain(d3.extent(dataSet, function(p) { return +p[d]; }))	// Link to domain
+		        	.range([h,0]));											// Set range
+		 	 	}));	
+		   
+		   var background=svg.append("g")  								// Draw lines in grey
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d",path)											// Set path data using path()
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#ccc")									// Grey
+				.attr("stroke-opacity",.4)								// Opacity
 					
-					function recurse(name, node) {
-				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-				    	else classes.push({packageName: name, className: node.name, value: node.val});
-				  		}
-				  	
-				  	recurse(null, root);
-				  	return {children: classes};
-					}
-					
-			d3.select(self.frameElement).style("height",dia+"px");
-	}
+		   	var highlight=svg.append("g")  								// Draw lines in highlight color
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d", path)										// Set path data
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#"+options.hCol)						// Highlight color
+				.attr("stroke-opacity",.7)								// Opacity
+ 
+ 			background.append("title").text(function(d) { return d.name })	// CREATE TOOLTIP
+			highlight.append("title").text(function(d) { return d.name })	// CREATE TOOLTIP
+ 
+ 		 	var g=svg.selectAll(".dimension")  							// Add a dimension group for each dataset
+      			.data(dimensions)										// Get dataset names
+    			.enter().append("g")									// Add group
+		      	.attr("transform", function(d) { return "translate("+x(d)+")"; })	// Position
+		      	.call(d3.behavior.drag()								// Create new drag behavior
+		        .on("dragstart", function(d) {							// On drag start
+		          	dragging[d]=this.__origin__=x(d);					// Set associatie array by name and set origin to xpos of axis
+		          	background.attr("visibility", "hidden");			// Hide grey lines
+		       		})
+   		        .on("drag", function(d) {								// On drag
+		          	dragging[d]=Math.min(w,Math.max(0,this.__origin__+=d3.event.dx));	// New xpos
+		         	highlight.attr("d",path);											// Set lines
+		          	dimensions.sort(function(a,b) { return position(a)-position(b); });	// Sort by position
+		          	x.domain(dimensions);
+		         	g.attr("transform", function(d) { return "translate("+position(d)+")"; })	
+		        	})
+		        .on("dragend", function(d) {							// On drag end
+		          	delete this.__origin__;								// Remove origin
+		          	delete dragging[d];									// Remove from dragging[]
+		          	transition(d3.select(this)).attr("transform","translate("+x(d)+")");	// Transition to new position
+		          	transition(highlight)								// Reshow highlighted lines
+		              	.attr("d",path);								// Move them to new place
+		         	background.attr("d",path)							// Set pos of grey lines
+		              	.transition().delay(500).duration(0)			// Wait 1/2 sec
+		             	.attr("visibility","visible");					// Show grey lines
+		        	})
+		        );
+		 
+			 g.append("g")  											// Add an axis and title.
+				.style("font-family","sans-serif")						// Sans
+				.style("font-size","9px")								// Size
+				.attr("fill","#999")									// Text color
+ 				.style(unselectable)									// Unselectable
+				.each(function(d) { d3.select(this).call(axis.scale(y[d])); })
+			    .append("text")											// Add axis title
+ 				.style("font-size",options.lSize+"px")					// Size
+				.attr("stroke","none")									// No fill
+				.attr("stroke-width",0)									// No fill
+				.attr("text-anchor","middle")							// Centered
+				.attr("fill","#"+options.lCol)							// Text color
+				.attr("y",-options.lSize)								// Position
+				.attr("font-weight","bold")								// Bold
+				.text(String);
 	
-	
-	
-	
-	
-	
+		    g.selectAll("path")											// Select the paths
+				.attr("fill","none")									// No fill
+				.attr("stroke","#999")									// Set line color
+ 
+ 		    g.selectAll(".tick")										// Select the ticks
+				.each(function(d,i) {									// For each tick
+					 if (!this.transform.baseVal.getItem(0).matrix.f)	// If top-most
+					 	this.style['opacity']=0;						// Hide it
+					})
+		
+			g.append("g")		  										// Add and store a brush for each axis.
+				.each(function(d) { d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush)); })
+		    	.selectAll("rect")										// Select the rect
+		      	.attr("x",-8)											// Position left of line
+		      	.attr("width",16)										// Set width
+				.attr("fill-opacity",.3)								// Set opacity
+ 	
+			function transition(g) {									// TRANSITION
+			  return g.transition().duration(500);						// Wait 1/2 sec
+			}
+
+			function position(d) {										// GET POSITION
+			  var v=dragging[d];										// Dragging
+			  return v == null ? x(d) : v;								// Return pos based on in dragging or not
+			}
+			
+			function path(d) {											// GET PATH
+		  		return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+			}
+			
+			function brush() {											// Handles a brush event, toggling the display of highlight lines.
+			  	var actives=dimensions.filter(function(p) { return !y[p].brush.empty(); });
+			 	var extents=actives.map(function(p) { return y[p].brush.extent(); });
+			 	highlight.style("display", function(d) {
+				  		return actives.every(function(p, i) {
+							return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+				    		}) ? null : "none";
+					  });
+				}
+
+			}															// End Parallel
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// STANDARD STUFF
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function trace(msg) { console.log(msg) };
+		
+		firstTime=false;												// Not first time thru
+		}																// End update
 
     </script>
   </body>

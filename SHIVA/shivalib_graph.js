@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
-	var i,o,shape,id=0;
+	var i,j,o,shape,id=0;
 	var options=this.options;											// Local options
 	var con="#"+this.container;											// Container
  	var w=options.width;												// Width
@@ -12,13 +12,17 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
 	var dataSet=null;													// Holds data
 	var d3Zoom;															// Scale/zoom
+	var minZoom=.1,maxZoom=10;											// Zoom range
 	var margins=[0,0,0,0];												// Default margins
+	var canPan=true;													// Can pan/zoom screen
 	var firstTime=true;
 		
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 	
+	$(con).css("overflow","hidden")										// Keep in container
+
 	if (!$("d3Popup").length)											// If not popup div yet
 		$("body").append("<div id='d3Popup' class='rounded-corners' style='display:none;position:absolute;border:1px solid #999;background-color:#eee;padding:8px'></div>");
 	
@@ -31,35 +35,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	$(con).width(options.width);	$(con).height(options.height);		// Set size
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
-
-	function zoomed() {													// ZOOM HANDLER
- 		var t;
- 		var scale=d3.event.scale;										// Set current scale
- 		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
- 		if (options.chartType == "Tree")								// Tree is x/y flopped
- 			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
-		if (!d3.event.sourceEvent.shiftKey)								// Don't move with shift key down (to allow node dragging)
-			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
- 		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
- 		if (options.chartType == "Bubble")								// Bubble needs text control
-		 	if (options.style == "Packed")
-			 	svg.selectAll("text")									// Add text
-					.attr("font-size",options.lSize/scale+"px")			// Size
-					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
-			} 	
-
-	svg=d3.select(con)													// Add SVG to container div
-		.append("svg")													// Add SVG shell
-		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
-		.call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed)) // Set zoom
-		.append("g")													// Needed for pan/zoom	
-		
-	svg.append("rect")													// Pan and zoom rect
-		.style({"fill":"none","pointer-events":"all"})					// Invisble
-    	.attr("id","underLayer")										// Set id
-    	.attr("width",w).attr("height",h)								// Set size
-    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
-
+	
+	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	if (options.chartType == "Network") {								// Force directed
 		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
 	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
@@ -128,26 +106,37 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			redraw();													// Draw graph
 		}
 	else if ((options.chartType == "Tree") || (options.chartType == "Bubble")) {	// Tree like data
+		if (options.chartType == "Bubble")	minZoom=1;					// Cap zoom at 1
 		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
+  			var nodeLink=false;											// Assume simple format
   			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var items=new Array();										// Holds items
-			for (i=0;i<data.length;++i) {								// For each row
-				if (!data[i][0])										// If no data
-					continue;											// Skip
-			 	if (!data[i][0].match(/node/i)) 						// If not a node
-					continue;											// Skip
-				o={};													// New object
-				o.name=data[i][2];										// Add name
-				o.parent=data[i][1];									// Add parent
-				if (data[i][3])											// If an info set
-					o.val=data[i][3];									// Add val
-				else													// If nothing there
-					o.val=1;											// Put 1 in
-				if (data[i][4])											// If an info set
-					o.info=data[i][4];									// Add info
-				items.push(o);											// Add to array
+			for (i=0;i<data.length;++i) 								// For each row
+				if (data[i][0] == "link") {								// If link node
+					nodeLink=true;										// Node/link format
+					break;												// Quit looking
+					}
+			if (nodeLink) {
 				}
-
+			else{														// Simple tree format
+				for (i=0;i<data.length;++i) {							// For each row
+					if (!data[i][0])									// If no data
+						continue;										// Skip
+				 	if (!data[i][0].match(/node/i)) 					// If not a node
+						continue;										// Skip
+					o={};												// New object
+					o.name=data[i][2];									// Add name
+					o.parent=data[i][1];								// Add parent
+					if (data[i][3])										// If an info set
+						o.val=data[i][3];								// Add val
+					else												// If nothing there
+						o.val=1;										// Put 1 in
+					if (data[i][4])										// If an info set
+						o.info=data[i][4];								// Add info
+					items.push(o);										// Add to array
+					}
+				}
+		
 		dataSet=[];														// Init as array first
 
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					
@@ -185,6 +174,84 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		});
 		}
 	}
+	else if (options.chartType == "Stream") {							// Stream
+		minZoom=1;														// Cap zoom at 1
+		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
+	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			dataSet=[];													// Init as array 
+			var nRows=data.length;										// Number of rows
+			var nSets=data[0].length-1;									// Number of datasets
+			for (i=1;i<nSets;++i) {										// For each dataset
+				for (j=1;j<nRows;++j) {									// For time point
+					o={};												// New obj
+					o.key=data[0][i];									// Set field name as key
+					o.date=new Date(data[j][0]);						// Set date
+					o.value=data[j][i]-0;								// Set value
+					dataSet.push(o);									// Add item
+					}
+				}
+			redraw();													// Draw
+			},true);
+	}																	
+	else if (options.chartType == "Parallel") {							// Parallel
+		minZoom=1;														// Cap zoom at 1
+		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
+	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			dataSet=[];													// Init as array 
+			var nRows=data.length;										// Number of rows
+			var nSets=data[0].length;									// Number of datasets
+			for (i=1;i<nRows;++i) {										// For each row
+				var o={};												// New obj
+				o.name=data[i][0];										// Set field name as key
+				for (j=1;j<nSets;++j) 									// For each field
+					o[data[0][j]]=data[i][j]-0;							// Set value
+				dataSet.push(o);										// Add item
+				}
+			redraw();													// Draw
+			},true);
+	}																	
+	
+	
+	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	
+	svg=d3.select(con)													// Add SVG to container div
+		.append("svg")													// Add SVG shell
+		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
+ 		.append("g")													// Needed for pan/zoom
+     	
+	svg.append("defs")													// Add defs section
+	    .append("clipPath")
+	    .attr("id","cp0")
+	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
+	    
+	svg.append("rect")													// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
+    	.attr("width",w).attr("height",h)								// Set size
+    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
+	
+	function zoomed() {													// ZOOM HANDLER
+ 		var t;
+ 		if (!canPan)
+ 			return;
+ 		var scale=d3.event.scale;										// Set current scale
+ 		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
+ 		if (options.chartType == "Tree")								// Tree is x/y flopped
+ 			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
+		if (!d3.event.sourceEvent.shiftKey)								// Don't move with shift key down (to allow node dragging)
+			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
+ 		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
+ 		if (options.chartType == "Bubble")								// Bubble needs text control
+		 	if (options.style == "Packed")
+			 	svg.selectAll("text")									// Add text
+					.attr("font-size",options.lSize/scale+"px")			// Size
+					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
+			} 	
+	
+	
+	// DRAW /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	
 	
 	function redraw(what) {												// DRAW
 
@@ -210,7 +277,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].eCol)	// If a style spec'd
 						return styles[d.style].eCol;					// Get col from data
 					else												// Default
-						return options.eCol;							// Set wid
+						return "#"+options.eCol;						// Set wid
 						})									
 				.style("stroke-width", function(d, i) {					// Edge width
 					if (d.style && styles[d.style] && styles[d.style].eWid)	// If a style spec'd
@@ -269,7 +336,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						if (options.nCol == "none")						// If no color set														
 							return colors(i); 							// Set color from auto colors
 						else											// A color set
-							return options.nCol;						// Set color
+							return "#"+options.nCol;					// Set color
 						}
 					})									
 				.style("stroke", function(d, i) {						// Edge col
@@ -284,7 +351,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-				.on("click",AddPopup)									// Click on node
+				.on("click",function(d){ if (!d3.event.shiftKey) AddPopup(d); })	// Click on node unless dragging w/ shift
 				.call(force.drag);
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { 
@@ -403,7 +470,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 			link.enter().insert("path","g")	  							// Enter any new links at the parent's previous position
 				.style("fill","none")									// No fule
-				.style("stroke",options.eCol)							// Color
+				.style("stroke","#"+options.eCol)						// Color
 				.style("stroke-width",options.eWid)						// Width
 				.attr("d", function(d) {								// Set path data
 					var o={ x:d.source.x,y:d.source.y };				// dataSet dot											
@@ -465,7 +532,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				    .style("stroke","#"+options.gCol)					// Edge
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
 	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
-					
+					.style("cursor", function(d) { return d.info ? "pointer" : "auto"; })	// Set cursor presence of info
+					.on("click",AddPopup)								// Click on node
+
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")
 			      	.attr("dy",".3em")									// Shift
@@ -478,6 +547,18 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.text(function(d) { return d.name.substring(0,d.r/3); });	// Set text
 					}
 		  	else{														// Not packed
+				function classes(root) {								// Returns a flattened hierarchy 
+					var classes=[];
+					
+					function recurse(name, node) {
+				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+				    	else classes.push({packageName: name, className: node.name, value: node.val});
+				  		}
+				  	
+				  	recurse(null, root);
+				  	return {children: classes};
+					}
+	
 				var bubble=d3.layout.pack()								// Create layout
 					.size([dia,dia])									// Set size
 		    		.padding(options.padding);							// Padding
@@ -508,29 +589,241 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.style("text-anchor","middle")						// Center
 			      	.style(unselectable)								// Unselectable
 			      	.text(function(d) { return d.className.substring(0,d.r/3); });
-	
-				function classes(root) {								// Returns a flattened hierarchy 
-					var classes=[];
-					
-					function recurse(name, node) {
-				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-				    	else classes.push({packageName: name, className: node.name, value: node.val});
-				  		}
-				  	
-				  	recurse(null, root);
-				  	return {children: classes};
-					}
-					
+						
 			d3.select(self.frameElement).style("height",dia+"px");
-			}															// End bubble
+			}
+		}															// End bubble
+	
+		// STEAM /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		else if (options.chartType == "Stream") {						// Stream graph
+			var colorRange=["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
+			if (options.sCol != "none") {								// Using a specified color set
+				colorRange=[];
+				var v=options.sCol.split(",");
+				for (i=0;i<v.length;++i)	colorRange.push("#"+v[i]);
+				}
+			var colorSet=d3.scale.ordinal().range(colorRange);			// Scale colorset
+			var x=d3.time.scale().range([0,options.width]);				// Scale x
+			var y=d3.scale.linear().range([options.height-options.lSize-10,options.lSize*1+10]);	// Scale y
+						
+			var timeBar=d3.select(con)									// Add start/end date bar
+		        .append("div")											// Add div
+		        .style("position","absolute")							// Setup
+		        .style("top",(options.height-options.lSize-6)+"px").style("left","0px") // Pos
+		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
+				.html("<span id='startDate'></span><span id='endDate' style='position:absolute;left:"+(options.width-200)+"px;width:200px;text-align:right'></span>")
+			
+			var dataBar=d3.select(con)									// Add vertical data bar
+		        .append("div")											// Add div
+		        .style("position","absolute")							// Setup
+		        .style("width","2px").style("height",options.height-options.lSize*2-20+"px")			// Size
+		        .style("pointer-events","none")							// No mouse hits
+		        .style("top",(options.lSize-0+10)+"px").style("left","0px").style("background","#fff")  // Pos
+		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
+				.html("<div id='vdat' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(options.height-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
+						
+			var stack=d3.layout.stack()									// Create layout
+					.offset("silhouette")								// Center the stream
+			    	.values(function(d) { return d.values; })			// Get values
+			   	 	.x(function(d) { return d.date; })					// Plot date on x axis
+			    	.y(function(d) { return d.value; });				// Vaalue on y
+			
+			if (options.style == "Full")	stack.offset("expand")		// Full varient
+			if (options.style == "Stacked")	stack.offset("zero")		// Stacked varient
+						
+			var nest=d3.nest().key(function(d) { return d.key; });		// Nest on keys
+			var layers=stack(nest.entries(dataSet));					// Create layers
+				
+			var area=d3.svg.area()										// Create stream
+			    .interpolate("cardinal")								// Use cardinal spline
+			    .x(function(d) { return x(d.date); })					// Plot date on x axis
+			    .y0(function(d) { return y(d.y0); })					// Plot y0 
+			    .y1(function(d) { return y(d.y0+d.y); });				// Plot y1
+			  
+			x.domain(d3.extent(dataSet, function(d) { return d.date; }));	
+		 	y.domain([0,d3.max(dataSet, function(d) { return d.y0+d.y; })]);	
 		
+			if (options.area == "Flat")	area.interpolate("linear")		// Linear varient
+			if (options.area == "Stepped")	area.interpolate("step")	// Stepped varient
+		
+				svg.selectAll(".layer")									// Add layers
+			      		.data(layers)									// Set data
+		    			.enter().append("path")							// Add path
+				      	.attr("class","layer")							// Set class
+			      		.attr("d", function(d) { return area(d.values); })		// Set position
+			      		.style("fill", function(d, i) { return colorSet(i); });	// Set color
+			
+				 svg.selectAll(".layer")								// Point at layers
+						.attr("opacity",1)								//  Assunme fully opaque if mouse is out
+						.on("mouseover", function(d,i) {				// On mouse over
+				      		svg.selectAll(".layer")						// Point at layers
+	      		     		.transition().duration(250)					// Quick transition
+				     	 	.attr("opacity", function(d,j) {			// Set opacity
+				        		return j != i ? 0.6 : 1;				// If over, set to 1, else .6
+				    		})
+				   	 	})
+		
+				.on("mousemove", function(d, i) {						// When hovering over layer
+						var k,o,datearray=[];
+						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
+				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+				      	var selected=(d.values);						// Selected layer						
+				      	for (var k=0;k<selected.length;k++) { 			// For each data point
+				        	o=selected[k].date;							// Get date
+				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
+				        	}
+					   	k=datearray.indexOf(now);						// Data item over
+						d3.select(this).attr("stroke","#000").attr("stroke-width","0.5px")			// Show border
+			        	dataBar.style("left",d3.mouse(this)[0]+"px");	// Position data bar
+			      		$("#vnow").text(shivaLib.FormatDate(date,options.dateFormat))
+			      		$("#vdat").text(d.key+": "+d.values[k].value)	// Show value
+			      		dataBar.style("visibility","visible");			// Show data bar
+			    		})
+
+			    .on("mouseout", function(d, i) {						// Stop hovering on layer
+			     		svg.selectAll(".layer")							// Get all layers
+			      			.transition().duration(250)					// Quick transition
+			      			.attr("opacity","1");						// Make layer opaque
+			      		d3.select(this).attr("stroke-width","0px");		// Add border	
+			      		dataBar.style("visibility","hidden");			// Hide data bar
+			  			})
+			    
+			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
+			$("#endDate").text(shivaLib.FormatDate(x.invert(options.width),options.dateFormat));	// Set end date
+			}															// End Stream
+	
+		// PARALLEL /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		else if (options.chartType == "Parallel") {						// Parallel coords
+	    	var y={};
+		    var dragging={};
+			canPan=false;												// No pan/zoom
+			var x=d3.scale.ordinal().rangePoints([0,options.width],1);	// X scale
+			var line=d3.svg.line();										// Lines
+			var axis=d3.svg.axis().orient("left").ticks(4).outerTickSize(0); // Axes
+
+			
+			svg.attr("height",options.height-options.lSize*2+"px");
+		   	svg.attr("transform", "translate(0,"+options.lSize*3+")");// Move
+		   	
+		  	x.domain(dimensions=d3.keys(dataSet[0]).filter(function(d) {		// Extract the list of dimensions and create a scale for each.
+		  	  	return d != "name" && (y[d]=d3.scale.linear()					// If not a name, scale data point
+		        	.domain(d3.extent(dataSet, function(p) { return +p[d]; }))	// Link to domain
+		        	.range([options.height-options.lSize*4,0]));								// Set range
+		 	 	}));	
+		   
+		   var background=svg.append("g")  								// Draw lines in grey
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d",path)											// Set path data using path()
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#ccc")									// Grey
+				.attr("stroke-opacity",.4)								// Opacity
+ 	
+		   var highlight=svg.append("g")  								// Draw lines in highlight color
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d", path)										// Set path data
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#"+options.eCol)						// Highlight color
+ 				.attr("stroke-width",options.eWid)						// Highlight color
+				.attr("stroke-opacity",.7)								// Opacity
+ 
+  			background.append("title").text(function(d) { return d.name })	// Tooltip
+			highlight.append("title").text(function(d) { return d.name })	// Tooltip
+ 		 	var g=svg.selectAll(".dimension")  							// Add a dimension group for each dataset
+      			.data(dimensions)										// Get dataset names
+    			.enter().append("g")									// Add group
+		      	.attr("transform", function(d) { return "translate("+x(d)+")"; })	// Position
+		      	.call(d3.behavior.drag()								// Create new drag behavior
+		        .on("dragstart", function(d) {							// On drag start
+		          	dragging[d]=this.__origin__=x(d);					// Set associatie array by name and set origin to xpos of axis
+		          	background.attr("visibility", "hidden");			// Hide grey lines
+		       		})
+   		        .on("drag", function(d) {								// On drag
+		          	dragging[d]=Math.min(w,Math.max(0,this.__origin__+=d3.event.dx));	// New xpos
+		         	highlight.attr("d",path);											// Set lines
+		          	dimensions.sort(function(a,b) { return position(a)-position(b); });	// Sort by position
+		          	x.domain(dimensions);
+		         	g.attr("transform", function(d) { return "translate("+position(d)+")"; })	
+		        	})
+		        .on("dragend", function(d) {							// On drag end
+		          	delete this.__origin__;								// Remove origin
+		          	delete dragging[d];									// Remove from dragging[]
+		          	transition(d3.select(this)).attr("transform","translate("+x(d)+")");	// Transition to new position
+		          	transition(highlight)								// Reshow highlighted lines
+		              	.attr("d",path);								// Move them to new place
+		         	background.attr("d",path)							// Set pos of grey lines
+		              	.transition().delay(500).duration(0)			// Wait 1/2 sec
+		             	.attr("visibility","visible");					// Show grey lines
+		        	})
+		        );
+		 
+			 g.append("g")  											// Add an axis and title.
+				.style("font-family","sans-serif")						// Sans
+				.style("font-size","10px")								// Size
+				.attr("fill","#999")									// Text color
+ 				.style(unselectable)									// Unselectable
+				.each(function(d) { d3.select(this).call(axis.scale(y[d])); })
+			    .append("text")											// Add axis title
+ 				.style("font-size",options.lSize+"px")					// Size
+				.attr("stroke","none")									// No fill
+				.attr("stroke-width",0)									// No fill
+				.attr("text-anchor","middle")							// Centered
+				.attr("fill","#"+options.lCol)							// Text color
+				.attr("y",-options.lSize)								// Position
+				.attr("font-weight","bold")								// Bold
+				.text(String);
+	
+		    g.selectAll("path")											// Select the paths
+				.attr("fill","none")									// No fill
+				.attr("stroke","#999")									// Set loine color
+ 
+ 		    g.selectAll(".tick")										// Select the ticks
+				.each(function(d,i) {									// For each tick
+					 if (!this.transform.baseVal.getItem(0).matrix.f)	// If top-most
+					 	this.style['opacity']=0;						// Hide it
+					})
+		
+			g.append("g")		  										// Add and store a brush for each axis.
+				.each(function(d) { d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush)); })
+		    	.selectAll("rect")										// Select the rect
+		      	.attr("x",-8)											// Position left of line
+		      	.attr("width",16)										// Set width
+				.attr("fill-opacity",.3)								// Set opacity
+ 	
+			function transition(g) {									// TRANSITION
+			  return g.transition().duration(500);						// Wait 1/2 sec
+			}
+
+			function position(d) {										// GET POSITION
+			  var v=dragging[d];										// Dragging
+			  return v == null ? x(d) : v;								// Return pos based on in dragging or not
+			}
+			
+			function path(d) {											// GET PATH
+		  		return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+			}
+			
+			function brush() {											// Handles a brush event, toggling the display of highlight lines.
+			  	var actives=dimensions.filter(function(p) { return !y[p].brush.empty(); });
+			 	var extents=actives.map(function(p) { return y[p].brush.extent(); });
+			 	highlight.style("display", function(d) {
+				  		return actives.every(function(p, i) {
+							return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+				    		}) ? null : "none";
+					  });
+				}
+
+			}															// End Parallel
+	
 		firstTime=false;												// Not first time thru
-		}																// End update
+//		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
-
-
-
 
 /////////////////////////////////
 // HELPER FUNCTIONS
@@ -538,6 +831,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 function AddPopup(d)												// SHOW A POPUP
 {
+	if (!d.info)														// Nothing to show
+		return;															// Quit
 	var x=d3.event.clientX+8;											// Set xPos
 	var y=d3.event.clientY+8;											// Y
 	$("#d3Popup").css({left:x,top:y});									// Position
