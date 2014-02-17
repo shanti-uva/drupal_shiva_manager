@@ -2,8 +2,9 @@
 //  SHIVALIB DATA ACCESS (CSV/GOOGLE DOCS)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader) 		//	GET GOOGLE DOCS SPREADSHEET
+SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader, sendError) 		//	GET GOOGLE DOCS SPREADSHEET
 {
+	this.spreadsheetError=null;
 	if (url.indexOf("google.com") != -1) {									// If Google doc
 		var query=new google.visualization.Query(url);						// Make query object	
 		query.send(handleGoogleResponse);									// Fetch data
@@ -21,6 +22,10 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 	    var i,j,o,lab;
 		var keys=new Array();												
 		var theData=new Array();
+		if (!response.responseText && sendError) {							// If no data and sending
+			callback(null,url);												// Send to callback
+			return(null)													// Return null
+			}
 		var data=shivaLib.parseCSV(response.responseText);					// Parse CSV
 		var cols=data[0].length;											// Get cols
 		if (addHeader || fields) {											// If setting header
@@ -65,6 +70,10 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHe
 		var keys=new Array();												
 		var theData=new Array();
 		var data=response.getDataTable();									// Try getting table from Google
+		if (!data && sendError) {											// If no data and sending
+			callback(null,url);												// Send to callback
+			return(null)													// Return null
+			}
 		var cols=data.getNumberOfColumns();									// Get cols
 		var rows=data.getNumberOfRows();									// Get rows
 		if (addHeader || fields) {											// If setting header

@@ -64,6 +64,7 @@
 				linkGravity:				{	def:'10', 			opt:'number',			des:'Node gravity (0-100)'},
 				linkStrength:				{	def:'100', 			opt:'number',			des:'Node strength (0-100)'},
 				nShape:						{	def:'Circle', 		opt:'Circle|Square|Star|Triangle|Caret|Diamond|Plus',	des:'Node shape'},
+				popupTime:					{	def:'5', 			opt:'number',			des:'Popup show time'},
 				nSize:						{	def:'20', 			opt:'number',			des:'Node size'},
 				nCol:						{	def:'none', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'2', 			opt:'number',		 	des:'Link line width'},
@@ -120,18 +121,26 @@
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
-				eWid:						{	def:'1', 			opt:'number',			des:'Line width'},
-				eCol: 						{	def:'4682B4', 		opt:'color',		 	des:'Line color'},
+				eWid:						{	def:'1.5', 			opt:'number',			des:'Active line width'},
+				eCol: 						{	def:'4682B4', 		opt:'color',		 	des:'Active line color'},
+				iCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Inactive line color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
 				},
 		Chord: {
-				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
-				height: 					{	def:'600', 			opt:'number',			des:'Height'},
-				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdEVSSFNnOTF4OW9hUUQ3aHNNMmJxZ2c&output=html', 	opt:'string',			des:'Data source URL'}, 
+				width: 						{	def:'600', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				padding: 					{	def:'100', 			opt:'number',		 	des:'Space for labels'},
+				bandWidth: 					{	def:'30', 			opt:'number',			des:'Width of group band'}, 
+				eWid:						{	def:'1', 			opt:'number',		 	des:'Link line width'},
+				sCol: 						{	def:'none', 		opt:'colors',		 	des:'Link colors'},
+				fill: 						{	def:'true', 		opt:'true|false',		des:'Fill links?'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
 				}
 		}
+
 	
 	var helpText=new Array();
 	helpText['Data source URL']="Click on the spreadsheet icon to the right of 'Data source url' to access a list of your Google Docs Spreadsheets from within SHIVA. You may be prompted to authorize access (read-only) to your Google account. You should then be able to select a spreadsheet from the provided list.<br/> <br/>Alternately, you can paste the URL provided through the Share link of your Google Doc. Note you have to change the Share settings for the Spreadsheet to either 'Public' or 'Anyone with the link'. <br/><br/>See <a href='https://wiki.shanti.virginia.edu/x/o5S1AQ' target='_blank'>the Knowledge Base</a> for more information about how to create and link to network data for use in these visualizations.";
@@ -149,6 +158,7 @@
 	helpText['Link line width']="In the text box to the right enter a value that sets the default link line width in pixels. This can be set by the class field in the spreadsheet on a link-by-link basis.";
 	helpText['Font size']="Click on the text box to the right and enter a number that sets the font size of node labels in pixels.";
 	helpText['Font color']="In the text box to the right enter a value that will determine the font color of node labels. Either click on the square color chip icon in the text box to the right to launch the color picker and select a color, or enter a hexadecimal color code in the text box.";
+	helpText['Popup show time']="The number of seconds a popup dialog will show until closing."
 	helpText['Branch levels to show']="The maximum branch level to show, from 1 to any number deep. Setting this to 0 will show all nodes.";
 	helpText['Transition time']="The time (in milliseconds) for a branch to expand or collapse.";
 	helpText['Branch spacing']="The span that branches of different depths are drawn horizontally.";
@@ -159,10 +169,15 @@
 	helpText['Area style']="<b>Stream</b> data is displayed as a centeredstream.<br><b>Stacked</b> displays as a traditional stacked area chart.<br><b>Full</b> a traditional stacked area chart normalized to fill entire height.";
 	helpText['Area shape']="<b>Curved</b> data area is displayed as a curved shape.<br><b>Flat</b> data area is displayed with straight edges.<br><b>Stepped</b> data area is displayed as a series of steps.";
 	helpText['Date format']="The format that dates will be displayed.";
+	helpText['Active line color']="This is the color of the highlighted lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
+	helpText['Active line width']="This is the width of the highlighted lines.";
+	helpText['Inactive line color']="This is the color of the unselected lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
 	
-	helpText['Line color']="This is the color of the highlighted lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
-	helpText['Line width']="This is the width of the highlighted lines.";
-	
+	helpText['Space for labels']="Space around graph to draw labels.";
+	helpText['Width of group band']="Width of grouping band around links";
+	helpText['Fill links?']="Whether the links are fill in, or only the edges are drawn";
+	helpText['Link colors']="Colors of the links. None will diplay the default colors.";
+
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
 ///// INIT  /////////////
@@ -216,7 +231,7 @@
 			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
-		else if (e.data.indexOf("PutJSON") == 0)
+		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
 	}
 
@@ -239,20 +254,20 @@
         chartType=jsonData.chartType;
       }
     else{
-      var s,e;
-      var query=window.location.search.substring(1);
-      if ((s=query.indexOf("&chartType=")) != -1)
-        if ((e=query.indexOf("&",s+1)) != -1)
-          chartType=query.substring(s+11,e);
-      }
-    SetAttributes(chartType,false);
+		var s,e;
+	    var query=window.location.search.substring(1);
+	    if ((s=query.indexOf("&chartType=")) != -1)
+			if ((e=query.indexOf("&",s+1)) != -1)
+				chartType=query.substring(s+11,e);
+		}
+	SetAttributes(chartType,false);
     shivaLib.ReEdit(jsonData,props[chartType]);
     for (var i=0;i<$("#chartType option").length;i++) 
-      if ($("#chartType option")[i].text.replace(/ /g,"") == chartType) {
-        chartType=$("#chartType option")[i].text;
-          $("select#chartType").val(chartType);
-          break;
-        }
+		if ($("#chartType option")[i].text.replace(/ /g,"") == chartType) {
+			chartType=$("#chartType option")[i].text;
+			$("select#chartType").val(chartType);
+			break;
+			}
     chartType=chartType.replace(/ /g,"");
     Draw();
 	}

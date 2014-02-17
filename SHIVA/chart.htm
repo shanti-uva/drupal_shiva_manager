@@ -297,10 +297,8 @@
 			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
 		else if (e.data.indexOf("GetType") == 0) 
 			e.source.postMessage("GetType="+shivaGroup,"*");
-		else if (e.data.indexOf("PutJSON") == 0)  { 
-		  console.info(e.data);
+		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-	  }
 		else if (e.data.indexOf("SetChartType=") == 0) {
 		  	$("select#chartType").val(e.data.substr(13));
 			SetAttributes(e.data.substr(13),true);
