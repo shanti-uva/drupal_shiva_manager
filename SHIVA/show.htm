@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Show</title>
+ 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
+	<script type="text/javascript" src="shivalib-min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { 		background-color:#e0e0e0; }
+		.ui-autocomplete { max-height: 300px; overflow-y: auto; }
+	
+ 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+		   				}
+		.title { 		font-family:Verdana,Geneva,sans-serif; font-size:x-large;color:#fff;
+						padding:8px;margin:0px;font-weight:bold;
+						-moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;
+						background-color:#ccc;
+					  	}
+		.contents { 	font-family:Verdana,Geneva,sans-serif; font-size:small; 
+						padding:0px; margin:0px;padding-right:16px;
+						} 
+		.trans { 		font-family:Verdana,Geneva,sans-serif; font-size:small;
+						margin:0px; padding:0px;padding-right:8px;padding-left:16px;
+						overflow:hidden;
+						cursor:pointer;
+						}
+		.slide { 		overflow:hidden;
+						}
+		.control { 		padding:4px;margin:0px;margin-top:6px;margin-bottom:6px;
+						-moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;
+						background-color:#ccc;
+						} 
+		.info { 		font-family:Verdana,Geneva,sans-serif; font-size:small;
+						margin:0px; padding:0px;
+						overflow:hidden;
+						}
+		.labels { 		font-family:Verdana,Geneva,sans-serif; font-size:medium;
+						color:#999;font-weight:bold;
+						}
+		.timeDisp { 	font-family:Verdana,Geneva,sans-serif; font-size:xx-small;
+						color:#666;width:100px;display:inline-block;text-align:center;
+						}
+
+ 	</style>
+</head>
+<body>
+<div id="showDiv" style="padding:0px;margin:0px;width:1000px;display:none">
+	<div id="titleDiv" style="position:absolute;width:984px" class="title unselectable"></div>
+	<div id="playerDiv" style="position:absolute" class="unselectable"></div>
+	<div id="slideDiv" style="position:absolute" class="slide unselectable"></div>
+	<div id="controlDiv" style="position:absolute" class="control unselectable">
+	  	<img id="playBut" src="playbut.gif" onclick="RunPlayer('play')" title="Play video" style="vertical-align:-4px;cursor:pointer">
+   		<div id="timeDisp" class="timeDisp unselectable"></div>
+   		<div style="display:inline-block" id="slider"></div>&nbsp;&nbsp;
+   		<img src="settingsbut.gif" id="settings" title="Settings menu" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;</span>
+  		<img src="startdot.gif" onclick="RunSlide('last')" title="Go to previous slide" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;|&nbsp;</span>
+   		<img src="enddot.gif" onclick="RunSlide('next')" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
+	</div>
+	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player">
+		<div style="position:absolute;width:64px;height:100%;left:-64px" class="unselectable"></div>
+	</div>
+	<div id="contentDiv" style="position:absolute" class="contents unselectable">
+		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
+	</div>
+	<div id="transDiv" style="position:absolute" class="trans">
+		<span class="labels">Transcript</span>
+		<div id="transSearchDiv" style='position:absolute;top:0px'> 
+			<input style='width:100px;font-size:small;border:1px solid #ddd' id='transSearch'>
+  			<img src="settingsbut.gif" id="transSettings" title="Transcript menu" style="vertical-align:-2px;cursor:pointer">
+	  	</div>
+  		<div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
+ 	</div>
+	<div id="infoDiv" style="position:absolute" class="info">
+		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
+	</div>
+	<div id="transHgt" style="position:absolute;width:1000px;height:16px;cursor:row-resize;border-bottom:3px solid #ccc" class="unselectable" title="Change transcript height"></div>
+	<div id="transSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize transcript"></div>
+</div>
+ 
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;															// Points to shiva library
+	var showWid;																// Width of entire player component
+	var showTitle="";															// Title of show
+	var playerSlideRatio=.5;													// Ratio of player to slide windows
+	var transInfoRatio=.5;														// Ratio of conter/transcript to info windows
+	var transHgt=400;															// Height of transscript
+	var transLanguage="English";												// Transcript language
+	var transLangs="None|English|Spanish|French|Tibetan";						// Transcript languages
+	var transVectors=new Array();												// Transcript timing RLC
+	var transText;																// Text of transcript
+	
+	var player=null;															// Holds player object
+	var playerQuality="Default";												// Video quality
+	var playerCaption="None";													// Captions
+	var playerMode="empty";														// State of player
+	var playerVolume=75;														// Volume
+	var playerSpeed=50;															// Play peed
+	var playerNow=0;															// Current time in secs
+	var playerTRT=367;															// Total running time in secs
+	var playerType="youtube";													// Type of player
+	var playerStart=0,playerStop=playerTRT;										// Start/end times
+	var playerURL="ft24bHtNJwY";												// Source
+	var playerAuto="false";														// Auto play
+	var playerAspect=.5625;														// Player aspect ratio
+	var playerTime=null;														// Timer
+		
+///////// INIT  /////////////
+
+	$(document).ready(function() {												// When loaded
+		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);			// Load SHIVA lib
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);					// Drupal flag
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		
+		showWid=$("#showDiv").width();											// Get width
+		LoadContent();															// Load show content
+		RunPlayer("scrub",0);													// Show start/end times
+		$("#showDiv").show(1000);												// Show interface
+		playerTimer=setInterval(OnPlayerTimer,200);								// Set timer ~5ps
+
+		$("#slider").slider({ value:playerNow, max:playerTRT,					// Init slider
+			slide: function(event,ui ) {										// Handle change
+				RunPlayer("scrub",ui.value);									// Show
+				}
+			});
+
+		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
+			cursorAt:{left:8},
+			cursor: "col-resize", axis:"x",										// X-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+			 	playerSlideRatio=Math.max(0,Math.min(1,(event.clientX-8)/(showWid+16)));	// Set ratio between windows
+				ResizePanes();													// Resize panes
+				}
+			});
+			
+		$("#transHgt").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+			cursor: "row-resize", axis:"y",										// Y-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+				transHgt=Math.max(event.clientY-$("#controlDiv").css("top").replace(/px/,"")*1-$("#controlDiv").height(),0)-32;  // Set hgt
+				ResizePanes();													// Resize panes
+				}
+			});
+
+		$("#playerSiz").hover(													// Player width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+		});
+
+		$("#settings").on("click", function(e) {								// SETTINGS HANDLER
+			if ($("#setpopup").length) {										// If open
+				$("#setpopup").hide('slide',{direction:'down'},300, function(){ $("#setpopup").remove() });	// Hide, then remove it
+				return;															// Quit
+				}
+			var w=190;
+			var x=$("#controlDiv").width()-w-12;
+			var str="<table><tr height='18'><td>Volume</td>";
+			str+="<td><div style='display:inline-block;width:100px' id='pVolume'></div></td></tr>"
+			str+="<tr height='18'><td>Speed</td>";
+			str+="<td><div style='display:inline-block;width:100px' id='pSpeed'></div></td></tr>"
+			str+="<tr height='18'><td>Quality</td><td>";
+			str+=shivaLib.MakeSelect("pQuality",false,["Default","Good","Better","Best"],playerQuality,"style='font-size:x-small'")+"</td></tr>";
+			str+="</table>";
+			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
+			var y=$("#controlDiv").css("top").replace(/px/,"")-$("#setpopup").height()-11;			
+			$("#setpopup").css("top",y);										// Position above control bat
+			$("#setpopup").show('slide',{direction:'down'},300);				// Show it
+			
+			$("#pVolume").slider({ value:playerVolume,							// VOLUME HANDLER 
+				change: function(event, ui) {									// On change
+					playerVolume=ui.value;										// Set param
+					RunPlayer("volume",playerVolume);							// Do it
+					}
+				});
+
+			$("#pSpeed").slider({ value:playerSpeed,step:25,					// SPEED CHANGE
+				change: function(event, ui) {									// On change
+					playerSpeed=ui.value;										// Set param
+					RunPlayer("speed",playerSpeed);								// Do it
+					}
+				});
+	
+			$("#pQuality").on("change", function(e) {							// VIDEO QUALITY HANDLER
+				playerQuality=$("#pQuality").val();								// Set param
+				RunPlayer("quality",playerQuality);								// Do it
+				});
+
+			$("#pCaption").on("change", function(e) {							// CAPTIONS HANDLER
+				playerCaption=$("#pCaption").val();								// Set param
+				RunPlayer("caption",playerCaption);								// Do it
+				});
+
+			});																	// End settins
+		
+	});
+
+	function LoadContent()													// LOAD SHOW CONTENT
+	{
+	var toc=[];
+	toc.push({start:"00:00",title:"Opening remarks"});
+	toc.push({start:"01:02",title:"Clinton Global Initiative"});
+	toc.push({start:"02:08",title:"Health in Rwanda"});
+	toc.push({start:"03:33",title:"AIDS vaccines"});
+	toc.push({start:"04:12",title:"Malaria reduction"});
+	toc.push({start:"04:55",title:"Partners in Health"});
+	toc.push({start:"05:09",title:"Jobs"});
+	toc.push({start:"05:45",title:"Health care"});
+	toc.push({start:"06:01",title:"Closing remarks"});
+	showTitle="Bill Clinton speaks at TED Conference";	
+	$("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes()'>");
+	$("#playerDiv").html("<img width='100%' src='video.jpg'onload='ResizePanes()'>");
+	$("#informationText").html("<img src='info.jpg'>");	
+	
+	$("#titleDiv").html(showTitle);												// Set titlw
+	MakeTOC(toc);																// Fill TOC contents
+	MakeTranscript();															// Load transcript
+	MakeTranscriptVectors();													// Make transcript timing list
+	if ((playerType != "youtube") && (playerType != "vimeo"))					// Doesn't resize on callback
+		ResizePanes();															// Resize panes
+	}
+
+	function ResizePanes()
+	{ 
+		var w=showWid*playerSlideRatio;											// Player width
+		var pt=$("#titleDiv").height()+32;										// Top of player
+		$("#playerDiv").css({ width:w+"px",top:pt+"px"});						// Set player pos
+		$("#slideDiv").css({ left:(w+16)+"px",width:(showWid-w)+"px",top:pt+"px"});		// Set slider pos/size
+		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());		// Player height
+		$("#playerSiz").css({ left:(w+8)+"px",height:h+"px",top:pt+"px"});		// Set sizer pos
+		h+=pt;																	// Point at top of control bar
+		var ct=h+$("#controlDiv").height()+24;									// Contents top
+		$("#contentDiv").css({ top:ct+"px",height:transHgt+"px"});				// Position/size contents
+		var cw=$("#contentDiv").width()+8;										// Get width of content panel
+		$("#controlDiv").css({ top:h+"px" });									// Position control slider
+		$("#slider").width(showWid-210);										// Slider width
+		w=showWid*transInfoRatio;												// Transcript width
+		$("#transDiv").css({ left:cw+"px",width:(w-cw-8)+"px",height:transHgt+"px",top:ct+"px"});
+		$("#transSiz").css({ left:w+8+"px",height:transHgt-32+"px",top:ct-0+32+"px"});	// Pos transcript sizer
+		if (transText)															// If a transcript
+			w=showWid*(1-transInfoRatio);										// Info window width
+		else																	// None
+			w=showWid-cw;														// But up to contents
+		$("#infoDiv").css({ left:(showWid-w+24)+"px",width:(w-16)+"px",height:transHgt+"px",top:ct+"px"});
+		$("#transHgt").css({ top:ct+transHgt+"px"});							// Set transcript height
+		$("#transSearchDiv").css("left",$("#transDiv").width()-104)+"px";		// Search div width
+		RunPlayer("resize");													// Resize player
+		}		
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TRANSCRIPT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function MakeTranscriptVectors()										// CREATE TRANSCRIPT TIMIMG VECTORS
+	{
+		var ps=0;
+		var pd=playerTRT;
+		var cs=0;
+		var cd=transText.length;
+		transVectors.push( { ps:0,pd:26,cs:0,cd:0,w:0 } );
+		transVectors.push( { ps:26,pd:pd-26,cs:0,cd:cd,w:60 } );
+	}
+
+	function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
+	{
+		var i,o,cp={};
+		var n=transVectors.length-1;											// Last vector
+		for (i=n;i>=0;i--) {													// For each vector
+			o=transVectors[i];													// Point at vector
+			if (t >= o.ps) {													// In this one
+				cp.pos=(t-o.ps)/o.pd*o.cd+o.cs;									// Get char pos
+				cp.pos2=cp.pos+o.w;												// End
+				cp.pct=cp.pos/transText.length;									// Percentage
+				return cp;														// Return pos
+				}																// Ratio into				
+			}
+		return { pos:0,pos2:0,line:0 };											// Not found
+	}
+	
+	function GetTimeFromCharPos(p)											// GET TIME FROM CHARPOS IN TRANSCRIPT
+	{
+		var i,o,t;
+		var n=transVectors.length-1;											// Last vector
+		for (i=n;i>=0;i--) {													// For each vector
+			o=transVectors[i];													// Point at vector
+			if (p >= o.cs) {													// In this one
+				t=(p-o.cs)/o.cd*o.pd+o.ps;										// Get time
+				return t;														// Return time
+				}
+			}
+		return 0;																// Not found
+	}
+	
+	function HighlightText(start, end)										// HGHLIGHT SELECTED CHARS
+	{
+		var tran=transText;														// Copy original
+		if (start != end) {														// If something to highlight
+			var str=tran.substring(0,start);									// Pre highlight
+			str+="<span style='color:#009900'>";								// Add style
+			str+=tran.substring(start,end);										// Highlight portion
+			str+="</span>";														// End style
+			str+=tran.substring(end);											// Add end
+			tran=str;															// Copy
+			}
+		$("#transcriptText").html(tran.replace(/\n/g,"<br>"));					// Set text
+	}
+
+	function MakeTOC(toc)
+	{
+		var i,t;
+		if (!toc) {																// No toc
+			$("#contentDiv").css("display","none");								// Hide it
+			$("#contentDiv").width(0);											// Squeeze
+			return;																// Quit
+			}
+		var str="<div style='cursor:pointer;padding-left:12px'>"				// Set up
+		for (i=0;i<toc.length;++i) {											// For each title
+			t=shivaLib.TimecodeToSeconds(toc[i].start);							// Get time
+			str+="<div onclick='RunPlayer(\"play\","+t+")'";					// Add handler						
+			str+="title='"+toc[i].start+"'>";									// Add timecode tooltip
+			str+="<span style='color:#aaa'><b>&bull; </b></span>"; 				// Add bullet
+			str+=toc[i].title+"</div>";											// Add title
+			}
+		$("#contentsText").html(str+"</div>");									// Set div contents
+	}
+
+	function MakeTranscript()												// CREATE TRANSCRIPT
+	{
+		transText="I thought in getting up to my TED wish I would try to begin by putting in perspective what I try to do and how it fits with what they try to do. We live in a world that everyone knows is interdependent, but insufficient in three major ways. It is, first of all, profoundly unequal: half the world's people still living on less than two dollars a day; a billion people with no access to clean water; two and a half billion no access to sanitation; a billion going to bed hungry every night; one in four deaths every year from AIDS, TB, malaria and the variety of infections associated with dirty water -- 80 percent of them under five years of age. Even in wealthy countries it is common now to see inequality growing. In the United States, since 2001 we've had five years of economic growth, five years of productivity growth in the workplace, but median wages are stagnant and the percentage of working families dropping below the poverty line is up by four percent. The percentage of working families without health care up by four percent. So this interdependent world which has been pretty good to most of us -- which is why we're all here in Northern California doing what we do for a living, enjoying this evening -- is profoundly unequal. It is also unstable. Unstable because of the threats of terror, weapons of mass destruction, the spread of global disease and a sense that we are vulnerable to it in a way that we weren't not so many years ago. And perhaps most important of all, it is unsustainable because of climate change, resource depletion and species destruction.\n\nWhen I think about the world I would like to leave to my daughter and the grandchildren I hope to have, it is a world that moves away from unequal, unstable, unsustainable interdependence to integrated communities -- locally, nationally and globally -- that share the characteristics of all successful communities: a broadly shared, accessible set of opportunities, a shared sense of responsibility for the success of the common enterprise and a genuine sense of belonging. All easier said than done. When the terrorist incidents occurred in the United Kingdom a couple of years ago, I think even though they didn't claim as many lives as we lost in the United States on 9/11, I think the thing that troubled the British most was that the perpetrators were not invaders, but homegrown citizens whose religious and political identities were more important to them than the people they grew up with, went to school with, worked with, shared weekends with, shared meals with. In other words, they thought their differences were more important than their common humanity. It is the central psychological plague of humankind in the 21st century.\n\nInto this mix, people like us, who are not in public office, have more power to do good than at any time in history, because more than half the world\'s people live under governments they voted in and can vote out. And even non-democratic governments are more sensitive to public opinion. Because primarily of the power of the Internet, people of modest means can band together and amass vast sums of money that can change the world for some public good if they all agree. When the tsunami hit South Asia, the United States contributed 1.2 billion dollars. 30 percent of our households gave. Half of them gave over the Internet. The median contribution was somewhere around 57 dollars. And thirdly, because of the rise of non-governmental organizations. They, businesses, other citizens' groups, have enormous power to affect the lives of our fellow human beings. When I became president in 1993, there were none of these organizations in Russia. There are now a couple of hundred thousand. None in India. There are now at least a half a million active. None in China. There are now 250,000 registered with the government, probably twice again that many who are not registered for political reasons.\n\nWhen I organized my foundation, and I thought about the world as it is and the world that I hope to leave to the next generation, and I tried to be realistic about what I had cared about all my life that I could still have an impact on. I wanted to focus on activities that would help to alleviate poverty, fight disease, combat climate change, bridge the religious, racial and other divides that torment the world, but to do it in a way that would either use whatever particular skills we could put together in our group to change the way some public good function was performed so that it would sweep across the world more.";
+		if (!transText) {														// If no transcript
+			transInfoRatio=0;													// Slide over
+			$("#transDiv").css("display","none");								// Hide it
+			$("#transSiz").css("display","none");								// Hide it
+			return;																// Quit
+			} 
+		transText=transText.replace(/\r/g,"");									// Remove CRS
+		$("#transcriptText").html(transText);									// Fill div
+		var words=transText.split(" ");											// Get words
+		var i,l,n=words.length;p=0;														
+		for (i=0;i<n;++i) {														// For each word	
+			l=words[i].length;													// Get word length
+			words[i]={ label:words[i],pos:p };									// Make into label index object
+			p+=l+1;																// Start of next word
+			}
+		
+		$("#transSearch").autocomplete({ source: words, 						// AUTOCOMPLETE HANDLER
+			select: function(event, ui) {										// On select
+				RunPlayer("scrub",GetTimeFromCharPos(ui.item.pos));				// Show
+				}
+			});
+		
+		$("#transcriptText").on("click", function (e) {							// HANDLE TRANSCRIPT CLICK
+	  		var s=window.getSelection();										// Get selection
+ 			var y=transText.indexOf(s.focusNode.textContent);					// Char pos of paragraph
+	 		y=y+s.anchorOffset;													// Position in text
+ 			RunPlayer("scrub",GetTimeFromCharPos(y),true);						// Show
+ 			});
+
+		$("#transHgt").hover(													// If over transcript height control
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		
+		$("#transSiz").hover(													// Transcript width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+
+		$("#transSiz").draggable({												// DRAG TRANSCRIPT WIDTH HANDLER
+			cursor: "col-resize", axis:"x",										// X-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+			 	transInfoRatio=Math.max(0,Math.min(1,(event.clientX)/showWid)); // Set ratio between windows
+				ResizePanes();													// Resize panes
+				}
+			});
+		
+		$("#transSettings").on("click", function(e) {							// TRANSCRIPT SETTINGS HANDLER
+			if ($("#setpopup").length) {										// If open
+				$("#setpopup").hide('slide',{direction:'right'},300, function(){ $("#setpopup").remove() });	// Hide, then remove it
+				return;															// Quit
+				}
+			var w=190;
+			var x=$("#transSearchDiv").css("left").replace(/px/,"")-0+80;
+			var str="<table><tr height='18'><td>Language</td><td>";
+			str+=shivaLib.MakeSelect("tLang",false,transLangs.split("|"),transLanguage,"style='font-size:x-small'")+"</td></tr>";
+			str+="</table>";
+			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
+			var y=$("#controlDiv").css("top").replace(/px/,"")-0+24+$("#controlDiv").height();			
+			$("#setpopup").css("top",y);										// Position above control bat
+			$("#setpopup").show('slide',{direction:'right'},300);				// Show it
+
+			$("#tLang").on("change", function(e) {								// LANGUAGE HANDLER
+				transLanguage=$("#tLang").val();								// Set param
+				RunTranscript("language",transLanguage);						// Do it
+				});
+
+			});																	// End transcript settings
+	}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function onYouTubeIframeAPIReady() 										// YOUTUBE PLAYER READY
+    {   
+		RunPlayer("init");														// Init player								
+ 	}
+
+	function OnPlayerTimer()												// GET TIME FROM CHARPOS IN TRANSCRIPT
+	{
+		if ((player) && (playerType == "youtube")) {							// If initted YouTube
+			if ((player.getPlayerState) && (player.getPlayerState() == 1)) {	// If in play
+				if (player.getCurrentTime() >= playerStop)						// Past end
+					RunPlayer("pause");											// Pause
+				playerNow=Math.min(player.getCurrentTime(),playerStop);			// Get time
+				RunPlayer("show");												// Show status
+				}
+			}
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function Popup(msg)
+	{
+		var x=$("#playerDiv").width()/2-50;
+		var y=$("#playerDiv").css("top").replace(/px/,"")-30+$("#playerDiv").height()/2;
+		$("#popup").remove();
+		var str="<div id='popup' style='position:absolute;display:none;background-color:#eee;left:"+x+"px;top:"+y+"px;border:1px solid;padding:12px' class='rounded-corners'>"+msg+"</div>";
+		$("body").append(str)
+		$("#popup").show().delay(700).hide(300)
+		}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ACTIONS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function RunPlayer(what, param, param2)								// PLAYER ACTIONS
+	{
+		if (what == "play") {												// Play
+			if ($("#playBut").attr("src") == "playbut.gif")	{				// If in pause
+				$("#playBut").attr("src","pausebut.gif");					// Show pause but
+				playerMode="play";											// Set mode
+				}
+			else if (param == undefined) {									// Already in play, but not going to a time
+				$("#playBut").attr("src","playbut.gif");					// Show play but
+				playerMode="pause";											// Set mode
+				}
+			if (param != undefined) {										// If playing to a time
+				if ((""+param).match(/:/))									// In tc format
+					param=shivaLib.TimecodeToSeconds(param);				// Convert to secs
+				playerNow=Math.max(Math.min(param,playerTRT),0);			// Set cur time
+				}	
+			if ((player) && (playerType == "youtube")) {					// If initted YouTube
+				player.seekTo(playerNow,true);								// Cue
+				if (playerMode == "play")	player.playVideo();				// Play
+				if (playerMode == "pause")	player.pauseVideo();			// Pause
+				}
+			RunPlayer("show");												// Show where we're at
+			}
+		else if (what == "scrub") {											// Scrub
+			playerNow=Math.max(Math.min(param,playerTRT),0)					// Set now
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.seekTo(playerNow,true);								// Cue
+			RunPlayer("show",param2);										// Show where we're at
+			}
+		else if (what == "pause") {											// Pause
+			$("#playBut").attr("src","playbut.gif");						// Show pause but
+			playerMode="pause";												// Set mode
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.pauseVideo();										// Pause
+			}
+		else if (what == "show") {											// Scrub
+			var str=shivaLib.SecondsToTimecode(playerNow)+" / ";			// Cur time
+			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
+			$("#timeDisp").text(str);										// Show now
+			$("#slider").slider("value",playerNow);							// Set slider
+			var max=$("#transcriptText")[0].scrollHeight;					// Max
+			var cp=GetCharPosTimeFrom(playerNow);							// Get char pos in transcript
+			if (!param)														// If not inhibiting scroll
+				$("#transcriptText").scrollTop(cp.pct*max-$("#transcriptText").height()/4);	// Set scroll
+			HighlightText(cp.pos,cp.pos2);									// Highlight area
+			}
+		else if (what == "quality") {										// Quality
+			if ((player) && (playerType == "youtube")) {					// If initted YouTube
+				var o={ Default:"default", Good:"small", Better:"medium", Best:"large"};	// Choices
+				player.setPlaybackQuality(o[playerQuality]);				// Set quality
+				}
+			}
+		else if (what == "volume") {										// Volume
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.setVolume(playerVolume);								// Set volume
+			}
+		else if (what == "speed") {											// Speed
+			s=Math.max(.25,playerSpeed/50);									// Speed set .25 to 2
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.setPlaybackRate(s);									// Set speed
+			}
+		else if (what == "caption") {										// Captions
+			player.setOption("cc","fontSize", 3);
+			}
+		else if (what == "resize") {										// Resize
+			var w=$("#playerDiv").width();									// Get width
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.setSize(w,w*playerAspect);							// Resize
+			}
+		else if (what == "load") {											// Volume
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.loadVideoById(param);								// Load video
+			}
+		else if (what == "ready") {											// When ready
+			RunPlayer("play",playerStart);									// Play
+			RunPlayer("resize");											// Resize player
+ 			ResizePanes();													// Resize panes
+			RunPlayer("pause");												// Pause
+			if (playerAuto == "true")										// If autoplay
+				RunPlayer("play",playerStart);								// Play
+			}
+
+		else if (what == "init") {											// Init player
+ 			if (playerType == "youtube") {									// If YouTube
+	       		player=new YT.Player("playerDiv", {							// Init player
+					playerVars:{ modestbranding:1, controls:0, 				// Settings
+						disablekb:1, rel:0, showinfo:0, autoplay:1 },
+	          		videoId: playerURL,										// Set url
+	         	 	events:{												// Add event handlers
+	            		"onStateChange": function(s) {						// Change of state
+		         			if (s.data == 1) {
+								$("#playBut").attr("src","pausebut.gif");	// Show pause but
+								playerMode="play";							// Set mode
+       							}
+       						else if ((s.data == 2) || (s.data == 0)) {		// In pause
+  								$("#playBut").attr("src","playbut.gif");	// Show play but
+								playerMode="pause";							// Set mode
+       							}
+       						},
+	            		"onReady": function(s) { RunPlayer("ready") }		// When ready
+	    				}
+		       		});
+				}
+	        }
+ 	}																		// End closure
+
+	function RunSlide(what, param)
+	{
+		shivaLib.Sound("click");
+		Popup("Advance to "+what+" slide");
+	}
+
+	function RunTranscript(what, param)
+	{
+		trace(what,param);	
+	}
+
+	function RunContent(what, param)
+	{
+		trace(what,param);	
+	}
+
+	function RunInfo(what, param)
+	{
+		trace(what,param);	
+	}
+
+	
+</script>
+</body></html>
