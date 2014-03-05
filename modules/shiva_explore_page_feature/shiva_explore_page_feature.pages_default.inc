@@ -275,7 +275,7 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <ul class="sf-menu explore">
 <li><img src="' . get_custom_image_url('sngen-poster.png') . '" alt="Poster Thumb" width="150" height="150" class="imgp_img"> 
 <ul>
-<li><!--<a href="https://wiki.shanti.virginia.edu/x/g6C1AQ" _mce_href="https://wiki.shanti.virginia.edu/x/g6C1AQ">Documentation</a>-->Documentation</li>
+<li><a href="/wikidoc/SHIVA%2BPoster%2BTool">Documentation</a></li>
 <li><a href="/examples?f[0]=shivanode_element_type%3A14">Examples</a></li>
 <li><a href="/node/add/shivanode/poster">Create one</a></li>
 </ul>
