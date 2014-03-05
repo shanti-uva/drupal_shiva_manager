@@ -7,7 +7,7 @@ CKEDITOR.editorConfig = function( config ) {
 	{ name: 'clipboard', items : [ 'Source','-','Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
 	{ name: 'editing', items : [ 'Find','Replace','-','SpellChecker', 'Scayt' ] },
 	{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
-	{ name: 'insert', items : [ 'Image','Table','HorizontalRule','SpecialChar','Iframe' ] },
+	{ name: 'insert', items : [ 'Image','Table','HorizontalRule','SpecialChar','Iframe', 'Preview' ] },
 	'/',
 	{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
 	{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote','CreateDiv',
@@ -16,5 +16,6 @@ CKEDITOR.editorConfig = function( config ) {
 	{ name: 'styles', items : [ 'Styles','Format','Font','FontSize' ] },
 	{ name: 'colors', items : [ 'TextColor','BGColor' ] }
 	];
+
 };
 

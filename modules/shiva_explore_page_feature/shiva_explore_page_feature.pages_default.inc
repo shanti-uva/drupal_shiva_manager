@@ -259,6 +259,18 @@ function shiva_explore_page_feature_default_page_manager_pages() {
 <tbody>
 <tr>
 <td width="150">
+<p><strong>Graphs</strong></p>
+<ul class="sf-menu explore">
+<li><img src="' . get_custom_image_url('sngen-graph.png') . '" alt="Graph Thumb" width="150" height="150" class="imgp_img"> 
+<ul>
+<li><!--<a href="https://wiki.shanti.virginia.edu/x/g6C1AQ" _mce_href="https://wiki.shanti.virginia.edu/x/g6C1AQ">Documentation</a>-->Documentation</li>
+<li><a href="/examples?f[0]=shivanode_element_type%3A16">Examples</a></li>
+<li><a href="/node/add/shivanode/graph">Create one</a></li>
+</ul>
+</li>
+</ul>
+</td>
+<td width="150">
 <p><strong>Poster</strong></p>
 <ul class="sf-menu explore">
 <li><img src="' . get_custom_image_url('sngen-poster.png') . '" alt="Poster Thumb" width="150" height="150" class="imgp_img"> 

@@ -59,7 +59,8 @@
 		height:		 				{	def:'366', 			opt:'number',		 	des:'Height of player'}, 
 		width:	 					{	def:'600', 			opt:'number',		 	des:'Width of player'},
 		duration:	 				{	def:'?', 			opt:'text',		 		des:'Duration of clip'},
-		notes: 						{	def:'false', 		opt:'true|false',		des:'Enable note taking?'},
+		vnotes: 					{	def:'false', 		opt:'true|false',		des:'Enable note taking?'},
+		ntext: 						{	def:'',				opt:'hidden',			des:'Holds notes'},
 		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}
 		}
 	
@@ -140,6 +141,14 @@
 		var v=re.exec($("#propInput0").val());
 		if (v)	
 			$("#propInput0").val("kaltura_"+v[1])
+
+		var n=$("#shivaNotesTbl tr").length;						
+		if (n) {
+			var str="";
+			for (var i=0;i<n;++i) 										
+			if ($("#ntx-"+i).val())	str+=$("#ntc-"+i).text()+$("#ntx-"+i).val()+"|";
+			$("#propInput9").val(str);			
+			}
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 

@@ -422,7 +422,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { 
 					var str=d.info;										// Copy info
-					if (d.info.match(/http/)) {							// If an embedded url
+					if (str && str.match(/http/)) {						// If an embedded url
 						var v=(str+" ").match(/http.?:\/\/.*?\s/ig);	// Extract url(s)
 						for (var i=0;i<v.length;++i) {					// For each url
 							v[i]=v[i].trim();							// Trim it
