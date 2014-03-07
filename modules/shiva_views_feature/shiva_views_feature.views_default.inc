@@ -252,7 +252,7 @@ function shiva_views_feature_views_default_views() {
   $export['shiva_data_sets'] = $view;
 
   $view = new view();
-  $view->name = 'shiva_vis';
+  $view->name = 'shiva_visualization_solr';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'search_api_index_default_node_index';
@@ -264,15 +264,7 @@ function shiva_views_feature_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'role';
-  $handler->display->display_options['access']['role'] = array(
-    3 => '3',
-    1 => '1',
-    2 => '2',
-    5 => '5',
-    6 => '6',
-    4 => '4',
-  );
+  $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -280,8 +272,7 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['pager']['options']['items_per_page'] = '60';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['pager']['options']['id'] = '0';
-  $handler->display->display_options['pager']['options']['quantity'] = '7';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_options'] = '5, 10, 20, 40, 60, 100, 200';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['style_options']['row_class'] = 'shiva-teaser';
   $handler->display->display_options['row_plugin'] = 'fields';
@@ -289,9 +280,10 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['header']['area']['id'] = 'area';
   $handler->display->display_options['header']['area']['table'] = 'views';
   $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Front Page Blurb';
-  $handler->display->display_options['header']['area']['content'] = '<h2>Welcome to SHIVA!</h2>
-<p>SHIVA is a way to create on-line, interactive visualizations. Read more <a href="/about">here</a>.</p>';
+  $handler->display->display_options['header']['area']['label'] = 'Shiva Front Page Blurb';
+  $handler->display->display_options['header']['area']['empty'] = TRUE;
+  $handler->display->display_options['header']['area']['content'] = '<h1>Welcome to SHIVA!</h1>
+<p style="font-size: 120%; margin-bottom: 8px;">SHIVA is a way to create on-line, interactive visualizations. Read more <a href="/about">here ...</a> </p>';
   $handler->display->display_options['header']['area']['format'] = 'full_html';
   /* Field: Indexed Node: Node ID */
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
@@ -315,6 +307,15 @@ function shiva_views_feature_views_default_views() {
     'image_style' => 'shiva_teaser',
     'image_link' => 'content',
   );
+  /* Field: Indexed Node: Content type */
+  $handler->display->display_options['fields']['type']['id'] = 'type';
+  $handler->display->display_options['fields']['type']['table'] = 'search_api_index_default_node_index';
+  $handler->display->display_options['fields']['type']['field'] = 'type';
+  $handler->display->display_options['fields']['type']['label'] = '';
+  $handler->display->display_options['fields']['type']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['type']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['type']['link_to_entity'] = 0;
+  $handler->display->display_options['fields']['type']['format_name'] = 0;
   /* Field: Indexed Node: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'search_api_index_default_node_index';
@@ -339,14 +340,6 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['fields']['shivanode_subtype']['exclude'] = TRUE;
   $handler->display->display_options['fields']['shivanode_subtype']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['shivanode_subtype']['empty'] = '[shivanode_element_type]';
-  /* Field: Indexed Node: Content type */
-  $handler->display->display_options['fields']['type']['id'] = 'type';
-  $handler->display->display_options['fields']['type']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['type']['field'] = 'type';
-  $handler->display->display_options['fields']['type']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['type']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['type']['link_to_entity'] = 0;
-  $handler->display->display_options['fields']['type']['format_name'] = 1;
   /* Field: Indexed Node: Date created */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'search_api_index_default_node_index';
@@ -383,12 +376,11 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['fields']['author_field_lname']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['author_field_lname']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['author_field_lname']['empty'] = '<div class="info-wrapper"><div class="info"><a href="node/[nid]">[shivanode_subtype] <br/> Created by  [author_name]<br/>on [created]</a></div></div>';
-  /* Contextual filter: Indexed Node: Author */
-  $handler->display->display_options['arguments']['author']['id'] = 'author';
-  $handler->display->display_options['arguments']['author']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['arguments']['author']['field'] = 'author';
-  $handler->display->display_options['arguments']['author']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['author']['summary']['format'] = 'default_summary';
+  /* Sort criterion: Indexed Node: Date created */
+  $handler->display->display_options['sorts']['created']['id'] = 'created';
+  $handler->display->display_options['sorts']['created']['table'] = 'search_api_index_default_node_index';
+  $handler->display->display_options['sorts']['created']['field'] = 'created';
+  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
   /* Filter criterion: Indexed Node: Content type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'search_api_index_default_node_index';
@@ -401,174 +393,26 @@ function shiva_views_feature_views_default_views() {
   $handler->display->display_options['filters']['shivanode_element_type']['table'] = 'search_api_index_default_node_index';
   $handler->display->display_options['filters']['shivanode_element_type']['field'] = 'shivanode_element_type';
   $handler->display->display_options['filters']['shivanode_element_type']['operator'] = '<>';
-  $handler->display->display_options['filters']['shivanode_element_type']['value'] = array(
-    1 => '1',
-  );
+  $handler->display->display_options['filters']['shivanode_element_type']['value'] = '1';
 
-  /* Display: Shiva Visualizations Page */
-  $handler = $view->new_display('page', 'Shiva Visualizations Page', 'page');
+  /* Display: Shiva Gallery Home */
+  $handler = $view->new_display('page', 'Shiva Gallery Home', 'page');
+  $handler->display->display_options['path'] = 'home';
+
+  /* Display: Shiva Gallery Examples */
+  $handler = $view->new_display('page', 'Shiva Gallery Examples', 'page_1');
   $handler->display->display_options['defaults']['header'] = FALSE;
   /* Header: Global: Text area */
   $handler->display->display_options['header']['area']['id'] = 'area';
   $handler->display->display_options['header']['area']['table'] = 'views';
   $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Front Page Blurb';
-  $handler->display->display_options['header']['area']['content'] = '
-<h2>Welcome to SHIVA!</h2>
-<p>SHIVA is a way to create on-line, interactive visualizations. Read more <a href="/about">here</a>.</p>';
+  $handler->display->display_options['header']['area']['label'] = 'Shiva Example Blurb';
+  $handler->display->display_options['header']['area']['empty'] = TRUE;
+  $handler->display->display_options['header']['area']['content'] = '<h1>SHIVA Examples</h1>
+<p style="padding-bottom: 8px;">Below are real life examples for the type of visualization you have chosen.</p>';
   $handler->display->display_options['header']['area']['format'] = 'full_html';
-  $handler->display->display_options['path'] = 'gallery';
-
-  /* Display: My Shiva Visualizations Page */
-  $handler = $view->new_display('page', 'My Shiva Visualizations Page', 'page_1');
-  $handler->display->display_options['display_description'] = 'Lists only user\'s visualizations';
-  $handler->display->display_options['defaults']['header'] = FALSE;
-  /* Header: Global: Text area */
-  $handler->display->display_options['header']['area']['id'] = 'area';
-  $handler->display->display_options['header']['area']['table'] = 'views';
-  $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Front Page Blurb';
-  $handler->display->display_options['header']['area']['content'] = '<h2>Welcome to SHIVA!</h2>
-<p>SHIVA is a way to create on-line, interactive visualizations. Read more <a href="/about">here</a>.</p>';
-  $handler->display->display_options['header']['area']['format'] = 'full_html';
-  $handler->display->display_options['defaults']['relationships'] = FALSE;
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
-  /* Contextual filter: Indexed Node: Author */
-  $handler->display->display_options['arguments']['author']['id'] = 'author';
-  $handler->display->display_options['arguments']['author']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['arguments']['author']['field'] = 'author';
-  $handler->display->display_options['arguments']['author']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['author']['default_argument_type'] = 'current_user';
-  $handler->display->display_options['arguments']['author']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['author']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['author']['not'] = 0;
-  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
-  $handler->display->display_options['defaults']['filters'] = FALSE;
-  /* Filter criterion: Indexed Node: Content type */
-  $handler->display->display_options['filters']['type']['id'] = 'type';
-  $handler->display->display_options['filters']['type']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['filters']['type']['field'] = 'type';
-  $handler->display->display_options['filters']['type']['value'] = array(
-    'shivanode' => 'shivanode',
-  );
-  $handler->display->display_options['filters']['type']['group'] = 1;
-  /* Filter criterion: Indexed Node: Type */
-  $handler->display->display_options['filters']['shivanode_element_type']['id'] = 'shivanode_element_type';
-  $handler->display->display_options['filters']['shivanode_element_type']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['filters']['shivanode_element_type']['field'] = 'shivanode_element_type';
-  $handler->display->display_options['filters']['shivanode_element_type']['operator'] = '<>';
-  $handler->display->display_options['filters']['shivanode_element_type']['value'] = array(
-    1 => '1',
-  );
-  $handler->display->display_options['filters']['shivanode_element_type']['group'] = 1;
-  $handler->display->display_options['path'] = 'mygallery';
-
-  /* Display: Shiva Examples */
-  $handler = $view->new_display('page', 'Shiva Examples', 'page_2');
-  $handler->display->display_options['display_description'] = 'Page for showing examples of visualization types';
-  $handler->display->display_options['defaults']['header'] = FALSE;
-  /* Header: Global: Text area */
-  $handler->display->display_options['header']['area']['id'] = 'area';
-  $handler->display->display_options['header']['area']['table'] = 'views';
-  $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Front Page Blurb';
-  $handler->display->display_options['header']['area']['content'] = '<h2>Examples of Shiva Visualization</h2>
-<p>This page shows a real examples of a particular type of visualization. <a href="/explore">Return to the Explore page.</a.></p>';
-  $handler->display->display_options['header']['area']['format'] = 'full_html';
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Indexed Node: Node ID */
-  $handler->display->display_options['fields']['nid']['id'] = 'nid';
-  $handler->display->display_options['fields']['nid']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['nid']['field'] = 'nid';
-  $handler->display->display_options['fields']['nid']['label'] = '';
-  $handler->display->display_options['fields']['nid']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['nid']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['nid']['separator'] = '';
-  $handler->display->display_options['fields']['nid']['link_to_entity'] = 0;
-  /* Field: Indexed Node: Image */
-  $handler->display->display_options['fields']['field_image']['id'] = 'field_image';
-  $handler->display->display_options['fields']['field_image']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['field_image']['field'] = 'field_image';
-  $handler->display->display_options['fields']['field_image']['label'] = '';
-  $handler->display->display_options['fields']['field_image']['element_type'] = 'div';
-  $handler->display->display_options['fields']['field_image']['element_class'] = 'shiva-teaser-image';
-  $handler->display->display_options['fields']['field_image']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_image']['click_sort_column'] = 'fid';
-  $handler->display->display_options['fields']['field_image']['settings'] = array(
-    'image_style' => 'shiva_teaser',
-    'image_link' => 'content',
-  );
-  /* Field: Indexed Node: Title */
-  $handler->display->display_options['fields']['title']['id'] = 'title';
-  $handler->display->display_options['fields']['title']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['title']['field'] = 'title';
-  $handler->display->display_options['fields']['title']['label'] = '';
-  $handler->display->display_options['fields']['title']['element_type'] = 'div';
-  $handler->display->display_options['fields']['title']['element_class'] = 'shiva-teaser-title';
-  $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['title']['link_to_entity'] = 0;
-  /* Field: Indexed Node: Type */
-  $handler->display->display_options['fields']['shivanode_element_type']['id'] = 'shivanode_element_type';
-  $handler->display->display_options['fields']['shivanode_element_type']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['shivanode_element_type']['field'] = 'shivanode_element_type';
-  $handler->display->display_options['fields']['shivanode_element_type']['label'] = '';
-  $handler->display->display_options['fields']['shivanode_element_type']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['shivanode_element_type']['element_label_colon'] = FALSE;
-  /* Field: Indexed Node: Visualization Subtype */
-  $handler->display->display_options['fields']['shivanode_subtype']['id'] = 'shivanode_subtype';
-  $handler->display->display_options['fields']['shivanode_subtype']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['shivanode_subtype']['field'] = 'shivanode_subtype';
-  $handler->display->display_options['fields']['shivanode_subtype']['label'] = '';
-  $handler->display->display_options['fields']['shivanode_subtype']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['shivanode_subtype']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['shivanode_subtype']['empty'] = '[shivanode_element_type]';
-  /* Field: Indexed Node: Content type */
-  $handler->display->display_options['fields']['type']['id'] = 'type';
-  $handler->display->display_options['fields']['type']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['type']['field'] = 'type';
-  $handler->display->display_options['fields']['type']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['type']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['type']['link_to_entity'] = 0;
-  $handler->display->display_options['fields']['type']['format_name'] = 1;
-  /* Field: Indexed Node: Date created */
-  $handler->display->display_options['fields']['created']['id'] = 'created';
-  $handler->display->display_options['fields']['created']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['created']['field'] = 'created';
-  $handler->display->display_options['fields']['created']['label'] = '';
-  $handler->display->display_options['fields']['created']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['created']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['created']['date_format'] = 'custom';
-  $handler->display->display_options['fields']['created']['custom_date_format'] = 'M d, Y';
-  $handler->display->display_options['fields']['created']['link_to_entity'] = 0;
-  /* Field: Author: Name (indexed) */
-  $handler->display->display_options['fields']['author_name']['id'] = 'author_name';
-  $handler->display->display_options['fields']['author_name']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['author_name']['field'] = 'author_name';
-  $handler->display->display_options['fields']['author_name']['label'] = '';
-  $handler->display->display_options['fields']['author_name']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['author_name']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['author_name']['link_to_entity'] = 0;
-  /* Field: Author: First Name (indexed) */
-  $handler->display->display_options['fields']['author_field_fname']['id'] = 'author_field_fname';
-  $handler->display->display_options['fields']['author_field_fname']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['author_field_fname']['field'] = 'author_field_fname';
-  $handler->display->display_options['fields']['author_field_fname']['label'] = '';
-  $handler->display->display_options['fields']['author_field_fname']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['author_field_fname']['element_label_colon'] = FALSE;
-  /* Field: Author: Last Name (indexed) */
-  $handler->display->display_options['fields']['author_field_lname']['id'] = 'author_field_lname';
-  $handler->display->display_options['fields']['author_field_lname']['table'] = 'search_api_index_default_node_index';
-  $handler->display->display_options['fields']['author_field_lname']['field'] = 'author_field_lname';
-  $handler->display->display_options['fields']['author_field_lname']['label'] = '';
-  $handler->display->display_options['fields']['author_field_lname']['alter']['alter_text'] = TRUE;
-  $handler->display->display_options['fields']['author_field_lname']['alter']['text'] = '<div class="info-wrapper"><div class="info"><a href="node/[nid]">[shivanode_subtype] <br/> Created by [author_field_fname] [author_field_lname]<br/>on [created]</a></div></div>';
-  $handler->display->display_options['fields']['author_field_lname']['element_type'] = 'div';
-  $handler->display->display_options['fields']['author_field_lname']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['author_field_lname']['element_default_classes'] = FALSE;
-  $handler->display->display_options['fields']['author_field_lname']['empty'] = '<div class="info-wrapper"><div class="info"><a href="node/[nid]">[shivanode_subtype] <br/> Created by  [author_name]<br/>on [created]</a></div></div>';
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
   $handler->display->display_options['path'] = 'examples';
-  $export['shiva_vis'] = $view;
+  $export['shiva_visualization_solr'] = $view;
 
   return $export;
 }
