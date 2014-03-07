@@ -15,7 +15,7 @@ function shiva_views_feature_views_default_views() {
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
-  $view->human_name = 'Shiva Data';
+  $view->human_name = 'Shiva Data Nodes';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -93,12 +93,12 @@ function shiva_views_feature_views_default_views() {
   );
   $handler->display->display_options['filters']['shivanode_element_type_value']['group'] = 1;
 
-  /* Display: Page */
-  $handler = $view->new_display('page', 'Page', 'page');
+  /* Display: Shiva Data */
+  $handler = $view->new_display('page', 'Shiva Data', 'page');
   $handler->display->display_options['path'] = 'data-sets';
 
-  /* Display: My Data Pane */
-  $handler = $view->new_display('panel_pane', 'My Data Pane', 'panel_pane_1');
+  /* Display: My Shiva Data */
+  $handler = $view->new_display('panel_pane', 'My Shiva Data', 'panel_pane_1');
   $handler->display->display_options['defaults']['title'] = FALSE;
   $handler->display->display_options['defaults']['css_class'] = FALSE;
   $handler->display->display_options['css_class'] = 'my-data-table';
