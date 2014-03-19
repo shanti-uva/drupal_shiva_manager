@@ -281,7 +281,7 @@ function shivanode_menu() {
     'file' => 'shivanode.inc',
   );
     
-  // Return SHIVA jsaon of a single node 
+  // Return SHIVA json of a single node 
   
   $items['data/json/%'] = array(
       'title' => 'JSON output of Node',
@@ -1140,6 +1140,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
+    $njson = _shivanode_get_json($form['#node']);
+    if(strtolower($njson['chartType']) == 'combochart') {
+      $form['#prefix'] = "<div style='color:red;'> <p>This visualization is a combo chart which are no longer supported in the editing interface.</p><p>You may adjust the title, tags, thumbnail and groups for this visualization, or delete it altogether, but you cannot edit its specs.</p><div style='display: none;>";
+      $form['#suffix'] = '</div></div>';
+    }
   }
   if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
