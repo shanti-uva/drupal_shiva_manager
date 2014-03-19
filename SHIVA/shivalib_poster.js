@@ -233,13 +233,14 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		if (isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='100%'>";						// Image				
 		else if (u) {																	// Something else
+			trace(u)
 			if (this.items[i].asp)														// If loaded
 				srs="go.htm?srs=100&";													// Resize to 100%
 			else																		// First time
 				srs="go.htm?";															// Get in original aspect ratio
 			if (!isNaN(u))																// If a number
 				u=srs+"e="+u;															// Add file base
-			else if ((u.match(/e=/)) || (u.match(/m=/)))								// An eStore or drupal
+			else if ((u.match(/e=/)) || (u.match(/M=/)))								// An eStore or drupal
 				u=srs+u;																// Add file base
 			if (u.match(/go.htm/))														// A shiva module
 				u+="&if="+i;															// Add id

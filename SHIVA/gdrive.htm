@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>Google Drive Link</title>
+	<style>
+		body { font-family:Verdana,Geneva,sans-serif; font-size:small;align:center;padding:16px }
+		.shadedBack { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 }
+	</style>
+</head>
+<body>
+	<div class="shadedBack" style='width:750px;padding:20px'>
+		<div style='font-size:xx-large;text-shadow:1px 1px #ccc;text-align:center'>gDrive Link</div><br>
+		<table style='text-align:right'>
+			<tr><td>Put Google drive link here: </td><td><input type='text' onchange='Convert(this.value)' style='width:500px'></td></tr>
+			<tr><td>Get direct link here: </td><td><input id='newUrl' type='text' style='width:500px'></td></tr>
+		</table>
+	<br><hr><br>
+	This utility will create a link to a document stored in Google Drive that can be used in SHIVA, MapScholar, or Qmedia:
+	<br>
+	<ol>
+	<li>Go to your Google drive page and make sure the document is shared so that anyone with the link can view it (found in the Share menu after right-clicking).</li>
+	<li>Copy the link to share from the highlighted text box to your clipboard.</li>
+	<li>Paste the share link to the first text box and press ENTER.</li>
+	<li>Copy the new link from the second text box.</li>
+	</ol>
+	</div>
+	<br>
+
+
+<script>
+
+	function Convert(url)
+	{
+		var id=url.match(/\/d\/(.*?)\//);
+		if (id)
+			var link="//drive.google.com/uc?export=view&id="+id[1];
+		else
+			link="There was a problem converting the share link";
+		var box=document.getElementById("newUrl");		
+		box.value=link;
+		box.focus();
+		box.setSelectionRange(0,link.length)
+	}
+
+
+</script>
+</body></html>
+

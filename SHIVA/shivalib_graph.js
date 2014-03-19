@@ -7,8 +7,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var i,j,o,shape,id=0;
 	var options=this.options;											// Local options
 	var con="#"+this.container;											// Container
- 	var w=options.width;												// Width
-	var h=options.height;												// Height
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
 	var dataSet=null;													// Holds data
 	var d3Zoom;															// Scale/zoom
@@ -39,6 +37,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		$(con).height(options.width),h=w;								// Use width
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
+	var opHeight=$(con).height();										// Get height in pixels
+	var opWidth=$(con).width();											// Get width in pixels
+ 	var w=opWidth;														// Width
+	var h=opHeight;														// Height
+	
 	
 	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -585,7 +588,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 		else if (options.chartType == "Bubble") {						// Bubble graph
   		    colors=d3.scale.category20c();								// Set colors
-			var dia=Math.min(options.height,options.width)-8;			// Diameter
+			var dia=Math.min(opHeight,opWidth)-8;			// Diameter
 		  	if (options.style == "Packed") {							// If packed
 				var pack=d3.layout.pack()								// Create layout
 				    .size([dia,dia])									// Set size
@@ -681,24 +684,24 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (i=0;i<v.length;++i)	colorRange.push("#"+v[i]);
 				}
 			var colorSet=d3.scale.ordinal().range(colorRange);			// Scale colorset
-			var x=d3.time.scale().range([0,options.width]);				// Scale x
-			var y=d3.scale.linear().range([options.height-options.lSize-10,options.lSize*1+10]);	// Scale y
+			var x=d3.time.scale().range([0,opWidth]);				// Scale x
+			var y=d3.scale.linear().range([opHeight-options.lSize-10,options.lSize*1+10]);	// Scale y
 						
 			var timeBar=d3.select(con)									// Add start/end date bar
 		        .append("div")											// Add div
 		        .style("position","absolute")							// Setup
-		        .style("top",(options.height-options.lSize-6)+"px").style("left","0px") // Pos
+		        .style("top",(opHeight-options.lSize-6)+"px").style("left","0px") // Pos
 		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
-				.html("<span id='startDate'></span><span id='endDate' style='position:absolute;left:"+(options.width-200)+"px;width:200px;text-align:right'></span>")
+				.html("<span id='startDate'></span><span id='endDate' style='position:absolute;left:"+(opWidth-200)+"px;width:200px;text-align:right'></span>")
 			
 			var dataBar=d3.select(con)									// Add vertical data bar
 		        .append("div")											// Add div
 		        .style("position","absolute")							// Setup
-		        .style("width","2px").style("height",options.height-options.lSize*2-20+"px")			// Size
+		        .style("width","2px").style("height",opHeight-options.lSize*2-20+"px")			// Size
 		        .style("pointer-events","none")							// No mouse hits
 		        .style("top",(options.lSize-0+10)+"px").style("left","0px").style("background","#fff")  // Pos
 		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
-				.html("<div id='vdat' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(options.height-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
+				.html("<div id='vdat' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(opHeight-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
 						
 			var stack=d3.layout.stack()									// Create layout
 					.offset("silhouette")								// Center the stream
@@ -767,7 +770,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			  			})
 			    
 			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
-			$("#endDate").text(shivaLib.FormatDate(x.invert(options.width),options.dateFormat));	// Set end date
+			$("#endDate").text(shivaLib.FormatDate(x.invert(opWidth),options.dateFormat));	// Set end date
 			}															// End Stream
 	
 		// PARALLEL /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
@@ -776,18 +779,18 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	    	var y={};
 		    var dragging={};
 			canPan=false;												// No pan/zoom
-			var x=d3.scale.ordinal().rangePoints([0,options.width],1);	// X scale
+			var x=d3.scale.ordinal().rangePoints([0,opWidth],1);	// X scale
 			var line=d3.svg.line();										// Lines
 			var axis=d3.svg.axis().orient("left").ticks(4).outerTickSize(0); // Axes
 
 			
-			svg.attr("height",options.height-options.lSize*2+"px");
+			svg.attr("height",opHeight-options.lSize*2+"px");
 		   	svg.attr("transform", "translate(0,"+options.lSize*3+")");// Move
 		   	
 		  	x.domain(dimensions=d3.keys(dataSet[0]).filter(function(d) {		// Extract the list of dimensions and create a scale for each.
 		  	  	return d != "name" && (y[d]=d3.scale.linear()					// If not a name, scale data point
 		        	.domain(d3.extent(dataSet, function(p) { return +p[d]; }))	// Link to domain
-		        	.range([options.height-options.lSize*4,0]));								// Set range
+		        	.range([opHeight-options.lSize*4,0]));								// Set range
 		 	 	}));	
 	
 
@@ -902,8 +905,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 		else if (options.chartType == "Chord") {						// Chord graph
 			canPan=false;												// No pan/zoom
-			options.height=options.width;								// Got to be square
-			var outerRadius=options.width/2;							// Radius
+			opHeight=opWidth;								// Got to be square
+			var outerRadius=opWidth/2;							// Radius
 			var innerRadius=outerRadius-options.padding;				// Real chart area
 	
 			var cols=[];												// Holds chart colors
@@ -1081,7 +1084,7 @@ SHIVA_Show.prototype.GraphActions=function(msg)						// REACT TO SHIVA ACTION ME
 	var v=msg.split("|");												// Split msg into parts
 	if (v[0] == "ShivaAct=resize") {  									// RESIZE
 		if (v[1] == "100") 												// If forcing 100%
-			shivaLib.options.width=shivaLib.options.height="100%";		// Set values
+			shivaLib.opWidth=shivaLib.opHeight="100%";		// Set values
 		shivaLib.DrawGraph();											// Redraw
 		}
 	else if (v[0] == "ShivaAct=data") {									// DATA
