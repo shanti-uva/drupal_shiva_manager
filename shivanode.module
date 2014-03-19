@@ -566,7 +566,7 @@ function shivanode_node_presave($node) {
       $stype = $json->chartType;
       $stind = _shivanode_subtypelist('index', $stype);
       if(!$stind || $stind == '') {
-        drupal_set_message(t("Not subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
+        drupal_set_message(t("No subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
       } else {
         $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
       }
@@ -1140,11 +1140,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
-    $njson = _shivanode_get_json($form['#node']);
-    if(strtolower($njson['chartType']) == 'combochart') {
-      $form['#prefix'] = "<div style='color:red;'> <p>This visualization is a combo chart which are no longer supported in the editing interface.</p><p>You may adjust the title, tags, thumbnail and groups for this visualization, or delete it altogether, but you cannot edit its specs.</p><div style='display: none;>";
-      $form['#suffix'] = '</div></div>';
-    }
   }
   if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
@@ -1409,7 +1404,12 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
         '<div id="shivanode_json_div"' . $jsonDivDisplay . '>';
   $form['shivanode_json']['#suffix'] = '</div>';
   $form['shivanode_json']['#weight'] = '4';
-  
+  $njson = _shivanode_get_json($form['#node']);
+  if(strtolower($njson['chartType']) == 'combochart') {
+    $form['#prefix'] = "";
+    $form['#suffix'] = '';
+    $form['shivanode_json']['#prefix'] = '<div id="shivanode-json-add-more-wrapper" style="display: none; clear:both;"></div><div style="display: block; clear: both !important; color:red; ">The specs for this type of visualization cannot be edited because it is no longer supported.<br/><br/></div>';
+  }
   // if it is not a new node, then the json is defined. So, reload that json by setting Drupal.Shivanode.loadJS to true
   //  tested once the editor page sends the ShivaReady Message which is received at shivanode.js line 377
   if (!$is_new_el) {
