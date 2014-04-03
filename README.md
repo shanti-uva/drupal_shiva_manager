@@ -28,6 +28,12 @@ README for Shanti Shivanode Module
              sudo git clone https://github.com/shanti-uva/drupal_shiva_manager.git shivanode
              
              
-October 22, 2012 (Updated, Feb. 11, 2014)
+# VERSIONS
+
+## 7.x-1.5-beta1 (April 1, 2014)
+
+* Switched to using Gdrive module authentication (OAuth 2.0) instead of Zend.
+
+October 22, 2012 (Updated, April 1, 2014)
 
 Than Grove

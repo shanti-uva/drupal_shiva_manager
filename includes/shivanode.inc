@@ -397,6 +397,9 @@ function _shivanode_access_modes() {
  *    user => uid (will return for a specific uid)
  * 
  *  If options is just a numeric it will return only elements of that type
+ * 
+ *  Common Options strings:
+ *    'sntype:1 mine' : Returns user's data elements
  */
 
 function _get_shivanodes($options = array()) {
@@ -417,9 +420,11 @@ function _get_shivanodes($options = array()) {
   $query = db_select('node', 'n');
   $query->join('field_data_shivanode_element_type', 'stype', 'n.nid = stype.entity_id');
   $query->join('field_data_shivanode_access', 'sac', 'n.nid = sac.entity_id');
+  $query->join('field_data_shivanode_json', 'sjson', 'n.nid = sjson.entity_id');
   $query->fields('n')
     ->fields('stype', array('shivanode_element_type_value'))
     ->fields('sac', array('shivanode_access_value'))
+    ->fields('sjson', array('shivanode_json_value'))
     ->condition('n.type', 'shivanode')
     ->condition('n.status', NODE_PUBLISHED);
   if(array_key_exists('mine', $options)) {
@@ -441,6 +446,14 @@ function _get_shivanodes($options = array()) {
   $nodes = array();
   foreach ($results as $row) {
     if ($row->uid == $uid || $row->shivanode_access_value == "Published" ||  user_access('bypass node access')) {
+      if(isset($row->shivanode_json_value)) {
+        $json = json_decode($row->shivanode_json_value);
+        if(isset($json->dataSourceUrl)) {
+          if($gid = _get_gid_from_url($json->dataSourceUrl)) { 
+            $row->dataGid = $gid;
+          }
+        }
+      }
       if (array_key_exists('nodata', $options)) {
         if ($row->shivanode_element_type_value > 1) {
           $nodes[] = $row; // This was returning node objects but it was too intensive to load each node.
@@ -452,6 +465,14 @@ function _get_shivanodes($options = array()) {
     }
   }
   return $nodes;
+}
+
+function _get_gid_from_url($url) {
+  if(preg_match('/\?key=([^\#\&]+)[\#\&]?/', $url, $matches)) { 
+    return $matches[1];
+  } else {
+    return FALSE;
+  }
 }
 
 /*
@@ -1026,32 +1047,11 @@ function _shivanode_gss_form($form, &$form_state) {
     
     $form['#prefix'] = '<div class="shivanode_google_spreadsheets">';
     $form['#suffix'] = '</div>';
-    // Link to google reauthentication>
-    $form['p0'] = array(
-      '#type' => 'markup',
-      '#markup' => '<p id="guser-reset">' .
-        l(t('Switch Google Account'), 'node/guser/reset/confirm', array(
-          'attributes' => array(
-            'target' => '_top',
-          )
-        )) . '</p>',
-    );
-    
-    // View All Shiva Visualizations Link
-    $form['viewall'] = array(
-      '#type' => 'markup',
-      '#markup' => '<div class="bold">' . l(t('View All SHIVA Data Entries'), 'mydata', array(
-        'attributes' => array(
-          'target' => '_top',
-        )
-      )) . '</div>',
-    );
     
     // Instructions
     $form['intro'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('To create a SHIVA Visualization using a Google Doc spreadsheet, you must first import that spreadsheet into Shiva to make it into a Shiva data entry. The present page has two sections:  Shiva Data Entries, which shows already imported spreadsheets for the Goolge account to which you are currently logged in; and (ii) "My Remaining Google Spreadsheets", which shows your other Google spreadsheets that are available for importation into Shiva. In the first section, you choose one of the Shiva data elements as the base for creating a new Shiva visualization. In the second section, you can import one of your other Google spreadsheets into Shiva, after which it will then appear in the first section, and you can use it as the basis of a visualization. To convert a Google spreadsheet into a Shiva Visualization, check the box next to the spreadsheets you wish to convert into data entries and when you click the button "Create Data Entries" at the bottom, data entries for each of those spreadsheets will be created. If you wish to log on to a different Google Doc account, click the "Switch Google Account" button above.') . '</p>' .
-                    '<p>' . t('Finally, the link "View All Shiva Data Entries" above will show you other people&rsquo;s data entries that they have shared with you or a group of which you are part, rather than only showing Shiva data entries that you personally created.') . '<p>',
+      '#markup' => '<p>' . t('The present page has two sections:  1) a list of spreadsheets you have already imported and 2) a list of spreadsheets in your currently logged-in Google Drive account. Click the select link to use a spreadsheet you have already entered. Or, to add spreadsheets from your Google Drive account, check the boxes next to desired spreadsheet title(s) and click the "Create Data Entries" button at the bottom of the page.') . '</p><p>' . t('If you want to switch Google Drive accounts, make sure your browser is logged into the new account, then <a href="@reauthlink">click here</a>.', array('@reauthlink' => url('gdrive/reauth'))),
     );
 
     $form['filterdiv'] = array(
@@ -1067,15 +1067,15 @@ function _shivanode_gss_form($form, &$form_state) {
 
     $form['gss_done'] = array(
       '#type' => 'fieldset',
-      '#title' => t('SHIVA Data Entries (Already Imported Spreadsheets)'),
+      '#title' => t('Already Imported Spreadsheets'),
       '#collapsible' => TRUE,
     );
     
     if (count($hasels) > 0) {
       $form['gss_done']['p'] = array(
         '#type' => 'markup',
-        '#markup' => '<p>' . t('The following ' . count($hasels) . ' spreadsheets from your Google Docs account have ' .
-          'already been added as data entries. Click on the "Select" option to create a visualization from it: ') . '</p>',
+        '#markup' => '<p><em>' . t('The following ' . count($hasels) . ' spreadsheets from your Google Docs account have ' .
+          'already been added as data entries. Click on the "Select" option to create a visualization from it: ') . '</em></p>',
       );
       $form['gss_done']['ul'] = array(
         '#type' => 'markup',
@@ -1093,7 +1093,7 @@ function _shivanode_gss_form($form, &$form_state) {
         $form['gss_done']['ul'][] = array(
           '#type' => 'markup',
           '#markup' => '<li>' . $el['title'] . ' (' . 
-             l(t('Select'), 'node/add/shivanode/' . $el['nid'], $target_top_attr) . ' | ' .
+             l(t('Select'), 'data/add/nid/' . $el['nid'], $target_top_attr) . ' | ' .
              l(t('View'), 'node/' . $el['nid'], $target_top_attr) . ' | ' .
              l(t('Edit'), 'node/' . $el['nid'] . '/edit', $target_top_attr) . ')</li>',
         );
@@ -1136,13 +1136,24 @@ function _shivanode_gss_form($form, &$form_state) {
         '#type' => 'hidden',
         '#value' => 0,
       );
+      $shared = TRUE;
+      if(preg_match('/([\w\W]+)\$\$notshared\$\$/', $value, $matches)) {
+        $value = $matches[1] . t(' (**Private**)');
+        $shared = FALSE;
+      }
+
       $form['gss_list']['choices'][$alct]['cbox' . $alct] = array(
         '#type' => 'checkbox',
         '#prefix' => '<span class="list-checkbox">',
         '#suffix' => '</span>',
-        '#title' => check_plain($value),
+        '#title' => '<span title="' . t('Warning: This spreadsheet is not shared and so cannot be used for public visualizations.') . '">' . check_plain($value) . '</span>',
         '#default_value' => $key,
       );
+      if(!$shared) {
+        $form['gss_list']['choices'][$alct]['cbox' . $alct]['#attributes'] = array(
+          'title' =>  t('Warning: This spreadsheet is not shared and so cannot be used for public visualizations.'),
+        );
+      }
     }
     
     // The Submit button
@@ -1161,16 +1172,13 @@ function _shivanode_gss_form($form, &$form_state) {
 
 function _shivanode_get_spreadsheet_list() {
   try {
-    // Create an authenticated HTTP Client to talk to Google.
-    $client = Zend_Gdata_AuthSub::getHttpClient($_SESSION['gdoc_token']);
-    // Get google doc info and display using ZEND
-    $spreadsheet_service = new Zend_Gdata_Spreadsheets($client);
-    $feed = $spreadsheet_service->getSpreadsheetFeed();
-    // Get Spreadsheet list from Feed and create an array
-    $sslist = array();
-    foreach ($feed->entries as $entry) {
-      $value = $entry->getTitleValue();
-      $key   = $entry->getLink('alternate')->getHref();
+    $gdocs = gdrive_get_filelist();
+    foreach ($gdocs as $doc) {
+      $value = $doc['title'];
+      if(!$doc['shared']) {
+        $value .= '$$notshared$$';
+      }
+      $key = $doc['url'];
       $sslist[$key] = $value;
     }
     // Call _shivanode_filter_gss_list() to separate list between those
@@ -1190,45 +1198,42 @@ function _shivanode_filter_gss_list($sslist) {
   $haselement = array();
  
   $msg = '';
+  
+  $existing = _get_shivanodes('stype:1 mine'); // Get all Shiva Data entries from Database
   foreach ($sslist as $url => $title) {
-    // Get all Shiva Data entries from Database
-    $query = db_select('node', 'n');
-    $query->join('field_data_shivanode_element_type', 't', 'n.nid=t.entity_id');
-    $query->join('field_data_shivanode_access', 'a', 'n.nid=a.entity_id');
-    $query->join('field_data_shivanode_json', 'j', 'n.nid=j.entity_id');
-    $query
-      ->fields('n', array('nid', 'type', 'title', 'created', 'uid'))
-      ->fields('a', array('shivanode_access_value'))
-      ->fields('t', array('shivanode_element_type_value'))
-      ->fields('j', array('shivanode_json_value'))
-      ->condition('n.type', 'shivanode', '=')
-      ->condition('t.shivanode_element_type_value', 1, '=');
-    $gkey = substr($url, strpos($url, '?'));
-    $result = $query->execute();
-    $found = 0;
-    $nid = '';
-    // Iterate through all data entries and see if one is based on this google doc ($url)
-    foreach ($result as $record) {
-      $json = $record->shivanode_json_value;
-      // If the google key is within the data entry's json then that spreadsheet has been added.
-      if (strpos($json, $gkey) > -1) {
-        // but add the record to the already added list only if the user owns this data entry.
-        if ($record->uid == $user->uid) {
-          $nid = $record->nid;
-          $found = 1;
-          break;
+    // Get current sheets gid and compare with existing data nodes
+    $gid = _get_gid_from_url($url);
+    $found = FALSE;
+    if($gid) {
+      foreach($existing as $n) {
+        if(isset($n->dataGid)) {
+          // Spreadsheet has already been used on this site
+          if($n->dataGid == $gid) {
+            $found = TRUE;
+            $n->found = TRUE; // add found property to existing node record
+            $haselement[] = array(
+              'nid' => $n->nid,
+              'url' => $url,
+              'title' => $title,
+            );
+          }
         }
       }
-    }
-    if ($found) {
-      $haselement[] = array(
-          'nid' => $nid,
-          'url' => $url,
-          'title' => $title,
-      );
+      // If not found in existing nodes add to the noelement array
+      if(!$found) {
+        $noelement[] = $title . "_URL:" . $url;
+      }
     } 
-    else {
-      $noelement[] = $title . "_URL:" . $url;
+  }
+  // Check for existing data nodes not from this Gdrive account, i.e. do not have the found property
+  foreach($existing as $n) {
+    if(!isset($n->found)) {
+      $json = json_decode($n->shivanode_json_value);
+      $haselement[] = array(
+        'nid' => $n->nid,
+        'url' => $json->dataSourceUrl,
+        'title' => $n->title,
+      );
     }
   }
   asort($noelement);
@@ -1239,7 +1244,7 @@ function _shivanode_filter_gss_list($sslist) {
     $avail_list[$pts[1]] = $pts[0];
   }
   usort($haselement, 'cmp_titles');
-  return array($avail_list, $haselement);
+  return array($avail_list, $haselement); // return 2 arrays, list of gsheets not added and list of data nodes already created from gsheets
 }
 
 function cmp_titles($a, $b) {
@@ -1331,31 +1336,7 @@ function _shivanode_gss_form_submit($form, &$form_state) {
  *      else it returns false
  */
 function _shivanode_check_google_login($authenticate = TRUE) {
-  global $base_root, $base_path;
-  if (!isset($_SESSION['gdoc_token'])) {
-      if (isset($_GET['token'])) {
-        // Converting single-use token to a session token.
-        $session_token = Zend_Gdata_AuthSub::getAuthSubSessionToken($_GET['token']);
-        // Store the session token in session.
-        $_SESSION['gdoc_token'] = $session_token;
-      } 
-      else {
-        // if just testing, return false
-        if (!$authenticate) {
-          return FALSE; 
-        }
-        // Display link to generate single-use token
-        $gdocs = 'http://spreadsheets.google.com/feeds/';
-        $pref = (strpos($base_root, 'http:') == -1)? "http://":"";
-        $source_page = $pref . $base_root . $base_path . request_uri();
-        $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-            $source_page,
-            $gdocs, 0, 1);
-            
-        drupal_goto($google_uri);
-      }
-  }
-  return TRUE;
+  return gdrive_is_authorized();
 }
 
 
@@ -1367,6 +1348,8 @@ function _shivanode_check_google_login($authenticate = TRUE) {
  */
 function _shivanode_data_form($form, &$form_state) {
   global $base_root, $base_path;
+  
+  drupal_set_title(t('Choose Your Data'));
   
   // Get path arguments
   $args = arg();
@@ -1430,8 +1413,10 @@ function _shivanode_data_form($form, &$form_state) {
   
   $form['p'] = array(
     '#type' => 'markup',
-    '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file.  Below is a list of all the spreadsheets you have registered with this site as well as all the spreadsheets in your Google Doc account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p>', 
-                    array('@type' => $sntypelabel)),
+    '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file.  Below is a list of all the spreadsheets you have registered with this site as well as all the spreadsheets in your Google Drive account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p><p>If you want to switch Google Drive accounts, make sure your browser is logged into the new account, then <a href="@reauthlink">click here</a>.</p>', array(
+    '@type' => $sntypelabel, 
+    '@reauthlink' => url('gdrive/reauth')
+   )),
   );
   
   // Add help link
@@ -1455,37 +1440,14 @@ function _shivanode_data_form($form, &$form_state) {
   
   // If not logged in show authorization button
   if (!_shivanode_check_google_login(FALSE)) {
-    // Display link to generate single-use token
-    
-    // if the request uri has ?format=simple in it 
-    // then it's in the add data entry popup, return there;
-    $return_page = str_replace(' ', '%20', current_path()); // was 'mydata'
-    $rui = request_uri();
-    if(strpos($rui, 'format=simple') > -1) {
-       $return_page  = 'node/add/shivanode?popup=dataurl'; 
-    }
-    $gdocs = 'http://spreadsheets.google.com/feeds/';
-    $google_uri = Zend_Gdata_AuthSub::getAuthSubTokenUri(
-        $base_root . $base_path . $return_page, 
-        $gdocs, 0, 1); // instead of $base_root did have str_replace('http://', 'https://', $base_root)
     $markup['spreadsheets'] = array(
       '#type' => 'markup',
       '#prefix' => '<div>',
       '#suffix' => '</div>',
     );
-    $form['spreadsheets']['addbutton'] = array(
-      '#prefix' => '<div class="addspreadsheet-button"><span>',
-      '#markup' => l('Authorize Access to Google Docs', $google_uri, array(
-                      'attributes' => array(
-                        'target' => '_top',
-                        'class' => 'shiva-button',
-                      )
-                    )),
-       '#suffix' => ' </span></div>',
-    );
     $form['spreadsheets']['instructions'] = array(
       '#type' => 'markup',
-      '#markup' =>'<p>' . t('To add further spreadsheets from your Google Doc account you must give permission for this site to have read-only access to your Google Docs. To do so, you will be directed away from this page to a Google authentication page. From there click "Grant Access", and you will automatically be redirected back here.') . '</p>',
+      '#markup' =>'<p>' . t('To view spreadsheets in your Google Drive account you must give permission for this site to have read-only access to your Google Drive. To do so, you need to visit the <a href="@authpage">Authorization Page</a>.', array('@authpage' => url('gdrive/auth'))) . '</p>',
     );
   }
   return $form;
@@ -1564,7 +1526,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     _shivanode_create_shiva_data_node($title, $url);
   }
   // Get the view of data sets
-  $viewMarkup = views_embed_view('shiva_data_sets', 'panel_pane_1');
+  $viewMarkup = views_embed_view('shiva_data_list', 'my_shiva_data_pane');
   
   // Load it into a XML DOM Document
   $xml = new DOMDocument();
@@ -1613,7 +1575,17 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       $rowclone = $result->cloneNode(TRUE);
       $rowmod = ($rowmod == 'even') ? 'odd' : 'even';
       $rowclone->setAttribute('class', $rowmod);
-      $gid = str_replace('https://spreadsheets.google.com/ccc?key=', '', $key);
+      $gid = $key;
+      if(strpos($key, '?key=') > -1) {
+        $pts = explode('?key=', $key);
+        if(isset($pts[1])) {
+          $gid = $pts[1];
+        }
+      }
+      if(preg_match('/([^\#\&]+)[\#\&]?/', $gid, $matches)) {
+        $gid = $matches[1];
+      }
+      //dpm($gid, $key);
       $titlecell = $rowclone->childNodes->item(0);
       $datecell = $rowclone->childNodes->item(1);
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();

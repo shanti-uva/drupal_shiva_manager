@@ -12,7 +12,7 @@
  // default name for the SHIVA Rest Service used in hook_enable and hook_disable
 define('SHIVA_SERVICE', 'get_shivanode');
 
-require_once('shivanode.inc');
+require_once('includes/shivanode.inc');
 
 /**
  * Implements hook_install().
@@ -155,12 +155,6 @@ function shivanode_update_7001() {
 
 function shivanode_enable() {
   shivanode_create_service();
-  if (module_exists('views')) {
-    shivanode_create_view();
-  } 
-  else {
-    drupal_set_message(t('Views is not enabled. Unable to create list view.'));
-  }
 }
 
 /**
@@ -379,48 +373,48 @@ function shivanode_update_7005() {
 function shivanode_update_7006() {
   if(!field_read_field('shivanode_subtype')) {
     
-    module_load_include('inc', 'shivanode'); // load shivanode.inc for _shivanode_get_generic_image_info() function
-      $t = get_t();
-      $stype_field = array(
-        'field_name'  => 'shivanode_subtype',
-        'type' => 'list_integer',
-        'cardinality' => '1',
-        'foreign keys' => array(),
-        'indexes' => array(
-          'value' => array(
-            0 => 'value',
-          ),
+    module_load_include('inc', 'shivanode', 'includes/shivanode'); // load shivanode.inc for _shivanode_get_generic_image_info() function
+    $t = get_t();
+    $stype_field = array(
+      'field_name'  => 'shivanode_subtype',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
         ),
-        'module' => 'list',
-        'settings' => array(
-          'allowed_values_function' => '_shivanode_subtypelist',
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_subtypelist',
+      ),
+    );
+    field_create_field($stype_field);
+    
+    $stype_instance = array(
+      'field_name'  => 'shivanode_subtype',
+      'label'  => $t('Visualization Subtype'),
+      'required' => 0,
+      'entity_type' => 'node',
+      'bundle' => 'shivanode',
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'module' => 'list',
+          'type' => 'list_default',
         ),
-      );
-      field_create_field($stype_field);
-      
-      $stype_instance = array(
-        'field_name'  => 'shivanode_subtype',
-        'label'  => $t('Visualization Subtype'),
-        'required' => 0,
-        'entity_type' => 'node',
-        'bundle' => 'shivanode',
-        'display' => array(
-          'default' => array(
-            'label' => 'hidden',
-            'module' => 'list',
-            'type' => 'list_default',
-          ),
-        ),
-        'settings' => array(
-          'user_register_form' => FALSE,
-          'default_value' => 1,
-        ),
-        'widget' => array(
-          'active' => 1,
-          'module' => 'options',
-          'type' => 'options_select',
-        ),
-      );
-      field_create_instance($stype_instance);
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 1,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
+      ),
+    );
+    field_create_instance($stype_instance);
   }
 }

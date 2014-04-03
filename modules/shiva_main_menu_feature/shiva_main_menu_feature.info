@@ -1,7 +1,7 @@
-name = Shiva Main Menu Feature
+name = SHIVA Main Menu Feature
 description = A feature to customize the main menu with SHIVA links
 core = 7.x
-package = Shanti Shiva
+package = SHANTI
 version = 7.x-1.0-beta2
 project = shiva_main_menu_feature
 dependencies[] = features

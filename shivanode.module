@@ -107,7 +107,7 @@ define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Graph|Image|Network|Timeline');
  *   This hook is run at the beginning of the page request. 
  */
 function shivanode_init() {
-  module_load_include('inc', 'shivanode', 'shivanode');
+  module_load_include('inc', 'shivanode', 'includes/shivanode');
   // Add names JS scripts here after putting file in shivanode/js folder
   $js_scripts = array(
     '/js/jquery.json-2.3.min.js',
@@ -161,15 +161,6 @@ function shivanode_user_logout($account) {
  */
 function shivanode_menu() {
   $items = array();
-/* Replaced by a view:
- * 
-  $items['node/shivanode/list'] = array(
-    'type' => MENU_NORMAL_ITEM,
-    'title' => 'Shiva visualization List',
-    'page callback' => '_shivanode_list_page',
-    'access callback' => TRUE,
-    'file' => 'shivanode.inc',
-  );*/
   
   // Defines link to admin settings form
   $items['admin/config/content/shivanode'] = array(
@@ -179,7 +170,7 @@ function shivanode_menu() {
     'page arguments' => array('_shivanode_admin_settings'),
     'access arguments' => array('access shivanode view settings'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
   
   $items['admin/config/content/shivanode/basic'] = array(
@@ -206,15 +197,16 @@ function shivanode_menu() {
     'weight' => -1
   );
   
-    // Defines link page that lists Google spreadsheets (OLD FORM)
+    // Defines link page that lists Google spreadsheets (OLD FORM, Deprecated)
   $items['data/spreadsheets'] = array(
     'type' => MENU_NORMAL_ITEM,
+    'menu_name' => "nomenu",
     'title' => 'Google Spreadsheets',
     'description' => 'List of your Google Doc Spreadsheets',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_gss_form'),
     'access callback' => 'is_auth_user',
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
   
   // Menu item to add a gid. First variable is GID. Second is optional type
@@ -224,7 +216,7 @@ function shivanode_menu() {
     'description' => 'Adds a Google Spreadsheet as a data node and uses it',
     'page callback' => '_shivanode_add_gid',
     'access callback' => 'is_auth_user',
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
   
   // Menu item for adding redirecting from popup when using an already added gdoc
@@ -234,32 +226,23 @@ function shivanode_menu() {
     'description' => 'Uses existing data node to create a visualization',
     'page callback' => '_shivanode_add_datanid',
     'access callback' => 'is_auth_user',
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
   
   // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
   $items['mydata'] = array(
-    'title' => 'Choose Your Data',
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+    'title' => 'Data',
     'description' => 'List of Available Shiva Data Entries',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_data_form'),
    // 'page callback' => '_shivanode_data_page',
     'access callback' => 'is_auth_user',
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
+    'weight' => 30,
   );
-  
-  /*
-  // Defines link to Page that lists all registered Data visualizations in SHIVA manager (NEW FORM)
-  $items['node/data-elements/simple'] = array(
-    'title' => 'Available Shiva Data Entries',
-    'description' => 'List of Available Shiva Data Entries',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_data_elements'),
-    'access callback' => 'is_auth_user',
-    'delivery callback' => '_shivanode_popup_page',
-    'file' => 'shivanode.inc',
-  );
-  */
+
    // Resets the guser login info stored in the session variable
   $items['node/guser/reset/confirm'] = array(
     'type' => MENU_CALLBACK,
@@ -268,7 +251,7 @@ function shivanode_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => '_shivanode_reset_guser_confirm',
     'access callback' => TRUE,
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
   
   // Return form for obtaining embed codes
@@ -278,7 +261,7 @@ function shivanode_menu() {
     'page callback' => '_shivanode_node_embed_page',
     'page arguments' => array(1),
     'access callback' => TRUE,
-    'file' => 'shivanode.inc',
+    'file' => 'includes/shivanode.inc',
   );
     
   // Return SHIVA json of a single node 
@@ -289,7 +272,7 @@ function shivanode_menu() {
       'page callback' => '_shivanode_node_json',
       'page arguments' => array(2, 'normal'),
       'access callback' => TRUE,
-      'file' => 'shivanode.inc',
+      'file' => 'includes/shivanode.inc',
     );
 	
 	// Return SHIVA jsaon of a single node 
@@ -300,7 +283,7 @@ function shivanode_menu() {
       'page callback' => '_shivanode_node_json',
       'page arguments' => array(2, 'teaser'),
       'access callback' => TRUE,
-      'file' => 'shivanode.inc',
+      'file' => 'includes/shivanode.inc',
     );
 
     
@@ -312,7 +295,7 @@ function shivanode_menu() {
       'description' => 'URL called by JS Interval to check if Shibboleth session is still active',
       'page callback' => '_shivanode_shib_check',
       'access callback' => TRUE,
-      'file' => 'shivanode.inc',
+      'file' => 'includes/shivanode.inc',
     );
     
     $items['shiva/login'] = array(
@@ -321,7 +304,7 @@ function shivanode_menu() {
       'description' => 'Login via shibboleth if enabled.',
       'page callback' => '_shivanode_login',
       'access callback' => TRUE,
-      'file' => 'shivanode.inc',
+      'file' => 'includes/shivanode.inc',
     );
 
   return $items;
@@ -1017,6 +1000,16 @@ function reset_ginfo_checked($form, $form_state) {
 }
 
 /**
+* Implementation of hook_views_api().
+*/
+function shivanode_views_api() {
+  return array(
+    'api' => 3.0,
+    'path' => drupal_get_path('module', 'shivanode') .'/includes'
+  );
+}
+
+/**
  * Implementation of hook_wysiwyg_include_directory().
  *
  * This tells the Wysiwyg module to search within the 'plugins' directory for
@@ -1405,7 +1398,12 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_json']['#suffix'] = '</div>';
   $form['shivanode_json']['#weight'] = '4';
   $njson = _shivanode_get_json($form['#node']);
-  if(strtolower($njson['chartType']) == 'combochart') {
+  if($gid = _get_gid_from_url($njson['dataSourceUrl'])) {
+    if(!$file = gdrive_get_file($gid)) {
+      drupal_set_message(t('This data file is not associated with the currently logged in Google Account!'), 'warning');
+    }
+  }
+  if(isset($njson['chartType']) && strtolower($njson['chartType']) == 'combochart') {
     $form['#prefix'] = "";
     $form['#suffix'] = '';
     $form['shivanode_json']['#prefix'] = '<div id="shivanode-json-add-more-wrapper" style="display: none; clear:both;"></div><div style="display: block; clear: both !important; color:red; ">The specs for this type of visualization cannot be edited because it is no longer supported.<br/><br/></div>';
@@ -1462,7 +1460,7 @@ function shivanode_services_resources() {
   $node_resource = array(
     'shivanode' => array(
       'retrieve' => array(
-        'file' => array('type' => 'inc', 'module' => 'shivanode', 'name' => 'shivanode'),
+        'file' => array('type' => 'inc', 'module' => 'shivanode', 'name' => 'includes/shivanode'),
         'help' => t('This method retreives a single Shivanode from its node id.'),
         'callback' => '_shivanode_resource_retrieve',
         'args' => array(
@@ -1480,7 +1478,7 @@ function shivanode_services_resources() {
         'access arguments append' => TRUE,
       ),
       'index' => array(
-        'file' => array('type' => 'inc', 'module' => 'shivanode', 'name' => 'shivanode'),
+        'file' => array('type' => 'inc', 'module' => 'shivanode', 'name' => 'includes/shivanode'),
         'help' => t('This method retreives a list of Shivanodes by searching for specific parameters such as user ids, etc.'),
         'callback' => '_shivanode_resource_index',
         'args' => array(

@@ -1,7 +1,7 @@
-name = Shiva Views Feature
+name = SHIVA Views Feature
 description = A Feature that contains views for Shiva data and Shiva galleries
 core = 7.x
-package = Shanti Shiva
+package = SHANTI
 version = 7.x-1.0-beta3
 project = shiva_views_feature
 dependencies[] = datatables
