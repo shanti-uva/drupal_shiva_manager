@@ -406,7 +406,7 @@ function shivanode_node_access($node, $op, $account) {
        return NODE_ACCESS_DENY;  // Deny anyone but author (and admins) to do anything on Draft nodes
     }
   }
-  return NODE_ACCESS_IGNORE;  // otherwise let Drupal do it's access thing
+  // otherwise let Drupal do it's access thing
 }
 
 /*
