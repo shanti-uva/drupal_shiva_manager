@@ -707,3 +707,8 @@ span.private {padding-left: 2px; color: #990000;}
 .link:hover {
 	text-decoration: underline;
 }
+
+.sn-notpublic {
+  font-size: 110%;
+  color: red;
+}

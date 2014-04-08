@@ -1596,7 +1596,10 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
       if(!$shared) {
-        $nsel = $xml->createElement('span','*');
+        $nsel = $xml->createElement('a','*');
+        $nsel->setAttribute('href', 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
+        $nsel->setAttribute('class', 'sn-notpublic');
+        $nsel->setAttribute('target', '_blank');
         $nsel->setAttribute('title', 'This spreadsheet is not publically shared');
         $titlecell->appendChild($nsel);
       }
