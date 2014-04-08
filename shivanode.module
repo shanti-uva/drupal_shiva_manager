@@ -398,6 +398,7 @@ function shivanode_apachesolr_process_results(&$results, DrupalSolrQueryInterfac
 * Implements hook_node_access().
 */
 function shivanode_node_access($node, $op, $account) {
+  module_load_include('inc', 'shivanode', 'includes/shivanode');
   $type = is_string($node) ? $node : $node->type;
   if (!is_string($node) && $type == "shivanode") {
     $shivaAccess = _shivanode_get_access($node);
