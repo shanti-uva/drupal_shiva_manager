@@ -394,26 +394,18 @@ function shivanode_apachesolr_process_results(&$results, DrupalSolrQueryInterfac
   //dpm($query, 'query');
 }
 
-
 /**
 * Implements hook_node_access().
 */
 function shivanode_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : $node->type;
   if (!is_string($node) && $type == "shivanode") {
-    $shivaAccess = $node->shivanode_access["und"]["0"]["value"];
-    // allow owner to do anything with node
-    if ($account->uid == $node->uid) {
-      return NODE_ACCESS_ALLOW;
-    }
-    elseif ($shivaAccess == 4 && $op == 'view') {
-      return NODE_ACCESS_ALLOW;
-    }
-    // No differentiation for other values. Group, etc.
-    else {
-      return NODE_ACCESS_DENY;
+    $shivaAccess = _shivanode_get_access($node);
+    if($shivaAccess == 1 && $account->uid != $node->uid) {  // access = 1 means "Draft" or private
+       return NODE_ACCESS_DENY;  // Deny anyone but author (and admins) to do anything on Draft nodes
     }
   }
+  return NODE_ACCESS_IGNORE;  // otherwise let Drupal do it's access thing
 }
 
 /*
