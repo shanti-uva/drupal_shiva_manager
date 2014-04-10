@@ -2702,8 +2702,8 @@ function _shivanode_node_embed_page($nid) {
 	$nurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . preg_replace('/https?\:/','', $base_url) . $base_path . 'data/json/' . $nid;
   $nurl = preg_replace('/https?:/', '', $nurl);
 	$njson = _shivanode_get_json($nid);
-	$width = $njson['width'];
-	$height = $njson['height'];
+	$width = isset($njson['width'])? $njson['width'] : '800';
+	$height = isset($njson['height']) ? $njson['height'] : '800';
  
 	$page =  array(
 	    'head' => array(
@@ -3003,7 +3003,7 @@ function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
       'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
       'Poster' => '',
       'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
-      'Timeline' => 'https://wiki.shanti.virginia.edu/x/sprRAQ', // old link to simile instructions: https://wiki.shanti.virginia.edu/x/tZy1AQ
+      'Timeline' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',  // old link to simile instructions: https://wiki.shanti.virginia.edu/x/tZy1AQ
       'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
       'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ',
       'Word Cloud' => ''
