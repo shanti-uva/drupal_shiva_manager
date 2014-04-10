@@ -1279,6 +1279,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        ),
       '#attributes' => array(
         'title' => t('Create a new SHIVA Visualization'),
+        'disabled' => 'disabled',
       ),
       '#value' => t('New'),
     );
@@ -1296,6 +1297,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#attributes' => array(
       //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()', // retrieve the latest JSON before saving
       'title' => $submitVal . ' ' . t('and view the Visualization'),
+      'disabled' => 'disabled',
     ),
     '#theme_wrappers' => array('button'),
   );
@@ -1312,6 +1314,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#attributes' => array(
       //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()', // retrieve the latest JSON before saving
       'title' => t('Save changes and continue editing'),
+      'disabled' => 'disabled',
     ),
   );
   
