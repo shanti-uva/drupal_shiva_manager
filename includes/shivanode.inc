@@ -1572,6 +1572,11 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     $sslists = _shivanode_get_spreadsheet_list();
     $gsheets = $sslists[0];
     foreach($gsheets as $key => $title) {
+      $shared = TRUE;
+      if(strpos($title, '$$notshared$$') > -1) {
+        $shared = FALSE;
+        $title = str_replace('$$notshared$$', '', $title);
+      }
       $rowclone = $result->cloneNode(TRUE);
       $rowmod = ($rowmod == 'even') ? 'odd' : 'even';
       $rowclone->setAttribute('class', $rowmod);
@@ -1590,6 +1595,14 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       $datecell = $rowclone->childNodes->item(1);
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
+      if(!$shared) {
+        $nsel = $xml->createElement('a','*');
+        $nsel->setAttribute('href', 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
+        $nsel->setAttribute('class', 'sn-notpublic');
+        $nsel->setAttribute('target', '_blank');
+        $nsel->setAttribute('title', 'This spreadsheet is not publically shared');
+        $titlecell->appendChild($nsel);
+      }
       $datecell->replaceChild(new DOMText(t('Not yet used')), $datecell->childNodes->item(0));
       $selectFrag = $xml->createDocumentFragment(); 
       $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
