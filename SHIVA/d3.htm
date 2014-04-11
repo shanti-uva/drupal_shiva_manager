@@ -1,47 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
-		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-		<title>Testbed</title>
-		<style type="text/css">
-		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
-		body { 			font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 
-   #frame { width:1000px;height:10000px;padding:0px;margin:0px;border:none}
+<html>
+<head>
+  <title>VexTab</title>
+  <script src="//www.vexflow.com/support/vexflow-min.js"></script>
+  <script src="//www.vexflow.com/support/underscore-min.js"></script>
+  <script src="//www.vexflow.com/support/jquery.js"></script>
+  <script src="//www.vexflow.com/support/tabdiv-min.js"></script>
+</head>
+<body>
+ 
+<div class="vex-tabdiv" width=680 scale=1.0 editor="true" editor_width=680 editor_height=330>
+
+options space=25
+tabstave
+  notation=false
+  notes :q (5/4.5/5) (7/4.7/5)s(5/4.5/5) ^3^
+  notes :8 7-5/4 $.a./b.$ (5/4.5/5)h(7/5) =:|
+  notes :8 (12/5.12/4)ds(5/5.5/4)u 3b4/5
+  notes :h (5V/6.5/4.6/3.7/2) $.italic.let ring$ =|=
+  text ++, .23, #f
   
-		 </style>
-  </head>
-  <body>
-<div id="wrapper" style="width:500px;height:400px;padding:20px;margin:0px;">
-	<div style="width:100%; height:90%; padding:0px;margin:0px;overflow: hidden"><iframe id="frame" src="//www.viseyes.org"></iframe></div>
-	<br> L-R<div id="sliderX" style="height:12px;display:block-inline"></div>
-	<br> U-D<div id="sliderY" style="height:12px;display:block-inline"></div>
-	<br>Zoom<div id="sliderZ" style="height:12px;display:block-inline"></div>
 </div>
-  <script type="text/javascript">
-
-	var curX=0,curY=0,curZ=1;
-	$("#sliderZ").slider({ max:175, value:50, iframeFix:true, slide:function(e,ui) { 
-		curZ=ui.value/100+.25; 
-		PanIframe("frame",curX,curY,curZ) 
-		}});
-	
-	$("#sliderX").slider({ max:1000, iframeFix:true, slide:function(e,ui) { curX=-ui.value; PanIframe("frame",curX,curY,curZ) }});
-	$("#sliderY").slider({ max:1000, iframeFix:true, slide:function(e,ui) { curY=-ui.value; PanIframe("frame",curX,curY,curZ) }});
-	$("#wrapper").resizable()
-
-	function PanIframe(id, x, y, z)
-	{
-		console.log(x+" "+y+" "+z)
-		$("#"+id).css({	"-webkit-transform-origin":"0 0",
-			"-webkit-transform":"matrix("+z+",0,0,"+z+","+x+","+y+")"
-    		});
-		}
-
-
-    </script>
-  </body>
+ </body>
 </html>

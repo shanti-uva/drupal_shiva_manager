@@ -16,7 +16,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return;
 	if (typeof(Popcorn.smart) != "function")
 		return;
-	var base="http://www.youtube.com/watch?autoplay=1&controls=1&v=";
+	var base="http://www.youtube.com/watch?autoplay=0&controls=1&v=";
 	
 	$(con).width(options.width);
 	$(con).height(options.height);
@@ -37,8 +37,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	$(con).empty();
     	this.player=null;
     	}
-  	if (!this.player)
-		this.player=Popcorn.smart(con,base+id);
+	this.player=Popcorn.smart(con,base+id);
 	this.player.smartPlayerType=type;
 	this.player.media.src=base+id;
 	if (options.end) {
@@ -54,7 +53,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// VIDEO WRAPPER ///////////////////////////////////////////////////
 
 	this.VideoPlay=function(time) {											// PLAY A CLIP
-		if (time != undefined) {												// If a time set
+		if (time != undefined) {											// If a time set
 			shivaLib.player.play();											// Start it playing first for some unknown reason
 			time=""+time;													// Cast to string
  			if (time.match(/:/))											// If a timecode
@@ -129,8 +128,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		this.ev.AddEvents(t);												// Add them
 		this.ev.HideAll(0);													// Hide boxes after load
 		}
-	this.SendReadyMessage(true);											// Ready										
-
 	this.VideoEvent("add","timeupdate",drawOverlay);						// Draw overlay when time changes
 	this.VideoEvent("add","loadeddata",onVidLoaded);						// Call when video is loaded
 	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});	// When video plays til end
@@ -140,6 +137,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// CALBACKS ///////////////////////////////////////////////////
 
  	function onVidLoaded()	{
+		this.SendReadyMessage(true);										// Ready										
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
