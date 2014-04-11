@@ -88,7 +88,7 @@
 				});
 				// enable save etc buttons after 5 secs
 				setTimeout(function() {
-  				$('#otherbuttons input[disabled=disabled]').each(function() {
+  				$('#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
   				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
   				});
 				}, 5000);
