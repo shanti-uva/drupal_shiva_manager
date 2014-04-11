@@ -41,7 +41,25 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var opWidth=$(con).width();											// Get width in pixels
  	var w=opWidth;														// Width
 	var h=opHeight;														// Height
+
+	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 	
+	svg=d3.select(con)													// Add SVG to container div
+		.append("svg")													// Add SVG shell
+		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
+ 		.append("g")													// Needed for pan/zoom
+    	
+	svg.append("defs")													// Add defs section
+	    .append("clipPath")
+	    .attr("id","cp0")
+	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
+	    
+	svg.append("rect")													// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
+    	.attr("width",w).attr("height",h)								// Set size
+    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
 	
 	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -54,6 +72,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (i=0;i<data.length;++i) {							// For each row
 					if (!data[i][0])									// If no data
 						continue;										// Skip
+					for (j=0;j<5;++j)									// For each possible field
+						if (data[i][j])									// If exists
+							data[i][j]=data[i][j].replace(/[\n|\r]/,"");// Remove CR/LFs							
 					if (data[i][0].match(/link-class/i)) {				// If a link-class
 						if (!styles[data[i][1]])						// If new
 							styles[data[i][1]]={};						// Create new style object
@@ -103,9 +124,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						dataSet.edges.push(o);							// Add node to list
 						}
 					}
-	 			for (i=0;i<dataSet.edges.length;++i) {					// For each edge
-	 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
-	 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
+		
+	 			for (j=0;j<dataSet.edges.length;++j) {					// For each edge
+	 				dataSet.edges[j].source=ids[dataSet.edges[j].source];	// Convert id to index
+	 				dataSet.edges[j].target=ids[dataSet.edges[j].target];	// Convert id to index
 	 				}
 	  			redraw();												// Draw graph
 				});
@@ -280,26 +302,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			},true);
 	}																	
 	
-	
-	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
-	
-	svg=d3.select(con)													// Add SVG to container div
-		.append("svg")													// Add SVG shell
-		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
-		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
- 		.append("g")													// Needed for pan/zoom
-     	
-	svg.append("defs")													// Add defs section
-	    .append("clipPath")
-	    .attr("id","cp0")
-	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
-	    
-	svg.append("rect")													// Pan and zoom rect
-		.style({"fill":"none","pointer-events":"all"})					// Invisble
-    	.attr("id","underLayer")										// Set id
-    	.attr("width",w).attr("height",h)								// Set size
-    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
-	
+		
 	function zoomed() {													// ZOOM HANDLER
  		var t;
  		if (!canPan)
@@ -420,7 +423,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-				.on("click",function(d){ if (!d3.event.shiftKey) AddPopup(d); })	// Click on node unless dragging w/ shift
+				.on("click",function(d){								// Click on node
+			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name); // Send message
+				 	if (!d3.event.shiftKey)								// If not shift key down 
+				 		AddPopup(d); 									// Show popup, if one
+				 	})	
 				.call(force.drag);
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { 
@@ -471,7 +478,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 		else if (options.chartType == "Tree") {							// Tree
 	
-		 	margins=[20,20,20,options.spacing/2];						// Margins
+		 	margins=[8,8,8,options.spacing/2];						// Margins
 	   	 	if (firstTime)
 		   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
 	   	 	
@@ -492,14 +499,16 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return  "translate("+d.parent.y+","+d.parent.x+")"; // Position to parent dot
 					else												// If dataSet
 						return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
-					})
-				.on("click", function(d) { toggle(d); redraw(d); });	// Add click handler
+				});
 		
 			nodeEnter.append("circle")									// Add circle
 				.attr("r",1e-6)											// Set size
 				.style("stroke","#999")									// Edge
 				.style("cursor", function(d) { return d._children ? "pointer" : "auto"; })	// Set cursor based on children
-				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; })	// Set color based on children
+				.on("click", function(d) { 								// Add click handler
+					toggle(d); 	redraw(d); 								// Toggle and redraw
+					});	
 		
 			nodeEnter.append("text")									// Add label
 				.style("font-family","sans-serif")						// San serif
@@ -510,8 +519,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("fill-opacity", 1e-6)							// Transparent
 				.style("fill",options.lCol)								// Color
 				.style("font-size",options.lSize)						// Size
-				.style(unselectable);									// Unselectable
-		
+//				.style(unselectable)									// Unselectable
+				.on("click", function(d) { 								// Add click handler
+			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
+					});	
+			
 			var nodeUpdate=node.transition()	  						// Transition nodes to their new position
 				.duration(options.trans)								// Set time
 				.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move
@@ -612,8 +624,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
 	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
 					.style("cursor", function(d) { return d.info ? "pointer" : "auto"; })	// Set cursor presence of info
-					.on("click",AddPopup)								// Click on node
-
+					.on("click", function(d) {							// Click on node
+								shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
+								AddPopup(d);							// Show popup
+								});								
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")
 			      	.attr("dy",".3em")									// Shift
@@ -657,7 +671,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				
 				node.append("circle")									// Add circle
 			      	.attr("r", function(d) { return d.r; })				// Set diameter
-			      	.style("fill", function(d) { return colors(d.packageName); });	// Set color
+			      	.style("fill", function(d) { return colors(d.packageName); })	// Set color
+					.on("click", function(d) {							// Click on node
+								shivaLib.SendShivaMessage("ShivaGraph=click",d.className+"|"+d.value); // Send message
+								AddPopup(d);							// Show popup
+								});								
 		
 		 		node.append("text")										// Add text
 			      	.attr("dy",".3em")									// Shift
@@ -768,8 +786,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      		d3.select(this).attr("stroke-width","0px");		// Add border	
 			      		dataBar.style("visibility","hidden");			// Hide data bar
 			  			})
+				.on("click",function(d) {								// Click on node
+						var k,o,datearray=[];
+						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
+				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+				      	var selected=(d.values);						// Selected layer						
+				      	for (var k=0;k<selected.length;k++) { 			// For each data point
+				        	o=selected[k].date;							// Get date
+				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
+				        	}
+					   	k=datearray.indexOf(now);						// Data item over
+					 	shivaLib.SendShivaMessage("ShivaGraph=click",shivaLib.FormatDate(date,options.dateFormat)+"|"+d.key+"|"+d.values[k].value); // Send message
+				 		});	
+
 			    
-			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
+			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));		// Set start date
 			$("#endDate").text(shivaLib.FormatDate(x.invert(opWidth),options.dateFormat));	// Set end date
 			}															// End Stream
 	
@@ -970,7 +1001,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		      	.style("stroke", function(d) { return cols[d.index%clen]; })	// Set edge color
 		      	.attr("d",arc)											// Draw grouping
 	   			.on("mouseover",function(d,i) { fade(.15,i);} )			// Fade down
-	  			.on("mouseout", function() { fade(.67,i);} );				// Fade up
+	  			.on("mouseout", function() { fade(.67,i);} )				// Fade up
+				.on("click",function(d) {								// Click on node
+				 		shivaLib.SendShivaMessage("ShivaGraph=click",nameByIndex.get(d.index)+"|"+d.index); // Send message
+				 		});	
 	    
 		  	g.append("text")											// Add node label						
 		  		.each(function(d) { d.angle=(d.startAngle+d.endAngle)/2; })	// Angle
@@ -998,8 +1032,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	
 			}															// End Chord
 
+	if (firstTime)														// If first time thru
+		shivaLib.SendReadyMessage(true);								// Send ready msg to drupal manager
 	firstTime=false;													// Not first time thru
-	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 	}																	// End update
 
 
@@ -1009,13 +1044,15 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 function AddPopup(d)												// SHOW A POPUP
 {
-	if (!d.info)														// Nothing to show
+	if (!d || !d.info)													// Nothing to show
 		return;															// Quit
 	var x=d3.event.clientX+8;											// Set xPos
 	var y=d3.event.clientY+8;											// Y
 	$("#d3Popup").css({left:x,top:y});									// Position
 	$("#d3Popup").html(shivaLib.LinkToAnchor(d.info));					// Add text										
 	$("#d3Popup").show();												// Show it
+	if (shivaLib.options.popupTime == undefined)						// If not defined
+		shivaLib.options.popupTime=2;									// Set default
 	$("#d3Popup").delay(shivaLib.options.popupTime*1000).fadeOut(400);	// Close after n seconds
 	}
 

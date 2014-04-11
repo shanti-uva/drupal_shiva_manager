@@ -1,7 +1,6 @@
 echo "Publishing ShivaLib"
 cat shivaLib_main.js \
 shivaLib_props.js \
-shivaLib_controls.js \
 shivaLib_draw.js \
 shiva_graphics.js \
 shivalib_maps.js \
