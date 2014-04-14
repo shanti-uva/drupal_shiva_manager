@@ -1368,13 +1368,16 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Set typeVal to form_state value, if set, (meaning we are editing an existing node) or to the default value is not set (meaning new node)
   $elTypes = _shivanode_element_typelist(TRUE);
-  $typeVal = 0;
-  try { 
-    $typeVal = (isset($form_state['node']->shivanode_element_type['und'])) ? 
-                    $form_state['node']->shivanode_element_type['und'][0]['value']:
-                    $elTypes[$sntype]; 
-  } catch (Exception $e) {
-    dpm((array)$e, 'Exception');
+  $typeVal = FALSE;
+  // Type of node when editing
+  if (isset($form_state['node']->shivanode_element_type['und'][0]['value'])) {
+    $typeVal = $form_state['node']->shivanode_element_type['und'][0]['value'];
+  // Use $sntype if set from above TODO: Check if this is necessary
+  } else if(array_key_exists($sntype, $elTypes)) {
+    $typeVal = $elTypes[$sntype];
+  // Default is to use the set value on the form
+  } else {
+    $typeVal = $form_state['input']['shivanode_element_type']['und'];
   }
 
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
