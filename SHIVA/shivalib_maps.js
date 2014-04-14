@@ -158,7 +158,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaActEarth=goto") {									// GOTO
+	if (v[0] == "ShivaAct=goto") {										// GOTO
 		var lookAt=shivaLib.map.getView().co
 		pyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
 		if (v[1] != undefined)	lookAt.setLatitude(Number(v[1]));		// Set lat
@@ -168,12 +168,12 @@ SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION ME
 		if (v[5] != undefined)	lookAt.setHeading(Number(v[5]));		// Set heading
 		shivaLib.map.getView().setAbstractView(lookAt);					// Go there
 		}
-	else if ((v[0] == "ShivaActEarth=show") || (v[0] == "ShivaActEarth=hide")) {	// SHOW/SHOW
+	else if ((v[0] == "ShivaAct=show") || (v[0] == "ShivaAct=hide")) {	// SHOW/SHOW
 		if (this.items[v[1]]) 											// If valid item	
-			this.items[v[1]].visible=(v[0] == "ShivaActEarth=show").toString();	// Set visibility 
+			this.items[v[1]].visible=(v[0] == "ShivaAct=show").toString();	// Set visibility 
 		this.DrawEarthOverlays();											// Redraw
 		}
-	else if (v[0] == "ShivaActEarth=data")  {							// FILL MARKERS
+	else if (v[0] == "ShivaAct=data")  {								// FILL MARKERS
 		if (v[1]) 														// If valid item	
 			this.EarthAddMarkers(v[1]);									// Add markers
 		}
@@ -358,21 +358,21 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaActMap=goto") {									// GOTO
+	if (v[0] == "ShivaAct=goto") {										// GOTO
 		var curLatlng=new google.maps.LatLng(v[1],v[2]);				// Set lat/lon
 		this.map.setCenter(curLatlng);									// Center map
 		this.map.setZoom(Number(v[3]));									// Zoom map
 		}
-	else if ((v[0] == "ShivaActMap=show") || (v[0] == "ShivaActMap=hide")) {	// SHOW/SHOW
+	else if ((v[0] == "ShivaAct=show") || (v[0] == "ShivaAct=hide")) {	// SHOW/SHOW
 		if (this.items[v[1]]) 											// If valid item	
-			this.items[v[1]].visible=(v[0] == "ShivaActMap=show").toString();	// Set visibility 
+			this.items[v[1]].visible=(v[0] == "ShivaAct=show").toString();	// Set visibility 
 		this.DrawMapOverlays();											// Redraw
 		}
-	else if (v[0] == "ShivaActMap=data")  {								// FILL MARKERS
+	else if (v[0] == "ShivaAct=data")  {								// FILL MARKERS
 		if (v[1]) 														// If valid item	
 			this.MapAddMarkers(v[1]);									// Add markers
 		}
-	else if (v[0] == "ShivaActMap=marker") { 							// SHOW/HIDE MARKERS
+	else if (v[0] == "ShivaAct=marker") { 								// SHOW/HIDE MARKERS
 		if (v[1] < this.markerData.length) 								// If valid
 			this.markerData[v[1]].obj.setMap(v[2]=="true"?this.map:null);	// Hide/show
 		}

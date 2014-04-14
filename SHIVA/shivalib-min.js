@@ -876,11 +876,11 @@ if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.
 if(obj){obj.setOpacity(opacity);obj.setVisibility(items[i].visible=="true");}}
 this.map.getView().setAbstractView(lookAt);}
 SHIVA_Show.prototype.EarthActions=function(msg)
-{var v=msg.split("|");if(v[0]=="ShivaActEarth=goto"){var lookAt=shivaLib.map.getView().co
+{var v=msg.split("|");if(v[0]=="ShivaAct=goto"){var lookAt=shivaLib.map.getView().co
 pyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);if(v[1]!=undefined)lookAt.setLatitude(Number(v[1]));if(v[2]!=undefined)lookAt.setLongitude(Number(v[2]));if(v[3]!=undefined)lookAt.setRange(Number(v[3]));if(v[4]!=undefined)lookAt.setTilt(Number(v[4]));if(v[5]!=undefined)lookAt.setHeading(Number(v[5]));shivaLib.map.getView().setAbstractView(lookAt);}
-else if((v[0]=="ShivaActEarth=show")||(v[0]=="ShivaActEarth=hide")){if(this.items[v[1]])
-this.items[v[1]].visible=(v[0]=="ShivaActEarth=show").toString();this.DrawEarthOverlays();}
-else if(v[0]=="ShivaActEarth=data"){if(v[1])
+else if((v[0]=="ShivaAct=show")||(v[0]=="ShivaAct=hide")){if(this.items[v[1]])
+this.items[v[1]].visible=(v[0]=="ShivaAct=show").toString();this.DrawEarthOverlays();}
+else if(v[0]=="ShivaAct=data"){if(v[1])
 this.EarthAddMarkers(v[1]);}}
 SHIVA_Show.prototype.EarthAddMarkers=function(json,mData)
 {}
@@ -925,12 +925,12 @@ if((items[i].visible=="true")&&(items[i].obj))
 items[i].obj.setMap(this.map);}
 this.map.setCenter(curLatlng);this.map.setZoom(Number(curZoom));}
 SHIVA_Show.prototype.MapActions=function(msg)
-{var v=msg.split("|");if(v[0]=="ShivaActMap=goto"){var curLatlng=new google.maps.LatLng(v[1],v[2]);this.map.setCenter(curLatlng);this.map.setZoom(Number(v[3]));}
-else if((v[0]=="ShivaActMap=show")||(v[0]=="ShivaActMap=hide")){if(this.items[v[1]])
-this.items[v[1]].visible=(v[0]=="ShivaActMap=show").toString();this.DrawMapOverlays();}
-else if(v[0]=="ShivaActMap=data"){if(v[1])
+{var v=msg.split("|");if(v[0]=="ShivaAct=goto"){var curLatlng=new google.maps.LatLng(v[1],v[2]);this.map.setCenter(curLatlng);this.map.setZoom(Number(v[3]));}
+else if((v[0]=="ShivaAct=show")||(v[0]=="ShivaAct=hide")){if(this.items[v[1]])
+this.items[v[1]].visible=(v[0]=="ShivaAct=show").toString();this.DrawMapOverlays();}
+else if(v[0]=="ShivaAct=data"){if(v[1])
 this.MapAddMarkers(v[1]);}
-else if(v[0]=="ShivaActMap=marker"){if(v[1]<this.markerData.length)
+else if(v[0]=="ShivaAct=marker"){if(v[1]<this.markerData.length)
 this.markerData[v[1]].obj.setMap(v[2]=="true"?this.map:null);}}
 SHIVA_Show.prototype.MapAddMarkers=function(json,mData)
 {var hasLines=false;var i,j,o,mark,list,ops;var flat,flon,tlat,tlon,col,alpha,width,coords,path;var _this=shivaLib;if(typeof(json)=="string"){json=$.parseJSON(json);var cols=json[0].length;for(i=1;i<json.length;++i){o={};for(j=0;j<cols;++j)
@@ -1017,7 +1017,7 @@ shivaLib.player.off(type,callback);}
 if(this.ev)
 t=this.ev.events;else
 t=options["shivaEvents"];this.ev=new SHIVA_Event(this);if((t)&&(t.length)){this.ev.AddEvents(t);this.ev.HideAll(0);}
-this.VideoEvent("add","timeupdate",drawOverlay);this.VideoEvent("add","loadeddata",onVidLoaded);this.VideoEvent("add","ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.VideoEvent("add","playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.VideoEvent("add","pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});function onVidLoaded(){this.SendReadyMessage(true);var v=shivaLib.options.start.split(":");if(v.length==1)
+this.VideoEvent("add","timeupdate",drawOverlay);this.VideoEvent("add","loadeddata",onVidLoaded);this.VideoEvent("add","ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.VideoEvent("add","playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.VideoEvent("add","pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});function onVidLoaded(){shivalLib.SendReadyMessage(true);var v=shivaLib.options.start.split(":");if(v.length==1)
 v[1]=v[0],v[0]=0;var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);shivaLib.VideoTime(time);shivaLib.VideoVolume(shivaLib.options.volume/100);if(shivaLib.options.autoplay=="true")
 shivaLib.VideoPlay();else
 shivaLib.VideoPause();$("#shivaEventDiv").height(Math.max(shivaLib.VideoMediaHeight()-40,0));shivaLib.VideoNotes();shivaLib.SendShivaMessage("ShivaVideo=ready");setInterval(onVideoTimer,400);if(shivaLib.ev)

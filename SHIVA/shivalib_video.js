@@ -137,7 +137,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// CALBACKS ///////////////////////////////////////////////////
 
  	function onVidLoaded()	{
-		this.SendReadyMessage(true);										// Ready										
+		shivalLib.SendReadyMessage(true);									// Ready										
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
@@ -156,50 +156,50 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
  			shivaLib.ev.DrawEventDots();										
    	}
 
-  	function onVideoTimer(e) {										// VIDEO TIMER HANDLER
-		if ($("#shivaNotesDiv").length) {								// If open
+  	function onVideoTimer(e) {											// VIDEO TIMER HANDLER
+		if ($("#shivaNotesDiv").length) {									// If open
 			var t,i,j,next;
-			var now=shivaLib.VideoTime();								// Get current time
-			for (i=0;i<500;++i) {										// Loop
-				if (!$("#ntc-"+i).length)								// If no more                                  
-					break;												// Quit
-				$("#ntc-"+i).css("color","#009900");					// Clear it
-	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());		// Convert to seconds      
-				if (now >= t) {											// Post start
+			var now=shivaLib.VideoTime();									// Get current time
+			for (i=0;i<500;++i) {											// Loop
+				if (!$("#ntc-"+i).length)									// If no more                                  
+					break;													// Quit
+				$("#ntc-"+i).css("color","#009900");						// Clear it
+	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
+				if (now >= t) {												// Post start
 	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
-					if (now < next) {									// If before next
-						$("#ntc-"+i).css("color","#ff0000");			// Highlight it
-			            break;                                         	// Quit
+					if (now < next) {										// If before next
+						$("#ntc-"+i).css("color","#ff0000");				// Highlight it
+			            break;                                         		// Quit
 	            		}
        				}
        			}
        		}
 	}
 	
-  	function drawOverlay()	{										// ON TIME CHANGE										
-		if (!$("#shivaDrawPaletteDiv").length)							// If not drawing
-   			shivaLib.DrawOverlay();										// Refresh overlay
+  	function drawOverlay()	{											// ON TIME CHANGE										
+		if (!$("#shivaDrawPaletteDiv").length)								// If not drawing
+   			shivaLib.DrawOverlay();											// Refresh overlay
    		}		
 }
   
-SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+SHIVA_Show.prototype.VideoActions=function(msg)							// REACT TO SHIVA ACTION MESSAGE
 {
-	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaAct=resize") { 									// RESIZE
-		if (v[1] == "100") {											// If forcing 100%
-			$("#containerDiv").width("100%");							// Set container 100%
-			$("#containerDiv").height("100%");							// Set container 100%
+	var v=msg.split("|");													// Split msg into parts
+	if (v[0] == "ShivaAct=resize") { 										// RESIZE
+		if (v[1] == "100") {												// If forcing 100%
+			$("#containerDiv").width("100%");								// Set container 100%
+			$("#containerDiv").height("100%");								// Set container 100%
 			}
 		}
-	else if (v[0] == "ShivaAct=play") {									// PLAY
-		this.VideoPlay();												// Play from current spot
-		if (v[1] != undefined)											// If a time set
-			this.Videoplay(v[1]);										// Play from then
+	else if (v[0] == "ShivaAct=play") {										// PLAY
+		this.VideoPlay();													// Play from current spot
+		if (v[1] != undefined)												// If a time set
+			this.Videoplay(v[1]);											// Play from then
 			}
-	else if (v[0] == "ShivaAct=pause")									// PAUSE
-		this.VideoPause();												// Pause
-	else if (v[0] == "ShivaAct=load") {									// LOAD
-		this.VideoLoad(v[1]); 											// Load
+	else if (v[0] == "ShivaAct=pause")										// PAUSE
+		this.VideoPause();													// Pause
+	else if (v[0] == "ShivaAct=load") {										// LOAD
+		this.VideoLoad(v[1]); 												// Load
 		}
 }
   
