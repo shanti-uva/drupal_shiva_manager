@@ -137,7 +137,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// CALBACKS ///////////////////////////////////////////////////
 
  	function onVidLoaded()	{
-		shivalLib.SendReadyMessage(true);									// Ready										
+		shivaLib.SendReadyMessage(true);									// Ready										
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
