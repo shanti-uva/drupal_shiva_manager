@@ -1370,11 +1370,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $elTypes = _shivanode_element_typelist(TRUE);
   $typeVal = 0;
   try { 
-    $typeVal = isset($form_state['node']->shivanode_element_type['und']) ? 
+    $typeVal = (isset($form_state['node']->shivanode_element_type['und'])) ? 
                     $form_state['node']->shivanode_element_type['und'][0]['value']:
                     $elTypes[$sntype]; 
   } catch (Exception $e) {
-    dpm((array) $e)
+    dpm((array)$e, 'Exception');
   }
 
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
