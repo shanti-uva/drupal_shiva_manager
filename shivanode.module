@@ -1368,9 +1368,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Set typeVal to form_state value, if set, (meaning we are editing an existing node) or to the default value is not set (meaning new node)
   $elTypes = _shivanode_element_typelist(TRUE);
-  $typeVal = isset($form_state['node']->shivanode_element_type['und'][0]['value']) ? 
-                  $form_state['node']->shivanode_element_type['und'][0]['value']:
-                  $elTypes[$sntype]; 
+  $typeVal = 0;
+  try { 
+    $typeVal = isset($form_state['node']->shivanode_element_type['und']) ? 
+                    $form_state['node']->shivanode_element_type['und'][0]['value']:
+                    $elTypes[$sntype]; 
+  } catch (Exception $e) {
+    dpm((array) $e)
+  }
 
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
   $iframeUrl = _get_shivaframe_url($typeVal, $nid);   
