@@ -315,6 +315,9 @@ function _shivanode_subtypelist($type='label', $search=FALSE) {
     25 => array(t('Parallel'), 'Parallel'),
     21 => array(t('Chord'), 'Chord'),
   );
+  if(is_numeric($type)) {
+    return $options[$type][0];
+  }
   if($type == 'index') {
     if(!$search) { return FALSE; } // If no search string, no match
     foreach($options as $key => $value) {
@@ -488,6 +491,19 @@ function _get_shivanode_type($node, $mode = 'string') {
     $val = $typefield['und']['0']['value'] * 1;
     if ($val == 5) { $val = 13; } // account for old simile 5 
     $type = ($mode == 'number')? $val : $options[$val];
+  }
+  return $type;
+}
+
+/*
+ * Gets the subtype of visualization in the Shiva node
+ */
+function _get_shivanode_subtype($node, $mode = 'string') {
+  $type = FALSE;
+  if ($node && isset($node->shivanode_subtype)) {
+    $subtype = $node->shivanode_subtype;
+    $val = $subtype['und']['0']['value'] * 1;
+    $type = _shivanode_subtypelist($val);
   }
   return $type;
 }
@@ -3005,6 +3021,8 @@ function _shivanode_add_ms_metafix() {
 /**
  * Function get Help link
  *    Returns the html link code for the help page depending on the shivanode type value sent to function
+ *    @param mixed $typeVal (Required) If this is a number, it returns the Shivanode type for that index. This only works for the major types. If it is a string, it uses that as an index on the $helurls array to find the correct help link. This works for visualization sub-types.
+ *    @param string $linkStr (Optional) The string to use as the text of the link returned. If omitted, the link display an image of a blue circle with a question mark in it.
  */
 function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
   global $base_root, $base_path;
@@ -3049,7 +3067,7 @@ function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
     $helpStr = $typeVal;
   }
   if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
-    return '';
+    return FALSE;
   } else {
     if($linkStr) {
       return '<a href="' . $helpurls[$helpStr] . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';

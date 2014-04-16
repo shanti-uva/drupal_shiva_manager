@@ -1093,6 +1093,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
   $ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
+  
   $ptitle = '';
   
   // If the node with the form does not have an nid, we are creating a new shivanode node. 
@@ -1124,7 +1125,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
     $submitVal = t('Save');
     $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : $sntype)));
+    
+  // Set Variables for edit form of existing nodes
   } else {
+    $ctype = _get_shivanode_subtype($form['#node']);
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
@@ -1393,9 +1397,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        t("(Note that deleting this reference will not affect your Google spreadsheet.) ") . 
        t("You may be able to edit your spreadsheet in the frame below if you are logged into Google. If not, you must go ") . 
        l(t("here"), $iframeUrl, array('attributes' => array('target' => '_blank'))) . '.</p>':'';
-
+       
+  // Create Iframe in Fieldset with Help Link in the Legend
+  $helpLinkHTML = ($ctype) ? _shivanode_get_help_link($ctype) : _shivanode_get_help_link($typeVal);
   $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
-        $sntype . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        $sntype . $helpLinkHTML . '</span>' . '&nbsp;</legend>' .
         '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
