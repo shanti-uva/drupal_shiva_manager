@@ -316,7 +316,11 @@ function _shivanode_subtypelist($type='label', $search=FALSE) {
     21 => array(t('Chord'), 'Chord'),
   );
   if(is_numeric($type)) {
-    return $options[$type][0];
+    if(isset($options[$type][0])){
+      return $options[$type][0];
+    } else {
+      return FALSE;
+    }
   }
   if($type == 'index') {
     if(!$search) { return FALSE; } // If no search string, no match
@@ -502,8 +506,10 @@ function _get_shivanode_subtype($node, $mode = 'string') {
   $type = FALSE;
   if ($node && isset($node->shivanode_subtype)) {
     $subtype = $node->shivanode_subtype;
-    $val = $subtype['und']['0']['value'] * 1;
-    $type = _shivanode_subtypelist($val);
+    if (isset($subtype['und']['0']['value'])) {
+      $val = $subtype['und']['0']['value'] * 1;
+      $type = _shivanode_subtypelist($val);
+    }
   }
   return $type;
 }
