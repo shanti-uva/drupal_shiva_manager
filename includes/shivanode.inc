@@ -1580,7 +1580,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     $nid = $info[1];
     // if simple = true, it's a popup, namely user has chosed a specific type
     $selectFrag = $xml->createDocumentFragment(); 
-    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', true);">Visualize</a>');
+    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
     // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
     if(!$simple) {
       $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
@@ -2529,7 +2529,7 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   if(!$gid) { drupal_goto('mydata'); }
   $vtype = 'chart';
   $ctype = '';
-  $gfile = gdrive_get_file($gid);
+  $gfile = gdrive_file_attributes(gdrive_get_file($gid));
  
   if($gfile) {
     $dnode = _shivanode_create_shiva_data_node($title, $gfile['url']); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid
