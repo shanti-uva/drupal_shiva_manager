@@ -232,7 +232,7 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 		}
 }
 
-SHIVA_Show.prototype.AddOverlay=function(data) 							// ADD OVERLAY
+SHIVA_Show.prototype.AddOverlay=function(data) 								// ADD OVERLAY
 {
 	var key;
    	this.overlay=new Array();												// Alloc new array
@@ -289,25 +289,23 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	if (this.player)														// If a player object
 		i=Math.max(0,i-=40);												// Don't hide controls, cap at 0
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
-		if (!$("#shivaDrawDiv").length) {									// No draw div yet	
-			str="<div id='shivaDrawDiv' style='position:absolute";			// Div
-			str+=";width:"+$(con).css("width");								// Make div
-			str+=";top:"+t;													// same as
-			str+=";left:"+l;												// container div
-			str+=";height:"+i+"px'/>";										// Set hgt
-			$('body').append(str);											// Add to dom								
-			}
+		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
+		str+=";width:"+$(con).css("width");									// Make div
+		str+=";top:"+t;														// same as
+		str+=";left:"+l;													// container div
+		str+=";height:"+i+"px'/>";											// Set hgt
+		$('body').append(str);												// Add to dom								
 		this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");				// Create canvas
 		}
 	$("#shivaDrawCanvas").attr("width",$(con).css("width"));				// Wid
 	$("#shivaDrawCanvas").attr("height",i+"px");							// Hgt
-	$("#shivaDrawDiv").css("left",l);										// Left div
-	$("#shivaDrawDiv").css("top",t);										// Top
+	$("#shivaDrawDiv").css("left",l+"px");									// Left div
+	$("#shivaDrawDiv").css("top",t+"px");									// Top
 	$("#shivaDrawDiv").css("width",$(con).css("width"));					// Wid
 	$("#shivaDrawDiv").css("height",i+"px");								// Hgt
 	ctx=$("#shivaDrawCanvas")[0].getContext('2d');							// Get context
 	ctx.clearRect(0,0,1600,1600);											// Clear canvas
-	if (navigator.userAgent.match(/\.NET CLR/))								// If IE
+	if ($.browser.msie)														// IE
 		$("#shivaDrawDiv").css("z-index",2);								// Force on top
 	else																	// All else
 		$("#shivaDrawDiv").css("z-index",2000);								// Force on top
@@ -353,10 +351,12 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				$(dd).css("border-radius",(w/2+16)+"px");					// Set border 1/2 wid + padding
 				$(dd).css("height",w+"px");									// Hgt same as wid
 				}
-			if (o.ideaGradient) 											// If a gradient
-				 $(dd).css({background:"-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)",
-				 			background:"linear-gradient(#f0f0f0,"+o.ideaBackCol+")"
-				 			});
+			if (o.ideaGradient) {											// If a gradient
+				if ($.browser.mozilla)										// Firefox			
+				 	$(dd).css("background","-moz-linear-gradient(top,#f0f0f0,"+o.ideaBackCol+")");
+				else														// All other browsers
+					 $(dd).css("background","-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)");
+				}
 
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
 
@@ -421,7 +421,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str+="width:"+(Math.abs(o.x[1]-o.x[0])-18)+"px'/>";
 			$("#shivaDrawDiv").append(str);									// Add div
 			$("#shtx"+i).css("color",o.textColor).css("text-align",o.textAlign.toLowerCase());	// Color/align
-			$("#shtx"+i).css("font-size",Number(o.textSize/2)+10);			// Set font size
+			$("#shtx"+i).css("font-size",Number(o.textSize)+12);			// Set font size
 			$("#shtx"+i).html(o.text);										// Set text
 			$("#shtx"+i).bind("change input propertychange",function(e) {	// Change event
 				var i=e.target.id.substr(4);								// Extract index

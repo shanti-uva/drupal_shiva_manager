@@ -5639,8 +5639,8 @@ tg.TG_TimelinePlayer.prototype = {
     // IE 7,8 not able to find the .titleBar element below
     // while this .each is happening. Performance in .find()?
     // This hack just turns off the titleBar tracking... :(
-    if ($.msie && parseInt($.version) <9) {
-     trackTB = false;
+    if ($.browser.msie && parseInt($.browser.version) <9) {
+      trackTB = false;
     }
     
     // if (trackTB === true) {

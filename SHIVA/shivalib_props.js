@@ -244,17 +244,17 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 	for (i=0;i<atts.length;++i) {
 		o=atts[i];
 		id="propInput"+i;
-   		var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
-		if ((this.drupalMan) && (o == "dataSourceUrl")) 
+   		var str="<tr style='height:26px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
+	if ((this.drupalMan) && (o == "dataSourceUrl")) 
 			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"gdoc\",0)'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
-   			str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
+   			str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
   		else if (props[o].opt == "advanced") 
-   			str+="<input tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";
+   			str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";
    		else if ((props[o].opt == "color") || (props[o].opt == "colors")) {
-   			str+="<div style='max-height:26px'><input onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";
-   			str+="<div style='position:relative;border:1px solid #999;height:10px;width:10px;top:-15px;left:8px;background-color:white'"
+   			str+="<div style='max-height:26px'><input size='7' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";
+   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px;background-color:white'"
 			if (props[o].opt == "colors")	
   				str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";		   			
 			else
@@ -262,9 +262,9 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			str+="</div>"
 			}				   			
    		else if (props[o].opt == "button") 
-   			str+="<button type='button' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";
+   			str+="<button type='button' size='14' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";
    		else if (props[o].opt == "slider")
-   			str+="<input onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
+   			str+="<input style='width:100px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
    		else if (props[o].opt == "checkbox") {
    			str+="<input onChange='Draw()' type='checkbox' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'";
    			if (props[o].def == "true")
@@ -297,18 +297,18 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 							str+=" onclick='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"C'/>";		   			
 							}				   			
 				   		else if (props[oo].opt == "colors") 
-	   						str+="<input style='width:90px' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 			   			else if (props[oo].opt == "button") 
    							str+="<button type='button' size='12' onChange='"+oo+"' id='"+id+"'>"+props[oo].def+"</button>";
 			   			else if (props[oo].opt == "slider")
    							str+="<input style='width:90px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 			   			else if (props[oo].opt == "list")
-   							str+="<textarea style='width:90px' rows='2' onChange='Draw()' onInput='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+   							str+="<textarea cols='13' rows='2' onChange='Draw()' onInput='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		else if (props[oo].opt == "hidden") 
    							str+="<input type='hidden' id='"+id2+"'/>";
 			   			else if (props[oo].opt.indexOf('|') != -1) {
 			   				var v=props[oo].opt.split("|");
-							str+="<select style='width:90px' id='"+id2+"' onChange='Draw()' onFocus='ShowHelp(\""+props[oo].des+"\")'>";
+							str+="<select id='"+id2+"' onChange='Draw()' onFocus='ShowHelp(\""+props[oo].des+"\")'>";
 							for (l=0;l<v.length;++l) {
 								if (v[l])
 									str+="<option>"+v[l]+"</option>";
@@ -318,7 +318,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 				   		else if (props[oo].opt == "sizer") 
   							str+="<button type='button' id='"+id2+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set</button>";		   			
 				   		else
-   							str+="<input style='width:90px' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+   							str+="<input size='14' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		str+="</span></p>";
 				   		}
 					str+="</div>";
@@ -365,36 +365,15 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 						}
 				}
 			}
-		for (i=0;i<atts.length;++i) 
+		for (i=0;i<atts.length;++i)
 			if (atts[i] == "item") {
 				atts[i]="name";
 				break;
-			}
+				}
 		for (j=0;j<items.length;++j) 
 			for (k=i;k<atts.length;++k)	
 				$("#itemInput"+j+"-"+(k-i)).val(items[j][atts[k]]);
 		}
-	
-	var bs={"-moz-border-radius":"10px","-webkit-border-radius":"10px","-khtml-border-radius":"10px","border-radius":"10px",
-			"width":"100px","padding-left":"7px","padding-right":"7px","padding-top":"1px",
-			"border":"1px solid #ddd","color":"#666","font-size":"12px","height":"18px"
-			};	 
-	
-	for (i=0;i<atts.length;++i) {
-		$("#propInput"+i).css(bs);
-		if ((props[atts[i]]) && (props[atts[i]].opt.match(/\|/)) && (atts[i] != "item")) {
-			$("#propInput"+i).css({ "background-color":"#eee",
-				  					"background":"-webkit-linear-gradient(top,#ffffff 0%,#f0f0f0 100%)",
-				  					"background":"linear-gradient(#ffffff,#f0f0f0)",
-									"padding-left":"5px",width:"115px",height:"21px",
-									});
-			if (navigator.userAgent.match(/firefox/i))
-				$("#propInput"+i).css({ "text-indent":"0.01px","text-overflow":"''",
-										"background":"url(selectorbutton.gif) no-repeat right #f8f8f8"
-										});
-			}
-	}
-
 }
 
 SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED OPTIONS									
