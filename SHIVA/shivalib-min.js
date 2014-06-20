@@ -85,8 +85,9 @@ if(o.x)o.x=o.x.split(",");if(o.y)o.y=o.y.split(",");this.overlay.push(o);}
 SHIVA_Show.prototype.DrawOverlay=function()
 {var o,i,col,ecol,ewid,a,cur,ctx,str,now,s=0,e=36000;var con="#"+this.container;if(!this.g)
 this.g=new SHIVA_Graphics();var l=$(con).css("left");var t=$(con).css("top");if(l=="auto")l="0px";if(t=="auto")t="0px";i=$(con).css("height").replace(/px/g,"");if(this.player)
-i=Math.max(0,i-=40);if(!$("#shivaDrawCanvas").length){str="<div id='shivaDrawDiv' style='position:absolute";str+=";width:"+$(con).css("width");str+=";top:"+t;str+=";left:"+l;str+=";height:"+i+"px'/>";$('body').append(str);this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");}
-$("#shivaDrawCanvas").attr("width",$(con).css("width"));$("#shivaDrawCanvas").attr("height",i+"px");$("#shivaDrawDiv").css("left",l+"px");$("#shivaDrawDiv").css("top",t+"px");$("#shivaDrawDiv").css("width",$(con).css("width"));$("#shivaDrawDiv").css("height",i+"px");ctx=$("#shivaDrawCanvas")[0].getContext('2d');ctx.clearRect(0,0,1600,1600);if($.browser.msie)
+i=Math.max(0,i-=40);if(!$("#shivaDrawCanvas").length){if(!$("#shivaDrawDiv").length){str="<div id='shivaDrawDiv' style='position:absolute";str+=";width:"+$(con).css("width");str+=";top:"+t;str+=";left:"+l;str+=";height:"+i+"px'/>";$('body').append(str);}
+this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");}
+$("#shivaDrawCanvas").attr("width",$(con).css("width"));$("#shivaDrawCanvas").attr("height",i+"px");$("#shivaDrawDiv").css("left",l);$("#shivaDrawDiv").css("top",t);$("#shivaDrawDiv").css("width",$(con).css("width"));$("#shivaDrawDiv").css("height",i+"px");ctx=$("#shivaDrawCanvas")[0].getContext('2d');ctx.clearRect(0,0,1600,1600);if(navigator.userAgent.match(/\.NET CLR/))
 $("#shivaDrawDiv").css("z-index",2);else
 $("#shivaDrawDiv").css("z-index",2000);if($("#shivaDrawPaletteDiv").length)
 $("#shivaDrawDiv").css('pointer-events','auto');else
@@ -99,10 +100,8 @@ if(o.ideaBold)
 str+="font-weight:bold;";str+="background:transparent;border:none;margin:0px;padding:0px;font-family:sans-serif;text-align:center;'/>";$(dd).append(str);$("#shtx"+i).html(o.text);if(o.ideaShape=="Round box")
 $(dd).css("border-radius","8px");else if(o.ideaShape=="Oval")
 $(dd).css("border-radius",$(dd).css("height"));else if(o.ideaShape=="Circle"){var w=$(dd).width();$(dd).css("border-radius",(w/2+16)+"px");$(dd).css("height",w+"px");}
-if(o.ideaGradient){if($.browser.mozilla)
-$(dd).css("background","-moz-linear-gradient(top,#f0f0f0,"+o.ideaBackCol+")");else
-$(dd).css("background","-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)");}
-if((shivaLib.dr)&&(shivaLib.dr.curTool==6)){$("#shtx"+i).resizable({stop:function(event,ui){var num=ui.originalElement[0].id.substr(4);shivaLib.dr.segs[num].ideaWid=ui.size.width-4;shivaLib.dr.segs[num].ideaHgt=ui.size.height-4;},handles:"se"});$(dd).draggable({drag:function(event,ui){var num=this.id.substr(9);var dx=ui.position.left-shivaLib.dr.segs[num].ideaLeft;var dy=ui.position.top-shivaLib.dr.segs[num].ideaTop;shivaLib.dr.segs[num].ideaLeft=ui.position.left;shivaLib.dr.segs[num].ideaTop=ui.position.top;shivaLib.dr.segs[num].ideaText=$("#"+this.id).val();shivaLib.dr.MoveIdeaChildren(num,dx,dy);shivaLib.DrawIdeaLinks(true);},containment:"parent",stop:function(event,ui){shivaLib.dr.DrawOverlay();}});$(dd).droppable({drop:function(event,ui){var from=ui.draggable.context.id.substr(9);var to=event.target.id.substr(9);shivaLib.dr.IdeaDrop(from,to);}});}
+if(o.ideaGradient)
+$(dd).css({background:"-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)",background:"linear-gradient(#f0f0f0,"+o.ideaBackCol+")"});if((shivaLib.dr)&&(shivaLib.dr.curTool==6)){$("#shtx"+i).resizable({stop:function(event,ui){var num=ui.originalElement[0].id.substr(4);shivaLib.dr.segs[num].ideaWid=ui.size.width-4;shivaLib.dr.segs[num].ideaHgt=ui.size.height-4;},handles:"se"});$(dd).draggable({drag:function(event,ui){var num=this.id.substr(9);var dx=ui.position.left-shivaLib.dr.segs[num].ideaLeft;var dy=ui.position.top-shivaLib.dr.segs[num].ideaTop;shivaLib.dr.segs[num].ideaLeft=ui.position.left;shivaLib.dr.segs[num].ideaTop=ui.position.top;shivaLib.dr.segs[num].ideaText=$("#"+this.id).val();shivaLib.dr.MoveIdeaChildren(num,dx,dy);shivaLib.DrawIdeaLinks(true);},containment:"parent",stop:function(event,ui){shivaLib.dr.DrawOverlay();}});$(dd).droppable({drop:function(event,ui){var from=ui.draggable.context.id.substr(9);var to=event.target.id.substr(9);shivaLib.dr.IdeaDrop(from,to);}});}
 continue;}
 cur=o.curve;col=o.color;ecol=o.edgeColor;ewid=Math.floor(o.edgeWidth/10)+1;a=Number(o.alpha)/100;if(o.edgeColor==-1)ewid=0;if((o.x)&&(o.x.length<2))
 continue;if(o.type==1)
@@ -112,7 +111,7 @@ this.g.DrawBar(ctx,o.color,a,o.x[0],o.y[0],o.x[1],o.y[1],ecol,ewid);}
 else if(o.type==3){if(o.curve)
 this.g.DrawRoundBar(ctx,o.boxColor,a,o.x[0],o.y[0],o.x[1],o.y[1],12,ecol,ewid);else
 this.g.DrawBar(ctx,o.boxColor,a,o.x[0],o.y[0],o.x[1],o.y[1],ecol,ewid);str="<text";if($("#shivaDrawPaletteDiv").length)
-str+="area rows='8'";str+=" id='shtx"+i+"' ";str+="style='position:absolute;background:transparent;border:none;margin:8px;font-family:sans-serif;overflow:none;";str+="left:"+Math.min(o.x[0],o.x[1])+"px;top:"+Math.min(o.y[0],o.y[1])+"px;opacity:"+(o.alpha/100)+";";str+="width:"+(Math.abs(o.x[1]-o.x[0])-18)+"px'/>";$("#shivaDrawDiv").append(str);$("#shtx"+i).css("color",o.textColor).css("text-align",o.textAlign.toLowerCase());$("#shtx"+i).css("font-size",Number(o.textSize)+12);$("#shtx"+i).html(o.text);$("#shtx"+i).bind("change input propertychange",function(e){var i=e.target.id.substr(4);var val=$("#shtx"+i).val();shivaLib.dr.SetShivaText(val,i);});}
+str+="area rows='8'";str+=" id='shtx"+i+"' ";str+="style='position:absolute;background:transparent;border:none;margin:8px;font-family:sans-serif;overflow:none;";str+="left:"+Math.min(o.x[0],o.x[1])+"px;top:"+Math.min(o.y[0],o.y[1])+"px;opacity:"+(o.alpha/100)+";";str+="width:"+(Math.abs(o.x[1]-o.x[0])-18)+"px'/>";$("#shivaDrawDiv").append(str);$("#shtx"+i).css("color",o.textColor).css("text-align",o.textAlign.toLowerCase());$("#shtx"+i).css("font-size",Number(o.textSize/2)+10);$("#shtx"+i).html(o.text);$("#shtx"+i).bind("change input propertychange",function(e){var i=e.target.id.substr(4);var val=$("#shtx"+i).val();shivaLib.dr.SetShivaText(val,i);});}
 else if(o.type==4){this.g.DrawBar(ctx,-1,a,o.x[0],o.y[0],o.x[1],o.y[1],ecol,ewid);str="<div id='shim"+i+"' style='position:absolute;background:transparent;opacity:"+(o.alpha/100)+";";w=Math.abs(o.x[1]-o.x[0]);h=Math.abs(o.y[1]-o.y[0]);str+="left:"+Math.min(o.x[0],o.x[1])+"px;top:"+Math.min(o.y[0],o.y[1])+"px;";str+="width:"+(w-16)+"px;height:"+h+"px'>";str+="<img id=shimi"+i+" src='"+o.imageURL+"' width='"+w+"'/>";$("#shivaDrawDiv").append(str);}
 else if((o.x)&&(o.x.length==2)&&(!o.arrow))
 this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);else if((o.x)&&(!o.arrow))
@@ -390,16 +389,16 @@ SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
 atts.push(o);if(keepData){oldData=new Array()
 for(i=0;i<atts.length;++i){if(atts[i]=="item")
 break;oldData.push($("#propInput"+i).val());}}
-$('#propertyTable tr:gt(0)').remove();for(i=0;i<atts.length;++i){o=atts[i];id="propInput"+i;var str="<tr style='height:26px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];if((this.drupalMan)&&(o=="dataSourceUrl"))
+$('#propertyTable tr:gt(0)').remove();for(i=0;i<atts.length;++i){o=atts[i];id="propInput"+i;var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];if((this.drupalMan)&&(o=="dataSourceUrl"))
 str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"gdoc\",0)'/>";str+="</td><td></td><td>";if(props[o].opt=="query")
-str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";else if(props[o].opt=="advanced")
-str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";else if((props[o].opt=="color")||(props[o].opt=="colors")){str+="<div style='max-height:26px'><input size='7' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px;background-color:white'"
+str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";else if(props[o].opt=="advanced")
+str+="<input tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";else if((props[o].opt=="color")||(props[o].opt=="colors")){str+="<div style='max-height:26px'><input onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";str+="<div style='position:relative;border:1px solid #999;height:10px;width:10px;top:-15px;left:8px;background-color:white'"
 if(props[o].opt=="colors")
 str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";else
 str+=" onclick='shivaLib.ColorPicker(0,"+i+")' id='"+id+"C'/>";str+="</div>"}
 else if(props[o].opt=="button")
-str+="<button type='button' size='14' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";else if(props[o].opt=="slider")
-str+="<input style='width:100px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";else if(props[o].opt=="checkbox"){str+="<input onChange='Draw()' type='checkbox' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'";if(props[o].def=="true")
+str+="<button type='button' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";else if(props[o].opt=="slider")
+str+="<input onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";else if(props[o].opt=="checkbox"){str+="<input onChange='Draw()' type='checkbox' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'";if(props[o].def=="true")
 str+=" checked";str+="/> "+props[o].des.split("::")[1];}
 else if(props[o].opt=="list")
 str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";else if(props[o].opt=="sizer")
@@ -409,16 +408,16 @@ str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des;if((this.drupalMa
 str+="<img src='kmlicon.gif' id='"+j+"' title='Click to find KML file' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"kml\",this.id)'/>";str+="</span><span style='position:absolute;left:142px;'>";if(props[oo].opt=="color"){str+="<input size='14' onChange='Draw()' style='text-align:center' id='"+id2+"'>";str+="<div style='position:relative;border:1px solid;height:8px;width:9px;top:-14px;left:5px'"
 str+=" onclick='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"C'/>";}
 else if(props[oo].opt=="colors")
-str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";else if(props[oo].opt=="button")
+str+="<input style='width:90px' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";else if(props[oo].opt=="button")
 str+="<button type='button' size='12' onChange='"+oo+"' id='"+id+"'>"+props[oo].def+"</button>";else if(props[oo].opt=="slider")
 str+="<input style='width:90px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";else if(props[oo].opt=="list")
-str+="<textarea cols='13' rows='2' onChange='Draw()' onInput='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";else if(props[oo].opt=="hidden")
-str+="<input type='hidden' id='"+id2+"'/>";else if(props[oo].opt.indexOf('|')!=-1){var v=props[oo].opt.split("|");str+="<select id='"+id2+"' onChange='Draw()' onFocus='ShowHelp(\""+props[oo].des+"\")'>";for(l=0;l<v.length;++l){if(v[l])
+str+="<textarea style='width:90px' rows='2' onChange='Draw()' onInput='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";else if(props[oo].opt=="hidden")
+str+="<input type='hidden' id='"+id2+"'/>";else if(props[oo].opt.indexOf('|')!=-1){var v=props[oo].opt.split("|");str+="<select style='width:90px' id='"+id2+"' onChange='Draw()' onFocus='ShowHelp(\""+props[oo].des+"\")'>";for(l=0;l<v.length;++l){if(v[l])
 str+="<option>"+v[l]+"</option>";}
 str+="</select>";}
 else if(props[oo].opt=="sizer")
 str+="<button type='button' id='"+id2+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set</button>";else
-str+="<input size='14' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";str+="</span></p>";}
+str+="<input style='width:90px' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";str+="</span></p>";}
 str+="</div>";}}
 else{str+="<select id='"+id+"' onChange='Draw()' onFocus='ShowHelp(\""+props[o].des+"\")'>";for(j=0;j<v.length;++j){if(v[j])
 str+="<option>"+v[j]+"</option>";}
@@ -438,7 +437,9 @@ for(i=0;i<atts.length;++i)
 if(atts[i]=="item"){atts[i]="name";break;}
 for(j=0;j<items.length;++j)
 for(k=i;k<atts.length;++k)
-$("#itemInput"+j+"-"+(k-i)).val(items[j][atts[k]]);}}
+$("#itemInput"+j+"-"+(k-i)).val(items[j][atts[k]]);}
+var bs={"-moz-border-radius":"10px","-webkit-border-radius":"10px","-khtml-border-radius":"10px","border-radius":"10px","width":"100px","padding-left":"7px","padding-right":"7px","padding-top":"1px","border":"1px solid #ddd","color":"#666","font-size":"12px","height":"18px"};for(i=0;i<atts.length;++i){$("#propInput"+i).css(bs);if((props[atts[i]])&&(props[atts[i]].opt.match(/\|/))&&(atts[i]!="item")){$("#propInput"+i).css({"background-color":"#eee","background":"-webkit-linear-gradient(top,#ffffff 0%,#f0f0f0 100%)","background":"linear-gradient(#ffffff,#f0f0f0)","padding-left":"5px",width:"115px",height:"21px",});if(navigator.userAgent.match(/firefox/i))
+$("#propInput"+i).css({"text-indent":"0.01px","text-overflow":"''","background":"url(selectorbutton.gif) no-repeat right #f8f8f8"});}}}
 SHIVA_Show.prototype.SetAdvancedAttributes=function(prop,baseVar)
 {var str,title,aProps,v,i;$("#advAttDialogDiv").dialog("destroy");$("#advAttDialogDiv").remove();str="<table>"
 switch(baseVar){case"legendTextStyle":case"titleTextStyle":case"pieSliceTextStyle":case"tooltipTextStyle":aProps={fontName:{opt:'string',des:'Font'},fontSize:{opt:'string',des:'Size'},color:{opt:'color',des:'Color'}}
@@ -539,42 +540,44 @@ sel="*";str+=sel+" ";if(num)
 str+="WHERE ";for(i=0;i<num;++i){if(i)
 str+=$("#clause"+i).val()+" ";str+=$("#subject"+i).val()+" ";str+=$("#predicate"+i).val()+" ";str+=$("#object"+i).val();str+=" ";}
 str+="ORDER BY "+$("#ord").val();this.query=str;this.DrawQuery();}
-function SHIVA_Draw(container,hidePalette)
+var drObj=null;function SHIVA_Draw(container,hidePalette)
 {this.container=container;this.color="-1";this.clipboard=new Array();this.edgeColor="#0000ff";this.textColor="#000000";this.boxColor="-1";this.edgeWidth="30";this.arrow=false;this.alpha=100;this.curTool=0;this.imageURL="";this.imageWid=400;this.textAlign="Left";this.textStyle="";this.textSize=0;this.ideaShape="Round box";this.ideaGradient=true;this.ideaBold=false;this.ideaBackCol="#FFF2CC";this.ideaEdgeCol="#999999";this.ideaTextCol="#000000";this.selectedItems=new Array();this.selectedDot=-1;this.segs=new Array();if(shivaLib.overlay)
-this.segs=shivaLib.overlay;this.closeOnMouseUp=false;this.curSeg=-1;this.lastDotTime=0;this.snap=false;this.curve=false;this.snapSpan=20;this.leftClick=false;this.lastX=0;this.lastY=0;shivaLib.dr=this;if(!hidePalette)
-this.DrawPalette();this.colorPicker="";this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');$("#shivaDrawDiv").css("cursor","crosshair");$("#shivaDrawDiv").mouseup(this.onMouseUp);$("#shivaDrawDiv").mousedown(this.onMouseDown);$("#shivaDrawDiv").mousemove(this.onMouseMove);document.onkeyup=this.onKeyUp;document.onkeydown=this.onKeyDown;}
+this.segs=shivaLib.overlay;this.closeOnMouseUp=false;this.curSeg=-1;this.lastDotTime=0;this.snap=false;this.curve=false;this.snapSpan=20;this.leftClick=false;this.lastX=0;this.lastY=0;drObj=shivaLib.dr=this;if(!hidePalette)
+this.DrawPalette();this.colorPicker="";if($("#shivaDrawCanvas")[0])
+this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');$("#shivaDrawDiv").css("cursor","crosshair");$("#shivaDrawDiv").mouseup(this.onMouseUp);$("#shivaDrawDiv").mousedown(this.onMouseDown);$("#shivaDrawDiv").mousemove(this.onMouseMove);document.onkeyup=this.onKeyUp;document.onkeydown=this.onKeyDown;}
+SHIVA_Draw.prototype.Sound=function(snd)
+{shivaLib.Sound(snd);}
 SHIVA_Draw.prototype.DrawPalette=function(tool)
-{this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');var hgt=$("#"+this.container).css("height").replace(/px/g,"");var top=$("#"+this.container).css("top").replace(/px/g,"");if(top=="auto")top=0;var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;if($("#shivaDrawPaletteDiv").length==0){var h=225;str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";$("body").append("</div>"+str);$("#shivaDrawPaletteDiv").addClass("propTable");$("#shivaDrawPaletteDiv").draggable();$("#shivaDrawPaletteDiv").css("z-index",2001);}
+{this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');var hgt=$("#"+this.container).css("height").replace(/px/g,"");var top=$("#"+this.container).css("top").replace(/px/g,"");if(top=="auto")top=0;var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;if($("#shivaDrawPaletteDiv").length==0){var h=225;str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";$("body").append("</div>"+str);$("#shivaDrawPaletteDiv").css({"background-color":"#eee","border-radius":"8px","z-index":2001});$("#shivaDrawPaletteDiv").addClass("propTable");$("#shivaDrawPaletteDiv").draggable();$("#shivaDrawPaletteDiv").css({"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none"});$("#shivaDrawPaletteDiv")[0].addEventListener('contextmenu',function(ev){ev.preventDefault();window.prompt("To copy graphics to clipboard: Hit Ctrl+C, then press OK",drObj.SaveSVGData());return false;},false);}
 this.SetTool(0);this.DrawMenu();}
 SHIVA_Draw.prototype.Clear=function()
 {shivaLib.overlay=[];this.segs=[];$("#shivaDrawDiv").html("");}
 SHIVA_Draw.prototype.ColorPicker=function(name)
-{var str="<p style='text-shadow:1px 1px white' align='center'><b>Choose a new color</b></p>";str+="<img src='colorpicker.gif' style='position:absolute;left:15px;top:28px' />";str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:22px;top:29px;width:96px;background:transparent;border:none;'>";$("#shivaDrawPaletteDiv").html(str);$("#shivaDrawPaletteDiv").on("click",onColorPicker);this.colorPicker=name;function onColorPicker(e){var col;var cols=["000000","444444","666666","999999","CCCCCC","EEEEEE","E7E7E7","FFFFFF","FF0000","FF9900","FFFF00","00FF00","00FFFF","0000FF","9900FF","FF00FF","F4CCCC","FCE5CD","FFF2CC","D9EAD3","D0E0E3","CFE2F3","D9D2E9","EDD1DC","EA9999","F9CB9C","FFE599","BED7A8","A2C4C9","9FC5E8","B4A7D6","D5A6BD","E06666","F6B26B","FFD966","9C347D","76A5AF","6FA8DC","8E7CC3","C27BA0","CC0000","E69138","F1C232","6AA84F","45818E","3D85C6","674EA7","A64D79","990000","B45F06","BF9000","38761D","134F5C","0B5394","351C75","741B47","660000","783F04","7F6000","274E13","0C343D","073763","20124D","4C1130"];var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if((x<112)&&(y<55))
+{var str="<p style='text-shadow:1px 1px white' align='center'><b>Choose a new color</b></p>";str+="<img src='colorpicker.gif' style='position:absolute;left:15px;top:28px' />";str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:22px;top:29px;width:96px;background:transparent;border:none;'>";$("#shivaDrawPaletteDiv").html(str);$("#shivaDrawPaletteDiv").on("click",onColorPicker);this.colorPicker=name;var _this=this;function onColorPicker(e){var col;var cols=["000000","444444","666666","999999","CCCCCC","EEEEEE","E7E7E7","FFFFFF","FF0000","FF9900","FFFF00","00FF00","00FFFF","0000FF","9900FF","FF00FF","F4CCCC","FCE5CD","FFF2CC","D9EAD3","D0E0E3","CFE2F3","D9D2E9","EDD1DC","EA9999","F9CB9C","FFE599","BED7A8","A2C4C9","9FC5E8","B4A7D6","D5A6BD","E06666","F6B26B","FFD966","9C347D","76A5AF","6FA8DC","8E7CC3","C27BA0","CC0000","E69138","F1C232","6AA84F","45818E","3D85C6","674EA7","A64D79","990000","B45F06","BF9000","38761D","134F5C","0B5394","351C75","741B47","660000","783F04","7F6000","274E13","0C343D","073763","20124D","4C1130"];var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if((x<112)&&(y<55))
 return;$("#shivaDrawPaletteDiv").off("click",this.onColorPicker);if((x>112)&&(x<143)&&(y<48)){if($("#shivaDrawColorInput").val())
 col="#"+$("#shivaDrawColorInput").val();else
 x=135;}
-if((x>143)&&(y<48)){shivaLib.dr.DrawMenu();return;}
+if((x>143)&&(y<48)){_this.DrawMenu();return;}
 if(y>193)
 col=-1;else if(y>48){x=Math.floor((x-24)/17);y=Math.floor((y-51)/17);col="#"+cols[x+(y*8)];}
-shivaLib.dr[shivaLib.dr.colorPicker]=col;if(shivaLib.dr.curTool==5){if(shivaLib.dr.selectedItems.length)
-shivaLib.dr.DrawMenu(shivaLib.dr.segs[shivaLib.dr.selectedItems[0]].type);else
-shivaLib.dr.DrawMenu(0);shivaLib.dr.SetVal(shivaLib.dr.colorPicker,col);}
-else if(shivaLib.dr.curTool==6){shivaLib.dr.SetVal(shivaLib.dr.colorPicker,col);shivaLib.dr.DrawMenu();}
+_this[_this.colorPicker]=col;if(_this.curTool==5){if(_this.selectedItems.length)
+_this.DrawMenu(_this.segs[_this.selectedItems[0]].type);else
+_this.DrawMenu(0);_this.SetVal(_this.colorPicker,col);}
+else if(_this.curTool==6){_this.SetVal(_this.colorPicker,col);_this.DrawMenu();}
 else
-shivaLib.dr.DrawMenu();}}
+_this.DrawMenu();}}
 SHIVA_Draw.prototype.DrawMenu=function(tool)
 {var preface="Edit ";if(tool==undefined)
-tool=this.curTool,preface="Draw ";var titles=["a line","a circle","a box","text","an image",""," an Idea Map"];var str="<p style='text-shadow:1px 1px white' align='center'><b>";str+=preface+titles[tool]+"</b></p>";str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='shivaLib.dr.SetTool(-1)'/>";str+="<table style='font-size:xx-small'>"
-if(tool<3){str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";if(tool==2)
-str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";else if(tool==0){str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td><input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";}
-str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";if(tool!=0)
-str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";}
-else if(tool==3){str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Text size</td><td><div style='width:82px;margin-left:6px' id='textSize'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";}
-else if(tool==4){str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";}
-else if(tool==6){str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Oval</option><option>Circle</option></select></td></tr>";str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";str+="<tr><td colspan='2' style='text-align:center'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button style='font-size:x-small' onclick='shivaLib.dr.AddIdea(-1)'>Add base idea</button></td></tr>";}
-str+="</table><br/>";str+="<div style='position:absolute;left:14px;top:194px'><span id='drawToolbar' style='font-size:xx-small'>";str+="<input type='radio' id='sdtb6' name='draw' onclick='shivaLib.dr.SetTool(5)'/><label for='sdtb6'>Select</label>";str+="<input type='radio' id='sdtb3' name='draw' onclick='shivaLib.dr.SetTool(2)'/><label for='sdtb3'>Box</label>";str+="<input type='radio' id='sdtb2' name='draw' onclick='shivaLib.dr.SetTool(1)'/><label for='sdtb2'>Circle</label>";str+="<input type='radio' id='sdtb1' name='draw' onclick='shivaLib.dr.SetTool(0)'/><label for='sdtb1'>Line</label>";str+="<input type='radio' id='sdtb4' name='draw' onclick='shivaLib.dr.SetTool(3)'/><label for='sdtb4'>A</label>";str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";str+="</span></div>";$("#shivaDrawPaletteDiv").html(str);$("#shivaDrawPaletteDiv").css("font-size","xx-small");$("#sdtb"+(this.curTool+1)).attr("checked","checked");$("#drawToolbar").buttonset();$("#sdtb1").button({text:false,icons:{primary:"ui-icon-pencil"}});$("#sdtb2").button({text:false,icons:{primary:"ui-icon-radio-on"}});$("#sdtb3").button({text:false,icons:{primary:"ui-icon-circlesmall-plus"}});$("#sdtb4").button({text:true});$("#sdtb5").button({text:false,icons:{primary:"ui-icon-image"}});$("#sdtb6").button({text:false,icons:{primary:"ui-icon-arrowthick-1-nw"}}).css("width","100");$("#sdtb7").button({text:false,icons:{primary:"ui-icon-lightbulb"}}).css("width","100");$("#alpha").slider({slide:function(event,ui){shivaLib.dr.SetVal("alpha",ui.value);}});$("#edgeWidth").slider({slide:function(event,ui){shivaLib.dr.SetVal("edgeWidth",ui.value);}});$("#textSize").slider({slide:function(event,ui){shivaLib.dr.SetVal("textSize",ui.value);}});$("#alpha .ui-slider-handle").css("border","1px solid #888");$("#edgeWidth .ui-slider-handle").css("border","1px solid #888");$("#textSize .ui-slider-handle").css("border","1px solid #888");this.SetMenuProperties();}
+tool=this.curTool,preface="Draw ";var titles=["a line","a circle","a box","text","an image",""," an Idea Map"];var str="<p style='text-shadow:1px 1px white' align='center'><b>";str+=preface+titles[tool]+"</b></p>";str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='drObj.SetTool(-1)'/>";str+="<table style='font-size:xx-small'>"
+if(tool<3){str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='drObj.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";if(tool==2)
+str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='drObj.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";else if(tool==0){str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td><input onClick='drObj.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td><input onClick='drObj.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";}
+str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"edgeColor\")' onChange='drObj.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"color\")' onChange='drObj.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";}
+else if(tool==3){str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"boxColor\")' onChange='drObj.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Round box?</td><td><input onClick='drObj.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='drObj.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Text size</td><td><div style='width:82px;margin-left:6px' id='textSize'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"textColor\")' onChange='drObj.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";}
+else if(tool==4){str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td><input onClick='drObj.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"edgeColor\")' onChange='drObj.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='drObj.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";}
+else if(tool==6){str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='drObj.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Oval</option><option>Circle</option></select></td></tr>";str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='drObj.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"ideaEdgeCol\")' onChange='drObj.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"ideaTextCol\")' onChange='drObj.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='drObj.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";str+="<tr><td colspan='2' style='text-align:center'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button style='font-size:x-small' onclick='drObj.AddIdea(-1)'>Add base idea</button></td></tr>";}
+str+="</table><br/>";str+="<div style='position:absolute;left:14px;top:194px'><span id='drawToolbar' style='font-size:xx-small'>";str+="<input type='radio' id='sdtb6' name='draw' onclick='drObj.SetTool(5)'/><label for='sdtb6'>Select</label>";str+="<input type='radio' id='sdtb3' name='draw' onclick='drObj.SetTool(2)'/><label for='sdtb3'>Box</label>";str+="<input type='radio' id='sdtb2' name='draw' onclick='drObj.SetTool(1)'/><label for='sdtb2'>Circle</label>";str+="<input type='radio' id='sdtb1' name='draw' onclick='drObj.SetTool(0)'/><label for='sdtb1'>Line</label>";str+="<input type='radio' id='sdtb4' name='draw' onclick='drObj.SetTool(3)'/><label for='sdtb4'>A</label>";str+="<input type='radio' id='sdtb5' name='draw' onclick='drObj.SetTool(4)'/><label for='sdtb5'>Image</label>";str+="<input type='radio' id='sdtb7' name='draw' onclick='drObj.SetTool(6)'/><label for='sdtb7'>Idea</label>";str+="</span></div>";$("#shivaDrawPaletteDiv").html(str);$("#shivaDrawPaletteDiv").css("font-size","xx-small");$("#sdtb"+(this.curTool+1)).attr("checked","checked");$("#drawToolbar").buttonset();$("#sdtb1").button({text:false,icons:{primary:"ui-icon-pencil"}});$("#sdtb2").button({text:false,icons:{primary:"ui-icon-radio-on"}});$("#sdtb3").button({text:false,icons:{primary:"ui-icon-circlesmall-plus"}});$("#sdtb4").button({text:true});$("#sdtb5").button({text:false,icons:{primary:"ui-icon-image"}});$("#sdtb6").button({text:false,icons:{primary:"ui-icon-arrowthick-1-nw"}}).css("width","100");$("#sdtb7").button({text:false,icons:{primary:"ui-icon-lightbulb"}}).css("width","100");$("#alpha").slider({slide:function(event,ui){drObj.SetVal("alpha",ui.value);}});$("#edgeWidth").slider({slide:function(event,ui){drObj.SetVal("edgeWidth",ui.value);}});$("#textSize").slider({slide:function(event,ui){drObj.SetVal("textSize",ui.value);}});$("#alpha .ui-slider-handle").css("border","1px solid #888");$("#edgeWidth .ui-slider-handle").css("border","1px solid #888");$("#textSize .ui-slider-handle").css("border","1px solid #888");this.SetMenuProperties();}
 SHIVA_Draw.prototype.SetMenuProperties=function()
-{var col,tcol,txt;tcol=txt=col=this.color;gradient=true;if(col==-1)col="#fff",tcol="000",txt='none';$("#color").css("background-color",col);$("#color").css("color",tcol);$("#color").val(txt);tcol=txt=col=this.edgeColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#edgeColor").css("background-color",col);$("#edgeColor").css("color",tcol);$("#edgeColor").val(txt);tcol=txt=col=this.textColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#textColor").css("background-color",col);$("#textColor").css("color",tcol);$("#textColor").val(txt);tcol=txt=col=this.boxColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#boxColor").css("background-color",col);$("#boxColor").css("color",tcol);$("#boxColor").val(txt);$("#snap").attr("checked",this.snap);$("#curve").attr("checked",this.curve);$("#arrow").attr("checked",this.arrow);$("#edgeWidth").slider("value",this.edgeWidth);$("#alpha").slider("value",this.alpha);$("#restSize").slider("value",this.textSize);$("#textAlign").val(this.textAlign);$("#imageURL").val(this.imageURL);$("#edgeWidth").val(this.edgeWidth);$("#ideaShape").val(this.ideaShape);$("#ideaBackCol").val(this.ideaBackCol);$("#ideaGradient").attr("checked",this.ideaGradient);$("#ideaBold").attr("checked",this.ideaBold);tcol=txt=col=this.ideaBackCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaBackCol").val(txt);$("#ideaBackCol").css("background-color",col);$("#ideaBackCol").css("color",tcol);tcol=txt=col=this.ideaEdgeCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaEdgeCol").val(txt);$("#ideaEdgeCol").css("background-color",col);$("#ideaEdgeCol").css("color",tcol);tcol=txt=col=this.ideaTextCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaTextCol").val(txt);$("#ideaTextCol").css("background-color",col);$("#ideaTextCol").css("color",tcol);}
+{var col,tcol,txt;tcol=txt=col=this.color;gradient=true;if(col==-1)col="#fff",tcol="000",txt='none';$("#color").css("background-color",col);$("#color").css("color",tcol);$("#color").val(txt);tcol=txt=col=this.edgeColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#edgeColor").css("background-color",col);$("#edgeColor").css("color",tcol);$("#edgeColor").val(txt);tcol=txt=col=this.textColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#textColor").css("background-color",col);$("#textColor").css("color",tcol);$("#textColor").val(txt);tcol=txt=col=this.boxColor;if(col==-1)col="#fff",tcol="000",txt='none';$("#boxColor").css("background-color",col);$("#boxColor").css("color",tcol);$("#boxColor").val(txt);$("#snap").attr("checked",this.snap);$("#curve").attr("checked",this.curve);$("#arrow").attr("checked",this.arrow);$("#edgeWidth").slider("value",this.edgeWidth);$("#alpha").slider("value",this.alpha);$("#textSize").slider("value",this.textSize);$("#textAlign").val(this.textAlign);$("#imageURL").val(this.imageURL);$("#edgeWidth").val(this.edgeWidth);$("#ideaShape").val(this.ideaShape);$("#ideaBackCol").val(this.ideaBackCol);$("#ideaGradient").attr("checked",this.ideaGradient);$("#ideaBold").attr("checked",this.ideaBold);tcol=txt=col=this.ideaBackCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaBackCol").val(txt);$("#ideaBackCol").css("background-color",col);$("#ideaBackCol").css("color",tcol);tcol=txt=col=this.ideaEdgeCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaEdgeCol").val(txt);$("#ideaEdgeCol").css("background-color",col);$("#ideaEdgeCol").css("color",tcol);tcol=txt=col=this.ideaTextCol;if(col==-1)col="#fff",tcol="000",txt='none';$("#ideaTextCol").val(txt);$("#ideaTextCol").css("background-color",col);$("#ideaTextCol").css("color",tcol);}
 SHIVA_Draw.prototype.DrawOverlay=function(num)
 {shivaLib.overlay=this.segs;shivaLib.Draw({shivaGroup:"Draw"});}
 SHIVA_Draw.prototype.SetShivaText=function(text,num)
@@ -587,6 +590,27 @@ str+=key+":"+str1.replace(/\n/g,"|").replace(/\r/g,"").replace(/\:/g,"`").replac
 str=str.substring(0,str.length-1);if(json)
 str+="\",\n";}
 return str;}
+SHIVA_Draw.prototype.SaveSVGData=function()
+{var i,j,o,x,y,e;var w=$("#shivaDrawDiv").width();var h=$("#shivaDrawDiv").height();var str="<svg width='100%' height='100%' viewBox='0 0 "+w+" "+h+"'>\n";for(i=0;i<drObj.segs.length;++i){o=drObj.segs[i];e=Math.max((o.edgeWidth/10),.5);if(o.type==0){if(o.arrow){var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);var xx=[],yy=[];var n=o.x.length-1;var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);var hh=o.edgeWidth/2;xx[0]=o.x[n]-hh*Math.cos(aa-Math.PI/6),yy[0]=o.y[n]-hh*Math.sin(aa-Math.PI/6);xx[1]=o.x[n];yy[1]=o.y[n];xx[2]=o.x[n]-hh*Math.cos(aa+Math.PI/6),yy[2]=o.y[n]-hh*Math.sin(aa+Math.PI/6);o.x[n]=((xx[2]-xx[0])/2)+xx[0];o.y[n]=((yy[2]-yy[0])/2)+yy[0];}
+str+="<path style='fill:";if(o.color!=-1)str+=o.color+";";else str+="none;"
+if(o.edgeColor!=-1){str+="stroke:"+o.edgeColor;str+=";stroke-width:"+e+";";}
+str+="opacity:"+(o.alpha/100)+"' d='M";str+=o.x[0]+",";str+=o.y[0]+" ";if(o.curve){var open=true;if((Math.abs(o.x[0]-o.x[o.x.length-1])<3)&&(Math.abs(o.y[0]-o.y[o.y.length-1])<3)){o.x[x.length-1]=o.x[0];o.y[y.length-1]=o.y[0];open=false;}
+x=o.x[0]-0+((o.x[1]-o.x[0])/2)-0;y=o.y[0]-0+((o.y[1]-o.y[0])/2)-0;if(open){str+="L"+x+",";str+=y+" ";}
+for(j=1;j<o.x.length-1;++j){x=o.x[j]-0+((o.x[j+1]-o.x[j])/2)-0;y=o.y[j]-0+((o.y[j+1]-o.y[j])/2)-0;str+="Q";str+=o.x[j]+",";str+=o.y[j]+" ";str+=x+",";str+=y+" ";}
+if(open){str+="L"+o.x[j]+",";str+=o.y[j]+" ";}}
+else{for(j=1;j<o.x.length;++j){str+="L";str+=o.x[j]+",";str+=o.y[j]+" ";}}
+if(o.color!=-1)str+="Z"
+str+="'/>\n";if((o.x)&&(o.arrow)){o.x[n]=xx[1];o.y[n]=yy[1];str+="<path style='fill:"+o.edgeColor;str+=";opacity:"+(o.alpha/100)+"' d='M";str+=xx[0];str+=","+yy[0];str+=" L"+xx[1]+",";str+=yy[1];str+=" L"+xx[2];str+=","+yy[2];str+=" Z'/>\n";}}
+else if(o.type==1){x=Math.abs(o.x[1]-o.x[0]);str+="<circle r='"+x+"' ";x=o.x[0];y=o.y[0];str+="cx='"+x+"' cy='"+y+"' style='fill:";if(o.color!=-1)str+=o.color+";";else str+="none;"
+if(o.edgeColor!=-1){str+="stroke:"+o.edgeColor;str+=";stroke-width:"+e+";";}
+str+="opacity:"+(o.alpha/100)+"'";str+="/>\n";}
+else if(o.type==2){x=Math.abs(o.x[1]-o.x[0]);y=Math.abs(o.y[1]-o.y[0]);str+="<rect width='"+x+"' height='"+y+"' ";x=o.x[0];y=o.y[0];str+="x='"+x+"' y='"+y+"' style='fill:";if(o.color!=-1)str+=o.color+";";else str+="none;"
+if(o.edgeColor!=-1){str+="stroke:"+o.edgeColor;str+=";stroke-width:"+e+";";}
+str+="opacity:"+(o.alpha/100)+"'";if(o.curve)str+=" rx='10' ry='10'";str+="/>\n";}
+else if(o.type==3){var th=(o.textSize/2)-0+10;if(o.boxColor!=-1){x=Math.abs(o.x[1]-o.x[0]);y=Math.abs(o.y[1]-o.y[0]);str+="<rect width='"+x+"' height='"+y+"' ";x=o.x[0];y=o.y[0];str+="x='"+x+"' y='"+y+"' style='fill:"+o.boxColor;str+=";opacity:"+(o.alpha/100)+"'";if(o.curve)str+=" rx='10' ry='10'";str+="/>\n";}
+x=o.x[0]+10;e="start";if(o.textAlign=="Right")x=o.x[1]-10,e="end";if(o.textAlign=="Center")x=o.x[0]-0+Math.abs(o.x[1]-o.x[0])/2,e="middle";x=x;y=((o.y[0])+th+1);str+="<text x='"+x+"' y='"+y+"' ";str+="style='opacity:"+(o.alpha/100);str+=";text-anchor:"+e+";fill:"+o.textColor;str+=";font-family:sans-serif;font-size:"+th+"'>";str+=o.text;str+="</text>\n";}
+else if(o.type==4){x=Math.abs(o.x[1]-o.x[0]);y=Math.abs(o.y[1]-o.y[0]);str+="<image width='"+x+"' height='"+y+"' ";x=o.x[0];y=o.y[0];str+="x='"+x+"' y='"+y+"' style='";str+="opacity:"+(o.alpha/100)+"'";str+=" xlink:href='"+o.imageURL+"'";str+="/>\n";if(o.edgeColor!=-1){x=Math.abs(o.x[1]-o.x[0]);y=Math.abs(o.y[1]-o.y[0]);str+="<rect width='"+x+"' height='"+y+"' ";x=o.x[0];y=o.y[0];str+="x='"+x+"' y='"+y+"' style='";str+="fill:none;stroke:"+o.edgeColor;str+=";stroke-width:"+e+";";str+=";opacity:"+(o.alpha/100)+"'";str+="/>\n";}}}
+str+="</g></svg>";return str;}
 SHIVA_Draw.prototype.DrawWireframes=function(clear)
 {var o,i,col,scol;if(clear)
 this.ctx.clearRect(0,0,1000,1000);for(i=0;i<this.segs.length;++i){col="#777";for(j=0;j<this.selectedItems.length;++j)
@@ -623,46 +647,47 @@ this.DrawOverlay();}}
 SHIVA_Draw.prototype.SetTool=function(num)
 {$("#shivaDrawDiv").css('pointer-events','auto');this.curTool=num;if(num==6)
 $("#shivaDrawDiv").css("cursor","auto");else
-$("#shivaDrawDiv").css("cursor","crosshair");if(this.curTool==-1){shivaLib.Sound("delete");$("#shivaDrawDiv").css("cursor","auto");$("#shivaDrawDiv").css('pointer-events','none');$("#shivaDrawPaletteDiv").remove();}
+$("#shivaDrawDiv").css("cursor","crosshair");if(this.curTool==-1){this.Sound("delete");$("#shivaDrawDiv").css("cursor","auto");$("#shivaDrawDiv").css('pointer-events','none');$("#shivaDrawPaletteDiv").remove();if(shivaLib)
+shivaLib.SendShivaMessage("ShivaDraw=done");}
 else
-shivaLib.Sound("click");this.DrawOverlay()
+this.Sound("click");this.DrawOverlay()
 this.curSeg=-1;if(this.curTool==5){this.selectedItems=[];if(this.segs.length>0){var s=this.segs.length-1;this.AddSelect(-1,s,false);this.DrawMenu(this.segs[s].type);}
 $("#shivaDrawDiv").css("cursor","auto");this.DrawWireframes(false);}
 else if(this.curTool!=-1)
 this.DrawMenu();}
 SHIVA_Draw.prototype.onMouseUp=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
-return true;if(shivaLib.dr.curTool==5)
-e.stopPropagation();shivaLib.dr.leftClick=false;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if(e.shiftKey){if(Math.abs(x-shivaLib.dr.lastX)>Math.abs(y-shivaLib.dr.lastY))
-y=shivaLib.dr.lastY;else
-x=shivaLib.dr.lastX;}
-if(shivaLib.dr.closeOnMouseUp){shivaLib.dr.closeOnMouseUp=false;shivaLib.dr.curSeg=-1;return true;}
-if(shivaLib.dr.curTool<5){if(shivaLib.dr.snap)
-x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);if((shivaLib.dr.curTool)&&(e.target.id.indexOf("shtx")==-1))
-shivaLib.dr.AddDot(x,y,true);}
-else if(shivaLib.dr.curTool>4)
-shivaLib.dr.AddSelect(x,y,e.shiftKey);return(shivaLib.dr.curTool==6);}
+return true;if(drObj.curTool==5)
+e.stopPropagation();drObj.leftClick=false;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if(e.shiftKey){if(Math.abs(x-drObj.lastX)>Math.abs(y-drObj.lastY))
+y=drObj.lastY;else
+x=drObj.lastX;}
+if(drObj.closeOnMouseUp){drObj.closeOnMouseUp=false;drObj.curSeg=-1;return true;}
+if(drObj.curTool<5){if(drObj.snap)
+x=x-(x%drObj.snapSpan),y=y-(y%drObj.snapSpan);if((drObj.curTool)&&(e.target.id.indexOf("shtx")==-1))
+drObj.AddDot(x,y,true);}
+else if(drObj.curTool>4)
+drObj.AddSelect(x,y,e.shiftKey);return(drObj.curTool==6);}
 SHIVA_Draw.prototype.onMouseDown=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
-return;if(shivaLib.dr.curTool==6)
-return true;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;shivaLib.dr.leftClick=true;shivaLib.dr.closeOnMouseUp=false;if(shivaLib.dr.snap)
-x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);if(shivaLib.dr.curTool==5){shivaLib.dr.lastX=x;shivaLib.dr.lastY=y;e.stopPropagation();return false;}
+return;if(drObj.curTool==6)
+return true;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;drObj.leftClick=true;drObj.closeOnMouseUp=false;if(drObj.snap)
+x=x-(x%drObj.snapSpan),y=y-(y%drObj.snapSpan);if(drObj.curTool==5){drObj.lastX=x;drObj.lastY=y;e.stopPropagation();return false;}
 if(e.target.id.indexOf("shtx")!=-1)
-return;if(shivaLib.dr.snap)
-x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);shivaLib.dr.AddDot(x,y,false);return false;}
+return;if(drObj.snap)
+x=x-(x%drObj.snapSpan),y=y-(y%drObj.snapSpan);drObj.AddDot(x,y,false);return false;}
 SHIVA_Draw.prototype.onMouseMove=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
-return;if((shivaLib.dr.curTool==6)||(shivaLib.dr.curTool==-1))
-return;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if(shivaLib.dr.snap)
-x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);if((shivaLib.dr.leftClick)&&(shivaLib.dr.curTool==5)){var dx=shivaLib.dr.lastX-x;var dy=shivaLib.dr.lastY-y;shivaLib.dr.MoveSegs(dx,dy,0);shivaLib.dr.lastX=x;shivaLib.dr.lastY=y;return;}
-if(shivaLib.dr.curSeg!=-1){if(shivaLib.dr.curTool!=5)
-shivaLib.dr.DrawOverlay();if(e.shiftKey){if(Math.abs(x-shivaLib.dr.lastX)>Math.abs(y-shivaLib.dr.lastY))
-y=shivaLib.dr.lastY;else
-x=shivaLib.dr.lastX;}
-if(shivaLib.dr.curTool==0)
-shivaLib.g.DrawLine(shivaLib.dr.ctx,"#000",1,shivaLib.dr.lastX,shivaLib.dr.lastY,x,y,1);else if((shivaLib.dr.leftClick)&&(shivaLib.dr.curTool==1))
-shivaLib.g.DrawCircle(shivaLib.dr.ctx,-1,1,shivaLib.dr.lastX,shivaLib.dr.lastY,Math.abs(x-shivaLib.dr.lastX),"#999",1);else if((shivaLib.dr.leftClick)&&(shivaLib.dr.curTool<5))
-shivaLib.g.DrawBar(shivaLib.dr.ctx,-1,1,shivaLib.dr.lastX,shivaLib.dr.lastY,x,y,"#999",1);if((shivaLib.dr.leftClick)&&(shivaLib.dr.curTool==0)){if(new Date().getTime()-shivaLib.dr.lastDotTime>100){shivaLib.dr.AddDot(x,y);shivaLib.dr.closeOnMouseUp=true;}}}}
+return;if((drObj.curTool==6)||(drObj.curTool==-1))
+return;var x=e.pageX-this.offsetLeft;var y=e.pageY-this.offsetTop;if(drObj.snap)
+x=x-(x%drObj.snapSpan),y=y-(y%drObj.snapSpan);if((drObj.leftClick)&&(drObj.curTool==5)){var dx=drObj.lastX-x;var dy=drObj.lastY-y;drObj.MoveSegs(dx,dy,0);drObj.lastX=x;drObj.lastY=y;return;}
+if(drObj.curSeg!=-1){if(drObj.curTool!=5)
+drObj.DrawOverlay();if(e.shiftKey){if(Math.abs(x-drObj.lastX)>Math.abs(y-drObj.lastY))
+y=drObj.lastY;else
+x=drObj.lastX;}
+if(drObj.curTool==0)
+shivaLib.g.DrawLine(drObj.ctx,"#000",1,drObj.lastX,drObj.lastY,x,y,1);else if((drObj.leftClick)&&(drObj.curTool==1))
+shivaLib.g.DrawCircle(drObj.ctx,-1,1,drObj.lastX,drObj.lastY,Math.abs(x-drObj.lastX),"#999",1);else if((drObj.leftClick)&&(drObj.curTool<5))
+shivaLib.g.DrawBar(drObj.ctx,-1,1,drObj.lastX,drObj.lastY,x,y,"#999",1);if((drObj.leftClick)&&(drObj.curTool==0)){if(new Date().getTime()-drObj.lastDotTime>100){drObj.AddDot(x,y);drObj.closeOnMouseUp=true;}}}}
 SHIVA_Draw.prototype.onKeyDown=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
 return;if((e.keyCode==8)&&(e.target.tagName!="TEXTAREA")&&(e.target.tagName!="INPUT")){e.stopPropagation();return false;}}
@@ -670,19 +695,19 @@ SHIVA_Draw.prototype.onKeyUp=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
 return;if((e.which==83)&&(e.ctrlKey)&&(e.altKey)){shivaLib.SaveData("eStore");return;}
 var i;if((e.target.tagName=="TEXTAREA")||(e.target.tagName=="INPUT"))
-return;if((e.which==67)&&(e.ctrlKey)){if(shivaLib.dr.selectedItems.length){shivaLib.Sound("click");shivaLib.dr.clipboard=[];}
-for(i=0;i<shivaLib.dr.selectedItems.length;++i)
-shivaLib.dr.clipboard.push(shivaLib.Clone(shivaLib.dr.segs[shivaLib.dr.selectedItems[i]]));}
-if((e.which==86)&&(e.ctrlKey)){if(shivaLib.dr.clipboard.length){shivaLib.dr.selectedItems=[];shivaLib.Sound("ding");for(i=0;i<shivaLib.dr.clipboard.length;++i){shivaLib.dr.selectedItems.push(shivaLib.dr.segs.length);shivaLib.dr.segs.push(shivaLib.Clone(shivaLib.dr.clipboard[i]));}}}
-if(shivaLib.dr.curTool==6){num=shivaLib.dr.selectedItems[0];if(((e.which==8)||(e.which==46))&&(num!=-1))
-shivaLib.dr.DeleteIdea();}
-var num=shivaLib.dr.curSeg;if(((e.which==8)||(e.which==46))&&(num!=-1)){var o=shivaLib.dr.segs[num];o.x.pop();o.y.pop();shivaLib.dr.lastX=o.x[o.x.length-1];shivaLib.dr.lastY=o.y[o.y.length-1];shivaLib.dr.DrawOverlay();shivaLib.Sound("delete");}
-if((e.which==27)&&(num!=-1)){shivaLib.dr.curSeg=-1;shivaLib.Sound("dclick");}
-else if(shivaLib.dr.curTool==5){if((e.which==8)||(e.which==46)){if(shivaLib.dr.selectedItems.length){num=shivaLib.dr.selectedItems[0];if((shivaLib.dr.selectedDot!=-1)&&(shivaLib.dr.segs[num].type==0)){shivaLib.dr.segs[num].x.splice(shivaLib.dr.selectedDot,1);shivaLib.dr.segs[num].y.splice(shivaLib.dr.selectedDot,1);}
+return;if((e.which==67)&&(e.ctrlKey)){if(drObj.selectedItems.length){drObj.Sound("click");drObj.clipboard=[];}
+for(i=0;i<drObj.selectedItems.length;++i)
+drObj.clipboard.push(shivaLib.Clone(drObj.segs[drObj.selectedItems[i]]));}
+if((e.which==86)&&(e.ctrlKey)){if(drObj.clipboard.length){drObj.selectedItems=[];drObj.Sound("ding");for(i=0;i<drObj.clipboard.length;++i){drObj.selectedItems.push(drObj.segs.length);drObj.segs.push(shivaLib.Clone(drObj.clipboard[i]));}}}
+if(drObj.curTool==6){num=drObj.selectedItems[0];if(((e.which==8)||(e.which==46))&&(num!=-1))
+drObj.DeleteIdea();}
+var num=drObj.curSeg;if(((e.which==8)||(e.which==46))&&(num!=-1)){var o=drObj.segs[num];o.x.pop();o.y.pop();drObj.lastX=o.x[o.x.length-1];drObj.lastY=o.y[o.y.length-1];drObj.DrawOverlay();drObj.Sound("delete");}
+if((e.which==27)&&(num!=-1)){drObj.curSeg=-1;drObj.Sound("dclick");}
+else if(drObj.curTool==5){if((e.which==8)||(e.which==46)){if(drObj.selectedItems.length){num=drObj.selectedItems[0];if((drObj.selectedDot!=-1)&&(drObj.segs[num].type==0)){drObj.segs[num].x.splice(drObj.selectedDot,1);drObj.segs[num].y.splice(drObj.selectedDot,1);}
 else if(e.target.id.indexOf("shtx")==-1)
-for(var i=0;i<shivaLib.dr.selectedItems.length;++i){$("#shtx"+shivaLib.dr.selectedItems[i]).remove();$("#shim"+shivaLib.dr.selectedItems[i]).remove();shivaLib.dr.segs.splice(shivaLib.dr.selectedItems[i],1);}
-shivaLib.dr.DrawOverlay();shivaLib.dr.DrawWireframes(false);shivaLib.Sound("delete");}}
-else if((e.which==40)&&(e.shiftKey))shivaLib.dr.MoveSegs(0,0,-1);else if((e.which==38)&&(e.shiftKey))shivaLib.dr.MoveSegs(0,0,1);else if(e.which==39)shivaLib.dr.MoveSegs(-1,0,0);else if(e.which==37)shivaLib.dr.MoveSegs(1,0,0);else if(e.which==40)shivaLib.dr.MoveSegs(0,-1,0);else if(e.which==38)shivaLib.dr.MoveSegs(0,1,0);}}
+for(var i=0;i<drObj.selectedItems.length;++i){$("#shtx"+drObj.selectedItems[i]).remove();$("#shim"+drObj.selectedItems[i]).remove();drObj.segs.splice(drObj.selectedItems[i],1);}
+drObj.DrawOverlay();drObj.DrawWireframes(false);drObj.Sound("delete");}}
+else if((e.which==40)&&(e.shiftKey))drObj.MoveSegs(0,0,-1);else if((e.which==38)&&(e.shiftKey))drObj.MoveSegs(0,0,1);else if(e.which==39)drObj.MoveSegs(-1,0,0);else if(e.which==37)drObj.MoveSegs(1,0,0);else if(e.which==40)drObj.MoveSegs(0,-1,0);else if(e.which==38)drObj.MoveSegs(0,1,0);}}
 SHIVA_Draw.prototype.AddSelect=function(x,y,shiftKey)
 {var i,j,o,seg=-1,asp;var oldDot=this.selectedDot;this.selectedDot=-1;var last=this.selectedItems[0];if(x!=-1){if(!shiftKey){this.selectedItems=[];$("#shivaDrawDiv").css("cursor","auto");}
 if(this.curTool==6){for(i=0;i<this.segs.length;++i){o=this.segs[i];if(o.type!=5)
@@ -699,8 +724,8 @@ for(j=0;j<o.x.length;++j){minx=Math.min(minx,o.x[j]);miny=Math.min(miny,o.y[j]);
 if((x>minx)&&(x<maxx)&&(y>miny)&&(y<maxy)){seg=i;break;}}}}
 else
 seg=y;if(seg!=-1){o=this.segs[seg];if(this.selectedDot!=-1){$("#shivaDrawDiv").css("cursor","crosshair");if(oldDot!=this.selectedDot)
-shivaLib.Sound("dclick");}
-else{$("#shivaDrawDiv").css("cursor","move");shivaLib.Sound("click");}
+drObj.Sound("dclick");}
+else{$("#shivaDrawDiv").css("cursor","move");drObj.Sound("click");}
 this.selectedItems.push(seg);this.alpha=o.alpha;this.curve=o.curve;if(o.type<3){this.arrow=o.arrow;this.curve=o.curve;this.color=o.color;this.edgeColor=o.edgeColor;this.edgeWidth=o.edgeWidth;}
 else if(o.type==3){this.curve=o.curve;this.textColor=o.textColor;this.boxColor=o.boxColor;this.textSize=o.textSize;this.textAlign=o.textAlign;}
 else if(o.type==4){o=this.segs[seg];asp=$("#shimi"+seg).height()/$("#shimi"+seg).width();if(!asp)asp=1;if(!isNaN(asp))
@@ -709,8 +734,8 @@ this.DrawMenu(o.type);this.SetMenuProperties();}
 this.DrawWireframes(false);}
 SHIVA_Draw.prototype.MoveSegs=function(dx,dy,dz)
 {var i,j,o,oo;for(i=0;i<this.selectedItems.length;++i){o=this.segs[this.selectedItems[i]];if(o.type==5)
-continue;if(dz){if((this.selectedItems[i]+dz<0)||(this.selectedItems[i]+dz>=this.segs.length)){shivaLib.Sound("delete");continue;}
-oo=this.segs[this.selectedItems[i]+dz];this.segs[this.selectedItems[i]+dz]=o;this.segs[this.selectedItems[i]]=oo;this.selectedItems[i]+=dz;shivaLib.Sound("click");}
+continue;if(dz){if((this.selectedItems[i]+dz<0)||(this.selectedItems[i]+dz>=this.segs.length)){drObj.Sound("delete");continue;}
+oo=this.segs[this.selectedItems[i]+dz];this.segs[this.selectedItems[i]+dz]=o;this.segs[this.selectedItems[i]]=oo;this.selectedItems[i]+=dz;drObj.Sound("click");}
 if(this.selectedDot!=-1)
 o.x[this.selectedDot]-=dx,o.y[this.selectedDot]-=dy;else
 for(j=0;j<o.x.length;++j)
@@ -723,17 +748,17 @@ o.type=5;o.id=this.segs.length;o.ideaParent=num;o.ideaShape=this.ideaShape;o.ide
 else{for(i=0;i<this.segs.length;++i)
 if(this.segs[i].ideaParent==num)
 off+=10;o.ideaLeft=this.segs[num].ideaLeft+off;o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32+off);}
-num=this.selectedItems[0]=this.segs.length;;this.segs.push(o);shivaLib.Sound("ding");this.DrawOverlay();}
+num=this.selectedItems[0]=this.segs.length;;this.segs.push(o);this.Sound("ding");this.DrawOverlay();}
 SHIVA_Draw.prototype.HighlightIdea=function()
 {var i,dd;$("#shivaIdeaAddBut").remove();for(i=0;i<this.segs.length;++i){var wid=1;dd="#shivaIdea"+i;if(this.segs[i].ideaEdgeCol==-1)
 $(dd).css("border","none");else
 $(dd).css("border",wid+"px solid "+this.segs[i].ideaEdgeCol);}
-if(this.selectedItems.length){dd="#shivaIdea"+this.selectedItems[0];$(dd).css("border","1px dashed red");var x=$(dd).width()/2;var y=$(dd).height();var str="<div id='shivaIdeaAddBut' style='position:absolute;top:"+y+"px;left:"+x+"px'><img src='adddot.gif' title='Add child idea' onmouseup='shivaLib.dr.AddIdea(0)'></div>"
+if(this.selectedItems.length){dd="#shivaIdea"+this.selectedItems[0];$(dd).css("border","1px dashed red");var x=$(dd).width()/2;var y=$(dd).height();var str="<div id='shivaIdeaAddBut' style='position:absolute;top:"+y+"px;left:"+x+"px'><img src='adddot.gif' title='Add child idea' onmouseup='drObj.AddIdea(0)'></div>"
 $(dd).append(str);}}
 SHIVA_Draw.prototype.DeleteIdea=function()
 {if(!this.selectedItems.length)
-return;num=this.selectedItems[0];if(this.segs[num].ideaParent!=-1){shivaLib.Sound("click");this.segs[num].ideaParent=-1;}
-else{this.selectedItems=[];$("#shivaIdea"+num).remove();this.segs.splice(num,1);this.DeleteIdeaChildren(num);shivaLib.Sound("delete");}
+return;num=this.selectedItems[0];if(this.segs[num].ideaParent!=-1){this.Sound("click");this.segs[num].ideaParent=-1;}
+else{this.selectedItems=[];$("#shivaIdea"+num).remove();this.segs.splice(num,1);this.DeleteIdeaChildren(num);this.Sound("delete");}
 this.DrawOverlay();}
 SHIVA_Draw.prototype.DeleteIdeaChildren=function(parent)
 {var i;for(i=0;i<this.segs.length;++i){if(this.segs[i].type!=5)
@@ -742,7 +767,7 @@ SHIVA_Draw.prototype.MoveIdeaChildren=function(parent,dx,dy)
 {var i;for(i=0;i<this.segs.length;++i){if(this.segs[i].type!=5)
 continue;if(this.segs[i].ideaParent==parent){this.segs[i].ideaLeft=Number(this.segs[i].ideaLeft)+Number(dx);this.segs[i].ideaTop=Number(this.segs[i].ideaTop)+Number(dy);$("#shivaIdea"+i).css("left",this.segs[i].ideaLeft+"px").css("top",this.segs[i].ideaTop+"px");this.MoveIdeaChildren(i,dx,dy);}}}
 SHIVA_Draw.prototype.IdeaDrop=function(from,to)
-{this.segs[from].ideaParent=to;shivaLib.Sound("ding");}
+{this.segs[from].ideaParent=to;this.Sound("ding");}
 function SHIVA_Graphics()
 {this.shadowOffX=this.shadowOffY=this.curShadowCol=this.curShadowBlur=0;this.composite="source-over";}
 SHIVA_Graphics.prototype.CreateCanvas=function(id,con,wid,hgt,left,top)
@@ -992,7 +1017,10 @@ base="http://vimeo.com/",type="Vimeo";else if(options.dataSourceUrl.match(/kaltu
 base="";type="Kaltura";}
 else if((options.dataSourceUrl.match(/http/g))&&(!options.dataSourceUrl.match(/youtube/g)))
 base="",type="HTML5";if(this.player){this.player.destroy();$(con).empty();this.player=null;}
-this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;if(options.end){v=options.end.split(":");if(v.length==1)
+this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
+else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
+shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
+if(options.end){v=options.end.split(":");if(v.length==1)
 v[1]=v[0],v[0]=0;this.VideoCue("add",Number(v[0]*60)+Number(v[1]),function(){this.pause()
 shivaLib.SendShivaMessage("ShivaVideo=done");});}
 this.VideoPlay=function(time){if(time!=undefined){shivaLib.player.play();time=""+time;if(time.match(/:/))
@@ -1008,9 +1036,6 @@ this.VideoTime=function(time){if(time!=undefined){time=""+time;if(time.match(/:/
 time=shivaLib.TimecodeToSeconds(time);shivaLib.player.currentTime(time-0);}
 else
 time=shivaLib.player.currentTime();return(time);}
-this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
-else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
-shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
 this.VideoEvent=function(mode,type,callback){if(mode=="add")
 shivaLib.player.on(type,callback);else
 shivaLib.player.off(type,callback);}
