@@ -234,7 +234,7 @@ DSC_RadialMenu.prototype.Color=function(id, gray) 						//	COLOR DOT
 		o.css({border:"solid 1px "+this.format["background-color"],			// Gradient
 		"text-shadow":"0 1px 1px rgba(0,0,0,.5)",
 		});
-		if ($.browser.mozilla)												
+		if ($.mozilla)												
 			o.css("background","-moz-linear-gradient(top,#7db9e8,#1e5799)");
 		else 
 			o.css("background","-webkit-linear-gradient(top, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%)")
@@ -272,7 +272,7 @@ DSC_RadialMenu.prototype.Draw=function(dat, x, y, id) 					//	DRAW DOT
 		"text-shadow":"0 1px 1px rgba(0,0,0,.5)",
 		"box-shadow":"0 4px 8px rgba(0,0,0,.3)",
 		});
-	if ($.browser.mozilla)	
+	if ($.mozilla)	
 		o.css("background","-moz-linear-gradient(top,#7db9e8,#1e5799)");
 	else 
 		o.css("background","-webkit-linear-gradient(top, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%)")
