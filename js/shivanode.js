@@ -1146,7 +1146,8 @@
     var did = p.find('span[class="mydid"]').text();
     var dtype = p.find('span[class="mydtype"]').text();
     var vtype = $(el).val();
-
+    
+    // If it's in a lightbox popup, send message to parent window to change URL 
     if($('html.lightpop').length == 1) {
       var url = '/data/add/nid/' + did + '/' + vtype; // URL to add already imported data node (when dtype = 'nid')
       // dtype of gid is a google doc that has not yet been added go to url to add it and return to form
@@ -1157,6 +1158,7 @@
       window.parent.postMessage(cmd,'*');
       window.parent.Lightbox.end();
       
+    // Otherwise, it's from the data page, set the input fields and submit the form
     } else { 
       
       if($(el).val() == 0) { return; }

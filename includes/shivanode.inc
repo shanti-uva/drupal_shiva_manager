@@ -315,6 +315,13 @@ function _shivanode_subtypelist($type='label', $search=FALSE) {
     25 => array(t('Parallel'), 'Parallel'),
     21 => array(t('Chord'), 'Chord'),
   );
+  if(is_numeric($type)) {
+    if(isset($options[$type][0])){
+      return $options[$type][0];
+    } else {
+      return FALSE;
+    }
+  }
   if($type == 'index') {
     if(!$search) { return FALSE; } // If no search string, no match
     foreach($options as $key => $value) {
@@ -468,7 +475,9 @@ function _get_shivanodes($options = array()) {
 }
 
 function _get_gid_from_url($url) {
-  if(preg_match('/\?key=([^\#\&]+)[\#\&]?/', $url, $matches)) { 
+  if (preg_match('/\?key=([^\#\&]+)[\#\&]?/', $url, $matches)) { 
+    return $matches[1];
+  } else if (preg_match('/\/d\/([^\/]+)\/edit/', $url, $matches)) {
     return $matches[1];
   } else {
     return FALSE;
@@ -486,6 +495,21 @@ function _get_shivanode_type($node, $mode = 'string') {
     $val = $typefield['und']['0']['value'] * 1;
     if ($val == 5) { $val = 13; } // account for old simile 5 
     $type = ($mode == 'number')? $val : $options[$val];
+  }
+  return $type;
+}
+
+/*
+ * Gets the subtype of visualization in the Shiva node
+ */
+function _get_shivanode_subtype($node, $mode = 'string') {
+  $type = FALSE;
+  if ($node && isset($node->shivanode_subtype)) {
+    $subtype = $node->shivanode_subtype;
+    if (isset($subtype['und']['0']['value'])) {
+      $val = $subtype['und']['0']['value'] * 1;
+      $type = _shivanode_subtypelist($val);
+    }
   }
   return $type;
 }
@@ -1040,10 +1064,10 @@ function _shivanode_gss_form($form, &$form_state) {
   else {
       
     // Create a checkable list of spreadsheets that can be converted into data elements
-    $avail_list = $sslists[0];
+    $unused = $sslists[0];
     // Create a list of Spreadsheets that already have visualizations associated with them
     $hasels = $sslists[1];
-    $total_sheets = count($avail_list) + count($hasels);
+    $total_sheets = count($unused) + count($hasels);
     
     $form['#prefix'] = '<div class="shivanode_google_spreadsheets">';
     $form['#suffix'] = '</div>';
@@ -1083,8 +1107,8 @@ function _shivanode_gss_form($form, &$form_state) {
         '#suffix' => '</ul>',
       );
       $list = '';
-      foreach ($hasels as $el) {
-        $enode = node_load($el['nid']);
+      foreach ($hasels as $doc) {
+        $enode = node_load($doc['nid']);
         $target_top_attr = array(
           'attributes' => array(
             'target' => '_top',
@@ -1092,10 +1116,10 @@ function _shivanode_gss_form($form, &$form_state) {
         );
         $form['gss_done']['ul'][] = array(
           '#type' => 'markup',
-          '#markup' => '<li>' . $el['title'] . ' (' . 
-             l(t('Select'), 'data/add/nid/' . $el['nid'], $target_top_attr) . ' | ' .
-             l(t('View'), 'node/' . $el['nid'], $target_top_attr) . ' | ' .
-             l(t('Edit'), 'node/' . $el['nid'] . '/edit', $target_top_attr) . ')</li>',
+          '#markup' => '<li>' . $doc['title'] . ' (' . 
+             l(t('Select'), 'data/add/nid/' . $doc['nid'], $target_top_attr) . ' | ' .
+             l(t('View'), 'node/' . $doc['nid'], $target_top_attr) . ' | ' .
+             l(t('Edit'), 'node/' . $doc['nid'] . '/edit', $target_top_attr) . ')</li>',
         );
       }
     } 
@@ -1113,7 +1137,7 @@ function _shivanode_gss_form($form, &$form_state) {
       '#title' => t('My Remaining Google Spreadsheets'),
       '#collapsible' => TRUE,
       '#description' => check_plain( t('Choose from among the ' . ((count($hasels) > 0)?'remaining ': '') . 
-        count($avail_list) . ' spreadsheets in your Google Docs account ' .
+        count($unused) . ' spreadsheets in your Google Docs account ' .
         'which ones you would like to make into data entry:')),
     );
     
@@ -1125,7 +1149,7 @@ function _shivanode_gss_form($form, &$form_state) {
     );
     
     $alct = -1;
-    foreach ($avail_list as $key => $value) {
+    foreach ($unused as $key => $doc) {
       $alct++;
       $form['gss_list']['choices'][$alct] = array(
         '#type' => 'markup',
@@ -1137,8 +1161,8 @@ function _shivanode_gss_form($form, &$form_state) {
         '#value' => 0,
       );
       $shared = TRUE;
-      if(preg_match('/([\w\W]+)\$\$notshared\$\$/', $value, $matches)) {
-        $value = $matches[1] . t(' (**Private**)');
+      if(!$doc['shared']) {
+        $doc['title'] .= t(' (**Private**)');
         $shared = FALSE;
       }
 
@@ -1146,7 +1170,7 @@ function _shivanode_gss_form($form, &$form_state) {
         '#type' => 'checkbox',
         '#prefix' => '<span class="list-checkbox">',
         '#suffix' => '</span>',
-        '#title' => '<span title="' . t('Warning: This spreadsheet is not shared and so cannot be used for public visualizations.') . '">' . check_plain($value) . '</span>',
+        '#title' => '<span title="' . t('Warning: This spreadsheet is not shared and so cannot be used for public visualizations.') . '">' . check_plain($doc['title']) . '</span>',
         '#default_value' => $key,
       );
       if(!$shared) {
@@ -1173,18 +1197,22 @@ function _shivanode_gss_form($form, &$form_state) {
 function _shivanode_get_spreadsheet_list() {
   try {
     $gdocs = gdrive_get_filelist();
+    $sslist = array();
     foreach ($gdocs as $doc) {
+      $sslist[$doc['title']] = $doc;
+      /*
       $value = $doc['title'];
       if(!$doc['shared']) {
         $value .= '$$notshared$$';
       }
       $key = $doc['url'];
-      $sslist[$key] = $value;
+      $sslist[$key] = $value;*/
     }
     // Call _shivanode_filter_gss_list() to separate list between those
     //    spreadsheets that have data entries associated with them [1]
-    //    and those that do not already have data entries [0]
-    return _shivanode_filter_gss_list($sslist);
+    //    and those that do not already have data entries [0]*/
+    $filtered_list = _shivanode_filter_gss_list($sslist);
+    return $filtered_list;
   } catch (Exception $e) {
     $msg = $e->getMessage();
     drupal_set_message(check_plain($msg), 'error');
@@ -1196,13 +1224,12 @@ function _shivanode_filter_gss_list($sslist) {
   global $user;
   $noelement = array();
   $haselement = array();
- 
   $msg = '';
-  
   $existing = _get_shivanodes('stype:1 mine'); // Get all Shiva Data entries from Database
-  foreach ($sslist as $url => $title) {
+  foreach ($sslist as $title => $gdoc) {
+    
     // Get current sheets gid and compare with existing data nodes
-    $gid = _get_gid_from_url($url);
+    $gid = $gdoc['gid'];
     $found = FALSE;
     if($gid) {
       foreach($existing as $n) {
@@ -1211,42 +1238,47 @@ function _shivanode_filter_gss_list($sslist) {
           if($n->dataGid == $gid) {
             $found = TRUE;
             $n->found = TRUE; // add found property to existing node record
-            $haselement[] = array(
-              'nid' => $n->nid,
-              'url' => $url,
-              'title' => $title,
-            );
+            $gdoc['nid'] = $n->nid;
+            $haselement[$gdoc['title']] = $gdoc;
           }
         }
       }
       // If not found in existing nodes add to the noelement array
       if(!$found) {
-        $noelement[] = $title . "_URL:" . $url;
+        $noelement[$gdoc['title']] = $gdoc;
       }
-    } 
+    }
   }
   // Check for existing data nodes not from this Gdrive account, i.e. do not have the found property
   foreach($existing as $n) {
-    if(!isset($n->found)) {
-      $json = json_decode($n->shivanode_json_value);
+    if(!isset($n->found) && isset($n->dataGid)) {
+      try {
+        $gdoc = gdrive_get_file($n->dataGid) ;
+        if($gdoc) { 
+          $haselement[$gdoc['title']] = gdrive_file_attributes($gdoc);
+        }
+      } catch (Exception $e) { }
+      /*$json = json_decode($n->shivanode_json_value);
       $haselement[] = array(
         'nid' => $n->nid,
         'url' => $json->dataSourceUrl,
         'title' => $n->title,
-      );
+      );*/
     }
   }
-  asort($noelement);
+  ksort($noelement);
+  ksort($haselement);
   // split no element items into keyed array
-  $avail_list = array();
+ /* $avail_list = array();
   foreach ($noelement as $item) {
     $pts = explode('_URL:', $item);
     $avail_list[$pts[1]] = $pts[0];
   }
   usort($haselement, 'cmp_titles');
-  return array($avail_list, $haselement); // return 2 arrays, list of gsheets not added and list of data nodes already created from gsheets
+  * */
+  return array($noelement, $haselement); // return 2 arrays, list of gsheets not added and list of data nodes already created from gsheets
 }
-
+/*
 function cmp_titles($a, $b) {
   if ($a['title'] < $b['title']) {
     return -1;
@@ -1258,7 +1290,7 @@ function cmp_titles($a, $b) {
     return 1;
   }
 }
-
+*/
 /**
  * Function _shivanode_gss_form_submit($form, &$form_state): (I think this is deprecated. Replaced by _shivanode_data_elements_submit. 2013-08-20)
  * 
@@ -1482,8 +1514,8 @@ function _shivanode_data_form_submit($form, &$form_state) {
   
   $nid = $vals['did'];
   if($vals['dtype'] == 'gid') {
-    $ssurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $nid;
-    $newel = _shivanode_create_shiva_data_node($vals['dtitle'], $ssurl);
+    $gfile = gdrive_file_attributes(gdrive_get_file($nid));
+    $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
   }
    
@@ -1515,7 +1547,8 @@ function _shivanode_data_form_submit($form, &$form_state) {
  *    Calls a view of existing data elements and adds ones google docs to it, if one has given permission
  *    Creates visualize buttons to create a visualization using a spreadsheet when clicked.
  *    The buttons are modified by JS () to set the newss, newsstype, and newsstitle hidden elements when clicked before submission
- *    $simple param refers to whether page is being displayed as a popup (simple = true) or not
+ *    $simple param refers to whether page is being displayed as the first step in creating a visualization 
+ *    (simple = true refers to whether it is in a popup, but pre-visualization-creation datapage can now also be a regular page)
  *    See JS at:  Drupal.behaviors.shivaDataElementSelect in shivanode.js
  */
 function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
@@ -1525,7 +1558,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     $title = 'Example Data for SHIVA';
     _shivanode_create_shiva_data_node($title, $url);
   }
-  // Get the view of data sets
+  // Get the view of data nodes
   $viewMarkup = views_embed_view('shiva_data_list', 'my_shiva_data_pane');
   
   // Load it into a XML DOM Document
@@ -1545,9 +1578,10 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     $info = explode('|$|', trim($txt->wholeText));
     $title = $info[0];
     $nid = $info[1];
-    // if simple = true, it's a popup and just insert data node.
+    // if simple = true, it's a popup, namely user has chosed a specific type
     $selectFrag = $xml->createDocumentFragment(); 
-    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', true);">Visualize</a>');
+    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
+    // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
     if(!$simple) {
       $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
     }
@@ -1558,11 +1592,11 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
   $xpath = new DOMXPath($xml);
   $result = $xpath->evaluate($xpathstr)->item(0);
-  
+  // If nothing is found, get out of here
   if(!is_object($result)) {
     return $xml->saveXML(); 
   }
-  
+  // Remove the 'views-row-last' attribute on last row
   $result->setAttribute('class', preg_replace('/\s*views-row-last/', '', $result->getAttribute('class')));
   $tbody = $result->parentNode;
   $rowmod = $result->getAttribute('class');
@@ -1571,16 +1605,21 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   if (_shivanode_check_google_login(FALSE)) {
     $sslists = _shivanode_get_spreadsheet_list();
     $gsheets = $sslists[0];
-    foreach($gsheets as $key => $title) {
+    foreach($gsheets as $title => $doc) {
       $shared = TRUE;
-      if(strpos($title, '$$notshared$$') > -1) {
+      if(!$doc['shared']) {
         $shared = FALSE;
         $title = str_replace('$$notshared$$', '', $title);
       }
       $rowclone = $result->cloneNode(TRUE);
       $rowmod = ($rowmod == 'even') ? 'odd' : 'even';
       $rowclone->setAttribute('class', $rowmod);
-      $gid = $key;
+      /*$gid = $key;
+      if(strpos($gid, 'http') > -1) {
+        $gid = _get_gid_from_url($gid);
+      }
+      $gfile = gdrive_get_file($gid);
+      
       if(strpos($key, '?key=') > -1) {
         $pts = explode('?key=', $key);
         if(isset($pts[1])) {
@@ -1589,15 +1628,16 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       }
       if(preg_match('/([^\#\&]+)[\#\&]?/', $gid, $matches)) {
         $gid = $matches[1];
-      }
+      }*/
       //dpm($gid, $key);
+      $gid = $doc['gid'];
       $titlecell = $rowclone->childNodes->item(0);
       $datecell = $rowclone->childNodes->item(1);
       $linkcell = $rowclone->childNodes->item(2)->cloneNode();
       $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
       if(!$shared) {
         $nsel = $xml->createElement('a','*');
-        $nsel->setAttribute('href', 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
+        $nsel->setAttribute('href', $doc['url']);
         $nsel->setAttribute('class', 'sn-notpublic');
         $nsel->setAttribute('target', '_blank');
         $nsel->setAttribute('title', 'This spreadsheet is not publically shared');
@@ -1688,8 +1728,8 @@ function _shivanode_data_use_form_submit($form, &$form_state) {
   $nid = $id; // by default assume it is an existing datanode and the nid is passed as ssurl;
   // if sstype is 'gid', then it's a spreadsheet that has not been added.
   if($type == 'gid') {
-    $ssurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $id;
-    $newel = _shivanode_create_shiva_data_node($title, $ssurl);
+    $gfile = gdrive_get_file($id);
+    $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
     $form_state['values']['datatype'] = 'nid';
     $form_state['values']['dataid'] = $newel->nid;
@@ -1790,8 +1830,11 @@ function _shivanode_data_elements_submit($form, &$form_state) {
   $nid = $ssurl; // by default assume it is an existing datanode and the nid is passed as ssurl;
   // if sstype is 'gid', then it's a spreadsheet that has not been added.
   if($sstype == 'gid') {
-    $ssurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $ssurl;
-    $newel = _shivanode_create_shiva_data_node($sstitle, $ssurl);
+    if(strpos($ssurl, 'http') > -1) {
+      $gid = _get_gid_from_url($ssurl);
+    }
+    $gfile = gdrive_get_file($gid);
+    $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
   }
 
@@ -2486,31 +2529,37 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   if(!$gid) { drupal_goto('mydata'); }
   $vtype = 'chart';
   $ctype = '';
-
-  $dnode = _shivanode_create_shiva_data_node($title, 'https://docs.google.com/spreadsheet/ccc?key=' . $gid);
-  if($type == "popup") {
-    $markup = array(
-      '#type' => 'markup',
-      '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
-    );
-    return $markup;
-  }
-  if($type < 15) {
-    $ctype = _shivanode_types_using_gdocs($type); 
+  $gfile = gdrive_file_attributes(gdrive_get_file($gid));
+ 
+  if($gfile) {
+    $dnode = _shivanode_create_shiva_data_node($title, $gfile['url']); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid
+    if($type == "popup") {
+      $markup = array(
+        '#type' => 'markup',
+        '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
+      );
+      return $markup;
+    }
+    if($type < 15) {
+      $ctype = _shivanode_types_using_gdocs($type); 
+    } else {
+      $vtype = strtolower(_shivanode_types_using_gdocs($type));
+    }
+    
+    if($vtype == 'slideshow') { $vtype = 'image'; }
+    
+    if($ctype == '') {
+      drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
+    } else {
+       drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype, array(
+          'query' => array(
+            'ctype' => $ctype,
+          ),
+       ));
+    }
   } else {
-    $vtype = strtolower(_shivanode_types_using_gdocs($type));
-  }
-  
-  if($vtype == 'slideshow') { $vtype = 'image'; }
-  
-  if($ctype == '') {
-    drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
-  } else {
-     drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype, array(
-        'query' => array(
-          'ctype' => $ctype,
-        ),
-     ));
+    drupal_set_message(t('Unable to access Google Drive file @gid.', array('@gid' => $gid)), 'warning');
+    drupal_goto('node/add/shivanode');
   }
 }
 
@@ -2579,6 +2628,7 @@ function _shivanode_add_data_correspondence($node) {
 /*
  * _shivanode_add_datalink: Adds a link to a data entry to a shivanode create/edit form
  *      Requires the form, the data entry id, and a boolean as to whether it is a new node (create) or not (edit)
+ *    It adds buttons to view data, reinsert data in form, or remove visualizations connection to this data.
  */
 function _shivanode_add_datalink(&$form, $did, $is_new_el) {
   if (!isset($is_new_el)) {
@@ -2633,17 +2683,20 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
       '#suffix' => '</div>',
     );
     // Link to Edit Google Doc source spreadsheet
-    $gupts = explode('key=', $dataurl);
-    $gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1]; //$(this).parent().click();
+    //$gupts = explode('key=', $dataurl);
+    //$gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1]; //$(this).parent().click();
     $form['gdocinfo']['button_div']['edit_gdoc'] = array(
       '#type' => 'markup',
-      '#markup' =>  '&nbsp;' . l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" class="form-submit" />', $gurl, array(
-        'attributes' => array(
-          'target' => '_blank',
-          'id' => 'datasheeturl'
-        ),
-        'html' => true,
-      )),
+      '#markup' =>  '&nbsp;' . 
+                    l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" class="form-submit" />', 
+                      $dataurl, 
+                      array(
+                      'attributes' => array(
+                        'target' => '_blank',
+                        'id' => 'datasheeturl'
+                      ),
+                      'html' => true,
+                    )),
       '#suffix' => ' | ',
     );
     // Link to reinsert Google url into data table.
@@ -2974,6 +3027,8 @@ function _shivanode_add_ms_metafix() {
 /**
  * Function get Help link
  *    Returns the html link code for the help page depending on the shivanode type value sent to function
+ *    @param mixed $typeVal (Required) If this is a number, it returns the Shivanode type for that index. This only works for the major types. If it is a string, it uses that as an index on the $helurls array to find the correct help link. This works for visualization sub-types.
+ *    @param string $linkStr (Optional) The string to use as the text of the link returned. If omitted, the link display an image of a blue circle with a question mark in it.
  */
 function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
   global $base_root, $base_path;
@@ -3018,7 +3073,7 @@ function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
     $helpStr = $typeVal;
   }
   if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
-    return '';
+    return FALSE;
   } else {
     if($linkStr) {
       return '<a href="' . $helpurls[$helpStr] . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';

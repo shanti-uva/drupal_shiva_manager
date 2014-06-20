@@ -92,9 +92,9 @@ function shiva_views_feature_default_search_api_server() {
     "options" : {
       "clean_ids" : true,
       "scheme" : "http",
-      "host" : "drupal-index.shanti.virginia.edu",
+      "host" : "PUT HOST HERE",
       "port" : "80",
-      "path" : "\\/solr-test\\/shiva",
+      "path" : "PUT PATH HERE",
       "http_user" : "",
       "http_pass" : "",
       "excerpt" : 0,

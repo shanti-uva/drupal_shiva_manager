@@ -841,7 +841,8 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       if (is_numeric($width)) {
         $width += 50;
       }
-      
+      if(!isset($height) || !is_numeric($height) || $height == 0) { $height = 800; }
+      if(!isset($width) || !is_numeric($width) || $width == 0) { $width = 800; }
       $iframe .= '<iframe id="shivaViewFrame" src="' . preg_replace('/https?\:\/\//','//', $iframeurl) . '"';
       $iframe .= ' height="' . $height . '" width="' . $width . '"';
       $iframe .= ' scrolling="auto" style="overflow: auto;" frameborder="0" ' . $disStr;
@@ -1082,8 +1083,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // Remove the Simile timeline option when displaying form only, 
   // but left it in array of types to display type of old existing simile timelines
   unset($form['shivanode_element_type']['und']['#options'][5]);
-  _shivanode_add_jtree_js();
-  _shivanode_add_ms_metafix();
+  _shivanode_add_jtree_js(); // add jtree for kmaps
+  _shivanode_add_ms_metafix(); // MS Explorer work around
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
@@ -1093,15 +1094,18 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
   $ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
-  // if the node with the form does not have an nid, we are creating a new shivanode node. Set variables accordingly
+  
   $ptitle = '';
+  
+  // If the node with the form does not have an nid, we are creating a new shivanode node. 
+  // Set variables accordingly by parsing any arguments in url
   if(!isset($form['#node']->nid)) {
     $is_new_el = TRUE;
     $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;
     $arg2  = (count(arg()) > 4) ? arg(4) : FALSE;
     if($arg1) {
       if($arg1 == 'nd') { $nodata = TRUE; } 
-      $did = (is_numeric($arg1)) ? $arg1 : FALSE;
+      $did = (is_numeric($arg1)) ? $arg1 : FALSE; // set $did to the data node nid for reference below
       if($arg2) { 
         $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
         if($snnewtype == '') {$snnewtype = 'chart';}
@@ -1114,7 +1118,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       }
     }
     
-    // If it's a data-based visualization without a data node id   at the end, redirect to data list
+    // If it's a data-based visualization without a data node id at the end, redirect to data list
     if (strpos(SHIVA_DATA_VISUALIZATIONS,$sntype) > -1 && $did == FALSE && $nodata == FALSE) {
       $url = 'mydata/'. strtolower($sntype);
       if($ctype) { $url .= '/' . $ctype; }
@@ -1122,7 +1126,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
     $submitVal = t('Save');
     $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : $sntype)));
+    
+  // Set Variables for edit form of existing nodes
   } else {
+    $ctype = _get_shivanode_subtype($form['#node']);
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
@@ -1391,9 +1398,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        t("(Note that deleting this reference will not affect your Google spreadsheet.) ") . 
        t("You may be able to edit your spreadsheet in the frame below if you are logged into Google. If not, you must go ") . 
        l(t("here"), $iframeUrl, array('attributes' => array('target' => '_blank'))) . '.</p>':'';
-
+       
+  // Create Iframe in Fieldset with Help Link in the Legend
+  $helpLinkHTML = ($ctype) ? _shivanode_get_help_link($ctype) : _shivanode_get_help_link($typeVal);
   $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
-        $sntype . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
+        $sntype . $helpLinkHTML . '</span>' . '&nbsp;</legend>' .
         '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
@@ -1402,7 +1411,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_json']['#suffix'] = '</div>';
   $form['shivanode_json']['#weight'] = '4';
   $njson = _shivanode_get_json($form['#node']);
-  if($gid = _get_gid_from_url($njson['dataSourceUrl'])) {
+  if(isset($njson['dataSourceUrl']) && $gid = _get_gid_from_url($njson['dataSourceUrl'])) {
     if(!$file = gdrive_get_file($gid)) {
       drupal_set_message(t('This data file is not associated with the currently logged in Google Account!'), 'warning');
     }
