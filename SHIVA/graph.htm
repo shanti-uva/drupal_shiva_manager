@@ -22,18 +22,11 @@
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
 				  	 border-collapse: collapse;
 				  	 }
-		.inbut { 	border-radius:10px;
-					padding-left:7px;padding-right:7px;padding-top:1px;
-					border:1px solid #ccc;color:#666;font-size:12px;height:19px;
-				  	background-color:#eee;
-				  	background:-webkit-linear-gradient(top,#ffffff 0%,#f0f0f0 100%);
-					background:linear-gradient(#ffffff,#f0f0f0);
-					}				  	 
   </style>
 </head>
 <body>
 	<div style="width:279px;position:absolute;top:0px;left:0px">
- 		<p><select id="chartType" onchange="ChangeChart(this.value)" class="inbut">
+ 		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Network</option>
 			<option>Tree</option>
 			<option>Bubble</option>
@@ -216,10 +209,6 @@
 		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 		$("#toolbar").buttonset();
-		if (navigator.userAgent.match(/firefox/i))
-				$("#chartType").css({ "text-indent":"0.01px","text-overflow":"''",
-										"background":"url(selectorbutton.gif) no-repeat right #f8f8f8"
-										});
 	
 	});
 

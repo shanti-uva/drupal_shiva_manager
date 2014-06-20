@@ -21,18 +21,11 @@
 				  	 border-collapse: collapse;
 				  	 width:278px;
 				  	 }
-		.inbut { 	border-radius:10px;
-					padding-left:7px;padding-right:7px;padding-top:1px;
-					border:1px solid #ccc;color:#666;font-size:12px;height:19px;
-				  	background-color:#eee;
-				  	background:-webkit-linear-gradient(top,#ffffff 0%,#f0f0f0 100%);
-					background:linear-gradient(#ffffff,#f0f0f0);
- 					}				  	 
 	</style>
 </head>
 <body>
 	<div style="width:279px">
-		<p><select id="chartType" onchange="ChangeChart(this.value)" class="inbut">
+		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Annotated Time Line</option>
 			<option>Area Chart</option>
 			<option>Bar Chart</option>
@@ -292,10 +285,6 @@
 			str+="</select>"; 
 			$("#saveAsDiv").html(str);
 			}
-		if (navigator.userAgent.match(/firefox/i))
-				$("#chartType").css({ "text-indent":"0.01px","text-overflow":"''",
-										"background":"url(selectorbutton.gif) no-repeat right #f8f8f8"
-										});
 	 });
 
 	function shivaEventHandler(e)
