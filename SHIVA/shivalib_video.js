@@ -40,6 +40,19 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	this.player=Popcorn.smart(con,base+id);
 	this.player.smartPlayerType=type;
 	this.player.media.src=base+id;
+
+	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
+		if (mode == "add") {												// If adding a new cue
+			shivaLib.player.cue(time,callback);								// Add end cue
+			shivaLib.player.numCues++;										// Add to count
+			}
+ 		else if (mode == "delete") {										// If removing them
+			for (var i=0;i<shivaLib.player.numCues;++i)						// For each cue
+ 				shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
+			shivaLib.player.numCues=0;										// Reset count
+			}
+  		}
+
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)
@@ -98,17 +111,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return(time);														// Return time
 	}
 
-	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
-		if (mode == "add") {												// If adding a new cue
-			shivaLib.player.cue(time,callback);								// Add end cue
-			shivaLib.player.numCues++;										// Add to count
-			}
- 		else if (mode == "delete") {										// If removing them
-			for (var i=0;i<shivaLib.player.numCues;++i)						// For each cue
- 				shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-			shivaLib.player.numCues=0;										// Reset count
-			}
-  		}
 
 	this.VideoEvent=function(mode, type, callback) {						// SET VIDEO EENT
 		if (mode == "add") 													// If adding a new cue
