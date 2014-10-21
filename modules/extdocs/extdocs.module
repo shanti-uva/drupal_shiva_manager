@@ -18,7 +18,7 @@ function extdocs_menu() {
     'title' => 'SHIVA External Documentation URL',
     'description' => 'Base URL for External Documentation',
     'page callback' => 'extdoc_display',
-    'access callback' => 'is_auth_user',
+    'access callback' => TRUE,
   );
   
   return $items;
