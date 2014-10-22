@@ -712,3 +712,72 @@ span.private {padding-left: 2px; color: #990000;}
   font-size: 120%;
   color: red;
 }
+
+/** TEST AREA **/
+
+.views-thin-list .views-row {
+	float: left;
+	width: 98%;
+	height: 110px;
+	background: white;
+	padding-bottom: 10px;
+	padding-right: 20px;
+	margin: 0 0 10px;
+	border-bottom: thin solid #aaa;
+}
+
+
+.views-thin-list .views-row img {
+	float: left;
+	margin-right: 10px;
+	height: 110px;
+	width: 110px;
+}
+
+.views-thin-list .views-row h3.title {
+	font-size: 18px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+}
+
+.views-thin-list .views-field-shivanode-description {
+	max-width: 100% !important;
+}
+
+.views-thin-list .views-row .field-content p {
+	max-width: 100%;
+	width: 100%;
+}
+
+.view-all-texts-control-box {
+	display: table;
+	width: 100%;
+	border-top: 0;
+	margin: 10px 0;
+	border-color: none;
+}
+
+.view-all-texts-control-box-row {
+	display: table-row;
+}
+
+.view-all-texts-control-box-cell {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.view-all-texts-control-box-cell.a {
+	width: 25%;
+}
+
+.view-all-texts-control-box-cell.b {
+	width: 30%;
+}
+
+.view-all-texts-control-box-cell.c {
+	width: 15%;
+}
+
+.view-all-texts-control-box-cell.d {
+	width: 30%;
+}
