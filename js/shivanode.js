@@ -181,6 +181,8 @@
 		      window.location.href='/mygallery';
 		    } else if(val == 'all') {
 		      window.location.href='/';
+		    } else if(val == 'list') {
+		    	window.location.href='/visualizations';
 		    }
 		  });
 		} // End of attach function
