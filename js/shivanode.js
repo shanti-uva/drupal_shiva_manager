@@ -172,6 +172,8 @@
 		  // Enable Gallery select buttons
 		  if(window.location.pathname == '/mygallery') {
 		     $('.shivagallerychooser select[name=gallerytype]').val(['my']);
+		  } else if(window.location.pathname == '/visualizations') {
+		     $('.shivagallerychooser select[name=gallerytype]').val(['list']);
 		  } else {
 		     $('.shivagallerychooser select[name=gallerytype]').val(['all']);
 		  }
