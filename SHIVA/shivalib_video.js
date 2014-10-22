@@ -6,7 +6,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t,type="YouTube";
 	var options=this.options;
-//	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
 //	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
 	var container=this.container;
@@ -38,6 +37,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	this.player=null;
     	}
 	this.player=Popcorn.smart(con,base+id);
+	this.player.controls(true);
 	this.player.smartPlayerType=type;
 	this.player.media.src=base+id;
 
@@ -53,6 +53,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			}
   		}
 
+	
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)
@@ -121,15 +122,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		
 ////////////////////////// EVENTS ///////////////////////////////////////////////////
 	
-	if (this.ev) 															// If event lib is already loaded
-		t=this.ev.events;													// Get events from lib
-	else																	// Else
-		t=options["shivaEvents"];											// Get from options array
-	this.ev=new SHIVA_Event(this);											// Alloc event library
-	if ((t) && (t.length))	{												// If any events
-		this.ev.AddEvents(t);												// Add them
-		this.ev.HideAll(0);													// Hide boxes after load
-		}
 	this.VideoEvent("add","timeupdate",drawOverlay);						// Draw overlay when time changes
 	this.VideoEvent("add","loadeddata",onVidLoaded);						// Call when video is loaded
 	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});	// When video plays til end
@@ -150,13 +142,10 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.VideoPlay();
     	else
      		shivaLib.VideoPause();
-		$("#shivaEventDiv").height(Math.max(shivaLib.VideoMediaHeight()-40,0));
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
    		setInterval(onVideoTimer,400);	
- 		if (shivaLib.ev)
- 			shivaLib.ev.DrawEventDots();										
-   	}
+    	}
 
   	function onVideoTimer(e) {											// VIDEO TIMER HANDLER
 		if ($("#shivaNotesDiv").length) {									// If open

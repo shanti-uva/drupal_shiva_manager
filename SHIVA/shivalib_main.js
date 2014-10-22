@@ -21,6 +21,8 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.cvs=null;
 	this.group=null;
 	this.msgAction=new Array();
+	this.ready=false;
+	this.actionCache=new Array();
 	if (options)
 		this.Draw(options);
 }
@@ -168,12 +170,17 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 
 SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE TO DRUPAL MANAGER
 {
+	var i;
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
 	if (this.options.height && this.options.width)							// If height and width defined
 		asp=this.options.height/this.options.width;							// Calc asp
 	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
+	shivaLib.ready=true;													// We're ready now
+	for (i=0;i<shivaLib.actionCache.length;++i)								// For each action stored
+		shivaLib.RunActions(shivaLib.actionCache[i]);						// Send command
+	shivaLib.actionCache=[];												// Clear action store
 }
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
@@ -207,30 +214,41 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 	if (!shivaLib.options)													// If no options
 		return;																// Quit
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
-		if (shivaLib.options.shivaGroup == "Map")							// If a map action
-			shivaLib.MapActions(e.data);									// Route
-		else if (shivaLib.options.shivaGroup == "Earth")					// If a earth action
-			shivaLib.EarthActions(e.data);									// Route 
-		else if (shivaLib.options.shivaGroup == "Video")					// If a video action
-			shivaLib.VideoActions(e.data);									// Route 
-		else if (shivaLib.options.shivaGroup == "Timeglider")				// If a timeline action
-			shivaLib.TimeActions(e.data);									// Route 
-		else if (shivaLib.options.shivaGroup == "Visualization")			// If a chart action
-			shivaLib.ChartActions(e.data);									// Route to chart actions
-		else if (shivaLib.options.shivaGroup == "Image")					// If an image action
-			shivaLib.ImageActions(e.data);									// Route
-		else if (shivaLib.options.shivaGroup == "Network")					// If an network action
-			shivaLib.NetworkActions(e.data);								// Route
-		else if (shivaLib.options.shivaGroup == "WordCloud")				// If an wordcloud action
-			shivaLib.WordActions(e.data);									// Route
-		else if (shivaLib.options.shivaGroup == "Control")					// If an control action
-			shivaLib.ControlActions(e.data);								// Route
-		else if (shivaLib.options.shivaGroup == "HTML")						// If an HTML action
-			shivaLib.HTMLActions(e.data);									// Route
-		else if (shivaLib.options.shivaGroup == "Graph")					// If an graph action
-			shivaLib.GraphActions(e.data);									// Route
+		if (!shivaLib.ready)													// If not ready yet
+			shivaLib.actionCache.push(e.data);								// Save action until initted
+		else																// Send it
+			shivaLib.RunActions(e.data);									// Route to action handler
 		}
 }
+
+SHIVA_Show.prototype.RunActions=function(data) 							// ROUTE ACTIONS
+{
+	var group=shivaLib.options.shivaGroup;									// Get group
+	if (group == "Map")														// If a map action
+		shivaLib.MapActions(data);											// Route
+	else if (group == "Earth")												// If a earth action
+		shivaLib.EarthActions(data);										// Route 
+	else if (group == "Video")												// If a video action
+		shivaLib.VideoActions(data);										// Route 
+	else if (group == "Timeglider")											// If a timeline action
+		shivaLib.TimeActions(data);											// Route 
+	else if (group == "Visualization")										// If a chart action
+		shivaLib.ChartActions(data);										// Route to chart actions
+	else if (group == "Image")												// If an image action
+		shivaLib.ImageActions(data);										// Route
+	else if (group == "Network")											// If an network action
+		shivaLib.NetworkActions(data);										// Route
+	else if (group == "WordCloud")											// If an wordcloud action
+		shivaLib.WordActions(data);											// Route
+	else if (group == "Control")											// If an control action
+		shivaLib.ControlActions(data);										// Route
+	else if (group == "HTML")												// If an HTML action
+		shivaLib.HTMLActions(data);											// Route
+	else if (group == "Graph")												// If an graph action
+		shivaLib.GraphActions(data);										// Route
+
+}
+
 
 SHIVA_Show.prototype.AddOverlay=function(data) 							// ADD OVERLAY
 {
@@ -758,7 +776,7 @@ SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION ME
 SHIVA_Show.prototype.Sound=function(sound, mode)				// PLAY SOUND
 {	
 	var snd=new Audio();
-	if (!snd.canPlayType("audio/mpeg"))
+	if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
 		snd=new Audio(sound+".ogg");
 	else	
 		snd=new Audio(sound+".mp3");
@@ -952,9 +970,10 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 SHIVA_Show.prototype.LinkToAnchor=function(str) 						// CONVERT LINKS TO ANCHORS
 {
 	var i,v,vv,url,title;
+	if (!str)																// If no string
+		return "";															// Return null
 	if (str.match(/href=/)) 												// If an embedded <a> tag
 		return str;															// Don't convert
-
 	if (str.match(/http/)) {												// If an embedded url
 		v=(str+" ").match(/http.?:\/\/.*?\s/ig);							// Extract url(s)
 		for (i=0;i<v.length;++i) {											// For each url

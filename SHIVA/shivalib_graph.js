@@ -276,7 +276,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (j=1;j<nRows;++j) {									// For time point
 					o={};												// New obj
 					o.key=data[0][i];									// Set field name as key
-					o.date=new Date(data[j][0]);						// Set date
+					o.date=new Date(data[j][0]).getTime();				// Set date in milliseconds < 1970
 					o.value=data[j][i]-0;								// Set value
 					dataSet.push(o);									// Add item
 					}
@@ -763,17 +763,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				   	 	})
 		
 				.on("mousemove", function(d, i) {						// When hovering over layer
-						var k,o,datearray=[];
-						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
-				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+						var date=x.invert(d3.mouse(this)[0]).getTime();	// Get date from x pos
+				      	var now=date;									// Unique now
 				      	var selected=(d.values);						// Selected layer						
-				      	for (var k=0;k<selected.length;k++) { 			// For each data point
-				        	o=selected[k].date;							// Get date
-				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
-				        	}
-					   	k=datearray.indexOf(now);						// Data item over
+						var k=selected.length-1;						// Start at end
+						while (k >= 0) {								// Work backwards
+		        			if (selected[k].date <= now) {				// If this one
+			        			break;									// Quit looking
+			        			}
+			        		--k;										// Next time
+							}				
 						d3.select(this).attr("stroke","#000").attr("stroke-width","0.5px")			// Show border
 			        	dataBar.style("left",d3.mouse(this)[0]+"px");	// Position data bar
+			      		
 			      		$("#vnow").text(shivaLib.FormatDate(date,options.dateFormat))
 			      		$("#vdat").text(d.key+": "+d.values[k].value)	// Show value
 			      		dataBar.style("visibility","visible");			// Show data bar
@@ -787,16 +789,17 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      		dataBar.style("visibility","hidden");			// Hide data bar
 			  			})
 				.on("click",function(d) {								// Click on node
-						var k,o,datearray=[];
-						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
-				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+						var date=x.invert(d3.mouse(this)[0]).getTime();	// Get date from x pos
+				      	var now=date;									// Unique now
 				      	var selected=(d.values);						// Selected layer						
-				      	for (var k=0;k<selected.length;k++) { 			// For each data point
-				        	o=selected[k].date;							// Get date
-				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
-				        	}
-					   	k=datearray.indexOf(now);						// Data item over
-					 	shivaLib.SendShivaMessage("ShivaGraph=click",shivaLib.FormatDate(date,options.dateFormat)+"|"+d.key+"|"+d.values[k].value); // Send message
+						var k=selected.length-1;						// Start at end
+						while (k >= 0) {								// Work backwards
+		        			if (selected[k].date <= now) {				// If this one
+							 	shivaLib.SendShivaMessage("ShivaGraph=click",shivaLib.FormatDate(date,options.dateFormat)+"|"+d.key+"|"+d.values[k].value); // Send message
+			        			break;									// Quit looking
+			        			}
+			        		--k;										// Next time
+							}
 				 		});	
 
 			    
