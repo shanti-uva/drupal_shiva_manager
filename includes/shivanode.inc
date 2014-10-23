@@ -925,7 +925,7 @@ function _shivanode_admin_settings_thumbs($form, &$form_state) {
 function _shivanode_admin_settings_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#id'] == 'edit-default-values') {
     // Viewer and Editor URLS
-   $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
+    $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
     $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
     $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
     $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
