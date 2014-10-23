@@ -44,10 +44,6 @@ SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SA
 				}
 			if (this.overlay && this.dr)
 				str+=this.dr.SaveDrawData(true);
-			if (this.ev && this.ev.events.length) {
-				var group=this.options.shivaGroup;
-				str+="\"shivaEvents\": "+this.ArrayToString(this.ev.events,group)+",\n";
-				}
 			var j=0;
 			if (type)
 		        str+="\t\"chartType\": \""+type+"\",\n";
@@ -126,12 +122,8 @@ SHIVA_Show.prototype.ReEdit=function(jsonData, propertyList)
 		if (jsonData) {
 			var items=new Array();
 			for (key in jsonData) {
-	 			if (key == "shivaEvents") {
-					if (!shivaLib.ev)
-						SHIVA_Event(this.container,this.player);
-					shivaLib.ev.AddEvents(jsonData[key]);										
+	 			if (key == "shivaEvents") 
 		 			continue;
-	 				}
 	 			if (key.indexOf("item-") != -1) {
 		 			v=jsonData[key].split(";");
 					o=new Object;

@@ -233,8 +233,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		if (isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='100%'>";						// Image				
 		else if (u) {																	// Something else
-			trace(u)
-			if (this.items[i].asp)														// If loaded
+				if (this.items[i].asp)														// If loaded
 				srs="go.htm?srs=100&";													// Resize to 100%
 			else																		// First time
 				srs="go.htm?";															// Get in original aspect ratio
@@ -430,7 +429,6 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
 		if (v[1].match(/posterFrame-/)) 								// A frame ready
