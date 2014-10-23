@@ -172,6 +172,8 @@
 		  // Enable Gallery select buttons
 		  if(window.location.pathname == '/mygallery') {
 		     $('.shivagallerychooser select[name=gallerytype]').val(['my']);
+		  } else if(window.location.pathname == '/visualizations') {
+		     $('.shivagallerychooser select[name=gallerytype]').val(['list']);
 		  } else {
 		     $('.shivagallerychooser select[name=gallerytype]').val(['all']);
 		  }
@@ -181,8 +183,11 @@
 		      window.location.href='/mygallery';
 		    } else if(val == 'all') {
 		      window.location.href='/';
+		    } else if(val == 'list') {
+		    	window.location.href='/visualizations';
 		    }
 		  });
+		  
 		} // End of attach function
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
 	
