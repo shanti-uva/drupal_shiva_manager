@@ -947,6 +947,8 @@ function _shivanode_admin_settings_validate($form, &$form_state) {
     drupal_set_message(t('All values have been reset to their default'));
     drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
   }
+	$form_state['values']['shivanode_chart_viewer'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_chart_viewer']);
+	$form_state['values']['shivanode_root_url'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_root_url']);
 } 
 /*
  * Using Validate function to reset the default values in the Shivanode URL display form
