@@ -9,4 +9,3 @@ dependencies[] = page_manager
 features[ctools][] = page_manager:pages_default:1
 features[features_api][] = api:2
 features[page_manager_pages][] = shiva_explore_page
-project path = sites/all/modules/shivanode/features
