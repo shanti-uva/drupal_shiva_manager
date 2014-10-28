@@ -276,7 +276,7 @@ function shivanode_menu() {
       'file' => 'includes/shivanode.inc',
     );
 	
-	// Return SHIVA jsaon of a single node 
+	// Return SHIVA json of a single node 
   
   $items['data/json/%/teaser'] = array(
       'title' => 'JSON output of Node',
@@ -287,7 +287,17 @@ function shivanode_menu() {
       'file' => 'includes/shivanode.inc',
     );
 
+  // Return a html fragment displaying a node for AJAX calls
     
+  $items['data/ajax/%'] = array(
+      'title' => 'HTML Fragment for Embedding a Node',
+      'description' => 'Return an HTML fragment for embedding a node',
+      'page callback' => '_shivanode_node_ajax',
+      'page arguments' => array(2),
+      'access callback' => TRUE,
+      'file' => 'includes/shivanode.inc',
+    );
+		
     // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
     // Calls _shivanode_shib_check
     $items['shib/auth/check'] = array(

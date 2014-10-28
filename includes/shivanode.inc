@@ -2068,6 +2068,16 @@ function _get_shivaframe_url($opt, $nid = '') {
   return $player;
 }
 
+/**
+ * _shivanode_node_ajax: Return an html fragment for displaying a node
+ */
+function _shivanode_node_ajax($nid) {
+	$node = node_load($nid);
+	$view = node_view($node, 'full');
+	$rendered = drupal_render($view);
+	print $rendered;
+}
+
 /*
  * _shivanode_node_json($nid): Function called by the menu path 'data/json/%' in shivanode_menu
  * 		This function retreives the node, gets its SHIVA json data and publishes that
