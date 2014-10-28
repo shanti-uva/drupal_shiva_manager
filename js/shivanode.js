@@ -86,11 +86,13 @@
 						return false;
 					}
 				});
-				// enable save etc buttons after 5 secs
+				// enable save etc buttons after 5 secs && set FormLoaded to true
 				setTimeout(function() {
-  				$('#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
+  				$('#otherbuttons button[disabled=disabled], #lowerbuttons button[disabled=disabled], ' +
+  					'#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
   				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
   				});
+  				Drupal.settings.shivanode.formLoaded = true;
 				}, 5000);
 			}
 			   
@@ -988,8 +990,8 @@
 	 * 			In case of overlay, if the close button is clicked, then it asks for confirmation.
 	 */
 	Drupal.Shivanode.setUnloadConfirm = function(ison) { 
-		if(ison) {
-			jQuery('#overlay-close, input[value=New]').attr('onmousedown', 
+		if(ison && Drupal.settings.shivanode.formLoaded == true) {
+			jQuery('#overlay-close, input[value=New], button[value=New]').attr('onmousedown', 
 				'javascript: if(confirm(Drupal.t(\"Are you sure you want to leave without saving?\"))) {jQuery(this).click();}');
 			if(window.onbeforeunload == null) {
 				window.onbeforeunload = function (e) {

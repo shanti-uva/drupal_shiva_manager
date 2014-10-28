@@ -125,6 +125,7 @@ function shivanode_init() {
     drupal_add_js( 'jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . 
                     variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"});', 'inline');
   }
+	drupal_add_js(array('shivanode' => array('formLoaded' => FALSE)), 'setting');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/shivanode.css');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
 }
@@ -1286,7 +1287,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        ),
       '#attributes' => array(
         'title' => t('Create a new SHIVA Visualization'),
-        'disabled' => 'disabled',
+        'disabled' => 'disabled', // Why are these disabled?
       ),
       '#value' => t('New'),
     );
