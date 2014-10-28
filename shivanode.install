@@ -348,6 +348,13 @@ function shivanode_update_7005() {
     $url = $snimgdir . $imgfn;
     $file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
     variable_set($info['variable'], $file->fid);
+		// Add shiva teaser style for image
+		$style = image_style_load('shiva_teaser');
+		if($style) { 
+			$source = 'public://shivanode/' . $imgfn;
+			$destination = 'public://styles/shiva_teaser/public/shivanode/' . $imgfn;
+			image_style_create_derivative($style, $source, $destination);
+		}
   }
   // Copy generic icons to shivanode public folder
   $snimgdir = drupal_get_path('module', 'shivanode') . '/images/';
