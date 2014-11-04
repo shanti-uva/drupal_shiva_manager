@@ -2,33 +2,46 @@
 core = 7.x
 
 api = 2
-projects[drupal][version] = "7.26"
+projects[drupal][version] = "7.32"
 
 ; Modules
+projects[views_bulk_operations][subdir] = "contrib"
 projects[views_bulk_operations][version] = "3.2"
 
+projects[admin_menu][subdir] = "contrib"
 projects[admin_menu][version] = "3.0-rc4"
 
+projects[advanced_help][subdir] = "contrib"
 projects[advanced_help][version] = "1.1"
 
+projects[backup_migrate][subdir] = "contrib"
 projects[backup_migrate][version] = "2.8"
 
+projects[ctools][subdir] = "contrib"
 projects[ctools][version] = "1.4"
 
+projects[facetapi][subdir] = "contrib"
 projects[facetapi][version] = "1.3"
 
+projects[datatables][subdir] = "contrib"
 projects[datatables][version] = "1.1"
 
+projects[devel][subdir] = "contrib"
 projects[devel][version] = "1.4"
 
+projects[entity][subdir] = "contrib"
 projects[entity][version] = "1.3"
 
+projects[entityreference][subdir] = "contrib"
 projects[entityreference][version] = "1.1"
 
+projects[entityreference_prepopulate][subdir] = "contrib"
 projects[entityreference_prepopulate][version] = "1.5"
 
+projects[facetapi_bonus][subdir] = "contrib"
 projects[facetapi_bonus][version] = "1.1"
 
+projects[features][subdir] = "contrib"
 projects[features][version] = "2.0"
 
 ; Please fill the following out. Type may be one of get, git, bzr or svn,
@@ -39,48 +52,92 @@ projects[SHANTI][type] = "module"
 projects[SHANTI][subdir] = "shanti"
 projects[SHANTI][version] = "0.1-alpha2"
 
+projects[panels][subdir] = "contrib"
 projects[panels][version] = "3.4"
 
+projects[imagepicker][subdir] = "contrib"
 projects[imagepicker][version] = "1.7"
 
+projects[jquery_update][subdir] = "contrib"
 projects[jquery_update][version] = "2.4"
 
+projects[libraries][subdir] = "contrib"
 projects[libraries][version] = "2.2"
 
+projects[lightbox2][subdir] = "contrib"
 projects[lightbox2][version] = "1.0-beta1"
 
+projects[mass_contact][subdir] = "contrib"
 projects[mass_contact][version] = "1.0"
 
+projects[migrate][subdir] = "contrib"
 projects[migrate][version] = "2.5"
 
+projects[module_filter][subdir] = "contrib"
 projects[module_filter][version] = "1.8"
 
+projects[og][subdir] = "contrib"
 projects[og][version] = "2.5"
 
+projects[services][subdir] = "contrib"
 projects[services][version] = "3.7"
 
+projects[search_api][subdir] = "contrib"
 projects[search_api][version] = "1.11"
 
+projects[search_api_solr][subdir] = "contrib"
 projects[search_api_solr][version] = "1.4"
 
+projects[sharethis][subdir] = "contrib"
 projects[sharethis][version] = "2.5"
 
+projects[shib_auth][subdir] = "contrib"
 projects[shib_auth][version] = "4.0"
 
+; Please fill the following out. Type may be one of get, git, bzr or svn,
+; and url is the url of the download.
+projects[shiva_explore_page_feature][download][type] = ""
+projects[shiva_explore_page_feature][download][url] = ""
+projects[shiva_explore_page_feature][type] = "module"
+projects[shiva_explore_page_feature][subdir] = "shanti/shivanode/modules"
+projects[shiva_explore_page_feature][version] = "1.0"
+
+; Please fill the following out. Type may be one of get, git, bzr or svn,
+; and url is the url of the download.
+projects[shiva_main_menu_feature][download][type] = ""
+projects[shiva_main_menu_feature][download][url] = ""
+projects[shiva_main_menu_feature][type] = "module"
+projects[shiva_main_menu_feature][subdir] = "shanti/shivanode/modules"
+projects[shiva_main_menu_feature][version] = "1.0-beta2"
+
+; Please fill the following out. Type may be one of get, git, bzr or svn,
+; and url is the url of the download.
+projects[shiva_views_feature][download][type] = ""
+projects[shiva_views_feature][download][url] = ""
+projects[shiva_views_feature][type] = "module"
+projects[shiva_views_feature][subdir] = "shanti/shivanode/modules"
+projects[shiva_views_feature][version] = "1.0-beta3"
+
+projects[superfish][subdir] = "contrib"
 projects[superfish][version] = "1.9"
 
+projects[views][subdir] = "contrib"
 projects[views][version] = "3.7"
 
+projects[webform][subdir] = "contrib"
 projects[webform][version] = "3.20"
 
+projects[webform_conditional][subdir] = "contrib"
 projects[webform_conditional][version] = "1.0-beta2"
 
+projects[webform_report][subdir] = "contrib"
 projects[webform_report][version] = "1.0"
 
+projects[wysiwyg][subdir] = "contrib"
 projects[wysiwyg][version] = "2.2"
-; add wysiwyg patch: https://www.drupal.org/files/issues/wysiwyg-1757684.28.patch 
 
-projects[zend][version] = "1.0-beta1"
+; Themes
+projects[zen][version] = "3.1"
 
 ; Modules
 projects[sarvaka_modules][type] = "module"
@@ -92,7 +149,7 @@ projects[shivanode][type] = "module"
 projects[shivanode][download][type] = "git"
 projects[shivanode][download][url] = "https://github.com/shanti-uva/drupal_shiva_manager.git"
 projects[shivanode][download][branch] = "newtheme"
-projects[shivanode][download][revision] = "98d921b17bb1078227f4ea36d10e4aa45344d6c7"
+projects[shivanode][download][revision] = "66886386d872d977ee68f73d89dc9764fc8fd222"
 
 projects[shanti_kmaps_fields][type] = "module"
 projects[shanti_kmaps_fields][download][type] = "git"
@@ -119,7 +176,12 @@ projects[sarvaka_shiva][download][revision] = "dfc1dc74064949c7200d794a8b163a8cb
 projects[shanti_sarvaka][type] = "theme"
 projects[shanti_sarvaka][download][type] = "git"
 projects[shanti_sarvaka][download][url] = "https://github.com/shanti-uva/drupal_shanti_sarvaka_theme.git"
-projects[shanti_sarvaka][download][revision] = "35b8332bc06c6de0ede18ea2fde010bdb415cd1e"
+projects[shanti_sarvaka][download][revision] = "e7ea03469555acd77267090427c40f27f14e84e4"
+
+projects[shantizen][type] = "theme"
+projects[shantizen][download][type] = "git"
+projects[shantizen][download][url] = "https://github.com/ThanGrove/Shantizen.git"
+projects[shantizen][download][revision] = "d34a382a7680ab1fa4aa010832fe4131b89483a0"
 
 ; Libraries
 ; Please fill the following out. Type may be one of get, git, bzr or svn,

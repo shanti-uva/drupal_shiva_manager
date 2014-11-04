@@ -1148,9 +1148,9 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
 			if ((mode == "link") && (type == "KML"))						// If a KML link
-				alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));	// Show url
+				prompt("Press Ctrl-C to copy link","http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));	// Show url
 			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
-				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
+				prompt("Press Ctrl-C to copy link","www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load
 				var dat={ id:this.id.substr(7) };							// Set id to look for
 				str="http://www.primaryaccess.org/REST/geteasyfile.php";	// eStore list url

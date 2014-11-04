@@ -294,8 +294,8 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files,filter,callback,mode)
 {var i,str,type;files.sort(function(a,b){var A=new Date(a.created.substr(0,5)+"/2012 "+a.created.substr(6));var B=new Date(b.created.substr(0,5)+"/2012 "+b.created.substr(6));return B-A;});for(i=0;i<files.length;++i){if((filter)&&(files[i].title.toLowerCase().indexOf(filter.toLowerCase())==-1))
 continue;str="<tr id='ezfile-"+files[i].id+"'><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";str+="<td width='100%'><img  src='adddot.gif'  height='11'> &nbsp;";str+=files[i].id+" "+files[i].title+"</td></tr>";$(str).appendTo("#ezFilesTable tbody");$("#ezFilesTable tr:odd").addClass("odd");}
 for(i=0;i<files.length;++i){type=files[i].type;$("#ezfile-"+files[i].id).click(function(){if((mode=="link")&&(type=="KML"))
-alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));if((mode=="link")&&(type!="KML"))
-alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
+prompt("Press Ctrl-C to copy link","http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));if((mode=="link")&&(type!="KML"))
+prompt("Press Ctrl-C to copy link","www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
 $("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);});}}
 SHIVA_Show.prototype.LoadEasyFile=function(num,callback)
