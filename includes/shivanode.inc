@@ -2069,13 +2069,23 @@ function _get_shivaframe_url($opt, $nid = '') {
 }
 
 /**
- * _shivanode_node_ajax: Return an html fragment for displaying a node
+ * _shivanode_node_api: Return an html fragment for displaying a node
  */
-function _shivanode_node_ajax($nid) {
+function _shivanode_node_api($mode, $nid) {
 	$node = node_load($nid);
-	$view = node_view($node, 'full');
-	$rendered = drupal_render($view);
-	print $rendered;
+	switch($mode) { 
+		case "ajax":
+			$view = node_view($node, 'full');
+			$rendered = drupal_render($view);
+			print $rendered;
+			break;
+		case "json":
+			drupal_json_output($node);
+			break;
+		default:
+			drupal_set_message(t("The API mode, @mode, has not been defined.", array('@mode' => $mode)), 'warning');
+			drupal_goto();
+	}
 }
 
 /*
@@ -3142,4 +3152,53 @@ function _shivanode_get_generic_image_info($type = 'ALL') {
   } else {
     return FALSE;
   }
+}
+
+function _shivanode_get_kmap_fields() {
+	$kmfields = array();
+	$fis = field_info_instances('node', 'shivanode');
+	foreach($fis as $key => $field) {
+	  if(isset($field['display']['default']['module']) && $field['display']['default']['module'] == 'shanti_kmaps_fields') {
+	    $kmfields[] = $field['field_name'];
+	  }
+	}
+	return $kmfields;
+}
+
+function _shivanode_get_nodes_by_kmap($kid, $domain = 'subjects', $nodes = TRUE) {
+	$kmf = _shivanode_get_kmap_fields();
+	$out = array();
+	foreach($kmf as $fn) {
+		$fif = field_info_field($fn);
+		$fdom = $fif['settings']['kmap_domain'];
+		if($fdom == $domain) {
+	    $table = 'field_data_' . $fn;
+	   	$col = $fn . '_id';
+	    $result = db_select($table, 't')->fields('t')->condition('t.' . $col, $kid, '=')->execute();
+	    foreach($result as $record) {
+	      $out[] = ($nodes) ? node_load($record->entity_id) : $record->entity_id;
+	    }
+	  }
+	}
+	if(empty($out)) { return FALSE; }
+	return $out;
+}
+
+/**
+ * Returns a list of shivanodes associated with a particular kmap id
+ *   TODO: implement pagination, list page (perhaps in views?)
+ *   Example URL: http://shivamanager.dev/kmaps/json/places/15885
+ *   
+ */
+function _shivanode_kmap_list($type, $kid, $domain = 'subjects') {
+	$nodes = _shivanode_get_nodes_by_kmap($kid, $domain);
+	if($type == 'json') { 
+		$out = array(
+			'total' => count($nodes),
+			'type' => $domain, 
+			'kmid' => $kid,
+			'results' => $nodes,
+		);
+		drupal_json_output($out);
+	}
 }

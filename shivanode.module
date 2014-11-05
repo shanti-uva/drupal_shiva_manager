@@ -287,17 +287,31 @@ function shivanode_menu() {
       'file' => 'includes/shivanode.inc',
     );
 
-  // Return a html fragment displaying a node for AJAX calls
+  // Return a json summary or html fragment displaying a node for AJAX calls
+  //   api/json/{id} or api/ajax/{id}
     
-  $items['data/ajax/%'] = array(
-      'title' => 'HTML Fragment for Embedding a Node',
-      'description' => 'Return an HTML fragment for embedding a node',
-      'page callback' => '_shivanode_node_ajax',
-      'page arguments' => array(2),
-      'access callback' => TRUE,
-      'file' => 'includes/shivanode.inc',
-    );
+  $items['api/%/%'] = array(
+    'title' => 'HTML Fragment for Embedding a Node',
+    'description' => 'Return an HTML fragment for embedding a node',
+    'page callback' => '_shivanode_node_api',
+    'page arguments' => array(1,2),
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
 		
+	// Return info about KMaps in SHIVA in various formats
+	//  Parameters are: type = page|json, domain = subject|places, kmapid = numeric value
+	//    type = page means an html page to display on site
+    
+  $items['kmaps/json/%/%'] = array(
+    'title' => 'Kmaps Information In Shiva',
+    'description' => 'Return list of nodes associated with Kmap Ideas',
+    'page callback' => '_shivanode_kmap_list',
+    'page arguments' => array('json',3,2),
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
+	
     // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
     // Calls _shivanode_shib_check
     $items['shib/auth/check'] = array(

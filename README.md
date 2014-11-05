@@ -27,6 +27,13 @@ README for Shanti Shivanode Module
         
              sudo git clone https://github.com/shanti-uva/drupal_shiva_manager.git shivanode
              
+  API Calls:
+  	* /api/json/{nid} : returns an json string for the complete Drupal node
+  	* /data/json/{nid}: returns the json object created by Bill's Shiva JS module
+  	* /api/ajax/{nid} : returns an html fragment displaying the node for use with ajax.
+  	* /kmaps/json/subjects/{kid} : returns a json list of nodes tagged with that subject id
+  	* /kmaps/json/places/{kid} : returns a list of nodes tagged with that place id
+  	
              
 # VERSIONS
 
