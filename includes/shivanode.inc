@@ -3174,10 +3174,22 @@ function _shivanode_get_nodes_by_kmap($kid, $domain = 'subjects', $nodes = TRUE)
 		if($fdom == $domain) {
 	    $table = 'field_data_' . $fn;
 	   	$col = $fn . '_id';
-	    $result = db_select($table, 't')->fields('t')->condition('t.' . $col, $kid, '=')->execute();
-	    foreach($result as $record) {
-	      $out[] = ($nodes) ? node_load($record->entity_id) : $record->entity_id;
-	    }
+			if($kid == 'all') {
+	    	$result = db_select($table, 't')->fields('t')->condition('t.' . $col, 0, '<>')->execute();
+				foreach($result as $record) {
+					$kmid = $record->{$col};
+					if(isset($out[$kmid])) {
+						$out[$kmid][] = $record->entity_id;
+					} else {
+						$out[$kmid] = array($record->entity_id);
+					}
+				}
+			} else {
+	    	$result = db_select($table, 't')->fields('t')->condition('t.' . $col, $kid, '=')->execute();
+		    foreach($result as $record) {
+		      $out[] = ($nodes) ? node_load($record->entity_id) : $record->entity_id;
+		    }
+			}
 	  }
 	}
 	if(empty($out)) { return FALSE; }

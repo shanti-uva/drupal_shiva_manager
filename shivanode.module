@@ -298,7 +298,17 @@ function shivanode_menu() {
     'access callback' => TRUE,
     'file' => 'includes/shivanode.inc',
   );
-		
+	
+	// Return all nodes marked with a kmap subject or place id
+  $items['kmaps/json/%'] = array(
+    'title' => 'Kmaps Information In Shiva',
+    'description' => 'Return list of nodes associated with Kmap Ideas',
+    'page callback' => '_shivanode_kmap_list',
+    'page arguments' => array('json','all',2),
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
+	
 	// Return info about KMaps in SHIVA in various formats
 	//  Parameters are: type = page|json, domain = subject|places, kmapid = numeric value
 	//    type = page means an html page to display on site
