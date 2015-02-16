@@ -106,7 +106,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  		// Lib to load
+			lib="popcorn-complete.min.js";  								// Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
