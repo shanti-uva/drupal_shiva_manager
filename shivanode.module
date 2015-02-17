@@ -61,7 +61,7 @@ define('SHIVA_CONTROL_EDITOR', 'control.htm');
 define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
 // default URL for Canvas Editor
-define('SHIVA_QMEDIA_EDITOR', 'http://www.qmediaplayer.com/edit.htm');
+define('SHIVA_QMEDIA_EDITOR', 'QMEDIA/edit.htm');
 
 // default URL for Word Cloud Editor
 define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
