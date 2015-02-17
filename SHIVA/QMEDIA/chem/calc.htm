@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<title>Qmedia Calculator</title>
+	<link REL="SHORTCUT ICON" HREF="qlogo.ico">
+	<meta http-equiv="X-UA-Compatible" content="chrome=1">
+</head>
+<style>
+		body { 				font-family:Verdana,Geneva,sans-serif; font-size:13px;
+							margin:0px;border:0px;
+							}
+		input {				border-radius:10px;border:1px solid #999;text-align:center;
+							}
+		.button-standard { 	width:50px;margin-bottom:3px;
+							}
+		.button-blue {  	width:50px;margin-bottom:3px;background-color:SteelBlue;color:#fff;
+							}
+		.textbox { 			font-size:15px;height:24px;width:370px; 
+							}
+
+</style>
+<body>	
+<table width=100% <tr><td align=center>
+<FORM NAME="opn" ACTION="javascript:calculate()" METHOD="post" ENCTYPE="text/plain">
+<P><INPUT TYPE="text" NAME="input" value="" AUTOCOMPLETE="OFF" class="textbox" onkeyup="changed()">
+<p>
+<input type="button" class="button-standard" style="visibility:hidden">
+<input type="button" class="button-standard" style="visibility:hidden">
+<input type="button" class="button-standard" style="visibility:hidden">
+<input type="reset" value=" C " name="c" class="button-standard"  style="background-color:#FFBF00;border-color:#FFBF00;" onclick="cleared()"></input>
+<input type="button" value=" ( " name="lp" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '(')"></input>
+<input type="button" value=" ) " name="rp" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, ')')"></input>
+<input type="button" value=" / " name="divby" class="button-standard"  style="background-color:SeaGreen;border-color:SeaGreen;color:#fff" onclick="insertAtCursor(document.opn.input, '/')"></input>
+</br>
+<input type="button" value="sin" name="sin" class="button-blue" title="The sine for x radians" onclick="insertAtCursor(document.opn.input, 'sin(')"></input>
+<input type="button" value="arcsin" name="asin" class="button-blue" title="The arcsine for x, result in radians" onclick="insertAtCursor(document.opn.input, 'arcsin(')"></input>
+<input type="button" value="&Lambda;" name="pow" class="button-blue" title=" x to the power of y" onclick="insertAtCursor(document.opn.input, '^')"></input>
+<input type="button" value=" 7 " name="seven" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '7')"></input>
+<input type="button" value=" 8 " name="eight" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '8')"></input>
+<input type="button" value=" 9 " name="multiply" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '9')"></input>
+<input type="button" value=" * " name="one" class="button-standard"  style="background-color:SeaGreen;border-color:SeaGreen;;color:#fff" onclick="insertAtCursor(document.opn.input, '*')"></input>
+</br>
+<input type="button" value="cos" name="cos" class="button-blue" title="The cosine for x radians" onclick="insertAtCursor(document.opn.input, 'cos(')"></input>
+<input type="button" value="arccos" name="acos" class="button-blue" title="The arccosine for x, result in radians" onclick="insertAtCursor(document.opn.input, 'arccos(')"></input>
+<input type="button" value="log" name="log" class="button-blue" title="The base 10 logarithm of x" onclick="insertAtCursor(document.opn.input, 'log(')"></input>
+<input type="button" value=" 4 " name="four" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '4')"></input>
+<input type="button" value=" 5 " name="five" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '5')"></input>
+<input type="button" value=" 6 " name="six" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '6')"></input>
+<input type="button" value=" - " name="minus" class="button-standard"  style="background-color:SeaGreen;border-color:SeaGreen;;color:#fff" onclick="insertAtCursor(document.opn.input, '-')"></input>
+</br>
+<input type="button" value="tan" name="tan" class="button-blue"  title="The tangent for x radians" onclick="insertAtCursor(document.opn.input, 'tan(')"></input>
+<input type="button" value="arctan" name="atan" class="button-blue" title="The arctangent for x, result in radians" onclick="insertAtCursor(document.opn.input, 'arctan(')"></input>
+<input type="button" value="ln" name="ln" class="button-blue" title="The natural logarithm of x" onclick="insertAtCursor(document.opn.input, 'ln(')"></input>
+<input type="button" value=" 1 " name="one" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '1')"></input>
+<input type="button" value=" 2 " name="two" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '2')"></input>
+<input type="button" value=" 3 " name="tree" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '3')"></input>
+<input type="button" value=" + " name="plus" class="button-standard"  style="background-color:SeaGreen;border-color:SeaGreen;;color:#fff" onclick="insertAtCursor(document.opn.input, '+')"></input>
+</br>
+<input type="button" value="&radic;" name="sqrt" class="button-blue" title="The square root of x" onclick="insertAtCursor(document.opn.input, '&radic;(')"></input>
+<input type="button" value="&pi;" name="pi" class="button-blue"  title="The Archimedes' constant &pi; pi" onclick="insertAtCursor(document.opn.input, '&pi;')"></input>
+<input type="button" value="e" name="Euler" class="button-blue"  title="The Euler's number and the base of natural logarithms" onclick="insertAtCursor(document.opn.input, 'e')"></input>
+<input type="button" value=" 0 " name="noll" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '0')"></input>
+<input type="button" value=" . " name="dot" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, '.')"></input>
+<input type="button" value="Exp" name="exp" class="button-standard" style="background-color:LightGrey;border-color:LightGrey;" onclick="insertAtCursor(document.opn.input, 'e')"></input>
+<input type="submit" value=" = " name="eq" class="button-standard" style="background-color:SeaGreen;border-color:SeaGreen;;color:#fff" onclick="document.opn.input.focus()"></input>
+</br> 
+</FORM>
+</td></tr></table>
+
+</center>
+	
+	
+<script>
+ 
+ 
+var resulthold = "";
+var given = "";
+
+function calculate(){
+   var MathIn = 0;
+   var i = 0;
+   var last = "";
+   var next = "";
+   var comma = -1;
+   var lpar = 0;
+   var rpar = 0;
+   var trail = "";
+   var start = 0;
+   var par1 = "";
+   var par2 = "";
+   var argument = "";
+   var num = 0;
+
+   given = document.opn.input.value;
+
+   try {
+
+      document.opn.input.value=document.opn.input.value.replace(/ /g,"");
+      
+      if(document.opn.input.value=="") {return;}
+
+      if(document.opn.input.value.indexOf("^") >= 0 && document.opn.input.value.indexOf("M") >= 0) {
+         alert("Please don't mix Math Objects with the use of calculator-buttons in the same calculation!");
+         return;
+      }
+
+      // Arcimedes' constant (π)
+      document.opn.input.value = document.opn.input.value.replace(/pi/ig, "Math.PI");     
+      document.opn.input.value = document.opn.input.value.replace(/π/g, "Math.PI");
+
+
+      //Euler's number (e)
+      for (i=0;i<=document.opn.input.value.length;i++){
+         last = document.opn.input.value.charAt(i);
+         if(last == "e" && (trail < "0" || trail > "9") && trail != "." && trail != ",") {
+            document.opn.input.value = document.opn.input.value.slice(0,i) + "Math.E" + document.opn.input.value.slice(i+1);
+         }
+         trail = last;
+      }
+
+
+
+      // Math Object Properties
+      document.opn.input.value = document.opn.input.value.replace(/Math.E/g, eval(Math.E));
+      document.opn.input.value = document.opn.input.value.replace(/Math.LN2/g, eval(Math.LN2));
+      document.opn.input.value = document.opn.input.value.replace(/Math.LN10/g, eval(Math.LN10));
+      document.opn.input.value = document.opn.input.value.replace(/Math.LOG2E/g, eval(Math.LOG2E));
+      document.opn.input.value = document.opn.input.value.replace(/Math.LOG10E/g, eval(Math.LOG10E));
+      document.opn.input.value = document.opn.input.value.replace(/Math.PI/g, eval(Math.PI));
+      document.opn.input.value = document.opn.input.value.replace(/Math.SQRT1_2/g, eval(Math.SQRT1_2));
+      document.opn.input.value = document.opn.input.value.replace(/Math.SQRT2/g, eval(Math.SQRT2));
+
+      // Decimal comma to decimal point 
+      for (i=0;i<=document.opn.input.value.length;i++){
+         last = document.opn.input.value.charAt(i);
+         if(last == "," && !MathIn) {
+            document.opn.input.value = document.opn.input.value.slice(0,i) + "." + document.opn.input.value.slice(i+1);
+            comma = 1;
+         }
+         if(last == "M") {
+            MathIn = 1;
+         }
+         if(last == "(" && MathIn) {
+            lpar += 1;
+         }
+         if(last == ")" && MathIn) {
+            rpar += 1;
+            if(lpar == rpar) {
+               MathIn = 0;
+            }
+         }
+      }
+      lpar = 0;
+      rpar = 0;
+
+      // Math Object Methods
+      document.opn.input.value = document.opn.input.value.replace(/√/g, "Math.sqrt");
+      document.opn.input.value = document.opn.input.value.replace(/ln/g, "Math.log");
+      document.opn.input.value = document.opn.input.value.replace(/arcsin/g, "Math.asin");
+      document.opn.input.value = document.opn.input.value.replace(/sin/g, "Math.sin");
+      document.opn.input.value = document.opn.input.value.replace(/Math.Math.sin/g, "Math.sin");
+      document.opn.input.value = document.opn.input.value.replace(/Math.aMath.sin/g, "Math.asin");
+      document.opn.input.value = document.opn.input.value.replace(/arccos/g, "Math.acos");
+      document.opn.input.value = document.opn.input.value.replace(/cos/g, "Math.cos");
+      document.opn.input.value = document.opn.input.value.replace(/Math.Math.cos/g, "Math.cos");
+      document.opn.input.value = document.opn.input.value.replace(/Math.aMath.cos/g, "Math.acos");
+      document.opn.input.value = document.opn.input.value.replace(/arctan/g, "Math.atan");
+      document.opn.input.value = document.opn.input.value.replace(/tan/g, "Math.tan");
+      document.opn.input.value = document.opn.input.value.replace(/Math.Math.tan/g, "Math.tan");
+      document.opn.input.value = document.opn.input.value.replace(/Math.aMath.tan/g, "Math.atan");
+
+      while (document.opn.input.value.indexOf("^") >= 0) {
+         if(document.opn.input.value.indexOf("^") >= 0) { start = document.opn.input.value.indexOf("^") + 1; }
+         lpar = 0;
+         rpar = 0;
+         for (i=start;i<=document.opn.input.value.length;i++){
+            last = document.opn.input.value.charAt(i);
+            if ((last == "+" || last == "-" || last == "*" || last == "/" || last == "^" || last == ")" || i == document.opn.input.value.length) 
+                && lpar == rpar && document.opn.input.value.slice(start,i+1) != "-" && document.opn.input.value.slice(start,i+1) != "+" 
+                && document.opn.input.value.charAt(i-1) != "e") {	    
+               par2 = document.opn.input.value.slice(start,i);
+               break;
+            }
+            if (last == "(") { lpar += 1; }
+            if (last == ")") { rpar += 1; }
+         } 
+         if(document.opn.input.value.indexOf("^") >= 0) { start = document.opn.input.value.indexOf("^") - 1; }
+         lpar = 0;
+         rpar = 0;
+         for (i=start;i>=0;i--){
+            last = document.opn.input.value.charAt(i);
+            if (i == 0) {
+              if (last == "(" && lpar == rpar) {
+                 par1 = document.opn.input.value.slice(i+1,start+1);            
+                 break;
+              }
+              else {
+                 par1 = document.opn.input.value.slice(i,start+1);
+//Buggfix 2012-04-22
+                 if (last =="-") {
+                    par1 = document.opn.input.value.slice(i+1,start+1);
+                 }
+                 break;  
+              }
+            }
+            else {
+              next = document.opn.input.value.charAt(i - 1);
+            }
+            if ((last == "+" || last == "-" || last == "*" || last == "/" || last == "^" || last == "(") && lpar == rpar && next != "e") {
+               if((last == "+" || last == "-") && (next == "+" || next == "-" || next == "(")) { 
+                  par1 = document.opn.input.value.slice(i,start+1);
+                  break;
+               }
+               else {	    
+                  par1 = document.opn.input.value.slice(i+1,start+1);
+                  break;
+               }
+            }
+            if (last == "(") { lpar += 1; }
+            if (last == ")") { rpar += 1; }
+
+         }
+         argument = par1 + "," + par2;
+         document.opn.input.value = document.opn.input.value.slice(0,start + 1 - par1.length) + "Math.pow(" + argument + ")" + document.opn.input.value.slice(start + 2 + par2.length);   
+      }
+      document.opn.input.value = document.opn.input.value.replace(/log/g, "1/Math.log(10)*Math.log"); 
+
+      //Trigonometry values by definition
+      while (document.opn.input.value.lastIndexOf("Math.tan") >= 0) { 
+         start = document.opn.input.value.lastIndexOf("Math.tan");
+         lpar = 0;
+         rpar = 0;
+         for (i=start + 8;i<=document.opn.input.value.length;i++){
+            last = document.opn.input.value.charAt(i);            
+            if (last == "(") { lpar += 1; }
+            if (last == ")") { rpar += 1; }
+            if (lpar == rpar) { 
+               argument = document.opn.input.value.slice(start + 9,i);
+               break;
+            }            
+         }
+         document.opn.input.value = document.opn.input.value.substring(0,start) + "(Math.sin(" + argument +")/Math.cos(" + argument + "))"
+         + document.opn.input.value.substring(start + 10 + argument.length);
+      }
+      start = document.opn.input.value.length;
+      while (document.opn.input.value.substring(0, start).lastIndexOf("Math.sin") >= 0 || document.opn.input.value.substring(0, start).lastIndexOf("Math.cos") >= 0) { 
+         if(document.opn.input.value.substring(0, start).lastIndexOf("Math.sin") > document.opn.input.value.substring(0, start).lastIndexOf("Math.cos")) {
+            start = document.opn.input.value.substring(0, start).lastIndexOf("Math.sin");
+            lpar = 0;
+            rpar = 0;
+            for (i=start + 8;i<=document.opn.input.value.length;i++){
+               last = document.opn.input.value.charAt(i);            
+               if (last == "(") { lpar += 1; }
+               if (last == ")") { rpar += 1; }
+               if (lpar == rpar) { 
+                  argument = document.opn.input.value.slice(start + 9,i);
+                  break;
+               }            
+            }
+            if(Math.abs(eval(argument)) >= 1 && Math.abs(eval(argument)%Math.PI) < 1e-14) {
+               document.opn.input.value = document.opn.input.value.substring(0,start) + "0"
+               + document.opn.input.value.substring(start + 10 + argument.length);
+            }
+            else {
+               document.opn.input.value = document.opn.input.value.substring(0,start) + "Math.sin(" + argument +")"
+               + document.opn.input.value.substring(start + 10 + argument.length);
+            }
+         }
+         else {
+            start = document.opn.input.value.substring(0, start).lastIndexOf("Math.cos");
+            lpar = 0;
+            rpar = 0;
+            for (i=start + 8;i<=document.opn.input.value.length;i++){
+               last = document.opn.input.value.charAt(i);            
+               if (last == "(") { lpar += 1; }
+               if (last == ")") { rpar += 1; }
+               if (lpar == rpar) { 
+                  argument = document.opn.input.value.slice(start + 9,i);
+                  break;
+               }            
+            }
+            if(Math.abs(Math.abs(eval(argument)%Math.PI) - Math.PI/2) < 1e-14) {
+               document.opn.input.value = document.opn.input.value.substring(0,start) + "0"
+               + document.opn.input.value.substring(start + 10 + argument.length);
+            }
+            else {
+               document.opn.input.value = document.opn.input.value.substring(0,start) + "Math.cos(" + argument +")"
+               + document.opn.input.value.substring(start + 10 + argument.length);
+            }
+         }
+      }
+
+      // Evaluate!
+      num = eval(document.opn.input.value);
+      num = num.toPrecision(15);
+      document.opn.input.value = eval(num);
+      if (document.opn.input.value == "NaN") {
+         document.opn.input.value = given;
+         resulthold = "";
+         alert("Undefined!");
+         return;
+      }
+      if(comma == 1) {document.opn.input.value=document.opn.input.value.replace(/\./,",");}
+      resulthold = document.opn.input.value;
+   }
+   catch(err) {
+      resulthold = "";
+      lpar = 0;
+      rpar = 0;
+      document.opn.input.value = given;
+      alert("Error!");
+   }
+   return;
+}
+
+function changed() {
+
+   var last = document.opn.input.value.charAt(document.opn.input.value.length-1);
+   var curposit = GetCursorLocation(document.opn.input)
+
+   if(resulthold == "") {return;}
+   if(resulthold == document.opn.input.value) {return;}
+
+   if(last != "+" && last != "-" && last != "*" && last != "/" && last != "e" && last != "E" && last != "^" && resulthold == document.opn.input.value.slice(0,document.opn.input.value.length-1) && curposit == document.opn.input.value.length) {
+      document.opn.input.value = last;
+   }
+   resulthold = "";
+   return;
+}
+
+function cleared() {
+   document.opn.input.focus();
+   resulthold = "";
+   return;
+}
+
+function smaller() { 
+   window.open("smallwindow.htm","fonster1","toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no,width=420,height=280,top=184,left=289");
+}
+
+function helpfile() { 
+   window.open("helpwindow.htm","fonster2","toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no,width=750,height=300,top=184,left=289");
+}
+
+function insertAtCursor(myField, myValue) {
+//This function was downloaded from http://alexking.org/blog/2003/06/02/inserting-at-the-cursor-using-javascript
+//Some changes are made by me
+
+  //IE support
+
+  if (document.selection) {
+    myField.focus();
+    sel = document.selection.createRange();
+    if (sel.text.length > 0) {
+      alert("Selected text and the use of buttons is not supported in this browser. Use the keyboard or another browser!");
+    }
+    else {
+      sel.text = myValue;
+    }
+  }
+
+  //MOZILLA/NETSCAPE support
+
+  else if (myField.selectionStart || myField.selectionStart == '0') {
+    var startPos = myField.selectionStart;
+    var endPos = myField.selectionEnd;
+    myField.value = myField.value.substring(0, startPos)
+                  + myValue 
+                  + myField.value.substring(endPos, myField.value.length);
+    setCaretPosition(myField, startPos + myValue.length);
+  } 
+  else {
+    myField.value += myValue;
+    myField.focus();
+  }
+
+  changed();
+}
+ 
+function setCaretPosition(ctrl, pos) {
+// Source http://demo.vishalon.net/getset.htm
+
+ 
+  if(ctrl.setSelectionRange) {
+    ctrl.focus();
+    ctrl.setSelectionRange(pos,pos);
+  }
+  else if (ctrl.createTextRange) {
+    var range = ctrl.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', pos);
+    range.moveStart('character', pos);
+    range.select();
+  }
+}
+
+
+function GetCursorLocation(CurrentTextBox) {
+// Source http://www.vbknowledgebase.com/?Id=109&Desc=Cursor-Position-in-Textbox-Using-JavaScript
+
+    var CurrentSelection, FullRange, SelectedRange, LocationIndex = -1;
+    if (typeof CurrentTextBox.selectionStart == "number") {
+      LocationIndex = CurrentTextBox.selectionStart;
+    }
+    else if (document.selection && CurrentTextBox.createTextRange) {
+      CurrentSelection = document.selection;
+      if (CurrentSelection) {
+        SelectedRange = CurrentSelection.createRange();
+        FullRange = CurrentTextBox.createTextRange();
+        FullRange.setEndPoint("EndToStart", SelectedRange);
+        LocationIndex = FullRange.text.length;
+      }
+    }
+    return LocationIndex;
+}
+ 
+  	function trace(msg) { console.log(msg) }
+ 
+
+</script>
+</body></html>

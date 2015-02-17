@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<title>Qmedia Video</title>
+	<link REL="SHORTCUT ICON" HREF="qlogo.ico">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+<head>
+<style>
+		body { 	font-family:Verdana,Geneva,sans-serif; font-size:13px;padding:0px;margin:0px }
+</style>
+<body>
+	<div id="playerDiv" style="width:100%;height:100%;padding:0px;margin:0px"></div>
+ 	
+<script>
+
+	var playerSource="";
+	var playerAuto="false";
+	var playerStart=0;
+	var playerVolume=50;
+	var playerSpeed=1;
+	var playerAspect=.5625;
+	var playerControls="true";
+	var player=null;															// Holds player object
+	var playerNow=0;															// Current time in secs
+	var playerTime=null;														// Timer
+	var playerMode="empty";														// State of player
+	var playerType="";															// Type of player
+	var	playerCurTime=0;														// Current time
+	var	playerTRT=0;															// Total running time
+	var playerHgt,playerWid;													// Source height/width
+	var isMobile=false;															// Flag for mobile devices
+
+	var v=window.location.search.substring(1).split("&");						// Get query string
+	for (i=0;i<v.length;++i) {													// For each param
+		if (v[i].match(/src/i))			playerSource=v[i].substr(4);			// Set src
+		if (v[i].match(/start/i))		playerStart=v[i].substr(6)-0;			// Set start
+		if (v[i].match(/auto/i))		playerAuto=v[i].substr(5);				// Set auto
+		if (v[i].match(/controls/i))	playerControls=v[i].substr(9);			// Set controls
+		}
+
+	$(document).ready(function() {												// When loaded
+ 		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler		
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		$(window).resize(function(e) { RunPlayer("resize"); } );				// Redraw on window resize		
+		Init();																	// Init player
+		});
+
+
+	function Init()
+	{
+		if (playerSource.match(/\/\//i)) {										// If HTML5
+			if (player && (playerType == "html5")) {							// Player not active loaded
+				if (player.currentSrc.indexOf(playerSource) == -1)	{			// Different clip
+					var base=playerSource.match(/(.*)\.[^.]+$/i)[1];			// Extract base
+					if (playerSource.match(/\.mp3/i)) 							// If audio
+						player.src=base+".mp3";									// MP3 Source
+					else{														// VIDEO
+						player.src=base+".mp4";									// MP4 Source
+						player.src=base+".ogg";									// OGG Source
+						player.src=base+".webm";								// WEBM Source
+						}
+					player.load();												// Load it
+					}
+				}
+			else{
+				playerType="html5";												// Set type
+				RunPlayer("init");												// Init player
+				}
+			}
+		else if (!isNaN(playerSource)) {										// If Vimeo
+			playerType="vimeo";													// Set type
+			RunPlayer("init");													// Init player
+			}
+		else{																	// If YouTube
+			playerType="youtube";												// Set type
+			if (player) {														// Player active 
+				if (!player.pauseVideo)	{										// If not YT player set
+					if (YT.Player)												// If library is loaded
+						RunPlayer("init");										// Re-init
+					else{														// Load YT api
+						var tag=document.createElement('script');				// Create script
+						tag.src="//www.youtube.com/iframe_api";					// Set api url
+						var firstScriptTag=document.getElementsByTagName('script')[0];	// Find 1st script
+						firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);		// Load
+						}
+					}
+				else{															// Player is active
+					if (player.getVideoUrl().indexOf(playerSource) == -1)		// Different clip
+						player.loadVideoById(playerSource);						// Reload clip
+					else
+						player.seekTo(playerStart);								// Seek to start point
+					if (playerAuto == "true")									// If autoplay
+						player.playVideo();										// Play video
+					}
+				}
+			else{																// API not loaded yet
+				var tag=document.createElement('script');						// Create script
+				tag.src="//www.youtube.com/iframe_api";							// Set api url
+				var firstScriptTag=document.getElementsByTagName('script')[0];	// Find 1st script
+				firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);		// Load
+				}
+			}
+		}
+
+
+	function RunPlayer(what, param, param2)									// PLAYER ACTIONS
+	{
+		var i,str;
+		if ((what == "play") || (what == "jump")) {								// Play/jump
+			if ((playerMode == "empty") && isMobile)							// Mobiles need user to initiate touch before controlled play
+				return;															// Quit
+			playerMode="play";													// Set mode
+ 			if (param != undefined) {											// If playing to a time
+				if ((""+param).match(/:/))										// In tc format
+					param=TimecodeToSeconds(param);								// Convert to secs
+				playerCurTime=playerNow=param;									// Set cur time
+				}	
+			if (!player) {														// If no player yet
+				return;															// Quit
+				}
+			if (playerType == "youtube") {										// If YouTube
+				player.seekTo(playerNow,true);									// Cue
+				if (playerMode == "play")		player.playVideo();				// Play
+				else if (playerMode == "pause")	player.pauseVideo();			// Pause
+				}
+			else if (playerType == "vimeo") {									// If Vimeo
+				player.contentWindow.postMessage("{\"method\":\"seekTo\",\"value\":\""+playerNow+"\"}","*");
+				if (playerMode == "play")										// Play
+					player.contentWindow.postMessage("{\"method\":\"play\"}","*");	// Send
+				if (playerMode == "pause")										// Pause
+					player.contentWindow.postMessage("{\"method\":\"pause\"}","*");	// Send
+ 				}
+			else if (playerType == "html5") {									// If HTML5
+				if (player.readyState)											// If ready
+					player.currentTime=playerNow;								// Cue
+				if (playerMode == "play")  	player.play(); 						// Play
+				if (playerMode == "pause")	player.pause();						// Pause
+				}
+			if (playerMode == "play")	playerStarted=playerNow;				// Save start point
+			
+			}
+		else if ((what == "scrub") || (what == "seek"))  {						// Scrub
+			if ((playerMode == "empty") && isMobile)							// Mobiles need user to initiate touch before controlled play
+				return;															// Quit
+			playerCurTime=playerNow=param;										// Set now
+			if (!player) {														// If no player yet
+				return;															// Quit
+				}
+			if (playerType == "youtube") 										// If YouTube
+				player.seekTo(playerNow,true);									// Cue
+			else if (playerType == "vimeo") 									// If Vimeo
+				player.contentWindow.postMessage("{\"method\":\"seekTo\",\"value\":\""+playerNow+"\"}","*");
+			else if (playerType == "html5") 									// If HTML5
+				if (player.readyState)											// If ready
+					player.currentTime=playerNow;								// Cue
+				}
+		else if (what == "pause") {												// Pause
+			$("#playBut").attr("src","images/playbut.gif");						// Show pause but
+			playerMode="pause";													// Set mode
+			if (!player)	return;												// If no player yet, quit
+			if (playerType == "youtube") 										// If YouTube
+				player.pauseVideo();											// Pause
+			else if (playerType == "vimeo") 									// If Vimeo
+				player.contentWindow.postMessage("{\"method\":\"pause\"}","*");	// Send
+ 			else if (playerType == "html5") 									// If HTML5
+				player.pause(); 												// Pause
+			}
+		else if (what == "volume") {											// Volume
+			if (!player)	return;												// If no player yet, quit
+			if (playerType == "youtube") 										// If YouTube
+				player.setVolume(playerVolume);									// Set it
+			else if (playerType == "vimeo") 									// If Vimeo
+				player.contentWindow.postMessage("{\"method\":\"setVolume\",\"value\":\""+playerVolume/100+"\"}","*"); // Send
+			else if (playerType == "html5") 									// If HTML5
+				player.volume=playerVolume/100;								// Set
+			}
+		else if (what == "speed") {												// Speed
+			if (!player)	return;												// If no player yet, quit
+			s=Math.max(.25,playerSpeed/50);										// Speed set .25 to 2
+			if (playerType == "youtube") 										// If initted YouTube
+				player.setPlaybackRate(s);										// Set speed
+			else if (playerType == "html5") 									// If HTML5
+				player.playbackRate=s;											// Set speed
+			}
+		else if (what == "resize") {											// Resize
+			if (!player)	return;												// If no player yet, quit
+			var w=$("#playerDiv").width();										// Get width
+			if (playerType == "youtube") 										// If initted YouTube
+				player.setSize(w,w*playerAspect);								// Resize
+			else if ((playerType == "vimeo") || (playerType == "html5")) {		// If Vimeo or HTML5
+				$("#vplayer").width(w);											// Set width
+				$("#vplayer").height(w*playerAspect);							// Set height
+				}
+			}
+		else if (what == "ready") {												// When ready
+			RunPlayer("resize");												// Size player
+			if (playerAuto == "true")											// If autoplay
+				RunPlayer("play",playerStart);									// Play
+			else if (playerStart) {												// Normal pause start
+				RunPlayer("scrub",playerStart);									// Seek
+				RunPlayer("pause");												// Pause
+				}
+			}
+		else if (what == "init") {												// Init player
+			if (playerType == "youtube") {										// If YouTube
+				$("#playerDiv").html("<div id='vplayer'></div>");				// Add holder div
+	       		var pc=playerControls == "true" ? 1 : 0;						// Set player controls?
+	       		player=new YT.Player("vplayer", {								// Init player
+					playerVars:{ modestbranding:1, controls:pc, 				// Settings	
+						disablekb:1, rel:0, showinfo:0, html5:1, autoplay:1 },
+	          		videoId: playerSource,										// Set source
+	         	 	events:{													// Add event handlers
+	            		"onStateChange": function(s) {							// Change of state
+		         			if (s.data == 1) {									// In play
+								$("#playBut").attr("src","images/pausebut.gif");// Show pause but
+       							if (playerMode == "empty" && !isMobile) 		// If first time
+       								player.pauseVideo();						// Pause
+								playerMode="play";								// Set mode
+       							playerStarted=playerNow;						// Save start point
+
+       							}
+       						else if ((s.data == 2) || (s.data == 0)) {			// In pause
+  								$("#playBut").attr("src","images/playbut.gif");	// Show play but
+								playerMode="pause";								// Set mode
+       							}
+       						},
+	            		"onReady": function(s) { RunPlayer("ready") }			// When ready
+		 	   			}});
+					}
+			else if (playerType == "vimeo") {									// If Vimeo
+				str="<iframe id='vplayer' src='//player.vimeo.com/video/";		// Iframe start
+				str+=playerSource;											// Add source
+				str+="?api=1&player_id=vplayer' width='500' height='281' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";
+				$("#playerDiv").html(str);										// Add vimeo iframe
+		       	player=$("#vplayer")[0];										// Point to iframe
+				}
+			else if (playerType == "html5") {									// If HTML5
+ 				$("#playerDiv").html("");										// Add video tag
+				var base=playerSource.match(/(.*)\.[^.]+$/i)[1];				// Extract base
+				str="<video id='vplayer' width='100%' height='100%'";			// Video tag
+				if ((playerControls == "true") || isMobile)						// If has controls or mobile
+					str+= " controls";											// Add native controls to player
+				str+=">";														// Close tag
+				if (playerSource.match(/\.mp3/i)) {								// If audio
+					str+="<source src='"+base+".mp3'  type='audio/mp3'>";		// MP3 Source
+					}
+				else{															// VIDEO
+					str+="<source src='"+base+".mp4'  type='video/mp4'>";		// MP4 Source
+					str+="<source src='"+base+".ogg'  type='video/ogg'>";		// OGG Source
+					str+="<source src='"+base+".webm' type='video/webm'>";		// WEBM Source
+					}
+				str+="</video>"
+				$("#playerDiv").html(str);										// Add video tag
+  				var myVid=document.getElementById("vplayer");					// Point ar player	
+ 				
+ 				myVid.onloadstart=function() {									// When loaded
+ 					player=$("#vplayer")[0];									// Point to player
+ 					RunPlayer("ready");											// Set up player		
+					};
+								
+				myVid.oncanplay=function() {									// When ready
+     				playerAspect=player.videoHeight/player.videoWidth;			// Set aspect 				
+ 					RunPlayer("ready");											// Set up player		
+					};
+
+ 				myVid.onended= function() {										// When done
+  					RunPlayer("pause");											// Pause
+ 					};
+
+				myVid.onplay= function() {										// When playing
+					$("#playBut").attr("src","images/pausebut.gif");			// Show pause but
+ 						playerMode="play";										// Set mode
+					playerStarted=playerNow;									// Save start point
+					};
+
+				myVid.onpause= function() {										// When paused
+					$("#playBut").attr("src","images/playbut.gif");				// Show play but
+ 						playerMode="pause";										// Set mode
+   					};
+  		 		
+ 			  	myVid.addEventListener("loadstart",myVid.onloadstart);	 		// Add listener for safari
+ 		 		myVid.addEventListener("canplay",myVid.oncanplay);	 			// Add listener for safari
+			  	myVid.addEventListener("ended",myVid.onended);	 				// Add listener for safari
+ 			  	myVid.addEventListener("play",myVid.onplay);	 				// Add listener for safari
+ 			  	myVid.addEventListener("pause",myVid.onpause);	 				// Add listener for safari
+ 	    		}
+			}																	// End init
+ 	}																			// End closure
+
+
+
+   function onYouTubeIframeAPIReady() 										// YOUTUBE PLAYER READY
+    {   
+		RunPlayer("init");														// Init player								
+ 	}
+
+	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=src+"|show";													// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+    
+ 	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		if (e.origin.match(/vimeo/i)) {											// From vimeo
+    		var ev=$.parseJSON(e.data);											// Parse json
+  			if (ev.event == "playProgress") {									// If playing			
+				playerCurTime=ev.data.seconds;									// Set current time
+				}
+			else if (ev.event == "play") {										// If play			
+				playerMode="play";												// Set mode
+				playerStarted=playerNow;										// Save start point
+ 				}
+			else if ((ev.event == "pause") || (ev.event == "finish")) {			// If pause/end			
+				playerMode="pause";												// Set mode
+     			}
+			else if (ev.method == "getDuration") {								// If duration	
+   				playerTRT=ev.value;												// Get duration
+ 				}
+ 			else if (ev.method == "getVideoHeight") {							// If height	
+ 				playerHgt=ev.value;												// Set it
+ 				if (playerWid)													// If have both parts
+ 					playerAspect=playerHgt/playerWid;							// Calc asp		
+				}
+			else if (ev.method == "getVideoWidth") {							// If width	
+ 				playerWid=ev.value;												// Set it
+ 				if (playerHgt)													// If have both parts
+ 					playerAspect=playerHgt/playerWid;							// Calc asp		
+				}
+ 			else if (ev.event == "ready"){										// If ready			
+	 			var f=$("#vplayer");											// Point at iframe
+				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"play\"}","*");
+				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"pause\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"playProgress\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getVideoHeight\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getVideoWidth\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getDuration\"}","*");
+ 				RunPlayer("ready");												// Show status
+				}
+		}	
+		else if (e.data.match(/ShivaAct=/))	{									// If data
+			var v=e.data.split("|");											// Split msg into parts
+			if (v[0] == "ShivaAct=play") 										// PLAY
+				RunPlayer("play",v[1] ? v[1] : "");								// Play 
+			else if (v[0] == "ShivaAct=pause")									// PAUSE
+				RunPlayer("pause");												// Pause
+			else if (v[0] == "ShivaAct=seek")									// SEEK
+				RunPlayer("seek",v[1]);											// Seek
+			}
+		}
+ 
+ 
+  	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+  
+  </script>
+  
+  
+</body>
+</html>

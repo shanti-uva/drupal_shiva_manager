@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="qlogo.ico">
+	<title>Qmedia assessment</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<script type="text/javascript" src="http://latex.codecogs.com/js/eq_editor-lite-15.js" ></script>
+
+	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
+	
+		.ui-autocomplete { max-height: 300px; overflow-y: auto; }
+	
+ 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+		   				}
+ 		.mainSty { 		font-family:Verdana,Geneva,sans-serif; font-size:12px; 
+						padding:0px; margin:0px;border-radius:1.5em;
+						-moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+						}
+		.titleSty { 	font-size:1.5em; font-weight:bold; text-align:center;padding-bottom:.6em;
+						color:#000099
+						} 
+		.textSty { 		padding-left:1.3em; padding-right:1.3em;
+						} 
+ 		.promptSty { 	padding-left:3.3em;padding-right:3.3em;padding-top:.33em;padding-bottom:1.2em;
+						margin:.6em;
+						font-weight:bold;
+						border-bottom:1px solid #ccc;
+						} 
+		.optionsLSty { 	text-align:left;padding-top:.33em;display:inline-block;
+						} 
+		.optionsRSty { 	padding-top:.33em;padding-left:1.33em;display:inline-block;
+						vertical-align:top;float:center;
+						} 
+ 		.nextbutSty {	border-radius:.83em;color:#009900;font-size:1em;
+ 						}
+  		#sortable li {  margin-bottom:.6em; padding:1px; padding-left:.75em;padding-right:.75em;
+  						border:1px solid #999;
+  						border-radius:.8em;background-color:#ddd;cursor:pointer
+  						}
+ 		.is {			border-radius:.8em;padding-left:.6em;padding-right:.6em;padding-top:1px;
+						border:1px solid #999;font-size:1em;height;1.66em;width:16.66em;
+						]
+	
+ 	</style>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-49268159-1', 'qmediaplayer.com');
+	  ga('send', 'pageview');
+	</script>
+</head>
+<body>
+
+<div id="containerDiv" style="position:absolute;top:0px;left:0px;width:100%" class="mainSty">
+	<div id="titleDiv" class="titleSty"></div>
+	<div id="textDiv" class="textSty"></div>
+	<div id="promptDiv" class="promptSty"></div>
+	<div style="text-align:center" >
+		<div id="optionsLDiv" class="optionsLSty"></div>
+		<div id="optionsRDiv" class="optionsRSty"><br></div>
+	</div>
+</div>
+<script>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	var aData=null;																// Holds assessment data
+	var curPage=0;																// Current page of assessment
+	var numTries=0;																// Number of tries at page
+	var curTime;																// Current player time
+	var qe=new QmediaEvents("QmediaAssess");									// Alloc events library
+	var fontSize=12;
+			
+	$(document).ready(function() {											// WHEN PAGE LOADED
+		qe.SendMessage("ready","");												// Send ready message
+		$("body").on("keydown", function(e) {									// Handle key down
+				if (e.which == 27) 												// Esc key
+					Draw(aData.pages.length);									// Move on
+				});
+		setInterval(function(){	qe.SendMessage("time")},500);					// Get player time						
+	
+		/////////////////////////////////////////////////////////////////	
+		var e={}
+		e.data='ShivaAct=data|{';
+		e.data+='"pages":[';
+		e.data+='{"title":"Sort"';
+		e.data+=',"numTries":3';
+		e.data+=',"text":"Sort these."';
+		e.data+=',\"prompt":"Drag then"';
+		e.data+=',\"whyRight":"Good!"';
+		e.data+=',"optionType":"sort","options":["first:sex","second:drugs","third:rock","fourth:roll"]}';
+		e.data+="]}"
+		
+//		QmediaEventHandler(e);													
+		/////////////////////////////////////////////////////////////////	
+
+
+		});
+		
+	function QmediaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var v=e.data.split("|");												// Split into parts													
+		if (v[0] == "ShivaAct=data") {											// If a data 
+			aData=$.parseJSON(v[1]);											// Convert to obj
+			Draw(0,false);														// Draw page
+			}												
+		else if (v[0] == "ShivaAct=time") 										// If time
+			curTime=v[1];														// Set curtime 
+	}	
+
+	function Draw(num, showRight, answer)									// DRAW NODE
+	{
+		var i,lab,str="",col="#000";												
+		if (num >= aData.pages.length) {										// Past last page
+			qe.SendMessage("done");												// Send done message
+			return;																// Quit
+			}
+		if (curPage != num)														// If a new page
+			numTries=0;															// Reset tries counter
+		curPage=num;															// Set curpage
+		var d=aData.pages[num];													// Point at page
+		if (d.fontSize)	fontSize=d.fontSize-0;									// Set fontsize
+		if (d.title) 	$("#titleDiv").html(d.title);							// Add title
+		if (d.text) 	$("#textDiv").html(d.text);								// Text body
+		if (d.prompt) 	$("#promptDiv").html(d.prompt);							// Prompt
+		$("#containerDiv").css("font-size",fontSize+"px");						// Set fontsize
+		if ((d.options) &&  (d.optionType == "radio" || d.optionType == "checkbox")) {	// Checkbox or radio												// Add options
+			for (i=0;i<d.options.length;++i) {									// For each option
+				if (showRight) {												// If showing correct answers
+					if (d.options[i].match(/^\*/)) 	col="#00aa00";				// If a correct one
+					else							col="#aa0000";				// A wrong one
+					}
+				lab=d.options[i].replace(/^\*/,"");								// Remove "correct" dot
+				str+="<span style='color:"+col+"'>";							// Add color span
+			 	str+="&nbsp;&nbsp; <input type='"+d.optionType+"' name='opt' id='opt"+i+"' value='"+lab+"'>"+lab+"</span>";	// Add line
+				if (d.options[i].toLowerCase() == "*other")						// If an other option
+		 			str+="&nbsp <input class='is' style='width:6em;' type='text' id='otherOpt'><br></span>";	// Add line
+				else	str+="<br>";											// Add break
+				}
+			}
+		if ((d.options) && (d.optionType == "cloze")) {							// Cloze
+			var s=d.text;
+			i=0;																// Reset counter
+			$("#textDiv").html("");												// No text
+			var imp="<input style='text-align:center;width:6.6em;border:none;border-bottom:1px solid;padding-left:.33em;color:#000099;font-size:1em' type='text' id='opt";
+			while (s.match(/__+/)) 												// While a blank
+				s=s.replace(/__+/,imp+(i++)+"'>");								// Replace with text box
+			str="<p style='margin-left:3.33em;margin-right:3.33em'>"+s+"</p>";	// Add cloze
+			}
+		if ((d.options) && ((d.optionType == "sort") || (d.optionType == "match"))) {	// Sort/match
+			v=[]
+			for (i=0;i<d.options.length;++i)  v.push(i);						// Normal array
+			v=Shuffle(v);														// Shuffle array
+			str="<ol id='sortable'>";											// Header
+			for (i=0;i<d.options.length;++i) 									// For each option
+				str+="<li id='"+i+"'>"+d.options[v[i]].split(":")[0]+"</li>";	// Add item
+			str+="</ol>";														// End tag
+			}
+		else if (d.optionType == "write") {										// Write option
+			if (d.options && d.options[0] && d.options[0].match(/eq/i))			// If including equations
+				str+="<button id='loadeqneditor' style='vertical-align:top' class='nextbutSty'>Fx</button>";	// Add button		
+			str+="&nbsp;&nbsp;<textarea id='opt' rows=3 placeholder='Write your answer here...' ";		// Text 
+			str+="style='font-size:1em;width:"+$("#optionsLDiv").parent().width()*.8+"px'></textarea><br></span>";	// area
+			if (d.options && d.options[0] && d.options[0].match(/eq/i))			// If including equations
+				str+="<img id='equation1'/><div id='qneditor'></div>";			// Add image/div for Codecogs editor	
+			}	
+		else if (d.optionType == "notes") {										// Notes option
+			qe.SendMessage("notes","start");									// Send start message
+			if (d.pic) str+="<img src='"+d.pic+"' height=75><br>";				// Add pic
+			}	
+		else if (d.optionType == "draw")	{									// Draw option
+			qe.SendMessage("draw","start|bottom|"+d.background);				// Send start message
+			if (d.pic) str+="<img src='"+d.pic+"' height=75><br>";				// Add pic
+			}	
+		str+="<p style='text-align:center'><input id='nextBut' type='button' value='OK' class='nextbutSty'>"; 	// Add button
+		if (d.skip != "false")													// If allowing skip button
+			str+=" <input id='skipBut' type='button' value='Skip' class='nextbutSty'>"; 	// Add button
+		str+="</p>";															// End tag
+		$("#optionsLDiv").html(str);											// Set div
+ 		$("#sortable" ).sortable({ axis:"y"} );									// Make sortable, if a sort
+		i=$("#optionsLDiv").height()-16;										// Height of options side
+		if ((d.optionType != "draw") && (d.optionType != "notes"))	{			// Not the draw or notes options
+			if (d.pic) $("#optionsRDiv").html("<img src='"+d.pic+"' height="+i+">");// Add pic
+			else	   $("#optionsRDiv").html("");								// Erase it
+			}
+		if ((d.options) && (d.optionType == "match")) {							// Match
+			str="<span style='text-align:left;font-weight:bold'>";				// Span
+			for (i=0;i<d.options.length;++i)									// For each option
+				str+="<p>"+d.options[i].split(":")[1]+"</p>";					// Add item
+			$("#optionsRDiv").html(str+"</span>");								// Set div
+			}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+		$("#nextBut").on("click",function() {									// NEXT BUTTON HANDLER
+			var ans
+			++numTries;															// Increment tries
+			if (d.optionType == "write") {										// Draw style
+				ans=$("#opt").val();											// Get answer
+				}	
+			else if (d.optionType == "notes") {									// Notes style
+				qe.SendMessage("answer",d.title+"|personalNotes");				// Send answer message
+				Draw(curPage+1);												// Move on
+				return;															// Quit
+				}
+			else if (d.optionType == "draw") {									// Draw style
+				qe.SendMessage("answer",d.title+"|draw");						// Send answer message
+				qe.SendMessage("draw","done");									// Send done message
+				Draw(curPage+1);												// Move on
+				return;															// Quit
+				}	
+			var i,correct=0,wrong=0,requiredCorrect=0;
+			
+			if (d.optionType != "write")										// Anything but write
+				ans="*"+$("input[name='opt']:checked").val();					// Chosen answer
+			if (d.options)														// If options
+				for (i=0;i<d.options.length;++i) {								// For each option
+					if (d.options[i].match(/^\*/))	requiredCorrect++			// Add to required count
+					if (ans == d.options[i])									// If correct
+						correct++;												// Add to count
+						}
+			if (d.optionType == "radio")	ans=correct ? "right" : "wrong"		// Radio
+			else if (d.optionType == "cloze") {									// Cloze
+				for (i=0;i<d.options.length;++i) {								// For each option
+					v=d.options[i].split(";");									// Get parts
+					ans=$("#opt"+i).val();										// Get answer
+					for (var j=0;j<v.length;++j) 								// For each possibility
+						if (ans.toLowerCase() == v[j].toLowerCase()) {			// If a match		
+							correct++;											// Add to corrects
+							break;												// Stop looking
+							}
+					if (j == v.length)											// Didn't find it
+						wrong++;												// Add to wrongs
+					}
+				ans="wrong";													// Assume wrong
+				if (correct == i)				ans="right";					// Correct				
+				if (correct && correct < i)		ans="partial"					// Partial
+				}
+			else if ((d.optionType == "sort") || (d.optionType == "match")) {	// Sort/Match
+				for (i=0;i<d.options.length;++i) 								// For each option
+				 	if ($("#sortable :eq("+i+")").text() == d.options[i].split(":")[0])	// A match
+						++correct;												// Inc right answer
+				ans="wrong";													// Assume wrong
+				if (correct == i)				ans="right";					// Correct				
+				if (correct && correct < i)		ans="partial"					// Partial
+				}
+			else if (d.optionType == "findtime") {								// Find time
+				var s,e;
+				ans="wrong";													// Assume wrong
+				for (i=0;i<d.options.length;++i) {								// For each option
+					s=d.options[i].split("-")[0];								// Start
+					e=d.options[i].split("-")[1];								// End
+					if (!e)	e=s;												// No end
+					if ((curTime >=s) && (curTime <=e))							// In span
+						ans="right";											// Right
+					}
+				}
+			else if (d.optionType != "write") {									// All else but write
+				correct=0;														// Restart
+				for (i=0;i<d.options.length;++i) {								// For each option
+					if ($("#opt"+i).prop("checked"))							// If checked
+						if (d.options[i].match(/^\*/)) 	correct++;				// Add to right count
+						else							wrong++;				// Add to wrong count
+					}
+				ans="wrong";													// Assume wrong
+				if (correct == requiredCorrect  && !wrong) 		ans="right";	// All correct
+				else if (correct < requiredCorrect && !wrong && correct) ans="partial"	// If partial
+				}
+			
+			if ($("#otherOpt").val())											// If *other written in
+				ans=$("#otherOpt").val();										// Use its value
+			if (d.whyRight || d.whyWrong || d.whyPartial) {						// If feedback spec'd
+				str="<div style='margin-left:1.33em;margin-right:1.33em'><div style='font-size:1.5em;text-align:center;font-weight:bold;color:#";	// Title
+				if (ans == "right") {											// Right
+					str+="009900'>That's right!</div><p>";						// Heading
+					if (d.whyRight)	str+=d.whyRight;							// Show explanation
+					}				
+				else if (ans == "partial") { 									// Partial
+					str+="ff9900'>Sorry, you only got some right..</div><p>";	// Heading		
+					if (d.whyPartial)		str+=d.whyPartial;					// Show partial explanation
+					else if (d.whyWrong)	str+=d.whyWrong;					// Show wrong explanation
+				 	if (str.match(/here\(/i)) {									// A here() tag
+				 		i=str.match(/here\((.+)\)/i)[1];						// Get time
+				 		str=str.replace(/here\(.+\)/i,"<a href='javascript:qe.SendMessage(\"play\",\""+i+"\")'>here</a>");
+				 		}
+				 	if (numTries < d.numTries)									// If more tries ahead
+				 		str+="<div style='text-align:center'><b>Please try again</b> ("+numTries+"/"+d.numTries+")</div>";	// Show progress
+					}
+				else if (ans == "wrong") { 										// Wrong
+					str+="000099'>Sorry, that's not the right answer</div><p>";	// Heading	
+					if (d.whyWrong)	str+=d.whyWrong;							// Show wrong explanation
+				 	if (str.match(/here\(/i)) {									// A here() tag
+				 		i=str.match(/here\((.+)\)/i)[1];						// Get time
+				 		str=str.replace(/here\(.+\)/i,"<a href='javascript:qe.SendMessage(\"play\",\""+i+"\")'>here</a>");
+				 		}
+				 	if (numTries < d.numTries)									// If more tries ahead
+				 		str+="<div style='text-align:center'><b>Please try again</b> ("+numTries+"/"+d.numTries+")</div>";	// Show progress
+					}
+				else{															// Anything else
+					str+="009900'>Answer</div><p>";								// Heading
+					if (d.whyRight)	str+=d.whyRight;							// Show explanation
+					}				
+				str+="</p><div style='text-align:center'>";						// Center
+				str+="<input id='contBut' type='button' value='Continue' class='nextbutSty'></div></div>"; 	// Add button
+				$("#optionsLDiv").html(str);									// Set div
+				$("#optionsRDiv").html("");										// Set div
+
+				$("#contBut").on("click",function() {							// CONTINUE BUTTON HANDLER
+					if (ans == "right")											// If right		
+						Draw(curPage+1);										// Show next
+					else{
+						if (numTries < d.numTries)	Draw(curPage);				// Reshow
+						else 						Draw(curPage+1);			// Move on
+						}
+					});
+				}																// End feedback
+			else
+				Draw(curPage+1);												// Show next
+			qe.SendMessage("answer",d.title+"|"+ans);							// Send answer message
+			});																	// End nextbut
+			
+		$("#skipBut").on("click",function() {									// SKIP BUTTON HANDLER
+			if (d.optionType == "draw") 										// Draw style
+				qe.SendMessage("draw","done");									// Send done message
+			else if (d.optionType == "notes") 									// Notes style
+				qe.SendMessage("answer",d.title+"|personalNotes");				// Send answer message
+			qe.SendMessage("answer",d.title+"|skip");							// Send answer message
+			Draw(curPage+1);													// Move on
+			});
+		
+		$('#loadeqneditor').click(function() {									// EQUATION BUTTON CLICKED
+			var http = ('https:' == document.location.protocol ? 'https://' : 'http://');
+		  	var host='latex.codecogs.com';
+			EQUATION_ENGINE = http+host;
+			FAVORITE_ENGINE = http+host+'/json';
+			EDITOR_SRC      = http+host;
+			EMBED_ENGINE    = http+host+'/editor_embedded_json.php';
+			EDIT_ENGINE     = http+'www.codecogs.com/eqnedit.php';
+			EDITOR_SW_FLASH = http+'download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0';
+			EDITOR_SW_PLAYER= http+'www.macromedia.com/go/getflashplayer';
+		    var css=$("<link rel='stylesheet' type='text/css' href='http://latex.codecogs.com/css/equation-embed.css'>");
+     		$("head").append(css); 												// Add css
+			$.ajax({ url: "http://latex.codecogs.com/js/eq_editor-lite-15.js",	// Load js
+     				 dataType: "script", cache: true							// Cached JS 
+					}).done(function() {										// When loaded	
+			 			EqEditor.embed('qneditor','things','mini','en-us');		// Embed editor
+						EqEditor.add(new EqTextArea('equation1','opt'),false);	// Display final equation
+				 		});
+			});	
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// HELPERS
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function Shuffle(array) 												// FISHER-YATES SHUFFLE
+	{
+	   	var i,j,t;
+		for (i=array.length-1;i>0;i--) {										// Work backwards thru array
+			j=Math.floor(Math.random()*(i+1));									// Get random num
+	      	t=array[i];															// Save current
+	        array[i]=array[j];													// Swap 
+	        array[j]=t;															// with random 
+	   		}
+    	return array;															// Return shuffled array
+	}	
+	
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// QMEDIA EVENT HANDLING
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+	function QmediaEvents(id)													// CONSTRUCTOR
+	{
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",QmediaEventHandler,false);		// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",QmediaEventHandler);					// Add handler
+		this.header=id+"=";														// Set header
+	}
+	
+	QmediaEvents.prototype.SendMessage=function(cmd, msg)					// SEND MESSAGE TO CONTAINER
+		{
+		var str=this.header+cmd+"|extra";										// Add header				
+		if (msg) str+="|"+msg;													// If more to it, add
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+	
+	
+</script>
+</body></html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>3D test</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<script src="lib/wgl/three.min.js"></script>
+	<script src="lib/wgl/loaders/OBJLoader.js"></script>
+	<script src="lib/wgl/loaders/ColladaLoader.js"></script>
+	<script src="lib/wgl/controls/OrbitControls.js"></script>
+	<script src="lib/wgl/controls/TrackballControls.js"></script>
+	<script src="lib/wgl/controls/FirstPersonControls.js"></script>
+	<script src="lib/wgl/Detector.js"></script>
+<style type="text/css">
+	body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small;margin:0px;padding:0px }
+</style>
+		
+<script>
+
+	var modelSrc="wgl/male02.obj";
+	var modelScale=1;
+	var	ambientLight="#101030";
+	var spotLight="#ffeedd";
+	var skyBox=true;
+	
+	var container;																// Iframe to hold WebGL player
+	var startTime,offTime=0;													// Current play time
+	var keys=[];																// Hold keyframes
+	var camera,scene,renderer,controls,clock,model;								// WebGL guts
+	var qe=new QmediaEvents("Qmedia3D");										// Alloc events library
+	var controlMode="orbit",lastMode;
+	
+	if (!Detector.webgl) Detector.addGetWebGLMessage();							// If not Wrbgl, warn
+	var url=window.location.search.substring(1);								// Get query string
+	if (url) {																	// If a query
+		url=url.split("&");														// Split into parts
+		for (var i=0;i<url.length;++i) {										// For each key/val pair
+			var v=url[i].split("=");											// Split into key/val
+			if (v[0] == 'm')	modelSrc=v[1];									// If model
+			if (v[0] == 's')	modelScale=v[1]-0;								// If scale
+			if (v[0] == 'c')	controlMode=v[1];								// If control
+			if (v[0] == 'b')	skyBox=false;									// If no skybox
+			}
+		if (modelSrc.match(/\/\//))												// If external domain
+			modelSrc="proxy.php?url="+modelSrc;									// Add proxy
+		}
+	$(document).ready(function() {												// When loaded
+		$("body").on("keydown",onKeyDown);										// Register handler
+ 		$("body").append("<div id='containerDiv'></div>");						// Add container div
+ 		camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,1,2000);	// Create camera
+		camera.position.z=400;													// Set z
+		SetControlMode(controlMode);											// Default control mode
+		renderer=new THREE.WebGLRenderer({antialias:true});						// Create renderer
+		renderer.setSize(window.innerWidth,window.innerHeight-2);				// Set remder size
+		$("#containerDiv")[0].appendChild(renderer.domElement);								// Add renderer
+		window.addEventListener('resize',onWindowResize,false );				// Add resize event
+		scene=new THREE.Scene();												// Add scene											
+		var manager=new THREE.LoadingManager();									// Ad loader
+		manager.onProgress=function(item,loaded,total) { console.log(item,loaded,total); };	// Track progress
+			
+		// TEXTURE FOR MAPMAN MODEL
+
+		var texture=new THREE.Texture();
+		var loader=new THREE.ImageLoader(manager);
+		loader.load('wgl/map.jpg',function(image) {
+			texture.name="tex";
+			texture.image=image;
+			texture.needsUpdate=true;
+			});
+		
+		// MODEL IMPORTERS
+		
+		if (modelSrc.match(/\.obj/i)) {										// IMPORT OBJ MODELS
+			var loader=new THREE.OBJLoader(manager);
+			loader.load(modelSrc,function(object) {
+				model=object;
+				object.traverse(function(child) {
+					if (child instanceof THREE.Mesh) 
+						child.material.map=texture;
+					});
+				model.position.y=-80;
+				scene.add(model);		
+				});
+			}
+		
+		if (modelSrc.match(/\.dae/i)) {										// IMPORT COLLADA DAE MODELS 
+			var loader = new THREE.ColladaLoader();
+			loader.options.convertUpAxis=true;
+			ambientLight="#cccccc";
+			spotLight="#666666";
+			loader.load(modelSrc,function(object) {
+				model=object.scene;
+				model.traverse(function(child) {
+						if (child instanceof THREE.SkinnedMesh) {
+							var animation=new THREE.Animation(child,child.geometry.animation);
+							animation.play();
+							}
+					});
+				model.position.y=-80;
+				model.scale.x=model.scale.y=model.scale.z=modelScale;
+				scene.add(model);		
+				});
+			}
+		
+		// SKYBOX
+		
+		if (skyBox) {
+			var urls=['wgl/px.jpg','wgl/nx.jpg','wgl/py.jpg','wgl/ny.jpg','wgl/pz.jpg','wgl/nz.jpg'];
+			var reflectionCube = THREE.ImageUtils.loadTextureCube(urls);
+			reflectionCube.format = THREE.RGBFormat;
+			var refractionCube = new THREE.CubeTexture( reflectionCube.image, new THREE.CubeRefractionMapping() );
+			refractionCube.format = THREE.RGBFormat;
+			var cubeMaterial3 = new THREE.MeshLambertMaterial( { color: 0xff6600, ambient: 0x993300, envMap: reflectionCube, combine: THREE.MixOperation, reflectivity: 0.3 } );
+			var cubeMaterial2 = new THREE.MeshLambertMaterial( { color: 0xffee00, ambient: 0x996600, envMap: refractionCube, refractionRatio: 0.95 } );
+			var cubeMaterial1 = new THREE.MeshLambertMaterial( { color: 0xffffff, ambient: 0xaaaaaa, envMap: reflectionCube } )
+			var shader = THREE.ShaderLib[ "cube" ];
+			shader.uniforms[ "tCube" ].value=reflectionCube;
+			var material = new THREE.ShaderMaterial( {
+				fragmentShader: shader.fragmentShader, vertexShader: shader.vertexShader,
+				uniforms: shader.uniforms, depthWrite: false, side: THREE.BackSide
+				}),
+			mesh=new THREE.Mesh( new THREE.BoxGeometry( 800, 800, 800 ), material );
+			scene.add(mesh);
+			}
+
+		// LIGHTING
+		
+		var ambient=new THREE.AmbientLight(ambientLight);
+		scene.add(ambient);
+		var directionalLight=new THREE.DirectionalLight(spotLight);
+		directionalLight.position.set(0,0,1);
+		scene.add(directionalLight);
+
+		animate();																	// Animate
+//		$("body").append("<div style='position:absolute;top:0px;z-index:1000;color:white'><br> &nbsp; Hit the C key to change control mode, P to play/pause, H for home</div>")
+		qe.SendMessage("ready","");													// Send ready message
+	
+	});
+
+	function onWindowResize() 													// ON WINDOW RESIZE
+	{
+		camera.aspect=window.innerWidth/window.innerHeight;							// Set apsect
+		camera.updateProjectionMatrix();											// Reset matrix
+		renderer.setSize(window.innerWidth,window.innerHeight-2);					// Reset render size
+	}
+
+	function animate() 															// ANIMATION LOOP
+	{
+		requestAnimationFrame(animate);												// Set timer
+		if (controls && (controlMode != "goto")) {									// If controls set
+			controls.update(clock.getDelta());										// Update position?
+			THREE.AnimationHandler.update(clock.getDelta());						// Update animation
+			}
+		renderer.render(scene,camera);												// Render
+	}
+
+	function SetControlMode(mode, time)											// SET CAMERA CONTROL MODE
+	{
+      	clock=new THREE.Clock();													// Reset clock
+	  	controlMode=mode;															// Set mode flag
+ 		controls=null;																// No controls
+		switch (controlMode) {														// Route on mode
+ 			case "orbit":
+		 	  	lastMode=controlMode;												// Save mode
+    			controls=new THREE.OrbitControls(camera);
+  				controls.damping = 0.2;
+    			break;
+  			case "track":
+		 	  	lastMode=controlMode;												// Save mode
+    			controls=new THREE.TrackballControls(camera);
+  				controls.rotationSpeed = 0.5;
+  				controls.zoomSpeed = 0.5;
+    			controls.panSpeed = 0.5;
+   				break;
+			case "first":
+  		 	  	lastMode=controlMode;												// Save mode
+	   			controls=new THREE.FirstPersonControls(camera);
+ 		       	controls.lookSpeed = 0.05;
+		        controls.movementSpeed = 100;
+		        controls.noFly = true;
+		        controls.lookVertical = true;
+		        controls.constrainVertical = false;
+		        controls.verticalMin = 1.0;
+		        controls.verticalMax = 2.0;
+		        controls.lon=-90;
+		        controls.lat=0;
+		        break;
+ 			case "path": case "":
+				var i,s,e,pct;
+				controls={};
+   				if (controlMode == "path")										// If path mode
+					startTime=new Date().getTime()/1000;						// Set start
+ 	    			
+ 	    			controls.update=function() {								// UPDATE FUNCTION
+					if (!controlMode)	return;
+
+						var time=new Date().getTime()/1000-startTime;			// Get now
+						time+=(offTime-0);										// Add offset
+						for (i=keys.length-1;i>=0;--i) 							// Work backwards
+							if (keys[i][0] <= time)								// If it's this one
+								break;											// Stop looking
+						if (i < 0)												// Didn't find one
+							return;												// Quit
+						s=e=keys[i];											// Point to start			
+						if (i <	keys.length-1)									// If not last
+							e=keys[i+1];										// Point at end				
+						pct=e[0]-s[0];											// Duration
+						if (pct)	pct=(time-s[0])/pct;						// Point within key 0-1
+						if (s[7] == 2)											// Slow in and out
+							pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);				// Full cosine curve
+						else if (s[7] == 1)										// Slow in
+							pct=1.0-(Math.cos(1.5707*pct));						// 1st quadrant of cosine curve
+						else if (s[7] == 3)										// Slow out
+							pct=1.0-(Math.cos(1.5707+(1.5707*pct))+1.0);		// 2nd quadrant of cosine curve
+						camera.position.x=s[1]-0+(e[1]-s[1])*pct;				// Get val
+						camera.position.y=s[2]-0+(e[2]-s[2])*pct;				// Get val
+						camera.position.z=s[3]-0+(e[3]-s[3])*pct;				// Get val
+						camera.rotation.x=s[4]-0+(e[4]-s[4])*pct;				// Get val
+						camera.rotation.y=s[5]-0+(e[5]-s[5])*pct;				// Get val
+						camera.rotation.z=s[6]-0+(e[6]-s[6])*pct;				// Get val
+						if (i == keys.length-1)									// If done
+							SetControlMode(lastMode);							// Return to previous mode
+						};
+	 				break;
+       		}
+      	}
+ 		
+	keys.push([0,0,0,300, 	0,0,0,1]);
+	keys.push([5,100,0,300,	0,0,0,0]);
+	keys.push([10,200,0,300,	0,-1,0,0]);
+	keys.push([15,36.340,30.424,-151.439,-0.024,0.025,0.001,3]);
+	keys.push([30,0,0,300, 	0,0,0,1]);
+	
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+
+	function onKeyDown(e) 													// KEYDOWN HANDLER
+	{
+		if (e.which == 75) {
+			var str=camera.position.x.toFixed(3)+","+camera.position.y.toFixed(3)+","+camera.position.z.toFixed(3)+",";
+			str+=camera.rotation.x.toFixed(3)+","+camera.rotation.y.toFixed(3)+","+camera.rotation.z.toFixed(3);
+			console.log(str);
+			}
+		if (e.which == 67) {
+			if (controlMode == "orbit") 
+				controlMode="first";
+			else 
+				controlMode="orbit";
+			SetControlMode(controlMode);
+			}
+		if (e.which == 71) {													// G for goto
+			SetControlMode("goto");
+			var str=prompt("Type Go to pos: t=,x=,y=...");
+			var v=str.split(",");
+			for (var i=0;i<v.length;++i) {
+				if (v[i].split("=")[0] == "x")	camera.position.x=v[i].split("=")[1]-0;
+				if (v[i].split("=")[0] == "y")	camera.position.y=v[i].split("=")[1]-0;
+				if (v[i].split("=")[0] == "z")	camera.position.z=v[i].split("=")[1]-0;
+				if (v[i].split("=")[0] == "xr")	camera.rotation.x=v[i].split("=")[1]-0;
+				if (v[i].split("=")[0] == "yr")	camera.rotation.y=v[i].split("=")[1]-0;
+				if (v[i].split("=")[0] == "zr")	camera.rotation.z=v[i].split("=")[1]-0;
+				}
+			SetControlMode("orbit");
+			}
+		if (e.which == 80) {													// P for play
+			if (controlMode == "path")											// If key playing
+				SetControlMode(lastMode);										// Return to previous mode
+			else{																// Start playing
+				if (e.shiftKey)													// As for time
+					offTime=prompt("Type time")-0;								// Get offset
+				else															// Just play
+					offTime=0;													// No offset
+				SetControlMode("path");											// Play
+				}
+			}
+		if (e.which == 72) {													// H for home
+			camera.position.z=500;
+			camera.position.x=camera.position.y=0;	
+			camera.rotation.x=camera.rotation.y=camera.rotation.z=0;
+			}
+		}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// QMEDIA EVENT HANDLING
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+	function QmediaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var v=e.data.split("|");												// Split into parts													
+		if (v[0] == "ShivaAct=path") {											// If a data 
+			keys=v[3].split(';')												// Get key sets
+//			keys="-100,0,0,300,0,0,0,1;3,100,0,300,0,0,0,3;6,200,0,300,0,3,0,0".split(';');
+			for (var i=0;i<keys.length;++i)										// For each set	
+				keys[i]=keys[i].split(',');										// Make into array
+			offTime=v[2]-0;														// Start time
+			if (v[1] == "play")													// If immediately playing
+				SetControlMode("path");											// Play it
+			}											
+		else if (v[0] == "ShivaAct=goto") {										// If goto
+			var s=v[1].split(',')												// Get vals
+			SetControlMode("goto");												// Control mode
+			if (s[0] != undefined)	camera.position.x=s[0]-0;					// Get val
+			if (s[1] != undefined)	camera.position.y=s[1]-0;					// Get val
+			if (s[2] != undefined)	camera.position.z=s[2]-0;					// Get val
+			if (s[3] != undefined)	camera.rotation.x=s[3]-0;					// Get val
+			if (s[4] != undefined)	camera.rotation.y=s[4]-0;					// Get val
+			if (s[5] != undefined)	camera.rotation.z=s[5]-0;					// Get val
+			}
+		else if (v[0] == "ShivaAct=play") {										// If play
+			offTime=0;															// No offset
+			if (v[1])	offTime=v[1]-0;											// If time spec'd
+			SetControlMode("path");												// Play it
+			}
+		else if (v[0] == "ShivaAct=pause") { 									// If pause
+			if (controlMode == "path")											// If key playing
+				SetControlMode(lastMode);										// Return to previous mode
+			}
+		else if (v[0] == "ShivaAct=scene") 	{									// If scene
+			}
+		else if (v[0] == "ShivaAct=control") {									// If control
+			SetControlMode(v[1]);												// Set mode
+			}
+		}	
+
+	function QmediaEvents(id)												// CONSTRUCTOR
+	{
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",QmediaEventHandler,false);		// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",QmediaEventHandler);					// Add handler
+		this.header=id+"=";														// Set header
+	}
+	
+	QmediaEvents.prototype.SendMessage=function(cmd, msg)					// SEND MESSAGE TO CONTAINER
+		{
+		var str=this.header+cmd+"|extra";										// Add header				
+		if (msg) str+="|"+msg;													// If more to it, add
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+</script>
+</body>
+</html>

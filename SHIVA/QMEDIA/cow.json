@@ -1,0 +1,66 @@
+LoadShow({
+    "title": "Assessing Concept of Word",
+    "initialPrompt":"&copy;2014 The University of Virginia",
+    "contentsLab": "Index",
+    "contentsPlayOnClick":"true",
+    "infoLab": "More information",
+    "transHgt": 400,
+    "transInfoRatio": 0.5,
+    "transLab": "Description",
+    "transLangs": "None|English|Spanish|French|Tibetan",
+    "transLanguage": "English",
+    "transText": "I thought in getting up to my TED wish I would try to begin by putting in perspective what I try to do and how it fits with what they try to do. We live in a world that everyone knows is interdependent, but insufficient in three major ways. It is, first of all, profoundly unequal: half the world's people still living on less than two dollars a day; a billion people with no access to clean water; two and a half billion no access to sanitation; a billion going to bed hungry every night; one in four deaths every year from AIDS, TB, malaria and the variety of infections associated with dirty water -- 80 percent of them under five years of age. Even in wealthy countries it is common now to see inequality growing. In the United States, since 2001 we've had five years of economic growth, five years of productivity growth in the workplace, but median wages are stagnant and the percentage of working families dropping below the poverty line is up by four percent. The percentage of working families without health care up by four percent. So this interdependent world which has been pretty good to most of us -- which is why we're all here in Northern California doing what we do for a living, enjoying this evening -- is profoundly unequal. It is also unstable. Unstable because of the threats of terror, weapons of mass destruction, the spread of global disease and a sense that we are vulnerable to it in a way that we weren't not so many years ago. And perhaps most important of all, it is unsustainable because of climate change, resource depletion and species destruction.\n\nWhen I think about the world I would like to leave to my daughter and the grandchildren I hope to have, it is a world that moves away from unequal, unstable, unsustainable interdependence to integrated communities -- locally, nationally and globally -- that share the characteristics of all successful communities: a broadly shared, accessible set of opportunities, a shared sense of responsibility for the success of the common enterprise and a genuine sense of belonging. All easier said than done. When the terrorist incidents occurred in the United Kingdom a couple of years ago, I think even though they didn't claim as many lives as we lost in the United States on 9/11, I think the thing that troubled the British most was that the perpetrators were not invaders, but homegrown citizens whose religious and political identities were more important to them than the people they grew up with, went to school with, worked with, shared weekends with, shared meals with. In other words, they thought their differences were more important than their common humanity. It is the central psychological plague of humankind in the 21st century.\n\nInto this mix, people like us, who are not in public office, have more power to do good than at any time in history, because more than half the world's people live under governments they voted in and can vote out. And even non-democratic governments are more sensitive to public opinion. Because primarily of the power of the Internet, people of modest means can band together and amass vast sums of money that can change the world for some public good if they all agree. When the tsunami hit South Asia, the United States contributed 1.2 billion dollars. 30 percent of our households gave. Half of them gave over the Internet. The median contribution was somewhere around 57 dollars. And thirdly, because of the rise of non-governmental organizations. They, businesses, other citizens' groups, have enormous power to affect the lives of our fellow human beings. When I became president in 1993, there were none of these organizations in Russia. There are now a couple of hundred thousand. None in India. There are now at least a half a million active. None in China. There are now 250,000 registered with the government, probably twice again that many who are not registered for political reasons.\n\nWhen I organized my foundation, and I thought about the world as it is and the world that I hope to leave to the next generation, and I tried to be realistic about what I had cared about all my life that I could still have an impact on. I wanted to focus on activities that would help to alleviate poverty, fight disease, combat climate change, bridge the religious, racial and other divides that torment the world, but to do it in a way that would either use whatever particular skills we could put together in our group to change the way some public good function was performed so that it would sweep across the world more.",
+    "playerAspect": 0.75,
+    "playerAuto": "false",
+    "playerControls": "false",
+    "playerQuality": "Default",
+    "playerSource": "http://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_sh5p8j1p/format/url/flavorParamId/301971/video.mp4",
+    "playerSlideRatio": 0.5,
+    "playerSpeed": 50,
+    "playerStart": 0,
+    "playerStop": 680,
+    "playerVolume": 75,
+    "width": 1000,
+    "toc": [
+		{"t":0,    "c":"<b>Concept of word</b>"},
+		{"t":20,   "c":"Memorizing the rhyme", "l":1},
+		{"t":118,  "c":"Pointing", "l":1},
+		{"t":222,  "c":"Word identification", "l":1},
+		{"t":267,  "c":"COW word list", "l":1},
+		{"t":306,  "c":"<b>A sample assessment</b>"},
+		{"t":306,  "c":"Testing", "l":1},
+		{"t":327,  "c":"Using pictures", "l":1},
+		{"t":367,  "c":"Using words", "l":1},
+		{"t":384,  "c":"Guided pointing", "l":1},
+		{"t":404,  "c":"Solo pointing", "l":1},
+		{"t":489,  "c":"Spelling", "l":1},
+		{"t":593,  "c":"<b>Levels of COW</b>"},
+		{"t":593,  "c":"Developing", "l":1},
+		{"t":626.5,"c":"Rudimentary", "l":1},
+		{"t":669.2,"c":"Firm", "l":1}
+		],
+
+	"playerVectors": [
+		{ "t":0,   "c":"" },
+		{ "t":680, "c":"" }
+		],	
+
+	"transVectors": [
+		{ "t":0,   "c":0, "d":60 },
+		{ "t":680, "c":4554 } 
+		],	
+
+	"slideVectors": [ 
+		{ "t":0, "c":"//www.proactiveparent.com/pals-kids.gif", "r":0.5 },
+		{ "t":4, "c":"//2.bp.blogspot.com/-mYoHE0UMI_E/UwUh4VxvA0I/AAAAAAAAAME/8lycTZXDuD8/s1600/logo_large.gif", "r":0.66 },
+		{ "t":680, "c":"" }
+		],	
+
+	"infoVectors": [ 
+		{ "t":0,   "c":"//curry.virginia.edu/uploads/resourceLibrary/Curry_logo_square.jpg", "r":0.8},
+		{ "t":5,   "c":"//pals.virginia.edu", "r":0.5 },
+		{ "t":680, "c":"" }
+		]	
+})	
+
+

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<title>Qmedia tab</title>
+	<link REL="SHORTCUT ICON" HREF="qlogo.ico">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<script src="lib/vexflow-min.js"></script>
+	<script src="lib/underscore-min.js"></script>
+	<script src="lib/tabdiv-min.js"></script>
+</head>
+<style>
+		body { 	font-family:Verdana,Geneva,sans-serif; font-size:13px; }
+</style>
+<body>
+	<div id="containerDiv" style="width:90%;height:90%;padding-left:20px">
+    	<canvas id="tabCanvas"></canvas>
+  	</div>
+ 	
+<script>
+
+ 	var renderer,artist,vextab;
+    var curTab=""																// Holds tabs
+ 	$(window).resize(RenderTab);												// Re-render when resized
+   	$(document).ready(function() {												// When loaded
+		renderer=new Vex.Flow.Renderer($('#tabCanvas')[0],Vex.Flow.Renderer.Backends.CANVAS);	// New base renderer
+		artist=new Vex.Flow.Artist(0,0,100,{scale: 1});							// New artist
+     	vextab=new Vex.Flow.VexTab(artist);										// New tab parser
+		if (window == window.parent) {											// If standalone
+			$("body").append("<textarea cols='70' rows='4' id='tabEdit'></textarea>")	// Add text area
+ 		    $("#tabEdit").keyup(_.throttle(RenderTab,250));						// Set text on key
+ 			$("body").append("<br><button id='saveBut' onclick='GetData()'>Get tabs</button>");
+			$("body").append("&nbsp; &nbsp;Click <a href='//www.vexflow.com/vextab/tutorial.html' target=/_blank'> here</a> for VexTab  tutorial"); // Add link to docs		
+ 			$("body").append("<br><br><textarea cols='70' rows='4' id='xmlEdit'></textarea>")	// Add xml area
+  			$("body").append("<br><button id='saveBut' onclick='GetXML()'>Convert XML</button>&nbsp; &nbsp;Paste XML in box above <i>-- or --</i> &nbsp;<input type='file' id='files' name='files[]' />");
+ 			$("body").append("<br>Bars per line: <select id='xmlMpl'><option>1</option><option>2</option><option selected=selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>");
+ 			$("body").append(" Starting bar: <input id='xmlStart' type='text' size=1' value='1'>");
+ 			$("body").append(" Ending bar: <input id='xmlEnd' type='text' size='1'>");
+  			$("body").append("<br><input id='xmlNote' type='checkbox'> Show musical notation?");
+ 			$("body").append(" <input id='xmlRhythm' type='checkbox'> Rhythm notation?");
+			$("body").append(" Draw stems? <select id='xmlStems'><option>no</option><option>up</option><option>down</option></select>");
+ 			$("body").append("<br><br><div style='color:#990000' id='error'></div>"); // Add error field				
+			document.getElementById('files').addEventListener('change',onFileSelect,false);	// Add handler
+ 			}
+ 		RenderTab();															// Draw it
+ 		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler		
+		});
+
+    
+	function onFileSelect(evt) 												// FILE SELECT HANDLER
+	{
+	    var file=document.getElementById('files').files[0];						// Get first selected file
+		if (!file) 	 															// If not found
+			return;																// Quit
+		if (typeof FileReader == "undefined") 									// On Safari
+			return alert("Sorry this is not supported on your browser. Try Chrome or FireFox.")
+			var reader=new FileReader();											// Alloc reader
+		reader.readAsText(file.slice(0,file.size));								// Start reading
+	
+	    reader.onloadend=function(evt) {										// ON FINISHED LOADING
+	       if (evt.target.readyState == FileReader.DONE)  						// When done
+	 			$("#xmlEdit").val(evt.target.result);							// Copy to text box
+		    }
+ 	 }
+     
+    function RenderTab() 													// RENDER TAB
+	{
+		try {																	// Try
+			artist.width=$("#containerDiv").width();							// Reset width
+			vextab.reset();														// Reset tab parser
+			artist.reset();														// Reset artist
+			if (window == window.parent)										// If standalone
+				vextab.parse($("#tabEdit").val());								// Get from textarea
+			else																// Display mode
+				vextab.parse(curTab);											// Set tabs to draw
+			artist.render(renderer);											// Draw it
+	        $("#error").text("");												// Clear error display
+        	} 
+        catch(e) {																// On error
+			console.log(e);														// Show it
+			$("#error").html(e.message.replace(/[\n]/g, '<br/>'));				// Set display
+        	}
+      }
+
+ 	function GetData() 														// GET FORMATTED DATA
+ 	{
+ 		curTab="data|"+$("#tabEdit").val();										// Get string
+ 		curTab=curTab.replace(/\r/g,"\n");										// CR -> LF
+ 		curTab=curTab.replace(/\n+/g,"~");										// LF(s) -> single ~
+		window.prompt("To copy graphics to clipboard: Hit Ctrl+C, then press OK",curTab);
+ 	}
+ 	
+  	function GetXML() 														// GET XML DATA
+ 	{
+ 		var i,m=0,n=0,o,notes;
+  		var curDur="",tuple;
+ 		var tab=""
+ 		
+ 		var xml=$.parseXML($("#xmlEdit").val());								// Get xml
+		var mpl=$("#xmlMpl").val();												// Get measures/line
+		var s=$("#xmlStart").val()-1;											// Get start
+		var e=$("#xmlEnd").val();												// Get end
+		var stems=$("#xmlStems").val();											// Get stems
+		
+		if (!e || isNaN(e))	e=1000;												// No end
+		if (stems != "no")														// If stems set
+			tab+="options tab-stems=true tab-stem-direction="+stems+"\n"; 		// Add options
+		var numMeasures=$(xml).find("measure").length;							// Number of measure
+		xml=$(xml).find("part").eq(0);											// Point at first part		
+		$(xml).find("measure").each( function() {								// For each measure
+			if (n++ < s)	return true;										// Before time, continue
+			if (n > e)		return false;										// After time, quit
+			if (!(m++%mpl)) {													// If a line break
+				tab+="\ntabstave";												// Add stave
+				if ($("#xmlNote").prop("checked")) tab+=" notation=true";		// Show notation
+				tab+="\nnotes";													// Add notes header
+				}				
+			else	tab+="| ";													// If not 1st, add bar
+			notes=[];															// New note array						
+			$(this).find("note").each( function() {								// For each measure
+				o={};															// New note obj
+				if ($(this).find("type").text() == "quarter") 		o.d="q";	// Set dur
+				else if ($(this).find("type").text() == "eighth") 	o.d="8";	// Set dur
+				else if ($(this).find("type").text() == "half") 	o.d="h";	// Set dur
+				else if ($(this).find("type").text() == "16th") 	o.d="16";	// Set dur
+				else if ($(this).find("type").text() == "whole") 	o.d="w";	// Set dur
+				else if ($(this).find("type").text() == "32nd") 	o.d="32";	// Set dur
+				else												o.d="q";	// Def to 1/4								
+				if ($("#xmlRhythm").prop("checked"))	o.d+="S";				// Rhythm mode		
+				o.fret=$(this).find("fret").text()-0;							// Set fret			
+				o.string=$(this).find("string").text()-0;						// Set string
+				o.chord=0;														// Assume it's a free note
+					
+				
+				o.rest=($(this).find("rest").length > 0);						// Set rest
+				o.grace=($(this).find("grace").length > 0);						// Set grace
+				if (o.grace)	return true;									// Skip grace
+//				o.alter=($(this).find("alter").length > 0);						// Set alter
+				if ($(this).find("up-bow").length)	 		o.bow="u";  		// Bow up
+				else if ($(this).find("down-bow").length)	o.bow="d";  		// Bow down
+				if ($(this).find("bend-alter").length)		o.bend=Math.ceil($(this).find("bend-alter").eq(0).text());	// Bend
+				if ($(this).find("beam").length) {								// Beam
+					o.beam=$(this).find("beam").text();							// Save beam
+					if (notes.length) 	 										// Not first note
+						if ((notes[notes.length-1].beam == "end") && (o.beam == "end")) // If a previous end
+							notes[notes.length-1].beam="continue";				// Flag as continue
+					}
+				if ($(this).find("chord").length) {								// If part of a chord
+					o.chord=2;													// This is a member
+					if (notes.length) 	 										// Not first note
+						if (notes[notes.length-1].chord == 0) 					// If not notes attached yet
+							notes[notes.length-1].chord=1;						// Flag as chord start
+					}
+				if (notes.length && $(this).find("hammer-on").attr("type") == "stop") 	// A hammer-on
+					notes[notes.length-1].hammer=o.fret;						// Set fret
+				notes.push(o);													// Add note to measure
+				});													
+			tuple=-1;															// Reset tuple start
+			for (i=0;i<notes.length;++i) {										// For each note in measure
+				o=notes[i];														// Get note			
+				if ((o.beam == "begin") && (tuple == -1))	tuple=0;			// Start of tuple	
+				if (curDur != o.d) {											// A new dur
+					curDur=o.d;													// Then is now
+					tab+=" :"+o.d;												// Add duration
+					}
+				if (o.rest)	{													// rest
+					tab+=" ## ";												// Add rest
+					continue;													// Next note
+					}
+				if (o.chord == 1) 												// Chord start	
+					tab+=" (";													// Open chord													
+				else if (o.chord > 1) 											// Chord member	
+					tab+=".";													// Attach note to last													
+				else{
+					tab+=" ";													// A single note
+					if (o.beam) ++tuple;										// Add to count
+					}
+				if ((o.fret != undefined) && o.string)	{						// If defined
+					tab+=o.fret;												// Add fret
+					if (o.hammer)	tab+="h"+o.hammer;							// Add hammer? 
+					if (o.bend)		tab+="b"+(o.bend+o.fret);					// Add bend? 
+					if (o.alter)	tab+="v";									// Add vibrato?
+					if (o.bow)		tab+=o.bow;									// Add bow?
+					tab+="/"+o.string;											// Add string
+					}
+				if (o.chord) { 													// Chord	
+					if ((i == notes.length-1) || (notes[i+1].chord != 2)) {		// Next note is NOT a member
+						tab+=") ";												// Close chord	
+						if (o.beam) ++tuple;									// Add to count
+						}
+					}
+				if (o.beam && o.hammer) --tuple;								// Remove hammer from count
+				if (o.beam == "end") {											// Tuple end
+					tab+=" ^"+tuple+"^ ";										// Add tuple to stave
+					tuple=-1;													// No tuple
+					}
+				}			
+			});													
+		$("#tabEdit").val(tab);													// Put in vex text
+		RenderTab();															// Show it
+	}
+ 
+ 	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		if (e.data.match(/ShivaAct=/))	{										// If data
+			curTab=e.data.replace(/ShivaAct=/,"");								// Remove header
+			curTab=curTab.replace(/data\|/i,"");								// Remove header id
+			curTab=curTab.replace(/~/g,"\n");									// Decode CRs
+			RenderTab();														// Draw it
+ 			}
+		}
+ 
+  	function trace(msg) { console.log(msg) }
+  
+  	
+  
+  
+  
+   </script>
+  
+</body>
+</html>

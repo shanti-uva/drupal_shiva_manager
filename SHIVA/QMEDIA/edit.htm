@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="qlogo.ico">
+	<title>Qmedia Editor</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<script src="qfile.js"></script>
+	<script src="//viseyes.org/mapscholar/ckeditor/ckeditor.js"></script>
+
+	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:10px;}
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { 		background-color:#e0e0e0; }
+		td:focus {		outline:none;	}
+		select:focus {	outline:none;	}
+		.ui-autocomplete { max-height: 300px; overflow-y: auto; }
+	
+ 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+		   				}
+		.selectable { -moz-user-select: text;     -khtml-user-select: text;
+		   			 	-webkit-user-select: text;  -ms-user-select: text;   user-select: text;
+		   				}
+ 	 	.player { 		display:inline-block;margin:0px;border:none;padding:0px;
+ 	 					}
+	 	.pane 	{ 		background-color:#f0f0f0;font-size:12px
+	 					}
+	 	.footer { 		margin:-1px;border-bottom-right-radius:4px;border-bottom-left-radius:4px; 
+	 					border:1px solid #999;background-color:#ddd;font-size:13px;
+	 					padding:0px;padding-top:4px;padding-bottom:4px;
+	 					display:inline-block;top:100%;width:100%;
+	 					}
+	 	.editor { 		border-radius:4px;border:1px solid #999;min-width:400px;
+	 					}
+		.butSty {		border-radius:10px;color:#333;cursor:pointer;
+						}
+ 		.ui-menu {     	overflow:hidden;border:none;font-size:13px;
+ 						border-radius:0px;border-bottom:1px solid #999;padding:0px !important;
+ 						}
+		.ui-menu > li { 				float: left;display: block;width: auto !important;}
+		.ui-menu ul {   				border:1px solid #999;border-radius:4px;padding-bottom:6px !important;}
+		.ui-menu ul li {   				display:block;float:none;border:none }
+		.ui-menu ul li ul {    			width:auto; left:96px !important; padding-top:5px !important;padding-bottom:5px !important;}
+		.ui-menu ul li ul li {    		width:auto !important; margin: 0px 5px !important; }
+		.ui-menu ul li ul li a {   	 	float:left; }
+		.ui-menu li {    				margin: 5px 5px !important; padding: 0 0 !important; }
+		.ui-menu > li > a {  			float:left;display:block;clear: both;overflow: hidden; }
+		.ui-menu .ui-menu-icon {     	display:none }
+		.ui-menu .ui-menu .ui-menu li { float:left;display:block; }	
+ 		.ui-menu .ui-menu { 		    overflow: visible !important; }
+		.bs {			border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;
+						}
+		.is {			border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;width:200px;
+						}
+		.anchorDot {	width:10px;height:10px;background-color:#009900;;border-radius:6px;
+						display:inline-block;cursor:pointer;
+						}
+
+ 	</style>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-49268159-1', 'qmediaplayer.com');
+	  ga('send', 'pageview');
+	</script>
+</head>
+
+	<div id='playerDiv' class='unselectable' >
+		<iframe class="player" id="playerIF" src="show.htm" height="100%" scrolling="no"></iframe>
+	</div>
+	<div id="editDiv" class="editor unselectable" style="position:absolute;top:16px;z-index:4;display:hidden"> 
+		 <ul id="menu" style="margin:1px">
+		    <li id=""><a href="#">File</a><ul>
+				<li id="m11"><a  href="#">New</a></li>
+				<li id="m12"><a href="#">Open</a></li>
+				<li id="m13"><a href="#">Save</a></li>
+				<li id="m14"><a href="#">Save As...</a></li>
+				<li id="m15"><a href="#">Delete</a></li>
+				<li id="m16"><a href="#">Undelete</a></li>
+		   	</ul></li>
+		    <li id=""><a href="#">Edit</a><ul>
+				<li id="m21"><a href="#">Undo</a></li>
+	            <li id="m22"><a href="#">Bookmark&nbsp;an&nbsp;undo</a></li>
+		 		<li id="m23"><a href="#">JSON</a></il>
+		 		<li id="m24"><a href="#">Import timed transcript</a></il>
+			</ul></li>
+	 			<li id=""><a href="#">Content</a><ul>
+	                <li id="m31"><a href="#">Edit graphic content</a></li>
+	                <li id="m32"><a href="#">Edit transcript</a></li>
+	                <li id="m33"><a href="#">Edit index</a></li>
+	                <li id="m34"><a href="#">Edit assessments</a></li>
+	            </ul>
+			<li id="m4" ><a href="#">Settings</a><li>
+		</ul>
+		<div id="paneDiv" class="pane" style="width:100%;height:100%"></div> 
+		<div id="footerDiv" class="footer" style="position:absolute;width:100%">
+			<span id="showName"></span>
+			<a id='getHelp' href='https://docs.google.com/document/d/1hMjG_Df0ifMjbT3a9j_KVjieMllkY0J_5UInOlkQweE/edit?usp=sharing' 
+				target='_blank' style='text-decoration:none;position:absolute' title='Help document'>
+				<img src="images/helpicon.gif"></a>
+		</div>
+	</div>
+	<div id="playerSiz" style="position:absolute;top:0px;width:8px;cursor:col-resize;opacity:inherit;height:100%" class="unselectable" title="Resize player"></div>
+		
+<body>
+<script>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	var curShow="";																// Currently loaded show name
+	var curPane="intro";														// Current edit pane
+	var curJson=null;															// Holds current JSON
+	var curTime=0;																// Current time of show player
+	var qmf=null;																// File system
+	var curPage=curEdit=-1;														// Current row editing
+	var butsty=" style='border-radius:10px;color#666;padding-left:12px;padding-right:12px;color:#222;background-color:#ccc;font-size:12px;' ";	// Button styling
+	var keyFlag="";																// Holds key flags												
+	var defTransDur=60;															// Default trancript line duration
+	var drupalMan=false;														// Flag for drupal manager	
+	var playerZoom=1;															// Plyer zoom level
+	var conPtr=null;															// Content type selector
+	
+	$(document).ready(function() {											// WHEN PAGE LOADED
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+
+		drupalMan=(""+window.location).match(/pr=d/);							// If called from Drupal manager
+		qmf=new QmediaFile("//qmediaplayer.com/",0);							// Alloc file system
+		NewShow();																// Init show
+		
+		var url=window.location.search.substring(1);							// Get query string
+		if (url && !isNaN(url)) 												// If a number
+			curShow=url;														// Save show number											
+		else																	// No query
+			curShow=1;															// Load default show
+		
+		sessionStorage.clear();													// Reset undos
+		$("#menu" ).menu({ position:{my:"left top", at: "left top+40" }});		// Set menu
+		$("#menu").on("menuselect", function(event,ui) { 						// On menu select
+				var id=ui.item[0].id.substr(1);									// Get id
+				if (id)	Sound("click");											// Click
+				switch(id) {													// Route on id
+					case "11":	ConfirmBox("This will clear the project you current have open. It will not affect the one stored online",NewShow);
+								ChangePane("intro");	Preview();		break;	// New file
+					case "12":	ChangePane("intro");	qmf.Load(); 	break;	// Load file
+					case "13":	ChangePane("intro");	qmf.Save(0); 	break;	// Save file
+					case "14":	ChangePane("intro");	qmf.Save(1); 	break;	// Save as... 
+					case "15":	ChangePane("intro");	qmf.Delete(); 	break;	// Delete
+					case "16":	ChangePane("intro");	qmf.Delete(1); 	break;	// Undelete
+					case "21":	Undo();									break;	// Undo
+					case "22":	Do("bookmark");							break;	// Save bookmark
+					case "23":	ChangePane("json");						break;	// Edit JSON
+					case "24":	ChangePane("import");					break;	// Import timed transcript
+					case "31":	ChangePane("content");					break;	// Manage content
+					case "32": 	ChangePane("transcript");  				break;	// Transcript
+					case "33": 	ChangePane("index");  					break;	// Index 
+					case "34": 	ChangePane("assessment");  				break;	// Assessment content
+					case "4":	ChangePane("settings");					break;	// Edit settings
+					}
+			 	});
+		
+		Draw();
+		$(window).resize(function(e) { if (!e.target.id) Draw();	 } );		// Redraw on window resize		
+		setInterval(function() { SendShivaMessage("Qmedia=time",""+curTime) },500); // Set timer 1-fps
+		qmf.LoadFile("qmf"+curShow);											// Load project
+		if (drupalMan) 															// If called from Drupal manager
+			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
+		$("#editDiv").show();													// Show editor
+
+		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
+			cursorAt:{left:-8},iframeFix:true,									// Cursor offset
+			cursor: "col-resize", axis:"x",										// X-only
+//			containment:[0,0,wid,0],
+			drag: function(event, ui) {											// On drag
+				var wid=curJson.width;											// Copy width
+				if ((" "+curJson.width).match("%"))								// If % in width
+					wid=$("body").width()*.66;									// Use 66%										
+			 	playerZoom=Math.max(0,Math.min(1,(event.clientX)/wid));			// Set ratio between windows
+				Draw();															// Resize panes
+				}
+			});
+		$("#playerSiz").hover(													// Player width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+		});
+
+	});	
+	
+	function NewShow() 														// NEW SHOW
+	{	
+		curJson={};																// New obj
+		curJson.title="Title goes here";										// Set defaults
+		curJson.playerStop=600;
+		curJson.width=1000;
+		curJson.playerSource="3_T9Un5hWAg";
+		curJson.playerAspect=.5625;
+		curJson.infoLab="";
+		curShow=qmf.curFile="";													// Clear curshow
+		curJson.playerVectors=[];										
+		curJson.slideVectors=[];										
+		curJson.infoVectors=[];										
+		curEdit=-1;																// Not editing anything
+		Preview();																// Preview
+		Draw();																	// Show curshow number as vlanml
+	}
+
+	function LoadShow(data)													// LOAD A SHOW
+	{
+ 		if (data.qmfmsg == "private") {											// If a private file		
+			AlertBox("Private project","Sorry, but this project is marked <i>private</i>. You will need to supply the proper password to load it");
+			return;																// Quit
+			}
+		else if (data.qmfmsg == "error") {										// If an error
+			AlertBox("Sorry, but there was an error loading this project");
+			return;																// Quit
+			}
+  		curJson=data;															// Set json
+   		if (qmf.curFile)														// If a good file
+   			curShow=qmf.curFile;												// Set curshow
+  		Preview(); 																// Preview show
+   		Draw();																	// Redraw 
+   		Sound('ding'); 															// Ding
+    	}
+
+	function Preview(time)													// PREVIEW SHOW
+	{
+		Do();																	// Save for undo
+		if (curPane == "settings") 												// If current pane Settings
+			Draw();																// Redraw frame because width may be reset
+		Sound("click");															// Click
+		curJson.curShow=curShow;												// Set current show
+		SendShivaMessage("Qmedia=data",JSON.stringify(curJson));				// Send to show player	   		
+  		if (time) 																// If a rolling preview
+			SendShivaMessage("Qmedia=play",Math.max(curTime-0+time,0));			// Roll player	   		
+   	}
+   	
+   	
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EDIT PANES
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function ChangePane(newPane) 											// CHANGE EDIT PANE
+	{	
+		if (curPane == "json") {												// If current pane is JSON editor
+			var str=$("#jsonEditor").val();										// Get script
+			try {																// Try this
+				curJson=$.parseJSON(str);  										// Get editor contents
+				}
+			catch(err) {														// On error	
+				AlertBox("JSON syntax error", "There is some error in this JSON. Any edits made will be ignored.");	
+				}
+			}
+		curPane=newPane;														// Set current pane
+		Draw();																	// Redraw
+	}
+	
+	function Draw()															// RESIZE PANES
+	{ 
+		var str;
+		var wid=curJson.width;													// Copy width
+		if ((" "+curJson.width).match("%"))										// If % in width
+			wid=$("body").width()*.66;											// Use 66%										
+		var w=window.innerWidth-(wid*playerZoom)-32;							// Editor width
+		var h=window.innerHeight-64;											// Editor height
+		$("#playerIF").prop("width",wid);										// Player wid
+		$("#playerIF").prop("height",(h+40)/playerZoom);						// Hgt
+		$("#editDiv").css({width:w+"px",left:wid*playerZoom+16+"px",height:h+"px"}); // Overall div
+		$("#getHelp").css({left:w-24+"px"});									// Help dot to right
+	
+		$("#showName").html("&nbsp; Current show: <b>"+curShow+"</b>");			// Show name
+		if (curPane == "json") {												// Editing pane
+			str="<textarea id='jsonEditor' style='width:"+(w-32)+"px;height:"+(h-55)+"px;border:none;font-size:13px;padding:16px;background-color:#f8f8f8'>"+JSON.stringify(curJson,null,'\t')+"</textarea></div>";
+			$("#paneDiv").html(str);											// Put editor up	
+			}
+		else if (curPane == "intro") {											// Startup pane
+			str="<br><br><p style='text-align:center'><img src='qlogo.png' width='80%'></p>";	// Image
+			$("#paneDiv").html(str);											// Put editor up	
+			}
+		else if (curPane == "content") 		ContentEditPane();					// Content pane
+		else if (curPane == "index") 		IndexEditPane();					// Index pane
+		else if (curPane == "transcript")   TranscriptEditPane();				// Transcript pane
+		else if (curPane == "settings")  	SettingsEditPane();					// Settings pane
+		else if (curPane == "assessment") 	AssessmentEditPane();				// Assessment pane
+		else if (curPane == "import") 		ImportTranscriptPane();				// Import transcript pane
+
+		$("#playerDiv").css({	"-webkit-transform-origin":"0 0", 				// Scale player window
+				"transform-origin":"0 0",			
+				"-webkit-transform":"matrix("+playerZoom+",0,0,"+playerZoom+",0,0)",
+	 			"-transform":"matrix("+playerZoom+",0,0,"+playerZoom+",0,0)",
+	   			});
+		var wid=curJson.width;													// Copy width
+		if ((" "+curJson.width).match("%"))										// If % in width
+			wid=$("body").width()*.66;											// Use 66%										
+		$("#playerSiz").css({ left:(wid*playerZoom+8)+"px"});					// Set sizer pos
+	}
+
+///////////// INDEX ////////////////
+
+
+	function IndexEditPane()												// INDEX EDITOR
+	{
+		curEdit=-1;																// Clear
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='font-size:36px;color:#999'><b>Edit Index</b></div>"	// Title
+		str+="<br><br><div style='max-height:300px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='indexTable' style='font-size:12px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td><b>Time</b></td><td><b>Index</b></td><td><b>Style&nbsp;</b></td><td><b>Indent&nbsp;</b></td><td><b>Expand</b></td><td></td></tr>";	// Add header
+		str+="<tr><td colspan='5'><hr></td></tr>";								// Add rule
+		if (!curJson.indexVectors)												// No index yet
+			curJson.indexVectors=[];											// Alloc it
+		if (curJson.indexVectors)												// If any indices
+			n=curJson.indexVectors.length;										// Get length
+		str+="</table></div><div style='font-size:12px'<br><br>";				// End table
+		str+="<button"+butsty+"id='addBut'>Add a new row to index</button>";	// Add button
+		str+="&nbsp;&nbsp;<button"+butsty+"id='preBut'>Preview</button>";		// Preview button
+		$("#paneDiv").html(str+"</div>");										// Put editor up	
+		MakeIndexTable();														// Make table
+	
+		$("#preBut").on("click",function() {									// ON PREVIEW
+			curEdit=-1;															// Not editing anymore
+			MakeIndexTable();													// Remake table
+			Preview();															// Run preview
+			});
+		
+		$("#addBut").on("click",function() {									// ON ADD
+			curJson.indexVectors.push({t:curTime,c:""})							// Add to json
+			curEdit=-1;															// Not editing anymore
+			MakeIndexTable();													// Remake table
+			Sound("click");														// Click
+			});
+	}
+	
+	function MakeIndexTable() 												// MAKE TABLE AND SORT BY TIME
+	{	
+		var i,n=0,l,s,e;
+		var trsty=" style='height:20px;cursor:pointer;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+		trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"'";
+		curJson.indexVectors.sort(function(a,b) { return a.t-b.t });			// Sort by time
+		if (curJson.indexVectors)												// If any indices
+			n=curJson.indexVectors.length;										// Get length
+		$("#indexTable tr:gt(1)").remove();										// Remove all rows
+		for (i=0;i<n;++i) {														// For each index
+			e=l=s="-";															// Null indicator
+			if (curJson.indexVectors[i].l-0)	l=curJson.indexVectors[i].l;				// If an indent set
+			if (curJson.indexVectors[i].s)		s=curJson.indexVectors[i].s.toUpperCase();	// If style set
+			if (curJson.indexVectors[i].e)		e=curJson.indexVectors[i].e;				// If an expand set
+			str="<tr id='idx"+i+"' "+trsty+">";									// Row
+			str+="<td> <input style='color:#009900;width:60px;font-family:monospace;border:none;background-color:transparent;font-weight:bold' type='text' id='idt"+i+"' value='"+SecondsToTimecode(curJson.indexVectors[i].t)+"'></td>"; 	// Add index
+			str+="<td> <input style='width:95%;border:none;background-color:transparent' type='text' id='idc"+i+"' value='"+curJson.indexVectors[i].c+"'></td>"; 	// Add index
+			str+="<td id='ids"+i+"' onclick='onClickIndexStyle(this.id)'>"+s+"</td>";			// Add style
+			str+="<td id='idi"+i+"' onclick='onClickIndexIndent(this.id)'>"+l+"</td>"			// Add indent
+			str+="<td id='ide"+i+"' onclick='onClickIndexExpand(this.id)'>"+e+"</td>";			// Add expand
+			str+="<td><img style='visibility:hidden' id='idd"+i+"' src='images/trashdot.gif' onclick='onDeleteIndex(this.id)'></td></tr>";	// Add trashcan
+			$("#indexTable").append(str);										// Add row
+			
+			$("#idc"+i).on("blur", function() {									// ON BLUR OF CONTENT
+				var i=this.id.substr(3);										// Get id
+				curJson.indexVectors[i].c=$("#idc"+i).val();					// Get text
+				});				
+			
+			$("#idt"+i).on("blur", function() {									// ON BLUR OF TIME
+				var i=this.id.substr(3);										// Get id
+				curJson.indexVectors[i].t=TimecodeToSeconds($("#idt"+i).val());	// Get text
+				});				
+		
+			$("#idx"+i).on("click", function(e) {								// ON ROW CLICK
+				var id;
+				if (e.target.id)												// If an id there
+					id=e.target.id.substr(3);									// Extract id from target
+				else
+					id=e.currentTarget.id.substr(3);							// Extract id from currentTarget
+				if (e.target.id.match(/idt/))									// If on time col				
+					curEdit=id;													// Get time id
+				else															// Anywhere else
+					curEdit=-1;													// Not editing time
+				SendShivaMessage("Qmedia=pause");								// Pause
+				for (var i=0;i<curJson.indexVectors.length;++i) {				// For each index
+					$("#idt"+i).css({"color":"#009900"});						// Restore
+					$("#idc"+i).css({"color":"#000000"});						// Restore
+					$("#idd"+i).css({"visibility":"hidden"});					// Restore
+					}	
+				SendShivaMessage("Qmedia=seek",""+curJson.indexVectors[id].t+"|skipAssess");	// Go to time
+				
+				if (e.target.id.match(/idt/))									// Click on time								
+					$("#idt"+id).css({"color":"#990000"});						// Highlight time
+				if (e.target.id.match(/idc/))									// Click on index								
+					$("#idc"+id).css({"color":"#990000"});						// Highlight index
+				$("#idd"+id).css({"visibility":"visible"});						// Show trashcan
+				});			
+			}
+	}	
+
+	function onDeleteIndex(id) 												// ON DELETE INDEX
+	{	
+		id=id.substr(3);														// Strip off prefix
+		curJson.indexVectors.splice(id,1);										// Remove from json
+		$("#idx"+id).remove();													// Remove from table
+		Sound("delete");														// Delete sound
+	}
+
+	function onClickIndexStyle(id) 											// ON CLICK INDEX STYLE
+	{	
+		id=id.substr(3);														// Strip off prefix
+		var s=curJson.indexVectors[id].s;										// Get style
+		if (!s || (s == "-"))	s="B";											// Move up
+		else if (s == "B")		s="I";						
+		else if (s == "I")		s="B+I";
+		else if (s == "B+I")	s="-";
+		$("#ids"+id).text(s == "0" ? "-" : s);									// Set row
+		curJson.indexVectors[id].s=s;											// Set style
+	}
+
+	function onClickIndexIndent(id) 										// ON CLICK INDEX INDENT
+	{	
+		id=id.substr(3);														// Strip off prefix
+		var s=curJson.indexVectors[id].l;										// Get indent
+		if (!s || (s == "0"))	s="1";											// Move up
+		else if (s == "1")		s="2";						
+		else if (s == "2")		s="3";
+		else if (s == "3")		s="0";
+		$("#idi"+id).text(s == "0" ? "-" : s);									// Set row
+		curJson.indexVectors[id].l=s;											// Set level
+	}
+
+	function onClickIndexExpand(id) 											// ON CLICK INDEX EXPAND
+	{	
+		id=id.substr(3);														// Strip off prefix
+		var s=curJson.indexVectors[id].e;										// Get mode
+		if (!s || (s == "-"))	s="Open";										// Move up
+		else if (s == "Open")	s="Closed";						
+		else if (s == "Closed")	s="-";
+		$("#ide"+id).text(s == "0" ? "-" : s);									// Set row
+		curJson.indexVectors[id].e=s;											// Set expand 
+	}
+
+
+
+///////////// TRANSCRIPT ////////////////
+
+	function TranscriptEditPane()											// TRANSCRIPT EDITOR
+	{
+		curEdit=-1;																// Clear
+		var w=($("#paneDiv").width()-140)/2;									// Width of halves
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='font-size:36px;color:#999'><b>Sync Transcript</b></div>"	// Title
+		str+="<br><br><div style='max-height:300px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='transTable' style='table-layout:fixed;font-size:13px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td width='50'><b>Time</b></td>";
+		if (curJson.transText && curJson.transText.match(/\.pdf|drive\.google/i) && (curJson.transText.length < 300)) 	// If a PDF source
+			str+="<td></td><td</td><td><b>Page</b></td></tr>";					// Add header
+		else
+			str+="<td style='text-align:right;border-right:2px solid '><b>&ltrif; before &nbsp;&nbsp; </td><td width='"+(w+15)+"'><b> &nbsp;&nbsp; after &rtrif;</b></td><td width='20'></td></tr>";	// Add header
+		str+="<tr><td colspan='4'><hr></td></tr>";								// Add rule
+		str+="</table></div><div style='font-size:12px'<br><br>";				// End table
+		str+="<button"+butsty+"id='addAncBut'>Add anchor</button>";				// Add button
+		str+="&nbsp;&nbsp;<button"+butsty+"id='preBut1'>Preview</button>";		// Preview button
+		str+="&nbsp;&nbsp;<button"+butsty+"id='pauseBut'>Pause</button>&nbsp; &nbsp;";				// Pause button
+		str+="<div id='timeControls' style='display:none;border:1px solid #999;padding:4px;border-radius:8px'>";	// Div to hold time controls
+		str+="<img src='images/rewbut.gif' id='nudgeBack' style='vertical-align:bottom'>"			// Back but
+		str+="&nbsp;&nbsp;<button"+butsty+"id='fromPlayer'>Get time from player</button>";				// Get from player button
+		str+="&nbsp;&nbsp;<img src='images/playbut.gif' id='nudgeForward' style='vertical-align:bottom'></div>";// Forward but
+		str+="<br><br><p><b>Transcript:</b></p><textarea id='transText' style='width:100%;border:1px solid #999;border-radius:8px;color:#999;font-size:12px'>"
+		str+=curJson.transText ? curJson.transText : "" +"</textarea>";
+		$("#paneDiv").html(str);												// Put editor up	
+		MakeTransTable();														// Make table
+	
+		$("#preBut1").on("click",function() {									// ON PREVIEW
+			curJson.transText=$("#transText").val();							// Update transcript text
+			MakeTransTable();													// Remake table
+			Preview(-1);														// Run preview
+			});
+		
+		$("#transText").on("change",function() {								// ON TEXT CHANGE
+			curJson.transText=$("#transText").val();							// Update transcript text
+			curEdit=-1;															// Not editing anymore
+			$("#timeControls").css("display","none");							// Turn off control bar
+			MakeTransTable();													// Remake table
+			});
+
+		$("#transText").on("click",function() {									// ON TEXT CLICK
+			onClickTrans();														// Deselect
+			$("#timeControls").css("display","none");							// Turn off control bar
+			});
+
+		$("#addAncBut").on("click",function() {									// ON ADD
+			if (!curJson.transText) 
+				return AlertBox("Need transcript text","Sorry, you need some transcript text before adding anchors");	// Needs text
+			if (!curJson.transVectors || !curJson.transVectors.length)	{		// No vectors yet
+				curJson.transVectors=[];										// Alloc it
+				curJson.transVectors.push({ t:0,c:0,d:defTransDur} );			// Add first			
+				curJson.transVectors.push({t:curJson.playerStop,c:curJson.transText ? curJson.transText.length : 0 });	// Add last			
+				}		
+			else																// Adding to existing
+				curJson.transVectors.push({t:curTime,c:""})						// Add to json
+			curEdit=-1;															// Not editing anymore
+			$("#timeControls").css("display","none");							// Turn off control bar
+			MakeTransTable();													// Remake table
+			Sound("click");														// Click
+			});
+
+		$("#pauseBut").on("click",function() {									// ON PAUSE
+			SendShivaMessage("Qmedia=pause");									// Pause
+			});
+ 		
+ 		$("#nudgeBack").on("click",function() {									// BACK BUT
+			curTime=Math.max(0,curTime-.5);										// Move back and cap
+			$("#idc"+curEdit).val(SecondsToTimecode(curTime));					// Set text
+			curJson.transVectors[curEdit].t=curTime;							// Set time
+			SendShivaMessage("Qmedia=seek",""+curTime);							// Go to time
+			Sound("click");														// Click
+			});
+ 
+ 		$("#fromPlayer").on("click",function() {								// GET TIME FROM PLAYER
+			$("#idc"+curEdit).val(SecondsToTimecode(curTime));					// Set text
+			curJson.transVectors[curEdit].t=curTime;							// Set time
+			});
+
+ 		$("#nudgeForward").on("click",function() {								// FORWARD BUT
+			$("#idc"+curEdit).val(SecondsToTimecode(curTime-0+.5));				// Set text
+			curJson.transVectors[curEdit].t=curTime;							// Set time
+			SendShivaMessage("Qmedia=seek",""+curTime-0+.5);					// Go to time
+			Sound("click");														// Click
+			});
+		
+		$("#editTime").on("change",function() {									// EDIT TEXT
+			var t=TimecodeToSeconds($("#idc"+curEdit).val());					// Get time
+			SendShivaMessage("Qmedia=seek",""+t);								// Go to time
+			Sound("click");														// Click
+			});
+ 	}
+
+	function MakeTransTable() 												// MAKE TABLE AND SORT BY TIME
+	{	
+		var i,n=0;
+		var nc=($("#paneDiv").width()-60)/18;										// Chars left of anchor
+		var trsty=" style='height:20px;cursor:pointer;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+		trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"' onclick='onClickTrans(this.id)'";
+		if (curJson.transVectors) {												// If any indices
+			curJson.transVectors.sort(function(a,b) { return a.t-b.t });		// Sort by time
+			n=curJson.transVectors.length;										// Get length
+			}
+		$("#transTable tr:gt(1)").remove();										// Remove all rows
+		for (i=0;i<n;++i) {														// For each line
+			str="<tr id='idx"+i+"' "+trsty+">";									// Row
+			s=curJson.transVectors[i].c;										// Start of line								
+			str+="<td> <input style='color:#009900;width:60px;font-family:monospace;border:none;background-color:transparent;font-weight:bold' type='text' id='idc"+i+"' value='"+SecondsToTimecode(curJson.transVectors[i].t)+"'></td>"; 	// Add index
+			if (curJson.transText.match(/\.pdf|drive\.google/i) && (curJson.transText.length < 300)) {	// If a PDF source
+				str+="<td></td><td id='idr"+i+"' style='color:#000;overflow:hidden;white-space:nowrap'>"
+				str+="<input style='border:none;background-color:transparent' type='text' id='idp"+i+"' value='"+s+"'></td>"; 	// Add line
+				}
+ 			else{
+				str+="<td id='idl"+i+"' style='color:#999;overflow:hidden;white-space:nowrap;text-align:right;border-right:1px solid #999'>"+curJson.transText.substring(s,s-nc)+" &nbsp; </td>"; 		// Add line
+				str+="<td id='idr"+i+"' style='color:#000;overflow:hidden;white-space:nowrap'> &nbsp; "+curJson.transText.substring(s,s-0+80)+"</td>"; 	// Add line
+				}
+			str+="<td  align='right'><img style='visibility:hidden' id='idd"+i+"' src='images/trashdot.gif' onclick='onDeleteTrans(this.id)'></td></tr>";	// Add trashcan
+			$("#transTable").append(str);										// Add row
+			
+			$("#idc"+i).on("blur", function() {									// ON BLUR OF TIME
+				var i=this.id.substr(3);										// Get id
+				curJson.transVectors[i].t=TimecodeToSeconds($("#idc"+i).val());	// Get text
+				});				
+			
+			$("#idp"+i).on("blur", function() {									// ON BLUR OF PAGE NUMBER
+				var i=this.id.substr(3);										// Get id
+				curJson.transVectors[i].c=$("#idp"+i).val()-0;					// Get text
+				});				
+			}
+		if (curEdit != -1) 	onClickTrans("idx"+curEdit);						// Highlight it
+		if (n && curJson.transText)												// If a transcript
+			curJson.transVectors[n-1].c=curJson.transText.length;				// Make last one end of text
+	}	
+
+	function onDeleteTrans(id) 												// ON DELETE TRANS
+	{	
+		id=id.substr(3);														// Strip off prefix
+		curJson.transVectors.splice(id,1);										// Remove from json
+		$("#idx"+id).remove();													// Remove from table
+		Sound("delete");														// Delete sound
+	}
+
+	function onClickTrans(id) 												// ON CLICK TRANS
+	{	
+		SendShivaMessage("Qmedia=pause");										// Pause
+		SendShivaMessage("Qmedia=pause");										// Pause
+		if (!curJson.transVectors)												// No anchors
+			return;																// Quit
+		for (var i=0;i<curJson.transVectors.length;++i) {						// For each row
+			$("#idc"+i).css({"color":"#009900"});								// Restore
+			$("#idl"+i).css({"color":"#999"});									// Restore
+			$("#idr"+i).css({"color":"#000"});									// Restore
+			$("#idp"+i).css({"color":"#000"});									// Restore
+			$("#idd"+i).css({"visibility":"hidden"});							// Restore
+			}	
+		$("#timeControls").css("display","none");								// Turn off control bar
+		curEdit=-1;																// No selected edit
+		if (id == undefined)													// If deselecting
+			return;																// Quit
+		$("#timeControls").css("display","inline-block");						// Turn on control bar
+		curEdit=id.substr(3);													// Strip off prefix
+		SendShivaMessage("Qmedia=seek",""+curJson.transVectors[curEdit].t+"|skipAssess");		// Go to time
+		$("#idc"+curEdit).css({"color":"#990000"});								// Highlight
+		$("#idl"+curEdit).css({"color":"#990000"});								// Highlight
+		$("#idr"+curEdit).css({"color":"#990000"});								// Highlight
+		$("#idp"+curEdit).css({"color":"#990000"});								// Highlight
+		$("#idd"+curEdit).css({"visibility":"visible"});						// Show trashcan
+	}
+
+	function ImportTranscriptPane()											// IMPORT TRANSCRIPT PANE
+	{
+		curEdit=-1;																// Clear
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='font-size:36px;color:#999'><b>Import Transcript</b></div>";	// Title
+		str+="<br><br><div style='overflow-y:auto;background-color:#f8f8f8;padding:8px;padding-right:14px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<p><b>Paste transcript here:</b></p><textarea id='transText' style='height:600px;width:95%;border:1px solid #999;border-radius:8px;color:#999;font-size:12px;padding:12px'></textarea>"
+		str+="<br><br><button"+butsty+"id='doneBut'>Convert and save</button><br><br>";	// Done button
+		$("#paneDiv").html(str+"</div>");										// Put editor up	
+
+		$("#doneBut").on("click",function() {									// DONE
+			var m,o;
+			curJson.transVectors=[];											// Start from fresh
+			var txt=$("#transText").val();										// Get text to import
+			if (txt.match(/\<scene/)) {											// THL coded XML
+ 				var parser=new DOMParser();										// Make parser
+			  	xml=parser.parseFromString(txt,"text/xml");						// Convert to XML
+				txt="";															// Fresh
+				$(xml).find("scene").each( function() {							// For each scene
+					o={};														// New obj
+					o.t=TimecodeToSeconds($(this).attr("in"));					// Add time as seconds
+					if ((o.t != 0) && (!curJson.transVectors.length))			// If not starting at 0
+						curJson.transVectors.push( { t:0, d:0, c:0 } );			// Add slug
+					o.d=defTransDur;											// Set duration
+					o.c=txt.length;												// Add pos
+						txt+=$(this).attr("speaker")+"\n";						// Add to text
+					if ($(this).text())											// If text defined
+						txt+=$(this).text()+"\n\n";								// Add to text
+					curJson.transVectors.push(o);								// Add to json
+					});
+				}
+			else while (m=txt.match(/\[(.+)\]/)) {								// Get next time stamp
+				o={};															// Nw obj
+				o.t=TimecodeToSeconds(m[1]);									// Add time as seconds
+				o.c=m.index-0;													// Add pos
+				if (!curJson.transVectors.length)								// If first one
+					o.d=defTransDur;											// Add duration
+				curJson.transVectors.push(o);									// Add to json
+				txt=txt.replace (/\[(.+)\]/,"");								// Remove time stamp
+				}
+			curJson.transText=txt;												// Copy to json
+			ChangePane("transcript");											// Go to transcript pane
+			Sound("ding");														// Click
+			});
+ 
+	}
+	
+///////////// ASSESSMENT ////////////////
+
+
+	function PreviewAssessment()											// PREVIEW ASSESSMENT														
+	{
+		if (curEdit == -1) 														// If noting selected
+			return;																// Quit
+		var h=$("#paneDiv").height()-$("#addAssessBut").offset().top-50;		// Room for the page editor
+		$("#pageDiv").css({height:h+"px",width:"400px"});						// Size appropriately
+			
+		$("#pageDiv").html("<iframe class='player' id='assessIF' src='assess.htm' width='99%' height='99%' 'scrolling='no'></iframe>");
+		$("#assessIF").on("load", function() {									// When loaded
+			$("#pageDiv").slideDown(300);										// Show the page
+			var str="ShivaAct=data|"+JSON.stringify(curJson.assessments[curEdit]);	// Get data
+			$("#assessIF")[0].contentWindow.postMessage(str,"*");				// Send data to wind
+			});
+	}	
+
+	function AssessmentEditPane()											// ASSESSMENT EDITOR
+	{
+		curEdit=-1;																// Clear
+		var w=($("#paneDiv").width()-75)/2;										// Width of halves
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='font-size:36px;color:#999'><b>Edit Assessments</b></div>"	// Title
+		str+="<br><br><div style='display:inline-block;width:"+w+"px;max-height:200px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='assessTable' style='font-size:13px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td><b>Name</b></td><td width='20'></td></tr>";				// Add header
+		str+="<tr><td colspan='2'><hr></td></tr>";								// Add rule
+		str+="</table></div>&nbsp;&nbsp;&nbsp;"									// End table
+	
+		str+="<div style='vertical-align:top;display:inline-block;width:"+w+"px;max-height:200px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<dl id='pageTable' style='font-size:13px;margin-top:2px;margin-bottom:2px'>";		// Add table
+		str+="<dt><b>Step</b></dt>";											// Add header
+		str+="<dt><hr></dt>";													// Add rule
+		str+="</dl></div><div style='font-size:12px'<br><p><hr></p>";			// End table
+
+		str+="<button"+butsty+"id='addAssessBut'>Add assessment</button>";						// Add assess button
+		str+="&nbsp;&nbsp;<button"+butsty+"onclick='onAddPage()'>Add step</button>";			// Add page button
+		str+="&nbsp;&nbsp;<button"+butsty+"onclick='PreviewAssessment()'>Preview assessment</button>";		// Preview button
+		str+="<br><br><div id='pageDiv' style='display:none;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		
+		$("#paneDiv").html(str+"</div>");										// Put editor up	
+		$("#pageTable").sortable();												// Make it sortable
+		MakeAssessTable();														// Make table
+			
+		$("#pageTable").on("sortstop", function(e, ui) {						// If sorted
+			var t=$.parseJSON(JSON.stringify(curJson.assessments[curEdit].pages));	// Clone
+			var v=$("#pageTable").sortable("toArray");							// Get new order
+ 			for (i=2;i<v.length;++i)											// For each option
+ 				curJson.assessments[curEdit].pages[i-2]=t[v[i].substr(3)];		// Reorder array
+ 			MakePageTable();													// Show pages
+ 			});
+
+	
+		$("#addAssessBut").on("click",function() {								// ON ADD
+			if (!curJson.assessments)											// No assessmenrts yet
+				curJson.assessments=[];											// Alloc it
+			curJson.assessments.push({name:"untitled"})							// Add to json
+			MakeAssessTable();													// Remake table
+			Sound("click");														// Click
+			});
+		
+		$("#preBut3").on("click",function() {									// ON PREVIEW
+			Sound("click");														// Click
+			curEdit=-1;															// Not editing anymore
+			MakeAssessTable();													// Remake table
+			});
+	}
+
+	function MakeAssessTable() 												// MAKE TABLE 
+	{	
+		var i,n=0,str;
+		var trsty=" style='height:20px;cursor:pointer;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+		trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"' onclick='onClickAssess(this.id)'";
+		if (curJson.assessments) {												// If any indices
+			n=curJson.assessments.length;										// Get length
+			}
+		$("#assessTable tr:gt(1)").remove();									// Remove all rows
+		for (i=0;i<n;++i) {														// For each index
+			str="<tr id='ida"+i+"' "+trsty+">";									// Row
+			str+="<td> <input style='width:95%;border:none;background-color:transparent' type='text' id='idn"+i+"' value='"+curJson.assessments[i].name+"'></td>"; 	// Add name
+			str+="<td align='right'><img style='visibility:hidden' id='idd"+i+"' src='images/trashdot.gif' onclick='onDeleteAssess(this.id)'></td></tr>";	// Add trashcan
+			$("#assessTable").append(str);										// Add row
+			
+			$("#idn"+i).on("blur", function() {									// ON BLUR OF CONTENT
+				var i=this.id.substr(3);										// Get id
+				curJson.assessments[i].name=$("#idn"+i).val();					// Get text
+				});				
+			}
+
+		if (curEdit != -1) 	onClickAssess("ida"+curEdit);						// Highlight it
+	}	
+
+	function onAddPage() 														// ON ADD ASSESS
+	{	
+		if (!curJson.assessments[curEdit].pages)								// If not pages yet
+			curJson.assessments[curEdit].pages=[];								// Alloc array
+		curJson.assessments[curEdit].pages.push({ title:"untitled",optionType:"radio" });	// Add page to array
+		curPage=curJson.assessments[curEdit].pages.length-1;					// Point at page
+		Sound("click");															// Click sound
+		MakePageTable();														// Make page table
+	}
+
+	function onDeleteAssess(id) 												// ON DELETE ASSESS
+	{	
+		id=id.substr(3);														// Strip off prefix
+		curJson.assessments.splice(id,1);										// Remove from json
+		$("#ida"+id).remove();													// Remove from table
+		Sound("delete");														// Delete sound
+	}
+
+	function onClickAssess(id) 												// ON CLICK ASSESS
+	{	
+		for (var i=0;i<curJson.assessments.length;++i) {						// For each row
+			$("#idn"+i).css({"color":"#000","font-weight":"normal"});			// Restore
+			$("#idd"+i).css({"visibility":"hidden"});							// Restore
+			}	
+		curEdit=-1;																// No selected edit
+		if (id == undefined)													// If deselecting
+			return;																// Quit
+		curEdit=id.substr(3);													// Strip off prefix
+		$("#idn"+curEdit).css({"color":"#990000","font-weight":"bold"});		// Highlight
+		$("#idd"+curEdit).css({"visibility":"visible"});						// Show trashcan
+		curPage=-1;																// No selected edit
+		MakePageTable();														// Make page table
+		$("#pageDiv").slideUp(300);												// Hide the page
+		Sound("click");															// Click
+		}
+
+	function MakePageTable() 												// MAKE TABLE 
+	{	
+		var i,n=0,str;
+		var trsty=" style='height:20px;cursor:pointer;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+		trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"' onclick='onClickPage(this.id)'";
+		if (curJson.assessments[curEdit] && curJson.assessments[curEdit].pages) {	// If any indices
+			n=curJson.assessments[curEdit].pages.length;						// Get length
+			}
+		$("#pageTable dt:gt(1)").remove();										// Remove all rows
+		for (i=0;i<n;++i) {														// For each index
+			str="<dt id='idp"+i+"' "+trsty+">";									// Row
+			str+="<div id='idy"+i+"' style='display:inline-block;overflow:hidden;white-space:nowrap'>"+curJson.assessments[curEdit].pages[i].title.replace(/<.+>/g,"")+"</div>"; 	// Add assessment name
+			$("#pageTable").append(str);										// Add row
+			}
+		if (curPage != -1) 	onClickPage("idp"+curPage);							// Highlight it
+	}	
+
+	function onClickPage(id) 												// ON CLICK PAGE
+	{	
+		for (var i=0;i<curJson.assessments[curEdit].pages.length;++i) {			// For each row
+			$("#idy"+i).css({"color":"#000","font-weight":"normal"});			// Restore
+			$("#idx"+i).css({"visibility":"hidden"});							// Restore
+			}	
+		curPage=-1;																// No selected edit
+		if (id == undefined)													// If deselecting
+			return;																// Quit
+		curPage=id.substr(3);													// Strip off prefix
+		$("#idy"+curPage).html(curJson.assessments[curEdit].pages[curPage].title.replace(/<.+>/g,"") ); // Reshow title, in case it was changed
+		$("#idy"+curPage).css({"color":"#990000","font-weight":"bold"});		// Highlight
+		$("#idx"+curPage).css({"visibility":"visible"});						// Show trashcan
+		EditPage();																// Edit page
+		$("#pageDiv").slideDown(300);											// Show the page
+		Sound("click");															// Click
+		}
+
+	function EditPage()
+	{
+		var i,str;
+		var o=curJson.assessments[curEdit].pages[curPage];						// Point at page
+		var h=$("#paneDiv").height()-$("#addAssessBut").offset().top-50;		// Room for the page editor
+		$("#pageDiv").css({height:h+"px",width:"auto"});						// Size appropriately
+		str="<table style='font-size:11px;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td><b>Step type</b></td><td>"+MakeSelect("optionType",false,["radio","checkbox","cloze","draw","findtime","write","notes","match","sort"],o.optionType)+"</td></tr>";	// Get setting
+		str+="<tr><td><b>Step title</b></td><td><input class='is' type='text' id='title' value='"+(o.title ? o.title :'')+"'></td></tr>";	// Get setting
+		str+="<tr><td><b>Text</b></td><td><textarea class='is' id='text'>"+(o.text ? o.text :'')+"</textarea></td></tr>";	// Get setting
+		str+="<tr><td><b>Prompt</b></td><td><textarea class='is' id='prompt'>"+(o.prompt ? o.prompt :'')+"</textarea></td></tr>";	// Get setting
+		str+="<tr><td><b>Image</b></td><td><input class='is' type='text' id='pic' value='"+(o.pic ? o.pic :'')+"'></td></tr>";	// Get setting
+		str+="<tr><td><b>If right answer</b></td><td><textarea class='is' id='whyRight'>"+(o.whyRight ? o.whyRight :'')+"</textarea></td></tr>";	// Get setting
+		str+="<tr><td><b>If wrong answer</b>&nbsp;</td><td><textarea class='is' id='whyWrong'>"+(o.whyWrong ? o.whyWrong :'')+"</textarea></td></tr>";	// Get setting
+		str+="<tr><td><b>If partial answer</b>&nbsp;</td><td><textarea class='is' id='whyPartial'>"+(o.whyPartial ? o.whyPartial :'')+"</textarea></td></tr>";	// Get setting
+		str+="<tr><td><b>Number of tries</b></td><td><input class='is' type='text' id='numTries' value='"+(o.numTries ? o.numTries :'')+"'></td></tr>";	// Get setting
+		str+="<tr><td><b>Allow skipping</b></td><td>"+MakeSelect("skip",false,["true","false"],o.skip)+"</td></tr>";	// Get setting
+		str+="<tr><td><b>Font size</b></td><td><input class='is' type='text' id='fontSize' value='"+(o.fontSize ? o.fontSize :'Default (12)')+"'></td></tr>";	// Get setting
+		str+="<tr><td colspan=2><hr></td></tr>";
+		str+="<tr><td><b>Options</b></td><td><dl id='optionsTable'>";
+		if (o.options) {
+			str+="";
+			for (i=0;i<o.options.length;++i) {
+				str+="<dt id='ido"+i+"'><input class='bs' type='text' id='idr"+i+"' value='"+(o.options[i] ? o.options[i] :'')+"'>"; 	// Add index
+				str+="&nbsp;&nbsp;<span style='color:#666;cursor:ns-resize;background-color:#ddd;border-radius:4px;font-size:10px;padding-bottom:2px;vertical-align:1px;border:1px solid #999'>&nbsp;&uarr;&darr;&nbsp;</span>";
+				str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img id='idd"+i+"' style='vertical-align:middle;cursor:pointer' src='images/trashdot.gif' onclick='onDeleteOption(this.id)'</dt>"
+				}
+			}		
+		str+="<dt><button"+butsty+"onclick='onAddOption()';>Add new option</button></td><td><dt>";	// Add button
+		str+="</dl></td></tr>";															// End options table
+		str+="<tr><td colspan=2><hr></td></tr>";
+		str+="</table></div><br>";														// End step table
+		str+="<button"+butsty+"onclick='MakeAssessTable()'>Done</button> &nbsp;";				// Done button
+		str+="<button"+butsty+"onclick='onDeletePage()'>Delete this step</button></td><td>";	// Delete step button
+		$("#pageDiv").html(str);	
+		$("#optionsTable").sortable();
+	
+		$("#optionType").on("change", function() { o.optionType=$(this).val();});// Extract value	
+		$("#title").on("change", function() { o.title=$(this).val(); });		// Extract value	
+		$("#text").on("change", function() { o.text=$(this).val(); });			// Extract value	
+		$("#prompt").on("change", function() { o.prompt=$(this).val(); });		// Extract value	
+		$("#pic").on("change",function() { o.pic=$(this).val(); });				// Extract value	
+		$("#whyRight").on("change", function() { o.whyRight=$(this).val(); });	// Extract value	
+		$("#whyWrong").on("change", function() { o.whyWrong=$(this).val(); });	// Extract value	
+		$("#whyPartial").on("change", function() { o.whyPartial=$(this).val()});// Extract value	
+		$("#fontSize").on("change", function() { o.fontSize=$(this).val(); });	// Extract value	
+		$("#numTries").on("change", function() { o.numTries=$(this).val(); });	// Extract value	
+		$("#skip").on("change", function() { o.skip=$(this).val(); });			// Extract value	
+		$("#optionsTable").on("sortstop", function(e, ui) {						// If sorted
+			var v=$("#optionsTable").sortable("toArray");						// Get new order
+ 			for (i=0;i<v.length-1;++i)											// For each option, less add but
+ 				o.options[i]=$("#idr"+v[i].substr(3)).val();					// Reorder array
+ 			});
+		if (o.options)															// If options set
+			for (i=0;i<o.options.length;++i)									// For each option
+		 		$("#idr"+i).on("change", function() { 							// Extract value	
+		 			var id=$(this)[0].id.substr(3);								// Extract id
+		 			o.options[id]=$(this).val(); 								// Set it
+		 			});
+			
+	}
+
+	function onDeletePage() 													// ON DELETE PAGE
+	{	
+		curJson.assessments[curEdit].pages.splice(curPage,1);					// Remove from json
+		Sound("delete");														// Delete sound
+		MakeAssessTable();														// Remake table
+	}
+
+	function onDeleteOption(id) 												// ON DELETE ASSESS
+	{	
+		id=id.substr(3);														// Strip off prefix
+		curJson.assessments[curEdit].pages[curPage].options.splice(id,1);		// Remove from json
+		Sound("delete");														// Delete sound
+		EditPage();																// Redraw page
+	}
+
+	function onAddOption() 														// ON DELETE ASSESS
+	{	
+		if (!curJson.assessments[curEdit].pages[curPage].options)				// First one
+			curJson.assessments[curEdit].pages[curPage].options=[];				// Alloc array
+		curJson.assessments[curEdit].pages[curPage].options.push("");			// Add new option from json
+		Sound("click");															// Delete sound
+		EditPage();																// Redraw page
+	}
+
+
+///////////// CONTENT ////////////////
+
+
+	function ContentEditPane()												// CONTENT EDITOR
+	{
+		curEdit=-1;																// Clear
+		var conType="Slide pane";
+		if (!conPtr)															// First time
+			conPtr=curJson.slideVectors;										// Use slide
+		if (!curJson.slideVectors)												// If not alloc'd  yet
+			curJson.slideVectors=[];											// Alloc array
+		if (!curJson.infoVectors)												// If not alloc'd  yet
+			curJson.infoVectors=[];												// Alloc array
+		if (!curJson.playerVectors)												// If not alloc'd  yet
+			curJson.playerVectors=[];											// Alloc array
+		if (conPtr == curJson.infoVectors)			conType="Information pane";	// Set proper type for pulldown
+		else if (conPtr == curJson.playerVectors)	conType="Player pane";		// Set proper type for pulldown
+		var h=$("#paneDiv").height()-220;										// Max height
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='display:inline-block;font-size:36px;color:#999'><b>Edit Content";
+		str+="<span style='font-size:12px'>&nbsp;&nbsp;in the&nbsp;<span></b></div>"// Title
+		str+=MakeSelect("contentType",false,["Slide pane","Information pane","Player pane"],conType);		// Get setting
+		str+="<br><br><div style='max-height:"+h+"px;overflow-x:hidden;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='contentTable' style='font-size:12px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="</table></div><div style='font-size:12px'<br><br>";				// End table
+		str+="<button"+butsty+"id='addConBut'>Add a new content</button>";		// Add button
+		str+="&nbsp;&nbsp;<button"+butsty+"id='preBut3'>Preview</button>";		// Preview button
+		str+="&nbsp;&nbsp;<button"+butsty+"id='pauseBut'>Pause</button>";		// Pause button
+		$("#paneDiv").html(str+"</div>");										// Put editor up	
+		MakeContentTable();														// Make table
+	
+		$("#contentType").on("change",function(e) {								// ON OUTSIDE CLICK
+			var s=$("#contentType").val();										// Get selection
+			if (s.match(/info/i)) 		conPtr=curJson.infoVectors;				// Point at info
+			else if (s.match(/play/i)) 	conPtr=curJson.playerVectors;			// Point at player
+			else if (s.match(/slide/i)) conPtr=curJson.slideVectors;			// Point at slides
+			MakeContentTable();													// Make table
+			});
+		
+		$("#addConBut").on("click",function() {									// ON ADD
+			conPtr.push({t:curTime,c:""})										// Add to json
+			curEdit=-1;															// Not editing anymore
+			MakeContentTable();													// Remake table
+			Sound("click");														// Click
+			});
+
+		$("#pauseBut").on("click",function() {									// ON PAUSE
+			SendShivaMessage("Qmedia=pause");									// Pause
+			});
+
+		$("#preBut3").on("click",function() {									// ON PREVIEW
+			curEdit=-1;															// Not editing anymore
+			Preview(-1);														// Run preview
+			});
+
+	}
+	
+	function MakeContentTable() 											// MAKE TABLE AND SORT BY TIME
+	{	
+		var i,o,n=0,pic;i;lastType=""; 
+		var trsty=" style='height:20px;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+		trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"'";
+		if (conPtr)	{															// If any indices
+			n=conPtr.length;													// Get length
+			conPtr.sort(function(a,b) { return a.t-b.t });						// Sort by time
+			}
+		$("#contentTable").empty();												// Remove all rows
+		for (i=0;i<n;++i) {														// For each index
+			o=conPtr[i];														// Point at row
+			str="<tr id='idx"+i+"' "+trsty+">";									// Row
+			str+="<td width='40'> <input style='color:#009900;width:60px;font-family:monospace;border:none;background-color:transparent;font-weight:bold' type='text' id='idt"+i+"' value='"+SecondsToTimecode(o.t)+"'></td>"; 	// Add index
+			pic="images/webthumb.jpg";											// Assume web content
+			if (o.c && o.c.match(/\.png|.gif|\.jpg|.jpeg/i)) 					// An image
+				pic=o.c;														// Point at image
+			else if (o.c && o.c.match(/drive\.google/i)) {						// An image on Google drive
+				var id=o.c.match(/\/d\/(.*?)\//);								// Extract id
+				if (id)															// An id found
+					pic="//drive.google.com/uc?export=view&id="+id[1];			// Construct 'direct' link
+				}
+			else if (o.c && o.c.match(/assess=/i)) 								// An assessment
+				pic="images/testthumb.jpg";										// Point at icon
+			else if (o.c && o.c.match(/video\.htm\?src=/i)) 					// A video
+				pic="images/videothumb.jpg";										// Point at icon
+			else if (o.c && o.c.match(/vex\.htm/i)) 							// Music
+				pic="images/musicthumb.jpg";									// Point at icon
+			str+="<td style='width:115px'><img style='border:1px solid #999' height='60' width='100' src='"+pic+"'></td>";	// Add thumbnail
+			str+="<td style='white-space:nowrap'><div style='height:18px;display:inline-block;width:65px;color:#777'><b>Source:</b></div>"
+			if (o.c && o.c.match(/</))											// If markup
+				str+="<textarea rows='1' style='border:none;background-color:transparent;width:210px;vertical-align:bottom' type='text' id='idc"+i+"'>"+(o.c ? o.c : '')+"</textarea>";
+			else
+				str+="<input style='border:none;background-color:transparent;width:210px' type='text' id='idc"+i+"' value='"+(o.c ? o.c : '')+"'>";
+			if (o.c && o.c.match(/<svg/i))					pic="SVG";
+			else if (o.c && o.c.match(/flickr/i))			pic="Flickr";
+			else if (o.c && o.c.match(/qtitle/i))			pic="Title";
+			else if (o.c && o.c.match(/video.htm\?src/i))	pic="Video";
+			else if (o.c && o.c.match(/qgraph/i))			pic="Graphics";
+			else if (o.c && o.c.match(/assess=/i))			pic="Assess";
+			else											pic="Link";
+			str+="&nbsp; "+MakeSelect("idu"+i,false,["Link","Title","Flickr","SVG","Video","HTML","Assess"],pic);	
+			str+="<br><div style='height:18px;display:inline-block;width:65px;color:#777'><b>Prompt:</b></div><input style='border:none;background-color:transparent;width:300px' type='text' id='idm"+i+"' value='"+(o.m ? o.m : '')+"'><br>";
+			str+="<div style='height:18px;display:inline-block;width:65px;color:#777'><b>Settings:</b></div>";
+			if (conPtr != curJson.playerVectors) { 								// Not in player
+				str+="<input id='idr"+i+"' type='text' style='text-align:center;width:50px;height:15px' class='is' value='";
+				str+=(o.r != undefined) ? Math.round(o.r*100)+"% split'> " : "No split'> ";			
+				}
+			if (!o.z)							pic="No zoom";
+			else if (o.z.split("|")[2] < 1)		pic="Inset";
+			else								pic="Zoom";							
+			str+="<input id='idz"+i+"' type='text' style='text-align:center;width:50px;height:15px' class='is' value='"+pic+"'> ";
+			if (conPtr != curJson.playerVectors) 								// Not in player
+				str+=MakeSelect("ida"+i,false,["No action","play","pause","seek","jump","load"],(""+o.p).split(":")[0]);	
+			str+=" <input id='idh"+i+"' type='text' style='text-align:center;width:30px;height:15px' class='is' value='Send'>";
+			str+="</td><td><img style='visibility:hidden' id='idd"+i+"' src='images/trashdot.gif' onclick='onDeleteContent(this.id)'></td></tr>>";	// Add trashcan
+			if (i < n-1) 														// If not last
+				str+="<tr><td colspan='3'><hr></td></tr>";						// Add between line
+			$("#contentTable").append(str);										// Add row
+			
+			$("#idx"+i).on("click", function(e) {								// ON ROW CLICK
+				var id=e.currentTarget.id.substr(3);							// Extract id
+				if (e.target.id.match(/idt/))									// If on time col				
+					curEdit=id;													// Set time id
+				else															// Anywhere else
+					curEdit=-1;													// Not editing time
+				SendShivaMessage("Qmedia=pause");								// Pause
+				if (id == undefined)											// If deselecting
+					return;														// Quit
+				for (var i=0;i<conPtr.length;++i) {								// For each index
+					$("#idt"+i).css({"color":"#009900","font-weight":"normal"});// Restore
+					$("#idm"+i).css({"color":"#000000"});						// Restore	
+					$("#idc"+i).css({"color":"#000000"});						// Restore	
+					$("#idd"+i).css({"visibility":"hidden"});					// Restore
+					}	
+				if (e.target.id.match(/idt/))									// Clicked on time
+					curEdit=id;													// Set time editing
+				Sound("click");													// Click
+				SendShivaMessage("Qmedia=seek",""+conPtr[id].t+"|skipAssess");	// Go to time
+				if (e.target.id.match(/idt/))									// If on time col				
+					$("#idt"+id).css({"color":"#990000","font-weight":"bold"});	// Highlight	
+				else if (e.target.id.match(/idm/))								// If on prompt col				
+					$("#idm"+id).css({"color":"#990000"});						// Highlight	
+				else if (e.target.id.match(/idc/))								// If on source col				
+					$("#idc"+id).css({"color":"#990000"});						// Highlight	
+				$("#idd"+id).css({"visibility":"visible"});						// Show trashcan
+				});
+
+			$("#idt"+i).on("blur", function() {									// ON BLUR OF TIME
+				var i=this.id.substr(3);										// Get id
+				conPtr[i].t=TimecodeToSeconds($("#idt"+i).val());				// Get text
+				});				
+
+			$("#idm"+i).on("blur", function() {									// ON BLUR OF PROMPT
+					var i=this.id.substr(3);									// Get id
+					conPtr[i].m=$("#idm"+i).val();								// Get text
+					});				
+			
+			$("#idc"+i).on("blur", function() {									// ON BLUR OF SOURCE
+					var i=this.id.substr(3);									// Get id
+					conPtr[i].c=$("#idc"+i).val();								// Get text
+					});				
+
+			$("#idr"+i).on("click", function() {								// ON BLUR OF SOURCE
+					var id=this.id.substr(3);									// Get id
+ 					var m="player";												// Assume player
+ 					var r=Math.round(conPtr[id].r*100);							// Get current val
+ 					if (isNaN(r))	r="";										// Not a number, use blank
+ 					if (conPtr == curJson.infoVectors)	m="transcript";			// If infopane
+ 					GetTextBox("Pane ratio", "Type the size of the "+m+" pane (0 to 100):",r,
+ 						function(r) {											// On entry
+ 							if (r && !isNaN(r)) 								// If a number
+  								conPtr[id].r=Math.max(0,Math.min(r/100,1));		// Cap 0-1
+							else												// Not a val or blank
+								delete conPtr[id].r;							// Remove it						
+							MakeContentTable();									// Show
+ 							}); 
+ 					});				
+
+			$("#idz"+i).on("click", function() {								// ON CLICK ZOOM
+					var id=this.id.substr(3);									// Get id
+					ZoomEditor(id, function(z) {								// On entry
+							conPtr[id].z=z;										// Set  val
+						 	MakeContentTable();									// Show
+							});
+ 					});				
+
+
+			$("#idu"+i).on("change", function() {								// ON EDIT SOURCE
+					var id=this.id.substr(3);									// Get id
+					lastType="";												// Reset last
+					TitleEditor(id, $(this).val(), conPtr[id].c, function(s) {	// Edit source
+							conPtr[id].c=s;										// Set val
+						 	MakeContentTable();									// Show
+							});
+					});				
+
+			$("#idu"+i).on("click", function() {								// ON EDIT SOURCE
+					if (lastType == $(this).val())								// If same as last
+						$(this).trigger("change");								// Trigger change
+					lastType=$(this).val();										// Then is now
+					});				
+
+			$("#ida"+i).on("change", function() {								// ON CHANGE ACTION
+					var id=this.id.substr(3);									// Get id
+					var str=$("#ida"+id).val();									// Get val
+					conPtr[id].p=str;											// Set val
+					if (str.match(/action/))	conPtr[id].p="";				// Null it out
+					else if ((str == "seek") || (str == "jump") || (str == "load")) {	// Need more info
+						var t="";												// No time
+						var h="To when";										// Header
+						var m="Type where in the media clip you want to go (in seconds)."; // Message
+						if (str == "load") 										// If a load
+						 	h="Load new show",m="Type number of show to load.";	// Set proper text
+						if (conPtr[id].p.split(":")[1] != undefined)			// If a time set	
+							t=conPtr[id].p.split(":")[1];						// Get time
+						GetTextBox(h,m,t,function(t) {							// On entry
+	 							if (t && !isNaN(t)) 							// If a number
+								conPtr[id].p=str+":"+t;							// Add to command	  							
+								});
+						}
+					});				
+	
+			$("#idh"+i).on("click", function() {								// ON SEND
+					var id=this.id.substr(3);									// Get id
+					var h=conPtr[id].h;											// Get command
+					if (!h) h="";												// Null it
+					GetTextBox("Send", "Type in command to send to pane.",h,	// Get text
+	 						function(h) { conPtr[id].h=h; } );					// Set 							
+					});				
+			}
+	}	
+
+	function TitleEditor(num, type, val, callback) 							// TITLE EDITOR
+	{
+		if (type == "Graphics")													// If graphics
+			SendShivaMessage("Qmedia=annotate");								// Put up annotation
+		else if (type == "Flickr")												// If Flickr
+			GetFlickrImage(function(s) { callback(s); } );						// Get url
+		else if (type == "HTML")												// If HTML
+			GetHTMLEditor(val,function(s) { callback("<html>"+s+"</html>"); } );	// Get code
+		else if (type == "Video") {												// If Video
+			val=val.replace(/video\.htm\?src=/,"");								// Remove path
+			GetTextBox("Media Source", "Type in media source id or URL",val,	// Get text
+	 			function(h) { 													// Callback
+					var re=/id="kaltura_player_([^"]+)"/;						// See if Kaltura embed code
+					re=re.exec(h);												// Run regex					
+					if (re)														// If found
+						h="//www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+re[1]+"/format/url/flavorParamId/301971/video.mp4"	
+	 				callback("video.htm?src="+h); } );							// Set 							
+			}
+		else if (type == "Assess") {											// If Assess
+			var i,opts=[];
+			val=val.replace(/assess=/i,"");										// Remove path
+			for (i=0;i<curJson.assessments.length;++i) 							// For each assessment
+				opts.push(curJson.assessments[i].name);							// Add to select
+			GetSelectBox("Assessment", "Choose assessment to add",val,opts,		// Get assessment
+	 			function(s) { callback("assess="+s); } );						// Callback
+			}
+		if (type != "Title")													// If not title
+			return;																// Quit
+		var titleText="";
+		var fontSize=16;
+		var fontCol="#ffd966";
+		var fontShad="#333333";
+		var frameCol="#cccccc";
+		var titlePos="Lower third";
+		var titleAlign="Right";
+		var frameType="None";
+		var frameGrad="#999999";
+		var fontFace="Sane-Serif";
+		var fontStyle="Bold";
+		if (val.match(/qtitle/i)) {												// If an existing title
+			var v=val.split('|');												// Split into parts
+			titlePos=v[1];		titleAlign=v[2];	titleText=v[11];			// Pos
+			frameType=v[3];		frameGrad=v[4];		frameCol=v[5];				// Frame
+			fontFace=v[6];		fontStyle=v[7];		fontCol=v[8];				// Font
+			fontSize=v[9];		fontShad=v[10];									// Font
+			}
+		$("#alertBoxDiv").remove();												// Remove any old ones
+		$("body").append("<div style='overflow:hidden;' class='unselectable' id='alertBoxDiv'></div>");														
+		var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";								
+		str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#000000'><b>Set title</b></span><br><br><p><table>";
+     	str+="<tr><td>Position</td><td>"+MakeSelect("titlePos",false,["Top third","Middle","Lower third"],titlePos);
+     	str+="</td><td>"+MakeSelect("titleAlign",false,["Left","Center","Right"],titleAlign)+"</td></tr>";
+	   	str+="<tr><td>Frame</td><td>"+MakeSelect("frameType",false,["None","Bar"],frameType);
+		str+="</td><td>"+MakeColorDot("Color","frameCol",frameCol);
+		str+="</td><td>"+MakeColorDot("Gradient end","frameGrad",frameGrad)+"</td></tr>";
+		str+="<tr><td>Font</td><td>"+MakeSelect("fontFace",false,["Sans-Serif","Serif","Monospace"],fontFace);
+	   	str+="</td><td>"+MakeSelect("fontStyle",false,["Regular","Bold","Italic","Bold/Ital"],fontStyle);
+	   	str+="</td><td>"+MakeSelect("fontSize",false,[10,12,14,16,18,24,36,48,72],fontSize);
+		str+="</td><td>"+MakeColorDot("Color","fontCol",fontCol);
+		str+="</td><td>"+MakeColorDot("Shadow","fontShad",fontShad)+"</td></tr>";
+		str+="<tr><td>Text</td><td colspan=4><textarea rows='2' class='is' style='width:300px;vertical-align:bottom' id='titleText'>"+titleText+"</textarea></td></tr>";
+		str+="</table></div>";		
+		$("#alertBoxDiv").append(str);	
+
+		$("#frameCol").data("frameCol",frameCol);
+		$("#frameGrad").data("frameGrad",frameGrad);
+		$("#fontCol").data("fontCol",fontCol);
+		$("#fontShad").data("fontShad",fontShad);
+		
+		function MakeSpec() {
+			var str="qTitle|"+$("#titlePos").val()+"|"+$("#titleAlign").val();
+			str+="|"+$("#frameType").val()+"|"+$("#frameGrad").data("frameGrad")+"|"+$("#frameCol").data("frameCol");
+			str+="|"+$("#fontFace").val()+"|"+$("#fontStyle").val();
+			str+="|"+$("#fontCol").data("fontCol")+"|"+$("#fontSize").val()+"|"+$("#fontShad").data("fontShad");
+			str+="|"+$("#titleText").val();
+			return str;
+			}
+			
+		$("#alertBoxDiv").dialog({ width:622, buttons: {
+	    	"OK": 		function() { callback(MakeSpec());		$(this).remove();	},
+	    	"Preview": 	function() { callback(MakeSpec());	   	Preview(); 		 	},
+	    	"Cancel":  	function() { $(this).remove(); 								}
+			}});	
+	}
+
+	function ZoomEditor(num, callback) 										// SET ZOOM BOX
+	{
+		var off=0,imgHgt=0,imgAsp=0;
+		var zoom=[.5,.5,1,1];
+		var zs="Zoom";
+		$("#alertBoxDiv").remove();												// Remove any old ones
+		if (conPtr[num].z)														// If an old one
+			zoom=conPtr[num].z.split("|");										// Get zoom members
+		if (!zoom[3])	zoom[3]=1;												// Make defaule duration
+		var h=Math.round(600*curJson.playerAspect);								// Height
+		$("body").append("<div style='overflow:hidden;' class='unselectable' id='alertBoxDiv'></div>");														
+		var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+		str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#000000'><b>Set zoom</b></span><br><br><p>";
+  		if (!conPtr[num].z)			zs="No zoom";
+		else if (zoom[2] < 1)		zs="Inset";
+        str+=MakeSelect("zoomType",false,["No zoom","Zoom","Inset"],zs)+"&nbsp;&nbsp;";
+       	str+=MakeSelect("whichpz",false,["Set end","Set start","No start"]);
+		str+="&nbsp;&nbsp;&nbsp;<span id='pzdurspan'>Duration &nbsp;<input id='pzdur' class='is' type='text' value='"+zoom[3]+"' style='text-align:center;width:20px'></span>";
+  		str+="<div id='pzdiv' style='overflow:hidden;font-size:14px;border:1px solid #999;background-color:#ddd;width:600px;height:"+h+"px'>";
+		str+="<div style='position:absolute;width:1px;background-color:#bbb;height:"+h+"px;left:25%'></div>"
+		str+="<div style='position:absolute;width:1px;background-color:#666;height:"+h+"px;left:50%'></div>"
+		str+="<div style='position:absolute;width:1px;background-color:#bbb;height:"+h+"px;left:75%'></div>"
+		str+="<div style='position:relative;height:1px;background-color:#bbb;width:100%;top:25%'></div>"
+		str+="<div style='position:relative;height:1px;background-color:#666;width:100%;;top:50%'></div>"
+		str+="<div style='position:relative;height:1px;background-color:#bbb;width:100%;top:75%'></div>"
+		var src=conPtr[num].c;													// Point at image
+		if (src && src.match(/drive\.google/i)) {								// An image on Google drive
+			var id=src.match(/\/d\/(.*?)\//);									// Extract id
+			if (id)	src="//drive.google.com/uc?export=view&id="+id[1];			// An id found, construct 'direct' link
+			}
+		str+="<div id='imgins' style='position:relative;top:-3px;left:0px'><img id='imginsi' src='"+src+"' width='100%'></div>";
+		str+="<div id='imgzbx' style='position:absolute;top:-3px;border:2px solid yellow;background-color:#bbb;opacity:.5'></div>";
+		str+="</div>";
+		$("#alertBoxDiv").append(str);	
+		
+		$("#imginsi").on("load",function() {									// WHEN CONTENT LOADED
+			imgHgt=this.height;													// Save original height
+			imgAsp=this.height/this.width;										// Save original aspect ratio
+			showZoom();															// Setup
+			});
+				
+		function showZoom() {
+			var t=$("#zoomType").val();											// Get type
+			if (t == "No zoom") {												// No zoom set
+				$("#whichpz").hide(500);										// Hide which
+				$("#pzdurspan").hide(500);										// And dur
+				}
+			else{																// A zoom or inset	
+				$("#whichpz").show(500);										// Show which
+				$("#pzdurspan").show(500);										// And dur
+				}
+			if (t == "Zoom") {													// If pan/zoom
+				var z=1/zoom[2+off];											// Zoom
+				var dx=$("#alertBoxDiv").offset().left-$("#pzdiv").offset().left-0;	// Offset x
+				var dy=$("#alertBoxDiv").offset().top-$("#pzdiv").offset().top-0;	// And y
+
+				$("#imgins").draggable( { containmet:[0,0,600,387]});						// No dragging
+				$("#imgins").css({border:"none",top:"-3px",left:"0px",width:"600px",height:imgHgt});	// No border, full size
+				$("#pzdiv").height(imgHgt);										// Set height of container
+
+				$("#imgzbx").css("left",(600*zoom[0+off])-(z*300)-dx+"px");		// left
+				$("#imgzbx").css("top",((600*imgAsp)*zoom[1+off])-(z*300*curJson.playerAspect)-dy+"px");		// Top
+				$("#imgzbx").width(z*600);										// Set width
+				$("#imgzbx").height(z*600*curJson.playerAspect);				// Height
+				$("#imgzbx").show();											// Show
+				
+				$("#imgzbx").resizable({ aspectRatio:true, maxWidth:600, 		// HANDLE RESIZE
+					stop:function() {											// When stopped
+						zoom[2+off]=600/$("#imgzbx").width();					// Set zoom
+						var z=1/zoom[2+off];									// Inverse zoom
+						$("#imgzbx").css("left",(600*zoom[0+off])-(z*300)-dx+"px");	// left
+						$("#imgzbx").css("top",((600*imgAsp)*zoom[1+off])-(z*300*curJson.playerAspect)-dy+"px"); // Top
+						}	
+					});
+		
+				$("#imgzbx").draggable({ 										// HANDLE DRAG
+					stop:function(e, ui) {
+						var z=1/zoom[2+off];									// Zoom
+						var dx=$("#imgzbx").offset().left-$("#pzdiv").offset().left;
+						var dy=$("#imgzbx").offset().top-$("#pzdiv").offset().top;
+						var w=300*z;
+						var h=w*curJson.playerAspect;
+						zoom[0+off]=(dx+w)/600;
+						zoom[1+off]=(dy+h)/(imgAsp*600);
+						}	
+					});
+	
+				}
+			else if (t == "Inset"){
+				$("#pzdiv").height(600*curJson.playerAspect);					// Set height of container
+				$("#imgzbx").hide();											// Hide zoom box
+				$("#imgins").resizable({ aspectRatio:true, maxWidth:600, 
+					stop:function() {
+						zoom[2+off]=$("#imgins").width()/600;
+						}	
+					});
+				
+				$("#imgins").draggable({ 
+					stop:function(e, ui) {
+						var dx=$("#imgins").offset().left-$("#pzdiv").offset().left;
+						var dy=$("#imgins").offset().top-$("#pzdiv").offset().top;
+						zoom[0+off]=(dx/600)+(zoom[2+off]/2);
+						zoom[1+off]=(dy/(curJson.playerAspect*600))+(zoom[2+off]/2);
+						}	
+					});
+				
+				$("#imgins").css("left",600*(zoom[0+off]-zoom[2+off]/2)+"px");	// Left
+				$("#imgins").css("top",(600*curJson.playerAspect)*(zoom[1+off]-zoom[2+off]/2)-3+"px");	// Top
+				$("#imgins").width(zoom[2+off]*600);							// Set width
+				$("#imgins").height(zoom[2+off]*600*imgAsp);					// Height
+				if (t == "Inset") 												// If inset
+					$("#imgins").css({ border:"2px solid yellow"});				// Add border
+				$("#imgins").draggable({ disabled:false });						// Allow dragging
+				}
+	
+			}
+				
+		$("#alertBoxDiv").dialog({ width:622, buttons: {
+	    	"OK": 		function() {
+	    		 			var z=zoom[0]+"|"+zoom[1]+"|"+zoom[2]+"|"+$("#pzdur").val();
+	    		 			for (var i=4;i<zoom.length;++i)						// For each start, if any
+	    		 				z+="|"+zoom[i];									// Add val
+							if ($("#zoomType").val() == "No zoom")				// If no zoom
+								z="";											// Clear
+	    		 			callback(z);
+	    		 			$(this).remove();
+	    		 			},
+	    	"Cancel":  	function() { $(this).remove(); }
+							}});	
+		
+		$("#zoomType").on("change",function() {									// ON CHANGE TYPE
+			var t=$("#zoomType").val();											// Get type
+			if (t == "Inset") 		zoom=[.5,.5,.5,1];							// Inset start
+			else if (t == "Zoom") 	zoom=[.5,.5,2,1];							// Zoom start
+			else 					zoom=[.5,.5,1,1];							// Zoom/none start
+			showZoom();															// Redraw
+			});
+
+		$("#whichpz").on("change",function() {									// ON CHANGE TYPE
+			var w=$("#whichpz").val();											// Get which
+			off=0;																// Set offset to end
+			if (w == "Set start") {												// Start pos
+				if (!zoom[4]) zoom[4]=.5;										// Add left
+				if (!zoom[5]) zoom[5]=.5;										// Add top
+				if (!zoom[6]) zoom[6]=zoom[2];									// Add zoom
+				off=4;															// Set offset to start
+				}
+			else if (w == "No start") {											// Remove start
+				zoom=[zoom[0],zoom[1],zoom[2],zoom[3]];							// Clear start
+				$("#whichpz").val("Set end");									// Set to end
+				}
+			showZoom();															// Redraw
+			});
+
+		$(".ui-dialog-titlebar").hide();
+		$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+		$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+ 		$(".ui-button").css({"border-radius":"30px","outline":"none"});
+ 	}
+
+	function onDeleteContent(id) 												// ON DELETE CONTENT
+	{	
+		id=id.substr(3);														// Strip off prefix
+		conPtr.splice(id,1);													// Remove from json
+		$("#idx"+id).remove();													// Remove from table
+		Sound("delete");														// Delete sound
+		MakeContentTable();														// Redraw table
+	}
+
+	function onPreviewContent(id) 												// ON PREVIEW CONTENT
+	{	
+		curEdit=-1;																// Not select
+		MakeContentTable();														// Redraw table
+		Preview();																// Preview()
+	}
+
+
+///////////// SETTINGS ////////////////
+
+
+	function SettingsEditPane()											// SETTINGS EDITOR
+	{
+		curEdit=-1;																// Clear
+		var h=$("#paneDiv").height()-220;										// Max height
+		var str="<div style='padding:12px'><br>"								// Container div
+		str+="<div style='font-size:36px;color:#999'><b>Settings</b></div>"		// Title
+		str+="<br><br><div style='width:360px;max-height:"+h+"px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='settingsTable' style='font-size:11px;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td colspan=3><b>General<b></td></tr>";						// Heading
+		str+="<tr><td colspan=3><hr></td></tr>";								// Rule
+		str+="<tr><td width=18></td><td>Title</td><td><input class='bs' type='text' id='title' value='"+(curJson.title ? curJson.title :'')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Overall width</td><td><input class='bs' type='text' id='width' value='"+curJson.width+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>InfoMap source</td><td><input class='bs' type='text' id='infoMapSource' value='"+(curJson.infoMapSource ? curJson.infoMapSource : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>External CSS stylesheet</td><td><input class='bs' type='text' id='extCSS' value='"+(curJson.extCSS ? curJson.extCSS : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Transcript pane label</td><td><input class='bs' type='text' id='transLab' value='"+(curJson.transLab ? curJson.transLab : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Information pane label</td><td><input class='bs' type='text' id='infoLab' value='"+(curJson.infoLab ? curJson.infoLab : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Index pane label</td><td><input class='bs' type='text' id='contentsLab' value='"+(curJson.contentsLab ? curJson.contentsLab : '' )+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Play when index clicked?</td><td>"+MakeSelect("contentsPlayOnClick",false,["false","true"],curJson.contentsPlayOnClick)+"</td></tr>";	// Get setting
+		str+="<tr><td></td><td>Require user login?</td><td>"+MakeSelect("logIn",false,["true","false"],curJson.logIn ? curJson.logIn : 'false' )+"</td></tr>";	// Get setting
+		str+="<tr><td></td><td>Lower panel height</td><td><input class='bs' type='text' id='transHgt' value='"+(curJson.transHgt ? curJson.transHgt : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td colspan=3><b><br>Player<b></td></tr>";					// Heading
+		str+="<tr><td colspan=3><hr></td></tr>";								// Rule
+		str+="<tr><td></td><td>Media source (Id or URL)</td><td><input class='bs' type='text' id='playerSource' value='"+(curJson.playerSource ? curJson.playerSource : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Start time (seconds)</td><td><input class='bs' type='text' id='playerStart' value='"+(curJson.playerStart ? curJson.playerStart : 0)+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Stop time (seconds)</td><td><input class='bs' type='text' id='playerStop' value='"+(curJson.playerStop ? curJson.playerStop : 600)+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Media aspect ratio (0-1)</td><td><input class='bs' type='text' id='playerAspect' value='"+(curJson.playerAspect ? curJson.playerAspect : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Initial width % (0-100)</td><td><input class='bs' type='text' id='playerSlideRatio' value='"+(curJson.playerSlideRatio != undefined ? Math.floor(curJson.playerSlideRatio*100) : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Initial volume (0-100)</td><td><input class='bs' type='text' id='playerVolume' value='"+(curJson.playerVolume != undefined ? curJson.playerVolume : "")+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Auto start</td><td>"+MakeSelect("playerAuto",false,["false","true"],curJson.playerAuto)+"</td></tr>";	// Get setting
+		str+="<tr><td></td><td>Show native controls</td><td>"+MakeSelect("playerControls",false,["false","true"],curJson.playerControls)+"</td></tr>";	// Get setting
+		str+="<tr><td></td><td>Quality</td><td>"+MakeSelect("playerQuality",false,["Default","Good","Better","Best"],curJson.playerQuality)+"</td></tr>";	// Get setting
+		str+="<tr><td colspan=3><b><br>Transcript<b></td></tr>";				// Heading
+		str+="<tr><td colspan=3><hr></td></tr>";								// Rule
+		str+="<tr><td></td><td>Initial width % (0-100)</td><td><input class='bs' type='text' id='transInfoRatio' value='"+(curJson.transInfoRatio != undefined ? Math.floor(curJson.transInfoRatio*100) : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Display</td><td>"+MakeSelect("transMode",false,["Default","Chunked","Closed-Caption","First","None"],curJson.transMode)+"</td></tr>";	// Get setting
+		str+="<tr><td></td><td>Initial language</td><td><input class='bs' type='text' id='transLanguage' value='"+(curJson.transLanguage ? curJson.transLanguage : '')+"'></td></tr>";	// Get setting
+		str+="<tr><td></td><td>Languages</td><td><input class='bs' type='text' id='transLangs' value='"+(curJson.transLangs ? curJson.transLangs : '')+"'></td></tr>";	// Get setting
+		str+="</table></div><br>";												// End table
+		str+="&nbsp;&nbsp;<button"+butsty+"onclick='Preview()'>Preview</button>";	// Preview button
+		$("#paneDiv").html(str+"</div>");										// Put editor up	
+		
+		$("#title").on("change", function() { curJson.title=$(this).val(); });					// Extract value	
+		$("#width").on("change", function() { curJson.width=$(this).val(); });					// Extract value	
+		$("#infoMapSource").on("change", function() { curJson.infoMapSource=$(this).val(); });	// Extract value	
+		$("#extCSS").on("change", function() { curJson.extCSS=$(this).val(); });				// Extract value	
+		$("#transLab").on("change", function() { curJson.transLab=$(this).val(); });			// Extract value	
+		$("#infoLab").on("change", function() { curJson.infoLab=$(this).val(); });				// Extract value	
+		$("#contentsLab").on("change", function() { curJson.contentsLab=$(this).val(); });		// Extract value	
+		$("#transLab").on("change", function() { curJson.transLab=$(this).val(); });			// Extract value	
+		$("#contentsPlayOnClick").on("change", function() { curJson.contentsPlayOnClick=$(this).val(); });	// Extract value	
+		$("#logIn").on("change", function() { curJson.logIn=$(this).val(); });					// Extract value	
+		$("#playerSource").on("change", function() { 											// On source change	
+				var v=$(this).val();															// Get value
+				var re=/id="kaltura_player_([^"]+)"/;											// See if Kaltura embed code
+				var re=re.exec(v);																// Run regex					
+				if (re)																			// If found
+					v="//www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+re[1]+"/format/url/flavorParamId/301971/video.mp4"	
+				curJson.playerSource=v;															// Set value	
+		 	});
+		$("#playerStart").on("change", function() { curJson.playerStart=$(this).val(); });		// Extract value	
+		$("#playerStop").on("change", function() { curJson.playerStop=$(this).val(); });		// Extract value	
+		$("#playerAspect").on("change", function() { curJson.playerAspect=$(this).val(); });	// Extract value	
+		$("#playerSlideRatio").on("change", function() { curJson.playerSlideRatio=$(this).val()/100; });	// Extract value	
+		$("#playerControls").on("change", function() { curJson.playerControls=$(this).val(); });// Extract value	
+		$("#playerAuto").on("change", function() { curJson.playerAuto=$(this).val(); });		// Extract value	
+		$("#playerVolume").on("change", function() { curJson.playerVolume=$(this).val(); });	// Extract value	
+		$("#playerQuality").on("change", function() { curJson.playerQuality=$(this).val(); });	// Extract value	
+		$("#transInfoRatio").on("change", function() { curJson.transInfoRatio=$(this).val()/100; });// Extract value	
+		$("#transHgt").on("change", function() { curJson.transHgt=$(this).val(); });			// Extract value	
+		$("#transMode").on("change", function() { curJson.transMode=$(this).val(); });			// Extract value	
+		$("#transLanguage").on("change", function() { curJson.transLanguage=$(this).val(); });	// Extract value	
+		$("#transLangs").on("change", function() { curJson.transLangs=$(this).val(); });		// Extract value	
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var o=null;															
+		if (e.data.match(/ShivaAct=time/))	{									// If a time
+			curTime=e.data.split("|")[1]-0;										// Isolate it
+			if (curPane == "index")			o=curJson.indexVectors;				// Point at index
+			if (curPane == "transcript")	o=curJson.transVectors;				// Point at transcript
+			if (curPane == "content")		o=conPtr;							// Point at player/info/slides		
+			if (o && (curEdit != -1)) {											// Editing time
+				if (!isNaN(curTime) ) {											// If a valid time
+					o[curEdit].t=curTime;										// Set it
+					$("#idt"+curEdit).val(SecondsToTimecode(curTime));			// Update text
+					if (e.data.split("|")[2].match(/s/i)) {						// If shift key pressed
+						var i,d=o[curEdit].t-curTime;							// Shift amount
+						for (i=curEdit-0+1;i<o.length;++i) {					// For each subsequent row
+							o[i].t-=d;											// Shift
+							$("#idt"+i).val(SecondsToTimecode(o[i].t));			// Update text
+							}
+						}
+					}
+				}
+			}
+		else if (e.data.match(/ShivaAct=transclick/))	{						// If a trans click
+			if (curPane == "transcript")	o=curJson.transVectors;				// Point at transcript
+			if (o && (curEdit != -1)) {											// Editing time
+				o[curEdit].c=e.data.split("|")[2]-0;							// Set it
+				SendShivaMessage("Qmedia=seek",""+o[curEdit].t+"|skipAssess");	// Go to time
+				MakeTransTable();												// Show new context
+				}											
+			}	
+		else if (e.data.match(/ShivaAct=playerwid/)) 							// If a player slider change
+				$("#gtBoxTt").val(Math.round(e.data.split("|")[2]*100));		// Set text box
+		else if (e.data.match(/ShivaAct=transwid/)) 							// If a transcript slider change
+				$("#gtBoxTt").val(Math.round(e.data.split("|")[2]*100));		// Set text box
+		else if (e.data.match(/PutJSON/))										// Incoming JSON data from Drupal manager
+			LoadShow($.parseJSON(e.data.substr(8)));							// Convert to obj and load
+		else if (e.data.match(/GetJSON/))										// Outgoing JSON data to Drupal manager
+			window.parent.postMessage("GetJSON="+JSON.stringify(curJson),"*"); 	// Stringify and send		
+//		else
+			trace(e.data);
+	}	
+
+	function SendShivaMessage(cmd, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=cmd+"|QmediaEditor";											// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		var win=document.getElementById("playerIF").contentWindow;				// Point at iframe	
+		win.postMessage(str,"*");												// Send message to show
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function SecondsToTimecode(secs) 										// CONVERT SECONDS TO TIMECODE
+	{
+		var str="",n;
+		n=Math.floor(secs/3600);												// Get hours
+		if (n) str+=n+":";														// Add to tc
+		n=Math.floor(secs/60);													// Get mins
+		if (n < 10) str+="0";													// Add leading 0
+		str+=n+":";																// Add to tc
+		n=Math.floor(secs%60);													// Get secs
+		if (n < 10) str+="0";													// Add leading 0
+		str+=n;																	// Add to tc
+		var f=secs-Math.floor(secs);											// Get fractional part
+		if (f) {																// If a fraction	
+			str+="."+Math.round(f*100);											// 2 digits
+			str=str.replace(/0$/,"");											// Remove trailing 0
+			}
+		return str;																// Return timecode			
+	}
+		
+	function TimecodeToSeconds(timecode) 									// CONVERT TIMECODE TO SECONDS
+	{
+		var h=0,m=0;
+		var v=(""+timecode).split(":");											// Split by colons
+		var s=v[0]																// Add them
+	 	if (v.length == 3)														// If hours
+	 		v.shift();															// Remove it
+	 	if (v.length == 2)														// Just minutes, seconds
+			s=v[1],m=v[0];														// Add them
+		else if (v.length == 3)													// Hours, minutes, seconds
+			s=v[2],m=v[1],h=v[0];												// Add them
+		return(Number(h*3600)+Number(m*60)+Number(s));							// Convert
+	}
+
+	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE SELECT WIDGET
+	{
+		var	str="<select class='bs' id='"+id+"'";
+		if (multi)
+			str+="multiple='multiple' size='"+multi+"'";
+		if (extra)
+			str+=extra;
+		str+=">";
+		for (i=0;i<items.length;++i) {
+			str+="<option";
+			if (sel == items[i])
+				str+=" selected='selected'"
+			if (values && values[i])
+				str+=" value='"+values[i]+"'";
+			str+=">"+items[i]+"</option>";
+			}	
+		return str+"</select>"
+	}
+	
+	
+</script>
+</body></html>
