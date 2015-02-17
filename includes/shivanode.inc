@@ -250,6 +250,12 @@ function _shivanode_installed_instances() {
  *
  * @return
  *  An associative array specifying the values we wish to add for the chart type.
+ * 
+ * 	Types are: 	1 = data, 2 = Image, 3 = Map, 4 = Subway, 5 = Timeline (Simile)*, 6 = Video, 7 = Chart,
+ * 							8 = Control*, 9 = Canvas*, 10 = Network, 11 = Draw*, 12 = Earth, 13 = Timeline (Timeglider), 14 = Poster,*
+ * 							15 = Word Cloud, 16 = Graph, 17 = Multimedia (Qmedia)
+ * 
+ * 		* means "deprecated"
  *  
  */
 function _shivanode_element_typelist($byName = FALSE) {
@@ -261,6 +267,7 @@ function _shivanode_element_typelist($byName = FALSE) {
     16 => t('Graph'),
     2 => t('Image'),
     3 => t('Map'),
+    17 => t('Multimedia'),
     10 => t('Network'),
     14 => t('Poster'),
     4 => t('Subway'),
@@ -268,6 +275,7 @@ function _shivanode_element_typelist($byName = FALSE) {
     13 => t('Timeline'),
     6 => t('Video'),
     15 => t('Word Cloud'),
+    
     /*
     8 => 'Control',
     9 => 'Canvas',
@@ -685,6 +693,14 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_map_editor', SHIVA_MAP_EDITOR),
     '#required' => TRUE,
   );
+	
+  $form['shivanode_url_settings']['shivanode_qmedia_editor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name of the Multimedia (QMedia) Editor File:'),
+    '#size' => 50,
+    '#default_value' => variable_get('shivanode_qmedia_editor', SHIVA_QMEDIA_EDITOR),
+    '#required' => TRUE,
+  );
     
   $form['shivanode_url_settings']['shivanode_network_editor'] = array(
     '#type' => 'textfield',
@@ -936,6 +952,7 @@ function _shivanode_admin_settings_validate($form, &$form_state) {
     $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
     $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
     $form_state['input']['shivanode_poster_editor'] = SHIVA_POSTER_EDITOR;
+    $form_state['input']['shivanode_qmedia_editor'] = SHIVA_QMEDIA_EDITOR_EDITOR;
     $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
     //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
     $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
@@ -2059,6 +2076,9 @@ function _get_shivaframe_url($opt, $nid = '') {
     case 16: // Graph
       $player =  variable_get('shivanode_graph_editor', SHIVA_GRAPH_EDITOR);
       break;
+		case 17: // Qmedia Multimedia
+			$player = variable_get('shivanode_qmedia_editor', SHIVA_QMEDIA_EDITOR);
+			break;
   }
   if (strpos($player, 'http://') === FALSE && $opt > 1) {
     $player = variable_get('shivanode_root_url', SHIVA_ROOT) . $player; 

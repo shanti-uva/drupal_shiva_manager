@@ -60,6 +60,9 @@ define('SHIVA_CONTROL_EDITOR', 'control.htm');
 // default URL for Canvas Editor
 define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
+// default URL for Canvas Editor
+define('SHIVA_QMEDIA_EDITOR', 'http://www.qmediaplayer.com/edit.htm');
+
 // default URL for Word Cloud Editor
 define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
 
@@ -153,7 +156,7 @@ function shivanode_user_presave(&$edit, $account, $category) {
 
 function shivanode_user_logout($account) {
   session_destroy();
-  drupal_goto();
+  //drupal_goto(); // ndg8f commented out 02/17/15
 }
 
 /**
