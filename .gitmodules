@@ -1,0 +1,6 @@
+[submodule "SHIVA"]
+	path = SHIVA
+	url = https://github.com/bferster/SHIVA.git
+[submodule "Qmedia"]
+	path = Qmedia
+	url = https://github.com/bferster/Qmedia.git
