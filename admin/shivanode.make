@@ -142,6 +142,12 @@ projects[shivanode][download][url] = "https://github.com/shanti-uva/drupal_shiva
 projects[shivanode][download][branch] = "newtheme"
 projects[shivanode][subdir] = "shanti"
 
+projects[gdrive][type] = "module"
+projects[gdrive][download][type] = "git"
+projects[gdrive][download][url] = "https://github.com/shanti-uva/drupal_gdrive.git"
+projects[gdrive][download][branch] = "master"
+projects[gdrive][subdir] = "shanti"
+
 projects[shanti_kmaps_fields][type] = "module"
 projects[shanti_kmaps_fields][download][type] = "git"
 projects[shanti_kmaps_fields][download][url] = "https://github.com/shanti-uva/drupal_shanti_kmaps_fields.git"
