@@ -133,7 +133,7 @@ projects[wysiwyg][version] = "2.2"
 projects[sarvaka_modules][type] = "module"
 projects[sarvaka_modules][download][type] = "git"
 projects[sarvaka_modules][download][url] = "https://github.com/shanti-uva/drupal_shanti_sarvaka_modules.git"
-projects[shivanode][download][branch] = "master"
+projects[sarvaka_modules][download][branch] = "master"
 projects[sarvaka_modules][subdir] = "shanti"
 
 projects[shivanode][type] = "module"
