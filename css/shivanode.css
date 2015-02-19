@@ -135,7 +135,7 @@ div.sn-share-button img {
   background-color: #c5ced1;
 }
 
-/** CSS for SHARE page Tabs **/
+/** CSS for SHARE page Tabs 
 #sharetabs {
 	font-size:90%;
 	margin:20px 0;
@@ -192,7 +192,7 @@ div.sn-share-button img {
 	padding: 8px;
 	height: 100px;
 	width: 550px;
-}
+}**/
 	/**
 .thumbs{
 	float:left;border:#000 solid 1px;margin-bottom:20px;margin-right:20px;

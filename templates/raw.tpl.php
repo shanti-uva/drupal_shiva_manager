@@ -1,1 +1,1 @@
-<?php print $content; ?>
+<?php print render($content); ?>

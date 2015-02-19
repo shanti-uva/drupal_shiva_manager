@@ -417,9 +417,11 @@ function shivanode_permission() {
  * 
  */
 function shivanode_preprocess_page(&$vars) {
-    if ( isset($_GET['format']) && $_GET['format'] == 'simple' ) {
-        $vars['template_file'] = 'raw';
-    }
+	$var['is_simple'] = TRUE;
+  if ( isset($_GET['format']) && $_GET['format'] == 'simple' ) {
+      $vars['template_file'] = 'raw';
+			$var['is_simple'] = TRUE;
+  }
 } 
 
 function shivanode_apachesolr_search_page_alter(&$build, $search_page) {
@@ -1585,7 +1587,11 @@ function shivanode_theme() {
         'content' => NULL,
         'type' => NULL,
         )
-     )
+     ),
+     'raw' => array(
+        'variables' => array('content' => NULL),
+        'template' => 'templates/raw'
+      ),
   );
   
 }

@@ -143,7 +143,7 @@
 	    }
 	    
 	    // Code to activate JQuery Tabs in the Share embed page
-	    if($('#sharetabs').length > 0) {
+	    /*if($('#sharetabs').length > 0) {
 			  $('#sharetabs div').hide();
 				$('#sharetabs div:first').show();
 				$('#sharetabs ul li:first').addClass('active');
@@ -159,7 +159,7 @@
 					}
 					return false;
 				});
-			}
+			}*/
 			// if ctype param is there then send message to shivaEditFrame to change the chart type
 			if(window.location.search.indexOf('ctype=') > -1) {
 				var pts = window.location.search.split('ctype=');

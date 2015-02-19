@@ -2762,21 +2762,25 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     );
   }
 }
-
+/*
+ * 
+ */
 function _shivanode_node_embed_page($nid) {
 	global $base_url, $base_path;
 	$node = node_load($nid);
 	// Starting code for sharing url pattern: node/###/share
 	// example taken from http://papermashup.com/simple-jquery-tabs/
 	$bcontent = FALSE;
-	$selcontent = '<ul>
-					     <li><a href="#tab-cf">Confluence</a></li>
-					     <li><a href="#tab-wp">Word Press</a></li>
-					     <li><a href="#tab-if">IFrame</a></li>
-					     <li><a href="#tab-lk">Link</a></li>
-					     <li><a href="#tab-url">URL</a></li>
-					     <li><a href="#tab-js">JSON</a></li>
-				   </ul>';
+	$selcontent = '<aside class="content-resources col-xs-6 col-sm-3 col-md-3 col-lg-2 sidebar-offcanvas equal-height">
+    <ul class="nav nav-pills nav-stacked" role="tablist">
+    	 <li class="active"><a href="#tab-sm" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="true">Social Media</a></li>
+	     <li><a href="#tab-cf" aria-controls="profile" role="tab" data-toggle="tab">Confluence</a></li>
+	     <li><a href="#tab-wp" aria-controls="profile" role="tab" data-toggle="tab">Word Press</a></li>
+	     <li><a href="#tab-if" aria-controls="profile" role="tab" data-toggle="tab">IFrame</a></li>
+	     <li><a href="#tab-lk" aria-controls="profile" role="tab" data-toggle="tab">Link</a></li>
+	     <li><a href="#tab-url" aria-controls="profile" role="tab" data-toggle="tab">URL</a></li>
+	     <li><a href="#tab-js" aria-controls="profile" role="tab" data-toggle="tab">JSON</a></li>
+   </ul></aside>';
     $smtab = '';
 	if(module_exists('sharethis')) {
 	    // add meta tag for share image
@@ -2789,8 +2793,8 @@ function _shivanode_node_embed_page($nid) {
 	    $bcontent = preg_replace('/stLight.options\(\{"publisher"\:"([^"]+)"/','stLight.options({"publisher":"$1", "onhover":"false", "doNotCopy":"true"', $bcontent);
 	    $imgurl = _get_thumb_image($node);
 	    $bcontent = preg_replace('/st\_title=""/','st_title="' . $node->title . '" st_image="' . $imgurl . '" ', $bcontent);
-	    $selcontent = str_replace('<ul>','<ul><li><a href="#tab-sm">Social Media</a></li>', $selcontent);
-		$smtab = '<div id="tab-sm">' . str_replace('display: none;','', $bcontent) . '<p>Click on a button to share this visualization through the desired social media site. <br/> ' .
+	    //$selcontent = str_replace(' style="display:none;"', '', $selcontent);
+	    $smtab = '<div role="tabpanel" class="tab-pane active" id="tab-sm""><h3>Social Media</h3>' . str_replace('display: none;','', $bcontent) . '<p>Click on a button to share this visualization through the desired social media site. <br/> ' .
 					'Don\'t see your preferred social media site? Then let us know by <a href="/contact" target="_blank">clicking here</a>.</p></div>';
 	}
 
@@ -2813,7 +2817,8 @@ function _shivanode_node_embed_page($nid) {
 
 	    'selectors' => array(
 	    	'#type' => 'markup',
-	    	'#markup' => $selcontent
+	    	'#markup' => $selcontent,
+	      '#suffix' => '<div class="tab-content">',
 		),
 		'tabsm' => array(
 			'#type' => 'markup',
@@ -2821,43 +2826,43 @@ function _shivanode_node_embed_page($nid) {
 		),
 		'tabcf' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-cf"><p>Cut and paste the following macron into the "Wiki Markup" view of your Confluence site page:</p>' .
-						'<textarea class="code">{iframe:src=' . $nurl . '|width=' . $width .
-						 '|height=' . $height .  '}Your browser does not support iframes{iframe}</textarea>' .
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-cf"><h3>Confluence</h3><p>Cut and paste the following macron into the "Wiki Markup" view of your Confluence site page:</p>' .
+						'<pre class="code">{iframe:src=' . $nurl . '|width=' . $width .
+						 '|height=' . $height .  '}Your browser does not support iframes{iframe}</pre>' .
 						'<p>For information on other iframe macro parameters see the <a href="http://www.adaptavist.com/display/AtlassianConfluence/iframe+macro" target="_blank">Confluence IFrame Macro Overview</a>.</p> </div>'
 						 
 						 //
 		),
 		'tabwp' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-wp"><p>Cut and paste the following code into your Word Press site: </p>' . 
-						'<textarea class="code">[iframe src="' . $nurl . '" width="' . $width . '" height="' . $height . '"]</textarea>' .
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-wp"><h3>Word Press</h3><p>Cut and paste the following code into your Word Press site: </p>' . 
+						'<pre class="code">[iframe src="' . $nurl . '" width="' . $width . '" height="' . $height . '"]</pre>' .
 						'<p>For information on other iframe parameters see the <a href="http://wordpress.org/extend/plugins/iframe/other_notes/" target="_blank">WP IFrame Plugin Notes</a>.</p> </div>'
 		),
 		'tabif' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-if"><p>Use this HTML code to put an iframe of this visualization on a web page: </p> ' .
-							'<textarea class="code"><iframe src="' . $nurl . '" height="' . $height .  '" width="' . $width . '"></iframe></textarea></div>'
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-if"><h3>IFrame</h3><p>Use this HTML code to put an iframe of this visualization on a web page: </p> ' .
+							'<pre class="code">&lt;iframe src="' . $nurl . '" height="' . $height .  '" width="' . $width . '"></iframe></pre></div>'
 		),
 		'tablk' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-lk"><p>To link to this visualization on a web page use the following link code: </p>' .
-							'<textarea class="code"><a href="' . $nurl . '">' . $node->title .  '</a></textarea></div>'
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-lk"><h3>Link</h3><p>To link to this visualization on a web page use the following link code: </p>' .
+							'<pre class="code">&lt;a href="' . $nurl . '">' . $node->title .  '</a></pre></div>'
 		),
 		'taburl' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-url"><p>The public URL to view this visualization is: </p>' .
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-url"><h3>URL</h3><p>The public URL to view this visualization is: </p>' .
 							'<p><a href="' . $nurl . '" target="_blank">http:' . $nurl . '</a></p></div>'
 		),
 		'tabjs' => array(
 			'#type' => 'markup',
-			'#markup' => '<div id="tab-js"><p>The JSON code that defines this visualization is: </p>' .
-							'<textarea class="code">' . prettyJson(json_encode($njson)) . '</textarea></div>'
+			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-js"><h3>JSON Data</h3><p>The JSON code that defines this visualization is: </p>' .
+							'<pre class="code">' . prettyJson(json_encode($njson)) . '</pre></div>'
 		),
 		'closing' => array(
 			'#type' => 'markup',
 			'#markup' => '',
-			'#suffix' => '</div>',
+			'#suffix' => '</div></div>',
 		),
 	);
 	return $page;
