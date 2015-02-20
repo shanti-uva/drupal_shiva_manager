@@ -1266,7 +1266,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Permission Value (calls JS to enforce only Public and Private)
   $form['shivanode_access']['und'] += array(
-    '#attributes' => array('onchange' => 'Drupal.Shivanode.checkPermissionsValue(jQuery(this).val());'),
+    '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
   );
   
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
