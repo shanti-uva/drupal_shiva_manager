@@ -13,6 +13,8 @@ dependencies[] = views_content
 ; dependencies[] = zend (7.x-1.0-beta1) ; replaced by gdrive
 
 files[] = shivanode.module
+files[] = includes/shivanode-constants.inc
 files[] = includes/shivanode.inc
+
 configure = admin/config/content/shivanode
 version = "7.x-1.5-beta1"

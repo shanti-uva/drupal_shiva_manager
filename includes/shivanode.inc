@@ -2690,6 +2690,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     // if it is a  new visualization call JS function to load the data entry data once form is loaded.
     // use 'preset' because this function already sets the markup for the data entry
     // Otherwise, load the data from the Drupal unless told not to
+    /*TODO: Change this to a behavior
     $jsfunct =  ($is_new_el)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
               'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . 
               $dataurl . '\', \'' . $datatitle . '\');}';
@@ -2700,7 +2701,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
                ' jQuery(\'#shivaEditFrame\').load(function() { ' . $jsfunct . '});' .
               '});' .
           '</script>',
-    );
+    );*/
 
     // Add the form elements display what the linked data entry is with links to reinsert, clear, and edit data.
     $form['gdocinfo']['data_nid'] = array(
@@ -2771,8 +2772,8 @@ function _shivanode_node_embed_page($nid) {
 	// Starting code for sharing url pattern: node/###/share
 	// example taken from http://papermashup.com/simple-jquery-tabs/
 	$bcontent = FALSE;
-	$selcontent = '<aside class="content-resources col-xs-6 col-sm-3 col-md-3 col-lg-2 sidebar-offcanvas equal-height">
-    <ul class="nav nav-pills nav-stacked" role="tablist">
+	$selcontent = '
+    <ul class="nav nav-tabs" role="tablist">
     	 <li class="active"><a href="#tab-sm" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="true">Social Media</a></li>
 	     <li><a href="#tab-cf" aria-controls="profile" role="tab" data-toggle="tab">Confluence</a></li>
 	     <li><a href="#tab-wp" aria-controls="profile" role="tab" data-toggle="tab">Word Press</a></li>
@@ -2780,7 +2781,7 @@ function _shivanode_node_embed_page($nid) {
 	     <li><a href="#tab-lk" aria-controls="profile" role="tab" data-toggle="tab">Link</a></li>
 	     <li><a href="#tab-url" aria-controls="profile" role="tab" data-toggle="tab">URL</a></li>
 	     <li><a href="#tab-js" aria-controls="profile" role="tab" data-toggle="tab">JSON</a></li>
-   </ul></aside>';
+   </ul>'; // <aside class="content-resources col-xs-6 col-sm-3 col-md-3 col-lg-2 sidebar-offcanvas equal-height"></aside>
     $smtab = '';
 	if(module_exists('sharethis')) {
 	    // add meta tag for share image
