@@ -118,9 +118,7 @@
 			// Send Data to SHIVA editor once loaded
 			if($('iframe#shivaEditFrame').length > 0) {
 				// Special on load for new versus existing
-				if(Drupal.settings.shivanode.isNewEl) {
-					$('#shivaEditFrame').load(function() { Drupal.Shivanode.insertDataElement('preset'); });
-				} else if(Drupal.settings.shivanode.loadJS) { 
+				if(!Drupal.settings.shivanode.isNewEl) { 
 					$('#shivaEditFrame').load(function() { 
 							Drupal.Shivanode.setDataSheet(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
 					});
@@ -167,6 +165,17 @@
   					'#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
   				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
   				});
+  				
+  				// Don't allow save unless Title is filled in
+  				$('button[id*="edit-submit"]').click(function(e) {
+  					var sntitle = $('#edit-title').val();
+  					if(sntitle == '') {
+  						alert("You must enter a title before submitting your visualization!");
+  						$('#edit-title').addClass('error');
+  						e.preventDefault();
+  					}
+  				});
+  				
   				Drupal.settings.shivanode.formLoaded = true;
 				});
 				
