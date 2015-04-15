@@ -575,7 +575,21 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#markup' => t('<h3>Shivanode Basic Settings</h3>') .
       t('<p>In this form you can set the URLs for the SHIVA player (for viewing nodes) and the various SHIVA editors.</p>'),
   );
-  
+  $form['shivanode_shiva_home'] = array(
+  	'#type' => 'textfield',
+    '#title' => t('Location of the SHIVA library'),
+    '#size' => 80,
+    '#default_value' => variable_get('shivanode_shiva_home', SHIVA_HOME),
+    '#required' => TRUE,
+	);
+  $form['shivanode_qmedia_home'] = array(
+  	'#type' => 'textfield',
+    '#title' => t('Location of the QMeida library'),
+    '#size' => 80,
+    '#default_value' => variable_get('shivanode_qmedia_home', QMEDIA_HOME),
+    '#required' => TRUE,
+	);
+	/*
   // URL Settings for SHIVA Node
   $form['shivanode_url_settings'] = array(
     '#description' => t('The urls for the SHIVA player and editors'),
@@ -602,7 +616,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_root_url', SHIVA_ROOT),
     '#required' => TRUE,
   );
-  
+  */
   $form['shivanode_username'] = array(
     '#prefix' => '<div id="snuname">',
     '#suffix' => '</div>',
@@ -639,6 +653,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_view_json', FALSE),
   );
   
+	/* OLD
   $form['shivanode_url_settings']['instructions_1'] = array(
     '#type' => 'markup',
     '#markup' => '<p>' . t('The following fields for the specific SHIVA editors can contain either a full URL includin "http://" or ' . 
@@ -725,7 +740,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR),
     '#required' => TRUE,
   );
-    
+    */
   /*$form['shivanode_url_settings']['shivanode_timeline_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Timeline Editor File:'),
@@ -733,7 +748,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR),
     '#required' => TRUE,
   );*/
-
+/* old
   $form['shivanode_url_settings']['shivanode_timeglider_editor'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of the Timeglider Editor File:'),
@@ -781,6 +796,7 @@ function _shivanode_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR),
     '#required' => TRUE,
   );
+ * */
 
   // Reset buttons uses the validate function to reset data
   $form['actions']['default_values'] = array(

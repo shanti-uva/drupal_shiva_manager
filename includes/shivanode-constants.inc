@@ -6,9 +6,14 @@
 
 global $base_root, $base_path;
  
- // default (base) URL for Visualization Editors
- // Definitive site is: http://shiva.shanti.virginia.edu/go.htm
+ // OLD default (base) URL for Visualization Editors
 define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivanode') . '/SHIVA/');
+
+// SHIVA Home in Libraries Folder
+define('SHIVA_HOME', $base_root . $base_path . 'sites/all/libraries/SHIVA/');
+
+// Qmedia Home in Libraries Folder
+define('QMEDIA_HOME', $base_root . $base_path . 'sites/all/libraries/Qmedia/');
 
 // default URL for Visualization Player
 define('SHIVA_VIEWER', SHIVA_ROOT . 'go.htm'); 

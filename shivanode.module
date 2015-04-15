@@ -1570,7 +1570,6 @@ function shivanode_facet_items_alter(&$build, &$settings) {
   }
 }
 
-
 /**
  * Implementation of hook_wysiwyg_include_directory().
  *
