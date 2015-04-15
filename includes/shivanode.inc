@@ -2698,10 +2698,17 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
       '#type' => 'markup',
       '#markup' => '<script type="text/javascript">' .
               'jQuery(document).ready(function() {' .
-               ' jQuery(\'#shivaEditFrame\').load(function() { ' . $jsfunct . '});' .
+              // ' jQuery(\'#shivaEditFrame\').load(function() { ' . $jsfunct . '});' .
               '});' .
           '</script>',
     );*/
+    $snsettings = array(
+			'shivanode' => array(
+				'dataUrl' => $dataurl,
+				'dataTitle' => $datatitle,
+			),
+		);
+		drupal_add_js($snsettings, 'setting');
 
     // Add the form elements display what the linked data entry is with links to reinsert, clear, and edit data.
     $form['gdocinfo']['data_nid'] = array(

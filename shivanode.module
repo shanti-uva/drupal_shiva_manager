@@ -13,6 +13,8 @@ module_load_include('inc', 'shivanode', 'includes/shivanode-constants');
  *   This hook is run at the beginning of the page request. 
  */
 function shivanode_init() {
+	module_load_include('inc', 'shivanode', 'includes/shivanode');
+	
   // Add names JS scripts here after putting file in shivanode/js folder
   $js_scripts = array(
     '/js/jquery.json-2.3.min.js',
@@ -27,38 +29,28 @@ function shivanode_init() {
       $js = drupal_get_path('module', 'shivanode') . $js;
     }
     drupal_add_js($js, $type);
-    drupal_add_js( 'jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . 
-                    variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"});', 'inline');
+    /*drupal_add_js( 'jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . 
+                    variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"});', 'inline');*/
   }
-	drupal_add_js(array('shivanode' => array('formLoaded' => FALSE)), 'setting');
+	
+	$snsettings = array(
+		'shivanode' => array(
+			'dataUrl' => '',
+			'dataTitle' => '',
+			'formLoaded' => false,
+			'iframeSrcUrl' => '',
+			'iframeType' => '',
+			'isNewEl' => false,
+			'jsonloaded' => false,
+			'loadJS' => false,
+			'shibstatus' => null,
+			'snviewer' => variable_get('shivanode_chart_viewer', SHIVA_VIEWER),
+			'status' => '',
+		),
+	);
+	drupal_add_js($snsettings, 'setting');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/shivanode.css');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
-}
-
-/**
- * Hook_user_presave: Use UVa's whois to fill in first and last name if it does not exist.
- */
-function shivanode_user_presave(&$edit, $account, $category) {
-  if(variable_get('shivanode_username_auto', FALSE)) {
-    $host = variable_get('shivanode_whois_host', 'whois.virginia.edu'); 
-    $name = $edit['name'];
-    if(count($edit['field_lname']['und']) == 0) {
-      $whois = shell_exec('whois -h ' . $host . ' ' . $name);
-      if(preg_match('/Name:\s+([^\n]+)/',$whois, $matches)) {
-        $name = $matches[1];
-        $name = explode(' ', $name);
-        if(count($edit['field_fname']['und']) == 0) {
-          $edit['field_fname']['und'] = array( array('value' => $name[0] ));
-        }
-        $edit['field_lname']['und'] = array( array('value' => array_pop($name) ));
-      }
-    }
-  }
-}
-
-function shivanode_user_logout($account) {
-  session_destroy();
-  //drupal_goto(); // ndg8f commented out 02/17/15
 }
 
 /**
@@ -251,22 +243,6 @@ function shivanode_menu() {
 }
 
 /**
- * Implements hook_node_info: 
- **/
-function shivanode_node_info() {
-  return array(
-    'shivanode' => array(
-      'name' => t('Shivanode'), 
-      'base' => 'shivanode', 
-      'has_title' => TRUE,
-      'title_label' => t('Title'),
-      'description' => t('A <em>Shivanode</em> creates a visualization using the SHIVA framework'), 
-      'title_label' => t('Shiva Visualization'),
-    ),
-  );
-}
-
-/**
  * Implements hook_help.
  *
  */
@@ -278,364 +254,143 @@ function shivanode_help($path, $arg) {
   }
 }
 
-/*
- * User Functions 
- */
- 
-/* Is the current user authenticated, used in menu access callbacks */
-function is_auth_user($normal = TRUE) {
-  return user_is_logged_in() * $normal;
-}
-
+/***************  Block Functions   ***************************/
 
 /**
-* Implements hook_permission().
-*/
-function shivanode_permission() {
-  return array(
-    'access shivanode view settings' => array(
-      'title' => t('Change the view settings to Shiva Visualizations'),
-    ),
-    'access shivanode view json' => array(
-      'title' => t('Show the JSON text in uneditable div when editing node.'),
-    ),
-    'access shivanode view subtype' => array(
-      'title' => t('Show the uneditable subtype field in Shivanode create/edit form.'),
-    ),
-  ); 
-}
-
-/**
- * Implements hook_preprocess_page () 
- *   This code  and the registry alter code comes from 
- * 
- *            http://stackoverflow.com/questions/247991/displaying-a-drupal-view-without-a-page-template-around-it
- *  
- *   Popups need to be called with {path url}?format=simple, as in: 
- * 
- *           http://shantivis.org/mydata?format=simple
- * 
- *   in lightbox you have to add a query object {'format' : 'simple' }
- * 
- */
-function shivanode_preprocess_page(&$vars) {
-	$var['is_simple'] = TRUE;
-  if ( isset($_GET['format']) && $_GET['format'] == 'simple' ) {
-      $vars['template_file'] = 'raw';
-			$var['is_simple'] = TRUE;
-  }
-} 
-
-function shivanode_apachesolr_search_page_alter(&$build, $search_page) {
-  //dpm(array($build, $search_page));
-  //dpm(array('build' => $build, 'search page' => $search_page));
-}
-
-function shivanode_apachesolr_process_results(&$results, DrupalSolrQueryInterface $query) {
-  //dpm($results, 'results');
-  //dpm($query, 'query');
-}
-
-/**
-* Implements hook_node_access().
-*/
-function shivanode_node_access($node, $op, $account) {
-  module_load_include('inc', 'shivanode', 'includes/shivanode');
-  $type = is_string($node) ? $node : $node->type;
-  if (!is_string($node) && $type == "shivanode") {
-    $shivaAccess = _shivanode_get_access($node);
-    if($shivaAccess == 1 && $account->uid != $node->uid) {  // access = 1 means "Draft" or private
-       return NODE_ACCESS_DENY;  // Deny anyone but author (and admins) to do anything on Draft nodes
-    }
-  }
-  // otherwise let Drupal do it's access thing
-}
-
-/*
- * Implements hook_node_insert
- *   Save shivanode_link record linking visualization node with data node
- */
-function shivanode_node_insert($node) {
-  $sntype = strtolower(_get_shivanode_type($node));
-  if($sntype != 'data') {
-    _shivanode_add_data_correspondence($node);
-  }
-}
-
-/*
- * Implements hook_node_delete
- *   When a shivanode is deleted, remove any links to other shivanodes if it is a data visualization
- */
-function shivanode_node_delete($node) {
-  $etype = _shivanode_get_element_type($node);
-  if ($etype == "Data") {
-    $nid = $node->nid;
-    $results = db_select('shivanode_links', 'l')
-      ->fields('l')
-      ->condition('data_id', $nid)
-      ->execute()
-      ->fetchAll();
-    $relations = array();
-    foreach ($results as $n => $link) {
-      $node = node_load($link->sn_id);
-      if ($node) {
-        $relations[] = l(check_plain($node->title), 'node/' . $node->nid);
-      }
-    }
-    $num_deleted = db_delete('shivanode_links')
-      ->condition('data_id', $nid)
-      ->execute();
-    if ($num_deleted > 0) {
-      if ($num_deleted != count($results)) {
-        drupal_set_message(
-          check_plain( t('The number of links deleted (' . $num_deleted . 
-            ') did not match the number of links found (' . count($results) . ') in shivanode.module line 237.'),
-            'warning')
-        );
-      }
-      drupal_set_message(
-        check_plain( t('Deleted links to the following ' . $num_deleted . ' visualizations:')) . ' ' . implode(', ', $relations)
-      );
-    }
-  }
-}
-
-
-/*
- * Implements hook_node_update
- *    If it is a data node make sure all that rely on it update their dataSourceUrl
- */
-function shivanode_node_update($node) {
-  if ($node->type == 'shivanode') {
-    // if it's a data visualization update shiva visualizations linked to it
-    if (_shivanode_get_element_type($node) == "Data") {
-      $nids = array();
-      $result = db_select('shivanode_links', 'l')
-        ->fields('l')
-        ->condition('data_id', $node->nid, '=')
-        ->execute()
-        ->fetchCol(1);
-      foreach ($result as $n => $nid) {
-        $dependent = node_load($nid);
-        if (_shivanode_get_element_type($dependent) != "Data") {
-          $dep_json = _shivanode_get_json($dependent);
-          $pres_json = _shivanode_get_json($node);
-          if (isset($dep_json->dataSourceUrl) && $dep_json->dataSourceUrl != $pres_json->dataSourceUrl) {
-            $dep_json->dataSourceUrl = $pres_json->dataSourceUrl;
-            $dependent->shivanode_json['und'][0]['value'] = json_encode($dep_json);
-            node_save($dependent);
-            $nids[] = $dependent->title . ' (' . $dependent->nid . ')';
-          }
-        }
-      }
-      if (count($nids) > 0) {
-        $msg = implode(', ', $nids);
-        if (count($nids) > 1) {
-          $msg = substr_replace($msg, ', and', strrpos($msg, ','), 1);
-        }
-        drupal_set_message(
-            check_plain(t("The following Shiva visualizations which use this data have also been modified:")) . " " . $msg
-        );
-      }
-    // otherwise if data_id is set, store that in the shivanode_links table
-    } 
-    elseif (isset($node->data_id)) {
-      if ($node->data_id == -1 ) {
-        _shivanode_remove_datalink($node);
-      } else {
-        $result = db_update('shivanode_links')
-          ->fields(array(
-              'data_id' => $node->data_id,
-            ))
-          ->condition('sn_id', $node->nid, '=')
-          ->execute();
-        if (!$result) {
-          _shivanode_add_data_correspondence($node); 
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_node_presave: sets a type-specific generic image for visualizations
- *    Generic thumbnails are set in shivanode.install 7005 and shivanode.inc
- */
-function shivanode_node_presave($node) {
-  if($node->type == 'shivanode') {
-    $lang = (isset($node->language)) ? $node->language : 'und';
-    if(!isset($node->field_image[$lang][0])) {
-      $type = strtolower(_get_shivanode_type($node));
-      if($type == 'data') { return; }
-      if($type == 'chart') {
-        $json = _shivanode_get_json($node);
-        $subtype = strtolower($json['chartType']);
-        if($subtype != '') {
-          $type .= "_$subtype";
-        }
-      }
-      if($fid = _shivanode_get_generic_image_info($type)) {
-        $node->field_image[$lang][0]['fid'] = $fid;
-      }
-    }
-    /** Add or adjust subtype field **/
-    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
-    if($json && isset($json->chartType)) {
-      $stype = $json->chartType;
-      $stind = _shivanode_subtypelist('index', $stype);
-      if(!$stind || $stind == '') {
-        drupal_set_message(t("No subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
-      } else {
-        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
-      }
-    }
-  }
-}
-
-function shivanode_redirect_to_new() {
-  drupal_goto('node/add/shivanode');
-}
-
-function shivanode_node_submit($node, $form, &$form_state) {
-  $node->data_id = (isset($form_state['input']['shivanode_data_nid'])) ? $form_state['input']['shivanode_data_nid'] : -1;
-  $trigger = strtolower($form_state['triggering_element']['#value']);
-  $dest = drupal_get_destination();
-  $dest = $dest['destination'];
-  
-  // When the Save & Continue button is pressed
-  if (strpos($trigger, 'continue') > -1) {
-    node_save($node);
-    $editurl = 'node/' . $node->nid . '/edit';
-    drupal_goto($editurl);
-  }
-}
-
-
-/**
- * Implements hook_node_view_alter(&$build)
- *   Adding field showing which data element is used by a visualization
+ * Implements hook_block_info()
  *
- */ 
-function shivanode_node_view_alter(&$build) {
-  // Full View
-  if($build['#view_mode'] == 'full') { 
-    global $base_path;
-    $node = $build['#node'];
-    if (_shivanode_get_access($node) == 4) {
-      // If viewing a node that is a shivanode, show the Share button
-      if ($build['#bundle'] == "shivanode") {
-        $build['sharediv'] = array(
-          '#type' => 'markup',
-          '#prefix' => '<div class="sn-share-button">',
-          '#suffix' => '</div>',
-        );
-        
-        $shareicon = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
-        
-        $build['sharediv']['share'] = array(
-          '#type' => 'markup',
-          '#markup' => '<span>' . l('<span>' . t('SHARE') . ' <img height="20" width="20" src="' . $shareicon . '" /></span>', 'node/' . $node->nid . '/share', array(
-            'attributes' => array(
-              'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
-              //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
-              'title' => 'Share this visualization!',
-              'onclick' => (_shivanode_get_element_type($node) == 'Earth')?'javascript: Drupal.Shivanode.hideViewDuringPopups();':'',
-            ),
-            'html' => true,
-            'query' => array(
-              'format' => 'simple',
-              'class' => 'lightbox',
-            ),
-          )) . '</span>',
-        );
-      }
-    }
-  
-    $sntype = _shivanode_get_element_type($node); // type of shiva visualization
-    
-    if($sntype == 'Data') {
-      unset($build['field_image']); // don't show thumbnail for data elements
-    } else { 
-      $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
-      // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
-      if ($node->type == 'shivanode') {
-        // If it's got a data element link, display that info
-        if ($data_id) {
-          $dnode = node_load($data_id);
-          if ($dnode && node_access('view', $dnode)) {
-            // make text to display: link if user has permission to view, otherwise just text
-            $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
-            // Put it after visualization type or assign it a weight of 12
-            $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
-            $build['data_element'] = array(
-              '#type' => 'markup',
-              '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
-                  '<div class="field-label">Data Element Used:&nbsp;</div>' .
-                  '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
-              '#weight' => $weight,
-            );
-          }
-        }
-        _shivanode_add_share_meta($node);
-        if(isset($build['field_image'])) { unset($build['field_image']); }
-      }
-    }
-  }
+ *  Defining blocks for SHIVA visualizations, including:
+ *       recent nodes
+ *
+ */
+function shivanode_block_info() {
+  $blocks['recent_nodes']['info'] = t('Recent SHIVA Nodes');
+  return $blocks;
 }
 
+
 /**
- * Implements form_id_validate(form, form_state)
+ * Implements hook_block_configure().
  *
- *   This code is called upon submission of the input/edit form for a shivanode
- *   It tests 1. if the resulting JSON visualization data is valid
- *   and 2. that a data source URL has been given
+ * This hook declares configuration options for blocks provided by this module.
  */
-function shivanode_form_validate(&$form, &$form_state) {
-  // Don't validate if deleting so nodes created prior to implementing validation can be deleted.
-  if (isset($form_state['values']['delete']) &&  isset($form_state['values']['op']) 
-    && $form_state['values']['op'] == $form_state['values']['delete']) { return; }
-  // Make sure JSON is valid
-  $jsonStr = $form_state['values']['shivanode_json']['und'][0]['value'];  
-  $jobj = json_decode($jsonStr);
-  if (is_null($jobj)) {
-    form_set_error('shivanode_json', t('Your JSON is not valid:') . $jsonStr);
-  }
-  // If it's a visualization that needs a dataSourceUrl, make sure it has a valid one
-  if ($jobj && isset($jobj->dataSourceUrl)) {
-    if ($jobj->dataSourceUrl == "") {
-      $form['shivanode_validationErrors'] = array(
-        '#type' => 'markup',
-        '#markup' => '<input type="hidden" name="validationErrors" id="validationErrors" value="source" />',
-      );
-      form_set_error('', t('You must include a data source url that points to a Google Doc spreadsheet! ' .
-        'Click on the icon next to the data source url label <!--or click on the "Use Existing Data" Link --> ' .
-        'to add the URL from an existing data listing.'));
-      $form_state['complete form']['shivanode_container']['#attributes'] = array( 'class' => array('error') );
-    }
-    elseif (!valid_url($jobj->dataSourceUrl)) {
-      $form['shivanode_validationErrors'] = array(
-        '#type' => 'markup',
-        '#markup' => '<input type="hidden" name="validationErrors" id="validationErrors" value="source" />',
-      );
-      form_set_error('', t('Your data source url is not valid!'));
-    }
-  }
-  if (count(form_get_errors()) > 0) {
-    if (isset($form_state['input']['shivanode_data_nid'])) {
-      _shivanode_add_datalink($form, $form_state['input']['shivanode_data_nid'], FALSE);  // add data link but it is not new because it has been submitted
-    }
-    $sntype = $form_state['values']['shivanode_element_type']['und'][0]['value'];
-    // if validation errors occur, set the IFrameScrURL to that editor can be reloaded in edit form again
-    $iframeurl = _get_shivaframe_url($sntype);
-    $form['shivaform_reload_script'] = array(
-      '#markup' => '<script type="text/javascript">
-                        Drupal.Shivanode.IframeSrcUrl = "' . $iframeurl . '";
-                        Drupal.Shivanode.IframeType = "' . _shivanode_options_list($sntype) . '";
-                        Drupal.Shivanode.loadJS = true; 
-                    </script>',
+function shivanode_block_configure($delta = '') {
+  $form = array();
+  if ($delta == 'recent_nodes') {
+    $form['shivanode_number_recent'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number of Entries'),
+      '#size' => 5,
+      '#description' => t('This is the number of entries to show in the SHIVA node recent list block'),
+      '#default_value' => variable_get('shivanode_block_entries', SHIVA_RECENT_ENTRIES),
     );
   }
+  return $form;
 }
+
+/**
+ * Implements hook_block_save().
+ *
+ * This hook declares how the configured options for a block
+ * provided by this module are saved.
+ */
+function shivanode_block_save($delta = '', $edit = array()) {
+  if ($delta == 'recent_nodes') {
+    variable_set('shivanode_block_entries', $edit['shivanode_number_recent']); // Have Drupal save the string to the database.
+  }
+  return;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the shivanode recent block. The bulk of this code is copied
+ * from node.module -> function theme_node_recent_block($variables) so that _get_recent_shivanodes()
+ * could be used for the list of recent nodes, the "more" link could be changed to go 
+ * to node/shivanode/list, shiva Visualization type added, and style issues could be controlled more closely.
+ */
+function shivanode_block_view($delta = '') {
+  if ($delta == 'recent_nodes') {
+    $block['subject'] = t('Recent SHIVA Visualizations');
+    $block['content'] = shivanode_render_recent_block();
+  }
+  return $block;
+}
+
+/**
+ * shivanode_render_recent_block() : a function to create the content for the recent shivanode block
+ */
+function shivanode_render_recent_block() {
+  global $user;
+  $nodes = _get_recent_shivanodes();
+  $rows = array();
+  $output = '';
+  if (count($nodes) > 0) {
+    $l_options = array(); // was 'query' => drupal_get_destination()
+    $isPrivate = FALSE;
+    foreach ($nodes as $node) {
+      if (shivanode_node_access($node, 'view', $user) == NODE_ACCESS_ALLOW || user_access('bypass node access')) {
+        $row = array();
+        $row[] = array(
+          'data' => theme('node_recent_content', array('node' => $node)),
+          'class' => 'title-author',
+        );
+        $row[] = array(
+          'data' => '<div class="element-type">' . _get_shivanode_type($node) . '</div>',
+          'class' => 'shivanode-type',
+        );
+        $row[] = array(
+          'data' => node_access('update', $node) ? l(t('edit'), 'node/' . $node->nid . '/edit', $l_options) : '',
+          'class' => 'edit',
+        );
+        $row[] = array(
+          'data' => node_access('delete', $node) ? l(t('delete'), 'node/' . $node->nid . '/delete', $l_options) : '',
+          'class' => 'delete',
+        );
+        $status = _get_shivanode_access_status($node);
+        if ($status == "Draft") {
+          $isPrivate = TRUE;
+          $cell1 = $row[0]['data'];
+          $row[0]['data'] = str_replace('</div><div class="node-author">', '<span class="private" title="Unpublished visualization">*</span></div><div class="node-author">', $cell1);
+        }
+        $rows[] = $row;
+      }
+    }
+
+    $output = theme('table', array('rows' => $rows));
+    $output .= theme('more_link', array('url' => 'node/elements', 'title' => t('Show all Visualizations')));
+    if ($isPrivate) {
+      $output .= '<p class="table-note"><span class="private" title="Unpublished Visualization">*</span> ' .
+        t('indicates a unpublished Visualization viewable only by the creator and administrators') . '.</p>';
+    }
+  }
+  return $output;
+}
+
+function shivanode_block_view_alter(&$data, $block) {
+  global $base_path;
+  switch ($block->module) {
+    case 'tagadelic':
+      $tags = _shivanode_get_tags();
+      $content = $data['content'];
+      $els = explode('<a href="' . $base_path . 'taxonomy/term/', $content);
+      $out = "";
+      foreach ($els as &$el) {
+        $tid = substr($el, 0, strpos($el, '"'));
+        if (isset($tags[$tid])) {
+          $tstr = 'Occurs ' . $tags[$tid]->count . ' time' . (($tags[$tid]->count == 1)? '':'s');
+          $el = str_replace('title=""', 'title="' . $tstr . '"', $el);
+          //$el .= ' (' . $tags[$tid]->count . ')';
+        }
+      }
+      $newcontent = implode('<a href="/taxonomy/term/', $els);
+      $data['content'] = $newcontent;
+      break;
+  }
+}
+
+
+/***************  Field Functions   ***************************/
 
 /**
  * Implements hook_field_formatter_info().
@@ -797,221 +552,258 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
   return $element;
 }
 
+/***************  Node Functions   ***************************/
 
 /**
- * Implements hook_block_info()
- *
- *  Defining blocks for SHIVA visualizations, including:
- *       recent nodes
- *
- */
-function shivanode_block_info() {
-  $blocks['recent_nodes']['info'] = t('Recent SHIVA Nodes');
-  return $blocks;
-}
-
-
-/**
- * Implements hook_block_configure().
- *
- * This hook declares configuration options for blocks provided by this module.
- */
-function shivanode_block_configure($delta = '') {
-  $form = array();
-  if ($delta == 'recent_nodes') {
-    $form['shivanode_number_recent'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Number of Entries'),
-      '#size' => 5,
-      '#description' => t('This is the number of entries to show in the SHIVA node recent list block'),
-      '#default_value' => variable_get('shivanode_block_entries', SHIVA_RECENT_ENTRIES),
-    );
-  }
-  return $form;
-}
-
-/**
- * Implements hook_block_save().
- *
- * This hook declares how the configured options for a block
- * provided by this module are saved.
- */
-function shivanode_block_save($delta = '', $edit = array()) {
-  if ($delta == 'recent_nodes') {
-    variable_set('shivanode_block_entries', $edit['shivanode_number_recent']); // Have Drupal save the string to the database.
-  }
-  return;
-}
-
-/**
- * Implements hook_block_view().
- *
- * This hook generates the contents of the shivanode recent block. The bulk of this code is copied
- * from node.module -> function theme_node_recent_block($variables) so that _get_recent_shivanodes()
- * could be used for the list of recent nodes, the "more" link could be changed to go 
- * to node/shivanode/list, shiva Visualization type added, and style issues could be controlled more closely.
- */
-function shivanode_block_view($delta = '') {
-  if ($delta == 'recent_nodes') {
-    $block['subject'] = t('Recent SHIVA Visualizations');
-    $block['content'] = shivanode_render_recent_block();
-  }
-  return $block;
-}
-
-/**
- * shivanode_render_recent_block() : a function to create the content for the recent shivanode block
- */
-function shivanode_render_recent_block() {
-  global $user;
-  $nodes = _get_recent_shivanodes();
-  $rows = array();
-  $output = '';
-  if (count($nodes) > 0) {
-    $l_options = array(); // was 'query' => drupal_get_destination()
-    $isPrivate = FALSE;
-    foreach ($nodes as $node) {
-      if (shivanode_node_access($node, 'view', $user) == NODE_ACCESS_ALLOW || user_access('bypass node access')) {
-        $row = array();
-        $row[] = array(
-          'data' => theme('node_recent_content', array('node' => $node)),
-          'class' => 'title-author',
-        );
-        $row[] = array(
-          'data' => '<div class="element-type">' . _get_shivanode_type($node) . '</div>',
-          'class' => 'shivanode-type',
-        );
-        $row[] = array(
-          'data' => node_access('update', $node) ? l(t('edit'), 'node/' . $node->nid . '/edit', $l_options) : '',
-          'class' => 'edit',
-        );
-        $row[] = array(
-          'data' => node_access('delete', $node) ? l(t('delete'), 'node/' . $node->nid . '/delete', $l_options) : '',
-          'class' => 'delete',
-        );
-        $status = _get_shivanode_access_status($node);
-        if ($status == "Draft") {
-          $isPrivate = TRUE;
-          $cell1 = $row[0]['data'];
-          $row[0]['data'] = str_replace('</div><div class="node-author">', '<span class="private" title="Unpublished visualization">*</span></div><div class="node-author">', $cell1);
-        }
-        $rows[] = $row;
-      }
-    }
-
-    $output = theme('table', array('rows' => $rows));
-    $output .= theme('more_link', array('url' => 'node/elements', 'title' => t('Show all Visualizations')));
-    if ($isPrivate) {
-      $output .= '<p class="table-note"><span class="private" title="Unpublished Visualization">*</span> ' .
-        t('indicates a unpublished Visualization viewable only by the creator and administrators') . '.</p>';
-    }
-  }
-  return $output;
-}
-
-function shivanode_block_view_alter(&$data, $block) {
-  global $base_path;
-  switch ($block->module) {
-    case 'tagadelic':
-      $tags = _shivanode_get_tags();
-      $content = $data['content'];
-      $els = explode('<a href="' . $base_path . 'taxonomy/term/', $content);
-      $out = "";
-      foreach ($els as &$el) {
-        $tid = substr($el, 0, strpos($el, '"'));
-        if (isset($tags[$tid])) {
-          $tstr = 'Occurs ' . $tags[$tid]->count . ' time' . (($tags[$tid]->count == 1)? '':'s');
-          $el = str_replace('title=""', 'title="' . $tstr . '"', $el);
-          //$el .= ' (' . $tags[$tid]->count . ')';
-        }
-      }
-      $newcontent = implode('<a href="/taxonomy/term/', $els);
-      $data['content'] = $newcontent;
-      break;
-  }
-}
-
-function reset_ginfo_checked($form, $form_state) {
-  return $form['google_login']['reset_message'];
-}
-
-/**
-* Implementation of hook_views_api().
-*/
-function shivanode_views_api() {
+ * Implements hook_node_info: 
+ **/
+function shivanode_node_info() {
   return array(
-    'api' => 3.0,
-    'path' => drupal_get_path('module', 'shivanode') .'/includes'
+    'shivanode' => array(
+      'name' => t('Shivanode'), 
+      'base' => 'shivanode', 
+      'has_title' => TRUE,
+      'title_label' => t('Title'),
+      'description' => t('A <em>Shivanode</em> creates a visualization using the SHIVA framework'), 
+      'title_label' => t('Shiva Visualization'),
+    ),
   );
 }
 
 /**
- * Implementation of hook_wysiwyg_include_directory().
- *
- * This tells the Wysiwyg module to search within the 'plugins' directory for
- * Wysiwyg plugins.
- *
- * @param String $type
- * The type of plugin being checked. One of:
- * - editor: for WYSIWYG editors such as TinyMCE, CKEditor, Nice Edit, etc.
- * - plugin: for toolbar buttons such as bold, add-image, strike-through, etc.
- *
- * @return String
- * The path to the plugin directory (relative to this module). This is usually
- * simply the plugin-type: e.g. "plugin" or "editor".
- * 
- * This is necessary to register the wysiwyg plugin code to add insert Shivanode button to editors
- */
-function shivanode_wysiwyg_include_directory($type) {
-  return $type;
-}
-
-/**
- * Implements hook_form_alter for Organic Groups Add User Form
- *    Changes Membership Types to Global Roles to be designated upon adding user
- * 
- */
-  
-function shivanode_form_og_ui_add_users_alter(&$form, &$form_state, $form_id) {
-  return;
-  //$roles = og_get_global_roles();
-  $unwanted = array();
-  foreach ($roles as $key => $value) {
-    if ($value == 'non-member') {
-      unset($roles[$key]);
-    } 
-    else {
-      $roles[$key] = ucwords($value);
+* Implements hook_node_access().
+*/
+function shivanode_node_access($node, $op, $account) {
+  module_load_include('inc', 'shivanode', 'includes/shivanode');
+  $type = is_string($node) ? $node : $node->type;
+  if (!is_string($node) && $type == "shivanode") {
+    $shivaAccess = _shivanode_get_access($node);
+    if($shivaAccess == 1 && $account->uid != $node->uid) {  // access = 1 means "Draft" or private
+       return NODE_ACCESS_DENY;  // Deny anyone but author (and admins) to do anything on Draft nodes
     }
   }
-  asort($roles);
-  $form['og_user']['og_add_user_membership_type']['#options'] = $roles; // og-ui-membership-type
-  $defval = (array_search('Viewer', $roles))? array_search('Viewer', $roles) : array_search('Member', $roles);
-  if (!$defval) {
-    $defval = 0; 
-  }
-  $form['og_user']['og_add_user_membership_type']['#default_value'] = $defval;
-  $form['#submit'] = array('shivanode_add_og_user_role'); // replace existing submission function with custom and call existing from custom to make sure user is first added.
+  // otherwise let Drupal do it's access thing
 }
 
-/* shivanode_add_og_user_role is the callback function to assign the role to the new group member
- *  upon adding him or her
- */
-function shivanode_add_og_user_role($form, &$form_state) {
-  og_ui_add_users_submit($form, $form_state); // make sure user is added first.
-  $uname = $form_state['values']['og_add_user'];
-  $guser = user_load_by_name($uname);
-  $guid = $guser->uid;
-  $gid = $form_state['values']['group']->gid;
-  $rid = $form_state['values']['og_add_user_membership_type'];
-  $roles = og_get_global_roles();
-  og_role_grant($gid, $guid, $rid);
-  drupal_set_message($uname . ' ' . t('has been assigned the role') . ' <em>' . ucwords($roles[$rid]) . '</em>.');
+/**
+ * Implements hook_node_view_alter(&$build)
+ *   Adding field showing which data element is used by a visualization
+ *
+ */ 
+function shivanode_node_view_alter(&$build) {
+  // Full View
+  if($build['#view_mode'] == 'full') { 
+    global $base_path;
+    $node = $build['#node'];
+    if (_shivanode_get_access($node) == 4) {
+      // If viewing a node that is a shivanode, show the Share button
+      if ($build['#bundle'] == "shivanode") {
+        $build['sharediv'] = array(
+          '#type' => 'markup',
+          '#prefix' => '<div class="sn-share-button">',
+          '#suffix' => '</div>',
+        );
+        
+        $shareicon = $base_path . drupal_get_path('module','shivanode') . '/images/share_icon.png';
+        
+        $build['sharediv']['share'] = array(
+          '#type' => 'markup',
+          '#markup' => '<span>' . l('<span>' . t('SHARE') . ' <img height="20" width="20" src="' . $shareicon . '" /></span>', 'node/' . $node->nid . '/share', array(
+            'attributes' => array(
+              'rel' => 'lightframe[|width:800px; height:450px; scrolling: no;]',
+              //'onmouseover' => 'javascript: Drupal.Shivanode.getJSON()',
+              'title' => 'Share this visualization!',
+              'onclick' => (_shivanode_get_element_type($node) == 'Earth')?'javascript: Drupal.Shivanode.hideViewDuringPopups();':'',
+            ),
+            'html' => true,
+            'query' => array(
+              'format' => 'simple',
+              'class' => 'lightbox',
+            ),
+          )) . '</span>',
+        );
+      }
+    }
+  
+    $sntype = _shivanode_get_element_type($node); // type of shiva visualization
+    
+    if($sntype == 'Data') {
+      unset($build['field_image']); // don't show thumbnail for data elements
+    } else { 
+      $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
+      // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
+      if ($node->type == 'shivanode') {
+        // If it's got a data element link, display that info
+        if ($data_id) {
+          $dnode = node_load($data_id);
+          if ($dnode && node_access('view', $dnode)) {
+            // make text to display: link if user has permission to view, otherwise just text
+            $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
+            // Put it after visualization type or assign it a weight of 12
+            $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
+            $build['data_element'] = array(
+              '#type' => 'markup',
+              '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
+                  '<div class="field-label">Data Element Used:&nbsp;</div>' .
+                  '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
+              '#weight' => $weight,
+            );
+          }
+        }
+        _shivanode_add_share_meta($node);
+        if(isset($build['field_image'])) { unset($build['field_image']); }
+      }
+    }
+  }
 }
 
 
 /**
- * Implements hook_FORMID_form_alter(form, form_state, form_id)
+ * Implements hook_node_presave: sets a type-specific generic image for visualizations
+ *    Generic thumbnails are set in shivanode.install 7005 and shivanode.inc
+ */
+function shivanode_node_presave($node) {
+  if($node->type == 'shivanode') {
+    $lang = (isset($node->language)) ? $node->language : 'und';
+    if(!isset($node->field_image[$lang][0])) {
+      $type = strtolower(_get_shivanode_type($node));
+      if($type == 'data') { return; }
+      if($type == 'chart') {
+        $json = _shivanode_get_json($node);
+        $subtype = strtolower($json['chartType']);
+        if($subtype != '') {
+          $type .= "_$subtype";
+        }
+      }
+      if($fid = _shivanode_get_generic_image_info($type)) {
+        $node->field_image[$lang][0]['fid'] = $fid;
+      }
+    }
+    /** Add or adjust subtype field **/
+    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
+    if($json && isset($json->chartType)) {
+      $stype = $json->chartType;
+      $stind = _shivanode_subtypelist('index', $stype);
+      if(!$stind || $stind == '') {
+        drupal_set_message(t("No subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
+      } else {
+        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
+      }
+    }
+  }
+}
+
+/*
+ * Implements hook_node_insert
+ *   Save shivanode_link record linking visualization node with data node
+ */
+function shivanode_node_insert($node) {
+  $sntype = strtolower(_get_shivanode_type($node));
+  if($sntype != 'data') {
+    _shivanode_add_data_correspondence($node);
+  }
+}
+
+/*
+ * Implements hook_node_delete
+ *   When a shivanode is deleted, remove any links to other shivanodes if it is a data visualization
+ */
+function shivanode_node_delete($node) {
+  $etype = _shivanode_get_element_type($node);
+  if ($etype == "Data") {
+    $nid = $node->nid;
+    $results = db_select('shivanode_links', 'l')
+      ->fields('l')
+      ->condition('data_id', $nid)
+      ->execute()
+      ->fetchAll();
+    $relations = array();
+    foreach ($results as $n => $link) {
+      $node = node_load($link->sn_id);
+      if ($node) {
+        $relations[] = l(check_plain($node->title), 'node/' . $node->nid);
+      }
+    }
+    $num_deleted = db_delete('shivanode_links')
+      ->condition('data_id', $nid)
+      ->execute();
+    if ($num_deleted > 0) {
+      if ($num_deleted != count($results)) {
+        drupal_set_message(
+          check_plain( t('The number of links deleted (' . $num_deleted . 
+            ') did not match the number of links found (' . count($results) . ') in shivanode.module line 237.'),
+            'warning')
+        );
+      }
+      drupal_set_message(
+        check_plain( t('Deleted links to the following ' . $num_deleted . ' visualizations:')) . ' ' . implode(', ', $relations)
+      );
+    }
+  }
+}
+
+
+/*
+ * Implements hook_node_update
+ *    If it is a data node make sure all that rely on it update their dataSourceUrl
+ */
+function shivanode_node_update($node) {
+  if ($node->type == 'shivanode') {
+    // if it's a data visualization update shiva visualizations linked to it
+    if (_shivanode_get_element_type($node) == "Data") {
+      $nids = array();
+      $result = db_select('shivanode_links', 'l')
+        ->fields('l')
+        ->condition('data_id', $node->nid, '=')
+        ->execute()
+        ->fetchCol(1);
+      foreach ($result as $n => $nid) {
+        $dependent = node_load($nid);
+        if (_shivanode_get_element_type($dependent) != "Data") {
+          $dep_json = _shivanode_get_json($dependent);
+          $pres_json = _shivanode_get_json($node);
+          if (isset($dep_json->dataSourceUrl) && $dep_json->dataSourceUrl != $pres_json->dataSourceUrl) {
+            $dep_json->dataSourceUrl = $pres_json->dataSourceUrl;
+            $dependent->shivanode_json['und'][0]['value'] = json_encode($dep_json);
+            node_save($dependent);
+            $nids[] = $dependent->title . ' (' . $dependent->nid . ')';
+          }
+        }
+      }
+      if (count($nids) > 0) {
+        $msg = implode(', ', $nids);
+        if (count($nids) > 1) {
+          $msg = substr_replace($msg, ', and', strrpos($msg, ','), 1);
+        }
+        drupal_set_message(
+            check_plain(t("The following Shiva visualizations which use this data have also been modified:")) . " " . $msg
+        );
+      }
+    // otherwise if data_id is set, store that in the shivanode_links table
+    } 
+    elseif (isset($node->data_id)) {
+      if ($node->data_id == -1 ) {
+        _shivanode_remove_datalink($node);
+      } else {
+        $result = db_update('shivanode_links')
+          ->fields(array(
+              'data_id' => $node->data_id,
+            ))
+          ->condition('sn_id', $node->nid, '=')
+          ->execute();
+        if (!$result) {
+          _shivanode_add_data_correspondence($node); 
+        }
+      }
+    }
+  }
+}
+
+
+/***************  Form Functions   ***************************/
+
+/**
+ * Implements hook_FORMID_form_alter(form, form_state, form_id) for Shivanode Form
  *
  *  This code creates the input and edit form for a shivanode
  */
@@ -1133,6 +925,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
+    drupal_add_js(array('shivanode' => array('isNewEl' => 'true')), 'setting');
     $form['shivanode_access']['und']['#default_value'] = 1;
     $eltypes = _shivanode_element_typelist(TRUE);
     $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntype])) ? $eltypes[$sntype] : 7; // default value is chart
@@ -1144,7 +937,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       'wrapper' => 'iframe_container',
     );
     unset($form['shivanode_element_type']['und']['#options'][1]); // remove the data option from the drop down list  Data elements are created automatically by adding spreadsheets
-  }
+  } // If not a new element
   else {
     // Get the Visualization type and disable the select type dropdown on exiting Visualizations.
     $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
@@ -1167,9 +960,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   //dpm($form['shivanode_access'], 'sn access field');
   // Permission Value (calls JS to enforce only Public and Private)
-  /*$form['shivanode_access']['und'] += array(
+  $form['shivanode_access']['und'] += array(
     '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
-  );*/
+  );
   
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
   // Link is hidden but click is mimiced from JS when Iframe sends a message asking for DataSourceURL
@@ -1331,7 +1124,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
 
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
-  $iframeUrl = _get_shivaframe_url($typeVal, $nid);   
+  $iframeUrl = _get_shivaframe_url($typeVal, $nid); 
+
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
   if($is_new_el && $ctype) {
     $iframeUrl .= '&chartType=' . str_replace(' ', '', $ctype);
@@ -1374,6 +1168,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
                         'Drupal.Shivanode.loadJS = true; ' .
                     '</script>',
     );*/
+   drupal_add_js(array('shivanode' => array('loadJS'=>true)), 'setting');
   }
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
@@ -1403,6 +1198,111 @@ function shivanode_element_change($form, $form_state) {
   return $iframe;
 }
 
+function shivanode_node_submit($node, $form, &$form_state) {
+  $node->data_id = (isset($form_state['input']['shivanode_data_nid'])) ? $form_state['input']['shivanode_data_nid'] : -1;
+  $trigger = strtolower($form_state['triggering_element']['#value']);
+  $dest = drupal_get_destination();
+  $dest = $dest['destination'];
+  
+  // When the Save & Continue button is pressed
+  if (strpos($trigger, 'continue') > -1) {
+    node_save($node);
+    $editurl = 'node/' . $node->nid . '/edit';
+    drupal_goto($editurl);
+  }
+}
+
+/**
+ * Implements form_id_validate(form, form_state)
+ *
+ *   This code is called upon submission of the input/edit form for a shivanode
+ *   It tests 1. if the resulting JSON visualization data is valid
+ *   and 2. that a data source URL has been given
+ */
+function shivanode_form_validate(&$form, &$form_state) {
+  // Don't validate if deleting so nodes created prior to implementing validation can be deleted.
+  if (isset($form_state['values']['delete']) &&  isset($form_state['values']['op']) 
+    && $form_state['values']['op'] == $form_state['values']['delete']) { return; }
+  // Make sure JSON is valid
+  $jsonStr = $form_state['values']['shivanode_json']['und'][0]['value'];  
+  $jobj = json_decode($jsonStr);
+  if (is_null($jobj)) {
+    form_set_error('shivanode_json', t('Your JSON is not valid:') . $jsonStr);
+  }
+  // If it's a visualization that needs a dataSourceUrl, make sure it has a valid one
+  if ($jobj && isset($jobj->dataSourceUrl)) {
+    if ($jobj->dataSourceUrl == "") {
+      $form['shivanode_validationErrors'] = array(
+        '#type' => 'markup',
+        '#markup' => '<input type="hidden" name="validationErrors" id="validationErrors" value="source" />',
+      );
+      form_set_error('', t('You must include a data source url that points to a Google Doc spreadsheet! ' .
+        'Click on the icon next to the data source url label <!--or click on the "Use Existing Data" Link --> ' .
+        'to add the URL from an existing data listing.'));
+      $form_state['complete form']['shivanode_container']['#attributes'] = array( 'class' => array('error') );
+    }
+    elseif (!valid_url($jobj->dataSourceUrl)) {
+      $form['shivanode_validationErrors'] = array(
+        '#type' => 'markup',
+        '#markup' => '<input type="hidden" name="validationErrors" id="validationErrors" value="source" />',
+      );
+      form_set_error('', t('Your data source url is not valid!'));
+    }
+  }
+  if (count(form_get_errors()) > 0) {
+    if (isset($form_state['input']['shivanode_data_nid'])) {
+      _shivanode_add_datalink($form, $form_state['input']['shivanode_data_nid'], FALSE);  // add data link but it is not new because it has been submitted
+    }
+    $sntype = $form_state['values']['shivanode_element_type']['und'][0]['value'];
+    // if validation errors occur, set the IFrameScrURL to that editor can be reloaded in edit form again
+    $iframeurl = _get_shivaframe_url($sntype);
+    /*$form['shivaform_reload_script'] = array(
+      '#markup' => '<script type="text/javascript">
+                       // Drupal.Shivanode.IframeSrcUrl = "' . $iframeurl . '";
+                       // Drupal.Shivanode.IframeType = "' . _shivanode_options_list($sntype) . '";
+                       // Drupal.Shivanode.loadJS = true; 
+                    </script>',
+    );*/
+    $snsettings = array(
+			'shivanode' => array(
+				'iframeSrcUrl' => $iframeurl,
+				'iframeType' => _shivanode_options_list($sntype),
+				'loadJS' => true,
+			),
+		);
+		drupal_add_js($snsettings, 'setting');
+  }
+}
+
+/**
+ * Implements hook_form_alter for Organic Groups Add User Form
+ *    Changes Membership Types to Global Roles to be designated upon adding user
+ * 
+ */
+  
+function shivanode_form_og_ui_add_users_alter(&$form, &$form_state, $form_id) {
+  return;
+  //$roles = og_get_global_roles();
+  $unwanted = array();
+  foreach ($roles as $key => $value) {
+    if ($value == 'non-member') {
+      unset($roles[$key]);
+    } 
+    else {
+      $roles[$key] = ucwords($value);
+    }
+  }
+  asort($roles);
+  $form['og_user']['og_add_user_membership_type']['#options'] = $roles; // og-ui-membership-type
+  $defval = (array_search('Viewer', $roles))? array_search('Viewer', $roles) : array_search('Member', $roles);
+  if (!$defval) {
+    $defval = 0; 
+  }
+  $form['og_user']['og_add_user_membership_type']['#default_value'] = $defval;
+  $form['#submit'] = array('shivanode_add_og_user_role'); // replace existing submission function with custom and call existing from custom to make sure user is first added.
+}
+
+/****************************  Sevice Functions   ***************************/
 /*
  * Function shivanode_services_resources: 
  * 
@@ -1479,12 +1379,85 @@ function shivanode_services_resources() {
   return $node_resource;
 }
 
-/**
- *    THEMING AND Display Functions
- */
 
-function shivanode_theme() {
+/****************************  User Functions   ***************************/
  
+/**
+ * Hook_user_presave: Use UVa's whois to fill in first and last name if it does not exist.
+ */
+function shivanode_user_presave(&$edit, $account, $category) {
+  if(variable_get('shivanode_username_auto', FALSE)) {
+    $host = variable_get('shivanode_whois_host', 'whois.virginia.edu'); 
+    $name = $edit['name'];
+    if(count($edit['field_lname']['und']) == 0) {
+      $whois = shell_exec('whois -h ' . $host . ' ' . $name);
+      if(preg_match('/Name:\s+([^\n]+)/',$whois, $matches)) {
+        $name = $matches[1];
+        $name = explode(' ', $name);
+        if(count($edit['field_fname']['und']) == 0) {
+          $edit['field_fname']['und'] = array( array('value' => $name[0] ));
+        }
+        $edit['field_lname']['und'] = array( array('value' => array_pop($name) ));
+      }
+    }
+  }
+}
+
+function shivanode_user_logout($account) {
+  session_destroy();
+  //drupal_goto(); // ndg8f commented out 02/17/15
+}
+
+/**
+* Implements hook_permission().
+*/
+function shivanode_permission() {
+  return array(
+    'access shivanode view settings' => array(
+      'title' => t('Change the view settings to Shiva Visualizations'),
+    ),
+    'access shivanode view json' => array(
+      'title' => t('Show the JSON text in uneditable div when editing node.'),
+    ),
+    'access shivanode view subtype' => array(
+      'title' => t('Show the uneditable subtype field in Shivanode create/edit form.'),
+    ),
+  ); 
+}
+
+/**
+* 	shivanode_add_og_user_role is the callback function to assign the role to the new group member
+*  			upon adding him or her
+*/
+function shivanode_add_og_user_role($form, &$form_state) {
+  og_ui_add_users_submit($form, $form_state); // make sure user is added first.
+  $uname = $form_state['values']['og_add_user'];
+  $guser = user_load_by_name($uname);
+  $guid = $guser->uid;
+  $gid = $form_state['values']['group']->gid;
+  $rid = $form_state['values']['og_add_user_membership_type'];
+  $roles = og_get_global_roles();
+  og_role_grant($gid, $guid, $rid);
+  drupal_set_message($uname . ' ' . t('has been assigned the role') . ' <em>' . ucwords($roles[$rid]) . '</em>.');
+}
+
+/***************  View and Theme Functions   ***************************/
+
+/**
+* Implementation of hook_views_api().
+*/
+
+function shivanode_views_api() {
+  return array(
+    'api' => 3.0,
+    'path' => drupal_get_path('module', 'shivanode') .'/includes'
+  );
+}
+ 
+/**
+ * Implements hook_theme
+ */
+function shivanode_theme() {
    return array(
     'shivanode' => array(
       'variables' => array(
@@ -1500,6 +1473,9 @@ function shivanode_theme() {
   
 }
 
+/**
+ * Implements hook_theme_registry_alter
+ */
 function shivanode_theme_registry_alter(&$theme_registry) {
    $modulepath = drupal_get_path('module','shivanode');
    if(!isset($theme_registry['page']['theme paths']) || $theme_registry['page']['theme paths'] == null) {
@@ -1516,6 +1492,27 @@ function shivanode_theme_registry_alter(&$theme_registry) {
 function theme_shivanode($variables) {
   return '<div class="shivanode_' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
+
+/**
+ * Implements hook_preprocess_page () 
+ *   This code  and the registry alter code comes from 
+ * 
+ *            http://stackoverflow.com/questions/247991/displaying-a-drupal-view-without-a-page-template-around-it
+ *  
+ *   Popups need to be called with {path url}?format=simple, as in: 
+ * 
+ *           http://shantivis.org/mydata?format=simple
+ * 
+ *   in lightbox you have to add a query object {'format' : 'simple' }
+ * 
+ */
+function shivanode_preprocess_page(&$vars) {
+	$var['is_simple'] = TRUE;
+  if ( isset($_GET['format']) && $_GET['format'] == 'simple' ) {
+      $vars['template_file'] = 'raw';
+			$var['is_simple'] = TRUE;
+  }
+} 
 
 function shivanode_image_default_styles() {
   $styles = array();
@@ -1549,7 +1546,8 @@ function shivanode_image_default_styles() {
 }
 
 /** Rewrite Author widget text to use first and last name if available 
- *  And rewrite link for 0 item facets to perform new search on just that facet */function shivanode_facet_items_alter(&$build, &$settings) {
+ *  And rewrite link for 0 item facets to perform new search on just that facet */
+function shivanode_facet_items_alter(&$build, &$settings) {
   if ($settings->facet == "author:name") {
     foreach($build as $key => $item) {
       $uid = user_load_by_name($item['#markup']);
@@ -1570,4 +1568,41 @@ function shivanode_image_default_styles() {
       $build[$key]['#query']['f'] = array( $param );
     }
   }
+}
+
+
+/**
+ * Implementation of hook_wysiwyg_include_directory().
+ *
+ * This tells the Wysiwyg module to search within the 'plugins' directory for
+ * Wysiwyg plugins.
+ *
+ * @param String $type
+ * The type of plugin being checked. One of:
+ * - editor: for WYSIWYG editors such as TinyMCE, CKEditor, Nice Edit, etc.
+ * - plugin: for toolbar buttons such as bold, add-image, strike-through, etc.
+ *
+ * @return String
+ * The path to the plugin directory (relative to this module). This is usually
+ * simply the plugin-type: e.g. "plugin" or "editor".
+ * 
+ * This is necessary to register the wysiwyg plugin code to add insert Shivanode button to editors
+ */
+function shivanode_wysiwyg_include_directory($type) {
+  return $type;
+}
+
+/***************  Helper Functions   ***************************/
+
+/* Is the current user authenticated, used in menu access callbacks */
+function is_auth_user($normal = TRUE) {
+  return user_is_logged_in() * $normal;
+}
+
+function reset_ginfo_checked($form, $form_state) {
+  return $form['google_login']['reset_message'];
+}
+
+function shivanode_redirect_to_new() {
+  drupal_goto('node/add/shivanode');
 }

@@ -9,11 +9,20 @@
  */
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
-
+			if($('iframe#shivaEditFrame').length > 0) {
+				console.log("its an entry form");
+			}
+		}
+	}; // End of Drupal.behaviors.shivaEntryFormConfig
+	
+	// Old Config form function
+	Drupal.behaviors.shivaEntryFormConfigOld = {
+		attach: function (context, settings) {
+			return; // Don't execut old code
 			// some module is adding lots of padding to the body top. Not sure which one so just eliminating it universally
 			setTimeout(function () {$('body').css('padding-top', '0px');}, 50);
 			
-			Drupal.Shivanode.shibstatus = null;
+			Drupal.settings.shivanode.shibstatus = null;
 			
 			setInterval(function () { Drupal.Shivanode.testShibAuth(); }, 120000); // Test Shibolleth Authentication every 2 mins
 			
@@ -27,12 +36,20 @@
 			  
 			// if it's an edit frame, enable the JS for that
 			if($('iframe#shivaEditFrame').length > 0) {
-
-				// When there's a validation error, reload the type of iframe
-				if(typeof(Drupal.Shivanode.IframeSrcUrl) != 'undefined' && Drupal.Shivanode.IframeSrcUrl != null) {
-					$('#shivaEditFrame').attr('src', Drupal.Shivanode.IframeSrcUrl);
-					$('#iframe_container .fieldset-legend').text(Drupal.Shivanode.IframeType);
-					Drupal.Shivanode.IframeSrcUrl = null;
+				// Moved from shivanode.inc line 2693 (2015-04-14)
+				if(Drupal.settings.shivanode.isNewEl) {
+					$('#shivaEditFrame').load(function() { Drupal.Shivanode.insertDataElement('preset'); });
+				} else if(Drupal.settings.shivanode.loadJS) { 
+					console.log(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
+					$('#shivaEditFrame').load(function() { 
+						//Drupal.Shivanode.setDataSheet(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
+					 });
+				}
+				// When there's a validation error, reload the type of iframe 
+				if(typeof(Drupal.settings.shivanode.iframeSrcUrl) != 'undefined' && Drupal.settings.shivanode.iframeSrcUrl != null) {
+					$('#shivaEditFrame').attr('src', Drupal.settings.shivanode.iframeSrcUrl);
+					$('#iframe_container .fieldset-legend').text(Drupal.settings.shivanode.iframeType);
+					Drupal.settings.shivanode.iframeSrcUrl = null;
 				}
 				$('iframe#shivaEditFrame').load(function() {
 				  Drupal.Shivanode.ShivaMessage("shivaEditFrame", "GetType"); // once edit frame is loaded send GetType message just to register this page as parent frame
@@ -186,7 +203,7 @@
 		    }
 		  });
 		} // End of attach function
-	}; // End of Drupal.behaviors.shivaEntryFormConfig
+	}; // End of Drupal.behaviors.shivaEntryFormConfigOld
 	
 	// Drupal Behaviors shivaDataElementSelect: for attach js to data entry select buttions
 	Drupal.behaviors.shivaDataElementSelect = {
@@ -241,7 +258,7 @@
 	
 	Drupal.Shivanode.fileItemIndex = null; // The index of the item for which a file request has been made in GetFile
 	
-	Drupal.Shivanode.status = "";
+	//Drupal.Shivanode.status = "";
 	
 	Drupal.Shivanode.helplinks = {
     'Annotated Time Line': 'https://wiki.shanti.virginia.edu/x/aAHLAQ',
@@ -376,7 +393,7 @@
 	    	Drupal.Shivanode.networkJSON = json;
 	    //
 	    } else if($('#shivanode_data_nid').length > 0) {
-				Drupal.Shivanode.status = "chartChanged";
+				Drupal.settings.shivanode.status = "chartChanged";
 			}
 			
 		// DataChanged={boolean} : When certain pages are changed
@@ -423,7 +440,7 @@
 					
 		// RelayJSON= : Relay JSON from one Iframe (lightbox popup) to another (Shiveyes editor)
 		} else if (e.data.indexOf('RelayJSON=') == 0) {
-			if (Drupal.Shivanode.loadJS) { return; }
+			if (Drupal.settings.shivanode.loadJS) { return; }
 			var json = e.data.substr(10);
 			Drupal.Shivanode.relayJSON(json, e);
 			
@@ -451,20 +468,20 @@
 		
 		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it if editing
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
-			if(Drupal.Shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
+			if(Drupal.settings.shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 
 				Drupal.Shivanode.jsonloaded = true;
 		  // else if adding a new element tell it to load default data (only timeglider needs this)
-			} else if (window.location.href.indexOf("add/shivanode") > -1 && Drupal.Shivanode.status != "chartChanged") {
+			} else if (window.location.href.indexOf("add/shivanode") > -1 && Drupal.settings.shivanode.status != "chartChanged") {
 			   Drupal.Shivanode.ShivaMessage("shivaEditFrame", "LoadDefaultData");
 			}
 			if(typeof(Drupal.Shivanode.networkJSON) != "undefined") {
 				Drupal.Shivanode.putJSON('shivaEditFrame', Drupal.Shivanode.networkJSON);
 				delete Drupal.Shivanode.networkJSON;
 			} 
-			if(Drupal.Shivanode.status == "chartChanged") {
-        Drupal.Shivanode.status = "";
+			if(Drupal.settings.shivanode.status == "chartChanged") {
+        Drupal.settings.shivanode.status = "";
 			  Drupal.Shivanode.insertDataElement('preset');
 			}
 			
@@ -623,10 +640,10 @@
 	 * 		This calls the editor iframe which response with the message GetJSON={json string}
 	 */
 	Drupal.Shivanode.getJSON = function() {
-	  if(Drupal.Shivanode.status == "gettingJSON") {
+	  if(Drupal.settings.shivanode.status == "gettingJSON") {
 	    return;
 	  }
-	  Drupal.Shivanode.status = "gettingJSON";
+	  Drupal.settings.shivanode.status = "gettingJSON";
 		var frm = 'shivaEditFrame';
 		Drupal.Shivanode.ShivaMessage(frm,'GetJSON');
 	};	
@@ -660,13 +677,13 @@
 			Drupal.Shivanode.ShivaMessage(iframe,cmd);
 			Drupal.Shivanode.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
-			Drupal.Shivanode.status = 'puttingJSON';
+			Drupal.settings.shivanode.status = 'puttingJSON';
 		} catch(e) {
 			if(typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
 			}
 		}
-		setTimeout("Drupal.Shivanode.loadJS = false;", 1000);
+		setTimeout("Drupal.settings.shivanode.loadJS = false;", 1000);
 		//Drupal.Shivanode.monitorEditFrame(true);
 	};
 	
@@ -734,14 +751,14 @@
 		
 		} else if (typeof(mode) == "string" && typeof(Drupal.Shivanode.dataChanged) == "string" && Drupal.Shivanode.dataChanged != mode) {
 			Drupal.Shivanode.chartChanged = true;
-			if(!Drupal.Shivanode.loadJS && Drupal.Shivanode.status != "chartChanged") {
+			if(!Drupal.settings.shivanode.loadJS && Drupal.settings.shivanode.status != "chartChanged") {
 			  Drupal.Shivanode.getJSON();
 			}
 		} else {
 			Drupal.Shivanode.dataChanged = mode;
 			Drupal.Shivanode.chartChanged = false;
 			Drupal.Shivanode.setUnloadConfirm(true);
-      if(!Drupal.Shivanode.loadJS && Drupal.Shivanode.status != "chartChanged") {
+      if(!Drupal.settings.shivanode.loadJS && Drupal.settings.shivanode.status != "chartChanged") {
         Drupal.Shivanode.getJSON();
       }
 		}
@@ -807,7 +824,7 @@
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
-    Drupal.Shivanode.status = "";
+    Drupal.settings.shivanode.status = "";
 		var jobj = JSON.parse(json); 
 		// if IDE.url is "preset" insert attached data node url into json
 		if(Drupal.Shivanode.IDE && Drupal.Shivanode.IDE.url && Drupal.Shivanode.IDE.url == "preset") {
@@ -1048,11 +1065,11 @@
 		 // if shibstatus variable is undefined, don't check, because they haven't logged in yet
 		jQuery.getJSON(Drupal.settings.basePath + 'shib/auth/check', function(data) { 
 			var status = data.status;
-			if(Drupal.Shivanode.shibstatus == "ok" && status != "ok") {
+			if(Drupal.settings.shivanode.shibstatus == "ok" && status != "ok") {
 				alert(Drupal.t("Your Netbadge session has expired!"));
-				Drupal.Shivanode.shibstatus = null; // so message only appears once
+				Drupal.settings.shivanode.shibstatus = null; // so message only appears once
 			} else {
-				Drupal.Shivanode.shibstatus = status;
+				Drupal.settings.shivanode.shibstatus = status;
 			}
 		});
 	};
