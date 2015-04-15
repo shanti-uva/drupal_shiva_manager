@@ -10,13 +10,13 @@ global $base_root, $base_path;
 define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivanode') . '/SHIVA/');
 
 // SHIVA Home in Libraries Folder
-define('SHIVA_HOME', $base_root . $base_path . 'sites/all/libraries/SHIVA/');
+define('SHIVA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/SHIVA/'));
 
 // Qmedia Home in Libraries Folder
-define('QMEDIA_HOME', $base_root . $base_path . 'sites/all/libraries/Qmedia/');
+define('QMEDIA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/Qmedia/'));
 
 // default URL for Visualization Player
-define('SHIVA_VIEWER', SHIVA_ROOT . 'go.htm'); 
+define('SHIVA_VIEWER', SHIVA_HOME . 'go.htm'); 
 
 // default URL for Chart Editor
 define('SHIVA_CHART_EDITOR', 'chart.htm');
@@ -63,11 +63,11 @@ define('SHIVA_CONTROL_EDITOR', 'control.htm');
 // default URL for Canvas Editor
 define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
-// default URL for Canvas Editor
-define('SHIVA_QMEDIA_EDITOR', 'QMEDIA/edit.htm');
-
 // default URL for Word Cloud Editor
 define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
+
+// default URL for Qmedia Editor
+define('SHIVA_QMEDIA_EDITOR', QMEDIA_HOME . 'edit.htm');
 
 // default Iframe Height for Full Display of Shiva visualization
 define('SHIVA_IFRAME_HEIGHT', 800);

@@ -425,3 +425,31 @@ function shivanode_update_7006() {
     field_create_instance($stype_instance);
   }
 }
+
+function shivanode_update_7007() {
+	$old_sn_vars = array(
+		'shivanode_canvas_editor',
+		'shivanode_chart_editor',
+		'shivanode_chart_viewer',
+		'shivanode_control_editor',
+		'shivanode_data_editor',
+		'shivanode_draw_editor',
+		'shivanode_earth_editor',
+		'shivanode_editor_url',
+		'shivanode_graph_editor',
+		'shivanode_image_editor',
+		'shivanode_map_editor',
+		'shivanode_network_editor',
+		'shivanode_poster_editor',
+		'shivanode_qmedia_editor',
+		'shivanode_root_url',
+		'shivanode_subway_editor',
+		'shivanode_timeglider_editor',
+		'shivanode_timeline_editor',
+		'shivanode_video_editor',
+		'shivanode_wcloud_editor'
+	);
+	foreach($old_sn_vars as $nm) {
+		variable_del($nm);
+	}
+}

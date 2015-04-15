@@ -957,31 +957,14 @@ function _shivanode_admin_settings_thumbs($form, &$form_state) {
 function _shivanode_admin_settings_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#id'] == 'edit-default-values') {
     // Viewer and Editor URLS
-    $form_state['input']['shivanode_chart_viewer'] = SHIVA_VIEWER;
-    $form_state['input']['shivanode_root_url'] = SHIVA_ROOT;
-    $form_state['input']['shivanode_chart_editor'] = SHIVA_CHART_EDITOR;
-    $form_state['input']['shivanode_data_editor'] = SHIVA_DATA_EDITOR;
-    $form_state['input']['shivanode_draw_editor'] = SHIVA_DRAW_EDITOR;
-    $form_state['input']['shivanode_earth_editor'] = SHIVA_EARTH_EDITOR;
-    $form_state['input']['shivanode_graph_editor'] = SHIVA_GRAPH_EDITOR;
-    $form_state['input']['shivanode_image_editor'] = SHIVA_IMAGE_EDITOR;
-    $form_state['input']['shivanode_map_editor'] = SHIVA_MAP_EDITOR;
-    $form_state['input']['shivanode_network_editor'] = SHIVA_NETWORK_EDITOR;
-    $form_state['input']['shivanode_poster_editor'] = SHIVA_POSTER_EDITOR;
-    $form_state['input']['shivanode_qmedia_editor'] = SHIVA_QMEDIA_EDITOR_EDITOR;
-    $form_state['input']['shivanode_subway_editor'] = SHIVA_SUBWAY_EDITOR;
-    //$form_state['input']['shivanode_timeline_editor'] = SHIVA_TIMELINE_EDITOR;
-    $form_state['input']['shivanode_timeglider_editor'] = SHIVA_TIMEGLIDER_EDITOR;
-    $form_state['input']['shivanode_video_editor'] = SHIVA_VIDEO_EDITOR;
-    $form_state['input']['shivanode_control_editor'] = SHIVA_CONTROL_EDITOR;
-    $form_state['input']['shivanode_canvas_editor'] = SHIVA_CANVAS_EDITOR;
-    $form_state['input']['shivanode_wcloud_editor'] = SHIVA_WCLOUD_EDITOR;
+    $form_state['input']['shivanode_shiva_home'] = SHIVA_HOME;
+    $form_state['input']['shivanode_qmedia_home'] = QMEDIA_HOME;
   
     drupal_set_message(t('All values have been reset to their default'));
     drupal_set_message(t('Configuration must be saved to take effect.'), 'warning');
   }
-	$form_state['values']['shivanode_chart_viewer'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_chart_viewer']);
-	$form_state['values']['shivanode_root_url'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_root_url']);
+	$form_state['values']['shivanode_shiva_home'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_shiva_home']);
+	$form_state['values']['shivanode_qmedia_home'] = preg_replace('/https?\:/', '', $form_state['values']['shivanode_qmedia_home']);
 } 
 /*
  * Using Validate function to reset the default values in the Shivanode URL display form
@@ -2046,58 +2029,58 @@ function _get_shivaframe_url($opt, $nid = '') {
        //$player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
       break;
     case 2:   // Image
-      $player =  variable_get('shivanode_image_editor', SHIVA_IMAGE_EDITOR);
+      $player =  SHIVA_IMAGE_EDITOR;
       break;
     case 3:  // Maps
-      $player =  variable_get('shivanode_map_editor', SHIVA_MAP_EDITOR);
+      $player =  SHIVA_MAP_EDITOR;
       break;
     case 4: // Subway
-      $player =  variable_get('shivanode_subway_editor', SHIVA_SUBWAY_EDITOR);
+      $player =  SHIVA_SUBWAY_EDITOR;
       break;
     case 5: // Timelines
       // removing ability to add simile timelines but calling timeglider editor for any existing ones
-      $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
+      $player =  SHIVA_TIMEGLIDER_EDITOR;
       //$player =  variable_get('shivanode_timeline_editor', SHIVA_TIMELINE_EDITOR);
       break;
     case 6: // Videos
-      $player =  variable_get('shivanode_video_editor', SHIVA_VIDEO_EDITOR);
+      $player =  SHIVA_VIDEO_EDITOR;
       break;
     case 7:  // Chart
-      $player =  variable_get('shivanode_chart_editor', SHIVA_CHART_EDITOR);
+      $player =  SHIVA_CHART_EDITOR;
       break;
     case 8:  // Controls
-      $player =  variable_get('shivanode_control_editor', SHIVA_CONTROL_EDITOR);
+      $player =  SHIVA_CONTROL_EDITOR;
       break;
     case 9:  // Canvas
-      $player =  variable_get('shivanode_canvas_editor', SHIVA_CANVAS_EDITOR);
+      $player =  SHIVA_CANVAS_EDITOR;
       break;
     case 10:  // Network
-      $player =  variable_get('shivanode_network_editor', SHIVA_NETWORK_EDITOR);
+      $player =  SHIVA_NETWORK_EDITOR;
       break;
     case 11:  // Draw
-      $player = variable_get('shivanode_draw_editor', SHIVA_DRAW_EDITOR); 
+      $player = SHIVA_DRAW_EDITOR; 
       break;
     case 12:  // Earth
-      $player = variable_get('shivanode_earth_editor', SHIVA_EARTH_EDITOR); 
+      $player = SHIVA_EARTH_EDITOR; 
       break;
     case 13: // Timeglider
-      $player =  variable_get('shivanode_timeglider_editor', SHIVA_TIMEGLIDER_EDITOR);
+      $player =  SHIVA_TIMEGLIDER_EDITOR;
       break;
     case 14: // Poster
-      $player =  variable_get('shivanode_poster_editor', SHIVA_POSTER_EDITOR);
+      $player =  SHIVA_POSTER_EDITOR;
       break;
     case 15: // Word Cloud
-      $player =  variable_get('shivanode_wcloud_editor', SHIVA_WCLOUD_EDITOR);
+      $player =  SHIVA_WCLOUD_EDITOR;
       break;
     case 16: // Graph
-      $player =  variable_get('shivanode_graph_editor', SHIVA_GRAPH_EDITOR);
+      $player =  SHIVA_GRAPH_EDITOR;
       break;
 		case 17: // Qmedia Multimedia
-			$player = variable_get('shivanode_qmedia_editor', SHIVA_QMEDIA_EDITOR);
+			$player = SHIVA_QMEDIA_EDITOR;
 			break;
   }
   if (strpos($player, 'http://') === FALSE && $opt > 1) {
-    $player = variable_get('shivanode_root_url', SHIVA_ROOT) . $player; 
+    $player = variable_get('shivanode_shiva_home', SHIVA_HOME) . $player; 
     $player = $player . '?pr=d';
   }
   $player = preg_replace('/https?\:\/\//', '//', $player); // added 2013-08-19 for Firefox 23 which blocks mixed content in iframes

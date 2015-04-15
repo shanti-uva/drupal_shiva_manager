@@ -479,7 +479,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
 	  	$jsonurl .= '/teaser';
 	  }
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
-      $iframeurl = variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '?m=' . $jsonurl;
+      $iframeurl = SHIVA_VIEWER . '?m=' . $jsonurl;
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
@@ -596,7 +596,7 @@ function shivanode_node_view_alter(&$build) {
     global $base_path;
     $node = $build['#node'];
     if (_shivanode_get_access($node) == 4) {
-      // If viewing a node that is a shivanode, show the Share button
+      // If viewing a node that is a Public shivanode, show the Share button
       if ($build['#bundle'] == "shivanode") {
         $build['sharediv'] = array(
           '#type' => 'markup',
