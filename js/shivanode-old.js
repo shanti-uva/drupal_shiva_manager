@@ -582,6 +582,7 @@
 			var mode = e.data.substr(12);
 			if (mode != "false") { // Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 				Drupal.Shivanode.setDataChanged(mode);
+				console.log("Data changed: " + mode);
 			}
 	  // dataSourceUrl : opens a list of data entries to use to create a visualization
 		} else if (e.data.indexOf('dataSourceUrl') == 0) {
@@ -647,6 +648,7 @@
 		
 		// ShivaReady: Sent from editor frame and first time puts the Drupal JSON into it if editing
 		} else if (e.data.indexOf('ShivaReady=') == 0) {
+			console.info('shiva ready!');
 			if(Drupal.settings.shivanode.loadJS == true && typeof(Drupal.Shivanode.jsonloaded) == "undefined") {
 				var json = $('#edit-shivanode-json-und-0-value').val();
 				Drupal.Shivanode.putJSON('shivaEditFrame',json); 

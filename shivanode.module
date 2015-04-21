@@ -18,7 +18,6 @@ function shivanode_init() {
   // Add names JS scripts here after putting file in shivanode/js folder
   $js_scripts = array(
     '/js/jquery.json-2.3.min.js',
-    '/js/shivanode.js',
     '/js/jquery.dataTables.min.js',
     '/js/jquery.dataTables.ColReorder.min.js',
   );
@@ -35,17 +34,19 @@ function shivanode_init() {
 	
 	$snsettings = array(
 		'shivanode' => array(
-			'dataUrl' => '',
+			'dataChanged' => false,
 			'dataTitle' => '',
+			'dataUrl' => '',
 			'formLoaded' => false,
 			'iframeSrcUrl' => '',
 			'iframeType' => '',
 			'isNewEl' => false,
-			'jsonloaded' => false,
+			'jsonLoaded' => false,
+			'latestJSON' => '',
 			'loadJS' => false,
 			'shibstatus' => null,
 			'snviewer' => variable_get('shivanode_chart_viewer', SHIVA_VIEWER),
-			'status' => '',
+			'status' => 'loading',
 		),
 	);
 	drupal_add_js($snsettings, 'setting');
@@ -1158,18 +1159,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['#suffix'] = '';
     $form['shivanode_json']['#prefix'] = '<div id="shivanode-json-add-more-wrapper" style="display: none; clear:both;"></div><div style="display: block; clear: both !important; color:red; ">The specs for this type of visualization cannot be edited because it is no longer supported.<br/><br/></div>';
   }
-  // if it is not a new node, then the json is defined. So, reload that json by setting Drupal.Shivanode.loadJS to true
-  //  tested once the editor page sends the ShivaReady Message which is received at shivanode.js line 377
-  if (!$is_new_el) {
-  	// TODO: CHANGE THIS TO SETTING?
-   /* $form['snload_script'] = array(
-      '#type' => 'markup',
-      '#markup' => '<script type="text/javascript">' .
-                        'Drupal.Shivanode.loadJS = true; ' .
-                    '</script>',
-    );*/
-   drupal_add_js(array('shivanode' => array('loadJS'=>true)), 'setting');
-  }
+
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
