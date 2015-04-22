@@ -100,12 +100,13 @@
 			
 			// Send Data to SHIVA editor once loaded
 			if($('iframe#shivaEditFrame').length > 0) {
-				Drupal.Shivanode.setUnload();
+				Drupal.Shivanode.setUnload(); // Set the unload function to check whether data changed.
 				
-				// if not new element load data sheet info
+				// if not new element load node's json field info
 				if(!Drupal.settings.shivanode.isNewEl) {
 					$('#shivaEditFrame').load(function() { 
-							Drupal.Shivanode.setDataSheet(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
+							//Drupal.Shivanode.setDataSheet(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
+							Drupal.Shivanode.putDrupalJSON();
 					});
 				} 
 				
@@ -150,16 +151,6 @@
 					$('#otherbuttons button[disabled=disabled], #lowerbuttons button[disabled=disabled], ' +
   					'#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
   				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
-  				});
-  				
-  				// Don't allow save unless Title is filled in
-  				$('button[id*="edit-submit"]').click(function(e) {
-  					var sntitle = $('#edit-title').val();
-  					if(sntitle == '') {
-  						alert("You must enter a title before submitting your visualization!");
-  						$('#edit-title').addClass('error');
-  						e.preventDefault();
-  					}
   				});
   				
   				shiva_settings.formLoaded = true;

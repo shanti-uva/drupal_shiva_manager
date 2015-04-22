@@ -3,7 +3,8 @@
 	// Use custom Drupal.Shivanode object for functions that are called at various times.
 	Drupal.Shivanode = {};
 	
-	// shiva_settings is assigned from Drupal.settings.shivanode in shivanode-behaviors.js shivaEntryFormConfig function
+	// shiva_settings is assigned by reference from Drupal.settings.shivanode 
+	//      in the shivanode-behaviors.js shivaEntryFormConfig function
 	
 	/*
 	 * Debug array:
@@ -14,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['show_errors', 'message_out'];
+	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out'];
 		
 	function debug_on(type) {
 		if(debug_settings.indexOf(type) > -1) {
@@ -36,7 +37,7 @@
 			mtype = e.data.substr(0,eind);
 			mdata = e.data.substr(eind + 1);
 		}
-		if(debug_on('message_in')) { console.log('message in', mtype, mdata); }
+		if(debug_on('message_in')) { console.log('message in: ', mtype, mdata); }
 				
 		switch(mtype) {
 			case 'ChartChanged':
@@ -46,6 +47,11 @@
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
 				Drupal.Shivanode.dataChanged(mdata);
+				break;
+				
+			// Shiva edit frame requests a data source URL from Drupal User. 	
+			case'dataSourceUrl':
+				$('#use-data-element-link a').click(); // Click on link to open lightbox list.
 				break;
 				
 			case 'GetJSON':
@@ -62,10 +68,10 @@
 	 * Sending message to Iframe
 	 */
 	Drupal.Shivanode.shivaSendMessage = function(iFrameName,cmd) {
-		console.trace();
+		//console.trace();
 		if(typeof(document.getElementById(iFrameName)) == 'object' && document.getElementById(iFrameName) != null) {
 			var win=document.getElementById(iFrameName).contentWindow.postMessage(cmd,'*');
-			if(debug_on('message_out')) { console.log("message out", cmd); }
+			if(debug_on('message_out')) { console.log("message out: ", cmd); }
 		} else if(debug_on('show_errors')) {
 	  	console.error('There is no frame by the name of: ' + iFrame); // for debugging messages, send to console
 	  }
@@ -132,7 +138,7 @@
 		Drupal.Shivanode.shivaSendMessage('shivaEditFrame','GetJSON');
 	};	
 	
-	/* 
+	/** 
 	 * Send JSON to editor iframe
 	 *    Sends the 'json' string to iframe with the given id
 	 * 		This Iframe should hold a Shiveye editor page, such as chart.htm, timeline.htm, etc.
@@ -153,6 +159,15 @@
 		}
 		//setTimeout("Drupal.settings.shivanode.loadJS = false;", 1000);
 		//Drupal.Shivanode.monitorEditFrame(true);
+	};
+	
+	/**
+	 * putDrupalJSON: takes json from node edit form and sends it to internal IFrame with SHIVA editor
+	 */
+	Drupal.Shivanode.putDrupalJSON = function() {
+		var frm = 'shivaEditFrame';
+		var json = $('textarea[id^="edit-shivanode-json"]').val();
+		Drupal.Shivanode.putJSON(frm, json);
 	};
 	
 	/* 
@@ -186,7 +201,13 @@
 		//Drupal.Shivanode.checkKMLUrls(jobj);
 	};
 	
+	/**
+	 * setUnload: sets error checkers for when a user navigates away from edit form
+	 * 			1. warns if data is changed and not saved
+	 * 			2. prevents submission without title
+	 */
 	Drupal.Shivanode.setUnload = function() {
+		// Set window onbeforeunload to warn if not saving
 		window.onbeforeunload = function (e) {
 			if(shiva_settings.dataChanged == true) {
 				var txt = e.srcElement.activeElement.innerText;
@@ -195,6 +216,16 @@
 				}
 			}
 		};
+		
+		// Don't allow save unless Title is filled in
+		$('button[id*="edit-submit"]').click(function(e) {
+			var sntitle = $('#edit-title').val();
+			if(sntitle == '') {
+				alert("You must enter a title before submitting your visualization!");
+				$('#edit-title').addClass('error');
+				e.preventDefault();
+			}
+		});
 	};
 	// End of Helper Functions
 	
