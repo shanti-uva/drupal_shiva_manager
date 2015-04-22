@@ -8,11 +8,8 @@
  *
  */
  
-
  // default name for the SHIVA Rest Service used in hook_enable and hook_disable
 define('SHIVA_SERVICE', 'get_shivanode');
-
-require_once('includes/shivanode.inc');
 
 /**
  * Implements hook_install().
@@ -53,6 +50,247 @@ function shivanode_install() {
   // disable comments for this content type doesn't seem to work
   variable_set('comment_shivanode', COMMENT_NODE_CLOSED);
   
+}
+
+/**
+ * Returns a structured array defining the fields created by this content type.
+ *
+ * This is factored into this function so it can be used in both
+ * node_example_install() and node_example_uninstall().
+ * 
+ * @return
+ *  An associative array specifying the fields we wish to add to our
+ *  new node type.
+ */
+ 
+function _shivanode_installed_fields() {
+  $t = get_t();
+  return array(
+    'shivanode_element_type' => array(
+      'field_name'  => 'shivanode_element_type',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_element_typelist',
+      ),
+    ),
+    'shivanode_subtype' => array(
+      'field_name'  => 'shivanode_subtype',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_subtypelist',
+      ),
+    ),
+    'shivanode_access' => array(
+      'field_name'  => 'shivanode_access',
+      'type' => 'list_integer',
+      'cardinality' => '1',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'module' => 'list',
+      'settings' => array(
+        'allowed_values_function' => '_shivanode_access_modes',
+      ),
+    ),
+    'shivanode_json' => array(
+      'field_name' => 'shivanode_json',
+      'type'        => 'text_long',
+    ),
+    'shivanode_description' => array(
+      'field_name' => 'shivanode_description',
+      'type' => 'text_with_summary',
+    ),
+    'shivanode_tags' => array(
+      'field_name' => 'shivanode_tags',
+      'type' => 'taxonomy_term_reference',
+      'module' => 'taxonomy',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => 'tags',
+            'parent' => '0',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Returns a structured array defining the instances for this content type.
+ *
+ * The instance lets Drupal know which widget to use to allow the user to enter
+ * data and how to react in different view modes.  We are going to display a
+ * page that uses a custom "node_example_list" view mode.  We will set a
+ * cardinality of three allowing our content type to give the user three color
+ * fields.
+ *
+ * This is factored into this function so it can be used in both
+ * node_example_install() and node_example_uninstall().
+ *
+ * @return
+ *  An associative array specifying the instances we wish to add to our new
+ *  node type.
+ */
+function _shivanode_installed_instances() {
+  $t = get_t();
+  return array(
+    'shivanode_element_type' => array(
+      'field_name'  => 'shivanode_element_type',
+      'label'  => $t('Visualization Type'),
+      'required' => 1,
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(
+            'default_value' => 7,
+          ),
+          'type' => 'list_default',
+          'weight' => 10,
+        ),
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 6,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
+        'settings' => array(
+          'default_value' => 7,
+        ),
+        'weight' => 10,
+      ),
+    ),
+    'shivanode_subtype' => array(
+      'field_name'  => 'shivanode_subtype',
+      'label'  => $t('Visualization Subtype'),
+      'required' => 0,
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'module' => 'list',
+          'type' => 'list_default',
+        ),
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 1,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
+      ),
+    ),
+    'shivanode_access' => array(
+      'field_name'  => 'shivanode_access',
+      'label'  => $t('Status'),
+      'required' => 1,
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(
+            'default_value' => 1,
+           ),
+          'type' => 'list_default',
+          'weight' => 15,
+        ),
+      ),
+      'settings' => array(
+        'user_register_form' => FALSE,
+        'default_value' => 1,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'type' => 'options_select',
+        'settings' => array(
+          'default_value' => 1,
+        ),
+        'weight' => 15,
+      ),
+    ),
+    'shivanode_json' => array(
+      'field_name' => 'shivanode_json',
+      'label'       => $t('Shiva Visualization'),
+      'required' => 1,
+      'display' => array(
+        'default' => array(
+          'module' => 'shivanode',
+          'type' => 'shiva_visualizer',
+          'settings' => array(
+            'height' => SHIVA_IFRAME_HEIGHT,
+            'width' => SHIVA_IFRAME_WIDTH,
+            'context' => 'default',
+          ),
+          'weight' => 15,
+        ),
+        'teaser' => array(
+          'module' => 'shivanode',
+          'type' => 'shiva_visualizer',
+          'settings' => array(
+            'height' => SHIVA_IFRAME_HEIGHT_TEASER,
+            'width' => SHIVA_IFRAME_WIDTH_TEASER,
+            'context' => 'teaser',
+          ),
+          'weight' => 15,
+        ),
+      ),
+      'widget'  => array(
+        'type'   => 'text_textarea',
+        'settings' => array(
+          'rows' => 10,
+        ),
+        'weight' => 25,
+      ),
+    ),
+    'shivanode_description' => array(
+      'field_name' => 'shivanode_description',
+      'label'       => $t('Description'),
+      'module' => 'text',
+      'required' => 0,
+      'widget'      => array(
+        'type'    => 'text_textarea_with_summary',
+        'weight' => 35,
+      ),
+    ),
+    'shivanode_tags' => array(
+      'field_name' => 'shivanode_tags',
+      'label'       => $t('Tags'),
+      'module' => 'taxonomy',
+      'widget'  => array(
+        'type'   => 'taxonomy_autocomplete',
+        'weight' => 40,
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+      ),
+    ),
+  );
 }
 
 /**
@@ -426,6 +664,9 @@ function shivanode_update_7006() {
   }
 }
 
+/**
+ *   Delete old SN editor url variables. Replaced by constants in shivanode.constants.inc
+ */
 function shivanode_update_7007() {
 	$old_sn_vars = array(
 		'shivanode_canvas_editor',
@@ -453,3 +694,4 @@ function shivanode_update_7007() {
 		variable_del($nm);
 	}
 }
+

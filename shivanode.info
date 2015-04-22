@@ -13,7 +13,9 @@ dependencies[] = views_content
 ; dependencies[] = zend (7.x-1.0-beta1) ; replaced by gdrive
 
 files[] = shivanode.module
-files[] = includes/shivanode-constants.inc
+files[] = includes/shivanode.constants.inc
+files[] = includes/shivanode.admin.inc
+files[] = includes/shivanode.pages.inc
 files[] = includes/shivanode.inc
 
 scripts[] = js/shivanode-behaviors.js

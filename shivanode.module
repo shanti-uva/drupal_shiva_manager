@@ -6,14 +6,16 @@
  * 
  */
 
-module_load_include('inc', 'shivanode', 'includes/shivanode-constants');
+module_load_include('inc', 'shivanode', 'includes/shivanode.constants');
+module_load_include('inc', 'shivanode', 'includes/shivanode');
+module_load_include('inc', 'shivanode', 'includes/shivanode.admin');
+module_load_include('inc', 'shivanode', 'includes/shivanode.pages');
 
 /**
  * Implements hook_init.
  *   This hook is run at the beginning of the page request. 
  */
 function shivanode_init() {
-	module_load_include('inc', 'shivanode', 'includes/shivanode');
 	
   // Add names JS scripts here after putting file in shivanode/js folder
   $js_scripts = array(
@@ -28,8 +30,6 @@ function shivanode_init() {
       $js = drupal_get_path('module', 'shivanode') . $js;
     }
     drupal_add_js($js, $type);
-    /*drupal_add_js( 'jQuery(document).ready(function () { Drupal.Shivanode.snviewer = "' . 
-                    variable_get('shivanode_chart_viewer', SHIVA_VIEWER) . '"});', 'inline');*/
   }
 	
 	$snsettings = array(
@@ -45,7 +45,7 @@ function shivanode_init() {
 			'latestJSON' => '',
 			'loadJS' => false,
 			'shibstatus' => null,
-			'snviewer' => variable_get('shivanode_chart_viewer', SHIVA_VIEWER),
+			'snviewer' => SHIVA_VIEWER,
 			'status' => 'loading',
 		),
 	);
@@ -61,6 +61,7 @@ function shivanode_init() {
 function shivanode_menu() {
   $items = array();
   
+	/*** Configuration Menu Items ***/
   // Defines link to admin settings form
   $items['admin/config/content/shivanode'] = array(
     'title' => 'SHIVA Manager Settings',
@@ -69,7 +70,7 @@ function shivanode_menu() {
     'page arguments' => array('_shivanode_admin_settings'),
     'access arguments' => array('access shivanode view settings'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'includes/shivanode.inc',
+    'file' => 'includes/shivanode.admin.inc',
   );
   
   $items['admin/config/content/shivanode/basic'] = array(
@@ -84,6 +85,7 @@ function shivanode_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_admin_settings_display'),
     'access arguments' =>  array('access shivanode view settings'),
+    'file' => 'includes/shivanode.admin.inc',
     'weight' => -10
   );
   
@@ -93,21 +95,11 @@ function shivanode_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_shivanode_admin_settings_thumbs'),
     'access arguments' =>  array('access shivanode view settings'),
+    'file' => 'includes/shivanode.admin.inc',
     'weight' => -1
   );
   
-    // Defines link page that lists Google spreadsheets (OLD FORM, Deprecated)
-  $items['data/spreadsheets'] = array(
-    'type' => MENU_NORMAL_ITEM,
-    'menu_name' => "nomenu",
-    'title' => 'Google Spreadsheets',
-    'description' => 'List of your Google Doc Spreadsheets',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_gss_form'),
-    'access callback' => 'is_auth_user',
-    'file' => 'includes/shivanode.inc',
-  );
-  
+	/*** Data related Menu Items ***/
   // Menu item to add a gid. First variable is GID. Second is optional type
   $items['data/add/gid'] = array(
     'type' => MENU_NORMAL_ITEM,
@@ -141,18 +133,19 @@ function shivanode_menu() {
     'file' => 'includes/shivanode.inc',
     'weight' => 30,
   );
-
-   // Resets the guser login info stored in the session variable
-  $items['node/guser/reset/confirm'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => 'Confirmation of Google Account Reset',
-    'description' => 'Confirms that user wants to reset google account',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => '_shivanode_reset_guser_confirm',
-    'access callback' => TRUE,
-    'file' => 'includes/shivanode.inc',
-  );
-  
+    
+	/*** Node Menu Items ***/
+	
+	// Create Visualization (node) Page
+	$items['create/visual'] = array(
+		'title' => t('Create a Visualization'),
+		'description' => 'Choose which type of visualization to create',
+		'page callback' => 'create_a_shivanode_page',
+		'access callback' => 'is_auth_user',
+    'file' => 'includes/shivanode.pages.inc',
+    'type' => MENU_NORMAL_ITEM,
+	);
+	
   // Return form for obtaining embed codes
   $items['node/%/share'] = array(
     'title' => '',
@@ -162,7 +155,8 @@ function shivanode_menu() {
     'access callback' => TRUE,
     'file' => 'includes/shivanode.inc',
   );
-    
+	
+	/*** API Functions ***/
   // Return SHIVA json of a single node 
   
   $items['data/json/%'] = array(
@@ -219,26 +213,27 @@ function shivanode_menu() {
     'access callback' => TRUE,
     'file' => 'includes/shivanode.inc',
   );
-	
-    // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
-    // Calls _shivanode_shib_check
-    $items['shib/auth/check'] = array(
-      'title' => 'Check Shibboleth Authentication',
-      'type' => MENU_LOCAL_TASK,
-      'description' => 'URL called by JS Interval to check if Shibboleth session is still active',
-      'page callback' => '_shivanode_shib_check',
-      'access callback' => TRUE,
-      'file' => 'includes/shivanode.inc',
-    );
-    
-    $items['shiva/login'] = array(
-      'title' => 'Login to SHIVA Visualization Manager',
-      'type' => MENU_LOCAL_TASK,
-      'description' => 'Login via shibboleth if enabled.',
-      'page callback' => '_shivanode_login',
-      'access callback' => TRUE,
-      'file' => 'includes/shivanode.inc',
-    );
+
+	/*** Shibboleth Login Functions ***/
+  // Path item for shib/auth/check called by Drupal.Shivanode.testShibAuth JS function to test to make sure one is still logged in
+  // Calls _shivanode_shib_check
+  $items['shib/auth/check'] = array(
+    'title' => 'Check Shibboleth Authentication',
+    'type' => MENU_LOCAL_TASK,
+    'description' => 'URL called by JS Interval to check if Shibboleth session is still active',
+    'page callback' => '_shivanode_shib_check',
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
+  
+  $items['shiva/login'] = array(
+    'title' => 'Login to SHIVA Visualization Manager',
+    'type' => MENU_LOCAL_TASK,
+    'description' => 'Login via shibboleth if enabled.',
+    'page callback' => '_shivanode_login',
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
 
   return $items;
 }
@@ -575,7 +570,7 @@ function shivanode_node_info() {
 * Implements hook_node_access().
 */
 function shivanode_node_access($node, $op, $account) {
-  module_load_include('inc', 'shivanode', 'includes/shivanode');
+  //module_load_include('inc', 'shivanode', 'includes/shivanode'); // included at top of this file
   $type = is_string($node) ? $node : $node->type;
   if (!is_string($node) && $type == "shivanode") {
     $shivaAccess = _shivanode_get_access($node);

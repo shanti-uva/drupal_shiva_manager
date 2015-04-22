@@ -1,0 +1,37 @@
+<?php
+
+
+function shivadata_menu() {
+	
+	$items = array(
+		'ctypes' => array(
+	    'title' => 'List All Content Types',
+	    'description' => 'List all content types',
+	    'page callback' => 'shivadata_list_ctypes',
+	    'access callback' => TRUE,
+	    'type' => MENU_NORMAL_ITEM,
+	  ),
+	);
+	
+	return $items;
+}
+
+/**
+ * List all content types
+ */
+ 
+ function shivadata_list_ctypes() {
+ 	$q = "select name from node_type where base = 'node_content';";
+	$res = db_query($q);
+	$items = array();
+	while ($row = $res->fetchAssoc()) {
+	 $items[] = $row['name'];
+	}
+	$vars = array(
+		'title' => t("Content Types on this Site"),
+		'type' => 'ol',
+		'items' => $items,
+	);
+	return theme('item_list', $vars);
+ }
+ 
