@@ -1,15 +1,259 @@
 <?php
 
 function shivadata_install() {
-	shivadata_update_7000();
+	shivadata_create_data_ctype();
+}
+
+function shivadata_create_data_ctype() {
+ //Create Data Content Type and fields
+
+	$t = get_t();
+  $shivadata = array(
+    'type' => 'shivadata',
+    'name' => $t('SHIVA Data Source'),
+    'base' => 'node_content',
+    'description' => $t('Contains data or url to data used by Shivanode visualizations'),
+    'body_label' => $t('Description'),
+    'custom' => TRUE,
+  );
+  
+  // Complete the node type definition by setting any defaults not explicitly
+  // declared above.
+  // http://api.drupal.org/api/function/node_type_set_defaults/7
+  $content_type = node_type_set_defaults($shivadata);
+
+  // Save the content type
+  node_type_save($content_type);
+  $datafields = array(
+    'field_shivadata_type' => array(
+      'field_name'  => 'field_shivadata_type',
+      'type' => 'list_text',
+      'cardinality' => '1',
+      'module' => 'list',
+      'settings' => array(
+	      'allowed_values' => shivadata_types(),
+      ),
+    ),
+		'field_shivadata_source_url' => array(
+      'field_name'  => 'field_shivadata_source_url',
+      'type' => 'text',
+      'cardinality' => '1',
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => 1024,
+      ),
+    ),
+    'field_shivadata_text' => array(
+      'field_name' => 'field_shivadata_text',
+      'type'        => 'text_long',
+      'cardinality' => '1',
+      'module' => 'text',
+    ),
+    'field_shivadata_file' => array(
+			'field_name' => 'field_shivadata_file',
+      'cardinality' => '1',
+	    'indexes' => array(
+	      'fid' => array(
+	        0 => 'fid',
+	      ),
+	    ),
+	    'locked' => 0,
+	    'module' => 'file',
+	    'settings' => array(
+	      'display_default' => 0,
+	      'display_field' => 0,
+	      'uri_scheme' => 'public',
+	    ),
+	    'translatable' => 0,
+	    'type' => 'file',
+		),
+  );
+  // Create all the fields we are adding to our content type.
+  // http://api.drupal.org/api/function/field_create_field/7
+  foreach ($datafields as $field) {
+    field_create_field($field);
+  }
+	
+	
+	$data_field_instances = array(
+		'field_shivadata_type' => array(
+	    'field_name' => 'field_shivadata_type',
+	    'entity_type' => 'node',
+	    'bundle' => 'shivadata',
+	    'description' => 'Type of data source represented by this record',
+	    'label' => 'Type of Data Source',
+	    'display' => array(
+	      'default' => array(
+	        'label' => 'above',
+	        'module' => 'list',
+	        'settings' => array(),
+	        'type' => 'list_default',
+	        'weight' => 0,
+	      ),
+	      'teaser' => array(
+	        'label' => 'above',
+	        'settings' => array(),
+	        'type' => 'hidden',
+	        'weight' => 0,
+	      ),
+	    ),
+	    'required' => TRUE,
+	    'settings' => array(
+	      'user_register_form' => FALSE,
+	    ),
+	    'widget' => array(
+	      'module' => 'options',
+	      'settings' => array(),
+	      'type' => 'options_select',
+	      'weight' => 0,
+	    ),
+	  ),
+		'field_shivadata_source_url' => array(
+	    'field_name' => 'field_shivadata_source_url',
+	    'entity_type' => 'node',
+	    'bundle' => 'shivadata',
+	    'description' => 'URL to data used by a SHIVA Visualization',
+	    'label' => 'Shiva Source URL',
+	    'display' => array(
+	      'default' => array(
+	        'label' => 'above',
+	        'module' => 'text',
+	        'settings' => array(),
+	        'type' => 'text_default',
+	        'weight' => 1,
+	      ),
+	      'teaser' => array(
+	        'label' => 'above',
+	        'settings' => array(),
+	        'type' => 'hidden',
+	        'weight' => 0,
+	      ),
+	    ),
+	    'required' => FALSE,
+	    'settings' => array(
+	      'text_processing' => 0,
+	      'user_register_form' => FALSE,
+	    ),
+	    'widget' => array(
+	      'module' => 'text',
+	      'settings' => array(
+	        'size' => 60,
+	      ),
+	      'type' => 'text_textfield',
+	      'weight' => 31,
+	    ),
+	  ),
+		'field_shivadata_text' => array(
+	    'field_name' => 'field_shivadata_text',
+	    'entity_type' => 'node',
+	    'bundle' => 'shivadata',
+	    'description' => 'Pasted Text of Data in CSV format',
+	    'label' => 'Shiva Source Text',
+	    'required' => FALSE,
+	    'settings' => array(
+	      'text_processing' => 0,
+	      'user_register_form' => FALSE,
+	    ),
+	    'widget' => array(
+	      'module' => 'text',
+	      'settings' => array(
+	        'rows' => 5,
+	      ),
+	      'type' => 'text_textarea',
+	      'weight' => 32,
+	    ),
+	  ),
+		'field_shivadata_file' => array(
+	    'field_name' => 'field_shivadata_file',
+	    'entity_type' => 'node',
+	    'bundle' => 'shivadata',
+	    'description' => 'File containing data in CSV format for a Shiva visualization',
+	    'label' => 'Shiva Source File',
+	    'bundle' => 'shivadata',
+	    'deleted' => 0,
+	    'display' => array(
+	      'default' => array(
+	        'label' => 'above',
+	        'module' => 'file',
+	        'settings' => array(),
+	        'type' => 'file_default',
+	        'weight' => 3,
+	      ),
+	      'teaser' => array(
+	        'label' => 'above',
+	        'settings' => array(),
+	        'type' => 'hidden',
+	        'weight' => 0,
+	      ),
+	    ),
+	    'required' => 0,
+	    'settings' => array(
+	      'description_field' => 0,
+	      'file_directory' => 'shivadata',
+	      'file_extensions' => 'txt csv',
+	      'max_filesize' => '',
+	      'user_register_form' => FALSE,
+	    ),
+	    'widget' => array(
+	      'active' => 1,
+	      'module' => 'file',
+	      'settings' => array(
+	        'progress_indicator' => 'throbber',
+	      ),
+	      'type' => 'file_generic',
+	      'weight' => 33,
+	    ),
+	  ),
+	  
+	);
+  // Create all the instances for our fields.
+  // http://api.drupal.org/api/function/field_create_instance/7
+  foreach ($data_field_instances as $instance) {
+    field_create_instance($instance);
+  }
+  
+  // disable comments for this content type doesn't seem to work
+  variable_set('comment_shivanode', COMMENT_NODE_CLOSED);
+}
+
+function shivadata_schema() {
+	// Defines a table for simple linking between data nodes and visualization nodes
+	$schema['shivadata'] = array(
+	  'description' => 'Table linking datanodes to visualizations',
+	  'fields' => array(
+	    'lid'       => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
+	    'data_id'   => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
+	    'vis_id'    => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
+	    'uid'       => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+	    'created'   => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+	  ),
+	  'indexes' => array(
+	    'data_id'        => array('data_id'),
+	    'vis_id'       	 => array('vis_id'),
+	    'node_created'   => array('created'),
+	    'uid'            => array('uid'),
+	  ),
+	  'unique keys' => array(
+	  ),
+	  'foreign keys' => array(
+	    'data_id' => array(
+	      'table' => 'node',
+	      'columns' => array('nid' => 'nid'),
+	     ),
+	    'vis_id' => array(
+	      'table' => 'node',
+	      'columns' => array('nid' => 'nid'),
+	     ),
+	   ),
+	  'primary key' => array('lid'),
+	);
+	return $schema;
 }
 
 function shivadata_enable() {
-  drupal_set_message(t('Yo dude, this new test mod is rad! Chill with it tubularly!'));
 }
 
 function shivadata_disable() {
-  drupal_set_message(t('Aw man, bummer to see you split!'));
 }
 
 function shivadata_uninstall() {
@@ -34,7 +278,7 @@ function shivadata_uninstall() {
   $datafields = array(
     'shivadata_type',
 		'shivadata_source_url',
-    'shivadata_json',
+    'shivadata_text',
     'shivadata_file',
   );
   foreach ($datafields as $field) {
@@ -58,120 +302,12 @@ function shivadata_uninstall() {
   field_purge_batch(1000);
 }
 
-
-/**
- * 	Create Data Content Type and migrate Shivanodes of data type to the new content type
- */
-function shivadata_update_7000() {
-	$t = get_t();
-  $shivadata = array(
-    'type' => 'shivadata',
-    'name' => $t('SHIVA Data Source'),
-    'base' => 'node_content',
-    'description' => $t('Contains data or url to data used by Shivanode visualizations'),
-    'body_label' => $t('Description'),
-    'custom' => TRUE,
-  );
-  
-  // Complete the node type definition by setting any defaults not explicitly
-  // declared above.
-  // http://api.drupal.org/api/function/node_type_set_defaults/7
-  $content_type = node_type_set_defaults($shivadata);
-
-  // Save the content type
-  node_type_save($content_type);
-  $datafields = array(
-    'shivadata_type' => array(
-      'field_name'  => 'shivadata_type',
-      'type' => 'list_text',
-      'cardinality' => '1',
-      'module' => 'list',
-      'settings' => array(
-	      'allowed_values' => shivadata_types(),
-      ),
-    ),
-		'shivadata_source_url' => array(
-      'field_name'  => 'shivadata_source_url',
-      'type' => 'text',
-      'cardinality' => '1',
-      'module' => 'text',
-      'settings' => array(
-        'max_length' => 1024,
-      ),
-    ),
-    'shivadata_json' => array(
-      'field_name' => 'shivadata_json',
-      'type'        => 'text_long',
-      'cardinality' => '1',
-      'module' => 'text',
-    ),
-    'shivadata_file' => array(
-			'field_name' => 'shivadata_file',
-			'type' => 'file',
-      'cardinality' => '1',
-      'module' => 'file',
-		),
-  );
-  // Create all the fields we are adding to our content type.
-  // http://api.drupal.org/api/function/field_create_field/7
-  foreach ($datafields as $field) {
-    field_create_field($field);
-  }
-	
-	
-	$data_field_instances = array(
-		'shivadata_type' => array(
-	    'field_name' => 'shivadata_type',
-	    'entity_type' => 'node',
-	    'bundle' => 'shivadata',
-	    'description' => 'Type of data source represented by this record',
-	    'label' => 'Type of Data Source',
-	    'required' => TRUE,
-	    'widget' => array(
-	      'type' => 'options_select',
-	      'weight' => 0,
-	    ),
-	    'display' => array(),
-	  ),
-		'shivadata_source_url' => array(
-	    'field_name' => 'shivadata_source_url',
-	    'entity_type' => 'node',
-	    'bundle' => 'shivadata',
-	    'description' => 'URL to data used by a SHIVA Visualization',
-	    'label' => 'Shiva Source URL',
-	  ),
-		'shivadata_json' => array(
-	    'field_name' => 'shivadata_json',
-	    'entity_type' => 'node',
-	    'bundle' => 'shivadata',
-	    'description' => 'JSON format of data	',
-	    'label' => 'Shiva Source JSON',
-	  ),
-		'shivadata_file' => array(
-	    'field_name' => 'shivadata_file',
-	    'entity_type' => 'node',
-	    'bundle' => 'shivadata',
-	    'description' => 'File containing data',
-	    'label' => 'Shiva Source File',
-	  ),
-	  
-	);
-  // Create all the instances for our fields.
-  // http://api.drupal.org/api/function/field_create_instance/7
-  foreach ($data_field_instances as $instance) {
-    field_create_instance($instance);
-  }
-  
-  // disable comments for this content type doesn't seem to work
-  variable_set('comment_shivanode', COMMENT_NODE_CLOSED);
-}
-
 function shivadata_types() {
 	$dtypes = array(
-		0 => 'Google Doc',
-		1 => 'CSV',
-		1 => 'File',
-		2 => 'JSON',
+		0 => 'Google Doc URL',
+		1 => 'CSV URL',
+		1 => 'File Upload',
+		2 => 'Pasted Text (CSV)',
 	);
 	return $dtypes;
 }

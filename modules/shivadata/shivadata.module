@@ -2,36 +2,32 @@
 
 
 function shivadata_menu() {
-	
-	$items = array(
-		'ctypes' => array(
-	    'title' => 'List All Content Types',
-	    'description' => 'List all content types',
-	    'page callback' => 'shivadata_list_ctypes',
-	    'access callback' => TRUE,
-	    'type' => MENU_NORMAL_ITEM,
-	  ),
+	$items = array();
+	$items['shivadata/text/%'] = array(
+    'title' => 'Shiva Text Data',
+    'description' => 'Returns a Shivadata pasted text as a CSV for use in Shiva Visualizations',
+    'page callback' => 'shivadata_text_as_csv',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
 	);
 	
 	return $items;
 }
 
+function shivadata_get_url() {
+	// Return url depending on type of data 	
+}
+
 /**
- * List all content types
+ * Return Pasted text as a CSV to provide URL for 
  */
  
- function shivadata_list_ctypes() {
- 	$q = "select name from node_type where base = 'node_content';";
-	$res = db_query($q);
-	$items = array();
-	while ($row = $res->fetchAssoc()) {
-	 $items[] = $row['name'];
-	}
-	$vars = array(
-		'title' => t("Content Types on this Site"),
-		'type' => 'ol',
-		'items' => $items,
-	);
-	return theme('item_list', $vars);
+ function shivadata_text_as_csv($nid) {
+ 	$node = node_load($nid);
+	$txtfield = field_get_items('node', $node, 'field_shivadata_text');
+	$sdata = field_view_value('node', $node, 'field_shivadata_text', $txtfield[0]);
+ 	drupal_add_http_header('Content-type', 'text/csv; charset=utf-8'); // or do we want application/csv ?
+ 	return $sdata;
  }
  
