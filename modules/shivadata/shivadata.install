@@ -24,6 +24,8 @@ function shivadata_create_data_ctype() {
 
   // Save the content type
   node_type_save($content_type);
+	node_add_body_field($content_type, 'Description');
+	
   $datafields = array(
     'field_shivadata_type' => array(
       'field_name'  => 'field_shivadata_type',
@@ -73,7 +75,6 @@ function shivadata_create_data_ctype() {
   foreach ($datafields as $field) {
     field_create_field($field);
   }
-	
 	
 	$data_field_instances = array(
 		'field_shivadata_type' => array(

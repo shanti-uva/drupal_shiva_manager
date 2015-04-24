@@ -12,9 +12,35 @@ function shivadata_menu() {
     'type' => MENU_NORMAL_ITEM,
 	);
 	
+  $items['admin/config/content/shivanode/convert'] = array(
+    'title' => 'Convert Data Entries',
+    'description' => 'Converts data entries from old format to individual records of shivadata type',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('shivadata_admin_convert_form'),
+    'access arguments' =>  array('access shivanode view settings'),
+    'weight' => -10
+  );
+  
+	
 	return $items;
 }
 
+/**
+ * @TODO: Need to add a function for modifying the display of this node type to show actual data
+ * 
+ * @TODO: Modify display of node to include "Use this Data Link"
+ */
+ 
+ 
+/**
+ * shivadata_get_url: Returns the url for the data depending on the type of data.
+ * 		GDoc and CSV return URL from URL field
+ * 		File returns URL to file in Drupal system
+ * 		Text returns shivadata/text/[NID] defined above
+ * 
+ * 	TODO: Add ability to upload Excell Docs? Or Require CSV?
+ */
 function shivadata_get_url() {
 	// Return url depending on type of data 	
 }
@@ -31,3 +57,102 @@ function shivadata_get_url() {
  	return $sdata;
  }
  
+ /**
+  * Add shivanode admin page to convert old data nodes to this new format
+  * Temporary: Move to install when completed
+  */
+ function shivadata_admin_convert_form($form, &$form_state) {
+  // Display Settings for Shivanode dealing with size of views etc.
+    
+  $form['shivadata_convert_header'] = array(
+    '#markup' => t('<h3>Shiva Data Convert</h3>') .
+      t('<p>Select the Shiva Nodes of the type "data" to be converted to Shivadata nodes:</p>'),
+  );
+	
+  $form['shivadata_convert_items'] = array(
+	  '#type' => 'checkboxes',
+	  '#options' => shivadata_get_oldnodes(),
+	  '#title' => t('Old Format Data Nodes'),
+  );
+  
+  $form['shivadata_convert_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Convert'),
+  );
+	
+	$form['#submit'][] = 'shivadata_admin_convert_submit';
+	
+	return $form;
+ }
+ 
+function shivadata_get_oldnodes() {
+ 	$query = 'select n.nid, n.title from node n, field_data_shivanode_element_type et ' .
+ 							'where n.nid = et.entity_id and et.shivanode_element_type_value = 1 order by n.nid desc limit 100';
+	$res = db_query($query);
+	$nodes = array();
+	while ($item = $res->fetchAssoc()) {
+		$nodes[$item['nid']] = "{$item['title']} ({$item['nid']})";
+	}
+	return $nodes;
+ }
+
+function shivadata_admin_convert_submit($form, &$form_state) {
+	//$msg = "The following nodes: <br><ul style=\"padding-left:24px;\">";
+	$selected_nodes = array();
+	foreach ($form_state['values']['shivadata_convert_items'] as $nid => $value) {
+		if ($nid == $value) {
+			$title = $form_state['complete form']['shivadata_convert_items'][$nid]['#title'];
+			//$msg .= "<li>$title ($nid)</li>";
+			$selected_nodes[] = $nid;
+		}
+	}
+	//$msg .= '</ul>';
+	//dpm($selected_nodes, 'selected nodes');
+	shivadata_admin_convert_nodes($selected_nodes);
+}
+
+function shivadata_admin_convert_nodes($nodes) {
+	foreach ($nodes as $nid) {
+		$old_node = node_load($nid);
+		
+	  $node = new stdClass();
+	  $node->title = $old_node->title;
+	  $node->type = 'shivadata';
+	  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+	  $node->language = $old_node->language;  // Set language to match old node
+	  $node->uid = $old_node->uid; // set author to old node author
+	  $node->status = 1; // published 
+	  $node->promote = 0; // not promoted to front page
+	  $node->comment = 0; // comments disabled
+	
+	  // Set Data Type to 0 = Google Doc URL
+	  $node->field_shivadata_type[$node->language][0]['value'] = 0;
+		
+	  // Get Source URL From old nodes JSON
+		$jsontxt = $old_node->shivanode_json[LANGUAGE_NONE][0]['value'];
+		$json = json_decode($jsontxt);
+		// if not dataSourceURL set warning and continue loop
+		if (!isset($json->dataSourceUrl)) {
+			drupal_set_message("{$old_node->title} ($nid) has no dataSourceUrl! Unable to convert!", 'warning');
+			continue;
+		}
+		// Otherwise set source_url field
+	  $node->field_shivadata_source_url[$node->language][0] = array(
+	    'value' => $json->dataSourceUrl,
+	    'safe_value' => $json->dataSourceUrl,
+	  );
+		// Save node
+	  $node = node_submit($node); // Prepare node for saving
+		// Change all timestamps to match old node
+		$node->created = $old_node->created; 
+		$node->changed = $old_node->changed;
+		$node->revision_timestamp = $old_node->revision_timestamp;
+		$node->last_comment_timestamp = $old_node->last_comment_timestamp;
+	  node_save($node);
+		$old_link = l($nid, "node/$nid");
+		$new_link = l($node->nid, "node/{$node->nid}");
+		drupal_set_message("Old node $old_link saved as node $new_link");
+		// TODO: Delete old node if properly saved
+		// TODO: Link to all visualizations that use this URL
+	}
+}

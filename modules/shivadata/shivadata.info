@@ -7,3 +7,4 @@ dependencies[] = file
 dependencies[] = list
 dependencies[] = options
 dependencies[] = text
+dependencies[] = shivanode
