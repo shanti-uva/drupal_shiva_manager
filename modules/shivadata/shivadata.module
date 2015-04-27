@@ -51,12 +51,29 @@ function shivadata_get_url() {
  
  function shivadata_text_as_csv($nid) {
  	$node = node_load($nid);
-	$txtfield = field_get_items('node', $node, 'field_shivadata_text');
-	$sdata = field_view_value('node', $node, 'field_shivadata_text', $txtfield[0]);
+	$txtfield = field_get_items('node', $node, 'shivadata_text');
+	$sdata = field_view_value('node', $node, 'shivadata_text', $txtfield[0]);
  	drupal_add_http_header('Content-type', 'text/csv; charset=utf-8'); // or do we want application/csv ?
  	return $sdata;
  }
  
+ 
+/**
+ * Implements hook_node_view_alter(&$build)
+ *   Adding field showing which data element is used by a visualization
+ *
+ */ 
+ /*
+function shivadata_node_view_alter(&$build) {
+  // Full View
+  if($build['#view_mode'] == 'full') { 
+    global $base_path;
+    $node = $build['#node'];
+		dpm($build, 'build');
+	}
+}
+ */
+ /****** Convert Old Nodes Functions *******/
  /**
   * Add shivanode admin page to convert old data nodes to this new format
   * Temporary: Move to install when completed
@@ -126,7 +143,7 @@ function shivadata_admin_convert_nodes($nodes) {
 	  $node->comment = 0; // comments disabled
 	
 	  // Set Data Type to 0 = Google Doc URL
-	  $node->field_shivadata_type[$node->language][0]['value'] = 0;
+	  $node->shivadata_type[$node->language][0]['value'] = 0;
 		
 	  // Get Source URL From old nodes JSON
 		$jsontxt = $old_node->shivanode_json[LANGUAGE_NONE][0]['value'];
@@ -137,7 +154,7 @@ function shivadata_admin_convert_nodes($nodes) {
 			continue;
 		}
 		// Otherwise set source_url field
-	  $node->field_shivadata_source_url[$node->language][0] = array(
+	  $node->shivadata_source_url[$node->language][0] = array(
 	    'value' => $json->dataSourceUrl,
 	    'safe_value' => $json->dataSourceUrl,
 	  );
@@ -156,3 +173,5 @@ function shivadata_admin_convert_nodes($nodes) {
 		// TODO: Link to all visualizations that use this URL
 	}
 }
+
+/***** End of Convert Old Nodes ****/

@@ -27,8 +27,8 @@ function shivadata_create_data_ctype() {
 	node_add_body_field($content_type, 'Description');
 	
   $datafields = array(
-    'field_shivadata_type' => array(
-      'field_name'  => 'field_shivadata_type',
+    'shivadata_type' => array(
+      'field_name'  => 'shivadata_type',
       'type' => 'list_text',
       'cardinality' => '1',
       'module' => 'list',
@@ -36,8 +36,8 @@ function shivadata_create_data_ctype() {
 	      'allowed_values' => shivadata_types(),
       ),
     ),
-		'field_shivadata_source_url' => array(
-      'field_name'  => 'field_shivadata_source_url',
+		'shivadata_source_url' => array(
+      'field_name'  => 'shivadata_source_url',
       'type' => 'text',
       'cardinality' => '1',
       'module' => 'text',
@@ -45,14 +45,14 @@ function shivadata_create_data_ctype() {
         'max_length' => 1024,
       ),
     ),
-    'field_shivadata_text' => array(
-      'field_name' => 'field_shivadata_text',
+    'shivadata_text' => array(
+      'field_name' => 'shivadata_text',
       'type'        => 'text_long',
       'cardinality' => '1',
       'module' => 'text',
     ),
-    'field_shivadata_file' => array(
-			'field_name' => 'field_shivadata_file',
+    'shivadata_file' => array(
+			'field_name' => 'shivadata_file',
       'cardinality' => '1',
 	    'indexes' => array(
 	      'fid' => array(
@@ -77,8 +77,8 @@ function shivadata_create_data_ctype() {
   }
 	
 	$data_field_instances = array(
-		'field_shivadata_type' => array(
-	    'field_name' => 'field_shivadata_type',
+		'shivadata_type' => array(
+	    'field_name' => 'shivadata_type',
 	    'entity_type' => 'node',
 	    'bundle' => 'shivadata',
 	    'description' => 'Type of data source represented by this record',
@@ -109,8 +109,8 @@ function shivadata_create_data_ctype() {
 	      'weight' => 0,
 	    ),
 	  ),
-		'field_shivadata_source_url' => array(
-	    'field_name' => 'field_shivadata_source_url',
+		'shivadata_source_url' => array(
+	    'field_name' => 'shivadata_source_url',
 	    'entity_type' => 'node',
 	    'bundle' => 'shivadata',
 	    'description' => 'URL to data used by a SHIVA Visualization',
@@ -144,8 +144,8 @@ function shivadata_create_data_ctype() {
 	      'weight' => 31,
 	    ),
 	  ),
-		'field_shivadata_text' => array(
-	    'field_name' => 'field_shivadata_text',
+		'shivadata_text' => array(
+	    'field_name' => 'shivadata_text',
 	    'entity_type' => 'node',
 	    'bundle' => 'shivadata',
 	    'description' => 'Pasted Text of Data in CSV format',
@@ -164,8 +164,8 @@ function shivadata_create_data_ctype() {
 	      'weight' => 32,
 	    ),
 	  ),
-		'field_shivadata_file' => array(
-	    'field_name' => 'field_shivadata_file',
+		'shivadata_file' => array(
+	    'field_name' => 'shivadata_file',
 	    'entity_type' => 'node',
 	    'bundle' => 'shivadata',
 	    'description' => 'File containing data in CSV format for a Shiva visualization',

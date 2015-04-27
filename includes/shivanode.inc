@@ -1712,21 +1712,6 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
        $form['title']['#default_value'] = str_replace(' (Data)', '', $datatitle); 
     } 
     
-    // if it is a  new visualization call JS function to load the data entry data once form is loaded.
-    // use 'preset' because this function already sets the markup for the data entry
-    // Otherwise, load the data from the Drupal unless told not to
-    /*TODO: Change this to a behavior
-    $jsfunct =  ($is_new_el)?  'Drupal.Shivanode.insertDataElement(\'preset\'); ' : 
-              'if(!Drupal.Shivanode.loadJS || Drupal.Shivanode.loadJS == false) { Drupal.Shivanode.setDataSheet(\'' . 
-              $dataurl . '\', \'' . $datatitle . '\');}';
-    $form['gdocinfo']['script'] = array(
-      '#type' => 'markup',
-      '#markup' => '<script type="text/javascript">' .
-              'jQuery(document).ready(function() {' .
-              // ' jQuery(\'#shivaEditFrame\').load(function() { ' . $jsfunct . '});' .
-              '});' .
-          '</script>',
-    );*/
     $snsettings = array(
 			'shivanode' => array(
 				'dataUrl' => $dataurl,
