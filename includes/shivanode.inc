@@ -10,36 +10,16 @@
  * @return
  *  An associative array specifying the values we wish to add for the chart type.
  * 
- * 	Types are: 	1 = data, 2 = Image, 3 = Map, 4 = Subway, 5 = Timeline (Simile)*, 6 = Video, 7 = Chart,
- * 							8 = Control*, 9 = Canvas*, 10 = Network, 11 = Draw*, 12 = Earth, 13 = Timeline (Timeglider), 14 = Poster,*
- * 							15 = Word Cloud, 16 = Graph, 17 = Multimedia (Qmedia)
+ * 	Bulk of this code is replaces bye shivanode_get_types in shivanode.type.inc
+ *  All types are defined in that include file
  * 
- * 		* means "deprecated"
+ * TODO: Replace all references to this with shivanode_get_types calls
  *  
  */
+ 
 function _shivanode_element_typelist($byName = FALSE) {
-  $options = array(
-    7 => t('Chart'),
-    1 => t('Data'),
-    11 => t('Draw'),
-    12 => t('Earth'),
-    16 => t('Graph'),
-    2 => t('Image'),
-    3 => t('Map'),
-    17 => t('Multimedia'),
-    10 => t('Network'),
-    14 => t('Poster'),
-    4 => t('Subway'),
-    5 => t('Timeline (Deprecated)'),
-    13 => t('Timeline'),
-    6 => t('Video'),
-    15 => t('Word Cloud'),
-    
-    /*
-    8 => 'Control',
-    9 => 'Canvas',
-    */
-  );
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+ 	$options = shivanode_get_types(); // returns all types by index=>name including deprecated ones
   if($byName === TRUE) {
     $options = array_flip($options); // What about when localized in a different language? Will this still work?
   }
@@ -52,36 +32,10 @@ function _shivanode_element_typelist($byName = FALSE) {
  * _shivanode_subtypelist('index', 'rgraph') will return the index for the second item. Search value can be either label or json val.
  */
 function _shivanode_subtypelist($type='label', $search=FALSE) {
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
   $types = array('label', 'json', 'index');
   $typeval = array_search($type, $types);
-  $options = array(
-    1 => array(t('Annotated Timeline'), 'AnnotatedTimeLine'),
-    2 => array(t('Area Chart'), 'AreaChart'),
-    3 => array(t('Bar Chart'), 'BarChart'),
-    4 => array(t('Candlestick Chart'), 'CandlestickChart'),
-    5 => array(t('Column Chart'), 'ColumnChart'),
-    6 => array(t('Gauge'), 'Gauge'),
-    7 => array(t('Geo Chart'), 'GeoChart'),
-    8 => array(t('Line Chart'), 'LineChart'),
-    9 => array(t('Motion Chart'), 'MotionChart'),
-    10 => array(t('Organization Chart'), 'OrgChart'),
-    11 => array(t('Pie Chart'), 'PieChart'),
-    12 => array(t('Scatter Chart'), 'ScatterChart'),
-    13 => array(t('Table'), 'Table'),
-    14 => array(t('Tree Map'), 'TreeMap'),
-    15 => array(t('Radial Graph'), 'rgraph'),
-    16 => array(t('Forced Directed'), 'forcedir'),
-    17 => array(t('Hyper Tree'), 'hypertree'),
-    18 => array(t('Slideshow'), 'Slideshow'),
-    19 => array(t('Image Montage'), 'Montage'),
-    20 => array(t('Zoomable Image'), 'Zoomable'),
-    21 => array(t('Network'), 'Network'),
-    22 => array(t('Tree'), 'Tree'),
-    23 => array(t('Bubble'), 'Bubble'),
-    24 => array(t('Stream'), 'Stream'),
-    25 => array(t('Parallel'), 'Parallel'),
-    21 => array(t('Chord'), 'Chord'),
-  );
+	$options = shivanode_get_types('subtypes');
   if(is_numeric($type)) {
     if(isset($options[$type][0])){
       return $options[$type][0];

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Sample url for using a datanode in a new visualization as on shiva production:
+ * http://shiva.virginia.edu/node/add/shivanode/3013/chart?ctype=Geo%20Chart
+ * 
+ */
 
 function shivadata_menu() {
 	$items = array();
@@ -63,16 +68,74 @@ function shivadata_get_url() {
  *   Adding field showing which data element is used by a visualization
  *
  */ 
- /*
-function shivadata_node_view_alter(&$build) {
-  // Full View
-  if($build['#view_mode'] == 'full') { 
-    global $base_path;
-    $node = $build['#node'];
-		dpm($build, 'build');
+function shivadata_preprocess_node(&$vars) {
+  //dpm($vars, 'vars in sppn');
+	if($vars['type'] == 'shivadata') {
+		$vars['shivanode_links'] = shivadata_get_links($vars['nid'], 'links');
+		$vars['use_link'] = drupal_render(drupal_get_form('shivadata_create_select_form', $vars['nid']));
 	}
 }
+
+function shivadata_create_select_form($form, &$form_state, $nid) {
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+	$options = array('0' => t("Choose a type")) + shivanode_get_types('datatypes', FALSE);
+	$form['desc'] = array(
+		'#markup' => t("<div id=\"dselmessage\"></div>"),
+	);
+	$form['vistype'] = array(
+		'#type' => 'select',
+		'#title' => t('Visualize this data'),
+		'#options' => $options,
+		'#description' => t('Use this data to create a visualization of your choice.'),
+		'#attributes' => array('onchange' => "form.action += '/' + form.vistype.value; form.submit();"),
+	);
+	$form['nid'] = array(
+			'#type' => 'hidden',
+			'#value' => $nid,
+	);
+	$form['#action'] = url('node/add/shivanode/' . $nid);
+	return $form;
+}
+
+function shivadata_create_select_form_submit($form, &$form_state) {
+	//dpm($form_state, 'in create with');
+	drupal_set_message('in create with');
+	$type = $form_state['values']['vistype'];
+	$nid = $form_state['values']['nid'];
+	dpm($type, $nid);
+	watchdog('shivadata', 'in submit handler');
+	
+}
+
+/**
+ * Returns a list of nodes using the data node whose id is given. Can be styled as an array of nids or links
+ * 
+ * @param $did : the node id of the shivadata node representing the datat
+ * @param $style : either 'nids' or 'links'
+ * 
+ * @return array of either nids or links
  */
+function shivadata_get_links($did, $style='nids') {
+	$result = db_query('select * from {shivadata_links} where data_id=:did', array(':did'=>$did));
+	$links = array();
+	while($record = $result->fetchAssoc()){
+		$nid = $record['vis_id'];
+		if($style == 'links') {
+			$node = node_load($nid);
+			$user = user_load($record['uid']);
+			$date = Date('M. j, Y', $record['created']);
+			$links[] = l($node->title, "node/$nid", array(
+				'attributes' => array(
+					'title' => "Created by {$user->name} on {$date}",
+				),
+			));
+		} else {
+			$links[] = $nid;
+		}
+	}
+	return $links;
+}
+
  /****** Convert Old Nodes Functions *******/
  /**
   * Add shivanode admin page to convert old data nodes to this new format
@@ -83,38 +146,29 @@ function shivadata_node_view_alter(&$build) {
     
   $form['shivadata_convert_header'] = array(
     '#markup' => t('<h3>Shiva Data Convert</h3>') .
-      t('<p>Select the Shiva Nodes of the type "data" to be converted to Shivadata nodes:</p>'),
+      t('<p>NEED TO DELETE OLD NODES! Convert old shivadata nodes to the new shivadata content type. Only 500 can be converted at one time.</p>'),
   );
-	
-  $form['shivadata_convert_items'] = array(
-	  '#type' => 'checkboxes',
-	  '#options' => shivadata_get_oldnodes(),
-	  '#title' => t('Old Format Data Nodes'),
-  );
-  
-  $form['shivadata_convert_button'] = array(
-    '#type' => 'submit',
-    '#value' => t('Convert'),
-  );
-	
-	$form['#submit'][] = 'shivadata_admin_convert_submit';
+	$old_nodes = shivadata_get_olddatanids();
+	if (count($old_nodes) == 0) {
+	  $form['shivadata_convert_items'] = array(
+		  '#markup' => t('<p>There are no old nodes to be converted.'),
+	  );
+	} else {
+		$form['shivadata_convert_items'] = array(
+		  '#markup' => t('<p>There are @count old nodes to be converted.</p>', array('@count' => count($old_nodes))),
+	  );
+	  $form['shivadata_convert_button'] = array(
+	    '#type' => 'submit',
+	    '#value' => t('Convert Next 500 Data Nodes'),
+	  );
+		$form['#submit'][] = 'shivadata_admin_convert_submit';
+	}
 	
 	return $form;
  }
  
-function shivadata_get_oldnodes() {
- 	$query = 'select n.nid, n.title from node n, field_data_shivanode_element_type et ' .
- 							'where n.nid = et.entity_id and et.shivanode_element_type_value = 1 order by n.nid desc limit 100';
-	$res = db_query($query);
-	$nodes = array();
-	while ($item = $res->fetchAssoc()) {
-		$nodes[$item['nid']] = "{$item['title']} ({$item['nid']})";
-	}
-	return $nodes;
- }
-
 function shivadata_admin_convert_submit($form, &$form_state) {
-	//$msg = "The following nodes: <br><ul style=\"padding-left:24px;\">";
+	/*//$msg = "The following nodes: <br><ul style=\"padding-left:24px;\">";
 	$selected_nodes = array();
 	foreach ($form_state['values']['shivadata_convert_items'] as $nid => $value) {
 		if ($nid == $value) {
@@ -125,54 +179,86 @@ function shivadata_admin_convert_submit($form, &$form_state) {
 	}
 	//$msg .= '</ul>';
 	//dpm($selected_nodes, 'selected nodes');
-	shivadata_admin_convert_nodes($selected_nodes);
+	shivadata_admin_convert_nodes($selected_nodes);*/
+	batch_set(shivadata_admin_convert_batch());
 }
 
-function shivadata_admin_convert_nodes($nodes) {
-	foreach ($nodes as $nid) {
-		$old_node = node_load($nid);
-		
-	  $node = new stdClass();
-	  $node->title = $old_node->title;
-	  $node->type = 'shivadata';
-	  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-	  $node->language = $old_node->language;  // Set language to match old node
-	  $node->uid = $old_node->uid; // set author to old node author
-	  $node->status = 1; // published 
-	  $node->promote = 0; // not promoted to front page
-	  $node->comment = 0; // comments disabled
-	
-	  // Set Data Type to 0 = Google Doc URL
-	  $node->shivadata_type[$node->language][0]['value'] = 0;
-		
-	  // Get Source URL From old nodes JSON
-		$jsontxt = $old_node->shivanode_json[LANGUAGE_NONE][0]['value'];
-		$json = json_decode($jsontxt);
-		// if not dataSourceURL set warning and continue loop
-		if (!isset($json->dataSourceUrl)) {
-			drupal_set_message("{$old_node->title} ($nid) has no dataSourceUrl! Unable to convert!", 'warning');
-			continue;
-		}
-		// Otherwise set source_url field
-	  $node->shivadata_source_url[$node->language][0] = array(
-	    'value' => $json->dataSourceUrl,
-	    'safe_value' => $json->dataSourceUrl,
-	  );
-		// Save node
-	  $node = node_submit($node); // Prepare node for saving
-		// Change all timestamps to match old node
-		$node->created = $old_node->created; 
-		$node->changed = $old_node->changed;
-		$node->revision_timestamp = $old_node->revision_timestamp;
-		$node->last_comment_timestamp = $old_node->last_comment_timestamp;
-	  node_save($node);
-		shivadata_migrate_links($node, $nid);
-		$old_link = l($nid, "node/$nid");
-		$new_link = l($node->nid, "node/{$node->nid}");
-		drupal_set_message("Old node $old_link saved as node $new_link");
-		// TODO: Delete old node if properly saved
-		// TODO: Link to all visualizations that use this URL
+function shivadata_admin_convert_batch() {
+	drupal_set_message(t('Converting old data nodes to new content type'));
+	$nids = shivadata_get_olddatanids();
+	$nids = array_splice($nids, 0, 500); // Can only do 500 at a time
+	$nodes_to_convert = array();
+	//$node_count = count($nodes_to_convert);
+	$operation = array();
+	while(count($nids) > 0) {
+		$part = array_splice($nids,0,100);
+		$nodes_to_convert +=  node_load_multiple($part);
 	}
+	foreach($nodes_to_convert as $nid=>$node) {
+    // $operations[] = array(<function name>, <array of arguments to pass to function>);
+    $operations[] = array('shivadata_admin_convert_node', array($node));
+  }
+	 // build the batch instructions
+  $batch = array(
+    'operations' => $operations,
+    'finished' => 'shivadata_admin_convert_finished',
+  );
+  return $batch;
+}
+
+function shivadata_get_olddatanids() {
+ 	$query = 'select n.nid, n.title from node n, field_data_shivanode_element_type et ' .
+ 							'where n.nid = et.entity_id and et.shivanode_element_type_value = 1 order by n.nid desc';
+	$res = db_query($query);
+	$nids = $nodes = array();
+	while ($item = $res->fetchAssoc()) {
+		$nids[] = $item['nid'];
+	}
+	//$nodes = node_load_multiple($nids);
+	return $nids;
+}
+
+function shivadata_admin_convert_node($old_node, &$context) {
+	$context['results'][] = $old_node->nid . ' : ' . check_plain($old_node->title);
+  $context['message'] = t('Processing data node "@title" (@nid)', array('@title' => $old_node->title, '@nid' => $old_node->nid));
+  $node = new stdClass();
+  $node->title = $old_node->title;
+  $node->type = 'shivadata';
+  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+  $node->language = $old_node->language;  // Set language to match old node
+  $node->uid = $old_node->uid; // set author to old node author
+  $node->status = 1; // published 
+  $node->promote = 0; // not promoted to front page
+  $node->comment = 0; // comments disabled
+
+  // Set Data Type to 0 = Google Doc URL
+  $node->shivadata_type[$node->language][0]['value'] = 0;
+	
+  // Get Source URL From old nodes JSON
+	$jsontxt = $old_node->shivanode_json[LANGUAGE_NONE][0]['value'];
+	$json = json_decode($jsontxt);
+	// if not dataSourceURL set warning and continue loop
+	if (!isset($json->dataSourceUrl)) {
+		drupal_set_message("{$old_node->title} ($old_node->nid) has no dataSourceUrl! Unable to convert!", 'warning');
+		return;
+	}
+	// Otherwise set source_url field
+  $node->shivadata_source_url[$node->language][0] = array(
+    'value' => $json->dataSourceUrl,
+    'safe_value' => $json->dataSourceUrl,
+  );
+	// Save node
+  $node = node_submit($node); // Prepare node for saving
+	// Change all timestamps to match old node
+	$node->created = $old_node->created; 
+	$node->changed = $old_node->changed;
+	$node->revision_timestamp = $old_node->revision_timestamp;
+	$node->last_comment_timestamp = $old_node->last_comment_timestamp;
+  node_save($node);
+	shivadata_migrate_links($node, $nid);
+	$old_link = l($nid, "node/$nid");
+	$new_link = l($node->nid, "node/{$node->nid}");
+	//drupal_set_message("Old node $old_link saved as node $new_link");
 }
 
 function shivadata_migrate_links($node, $old_id) {
@@ -189,6 +275,19 @@ function shivadata_migrate_links($node, $old_id) {
 			))->execute();
 		}
 	}
+}
+
+function shivadata_admin_convert_finished($success, $results, $operations) {
+  if ($success) {
+    // Here we could do something meaningful with the results.
+    // We just display the number of nodes we processed...
+    drupal_set_message(t('@count data nodes converted.', array('@count' => count($results))));
+  } else {
+    // An error occurred.
+    // $operations contains the operations that remained unprocessed.
+    $error_operation = reset($operations);
+    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+  }
 }
 
 /***** End of Convert Old Nodes ****/
