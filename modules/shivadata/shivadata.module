@@ -166,11 +166,28 @@ function shivadata_admin_convert_nodes($nodes) {
 		$node->revision_timestamp = $old_node->revision_timestamp;
 		$node->last_comment_timestamp = $old_node->last_comment_timestamp;
 	  node_save($node);
+		shivadata_migrate_links($node, $nid);
 		$old_link = l($nid, "node/$nid");
 		$new_link = l($node->nid, "node/{$node->nid}");
 		drupal_set_message("Old node $old_link saved as node $new_link");
 		// TODO: Delete old node if properly saved
 		// TODO: Link to all visualizations that use this URL
+	}
+}
+
+function shivadata_migrate_links($node, $old_id) {
+	$data_id = $node->nid;
+	$res = db_query('select * from {shivanode_links} where data_id=:oid', array(':oid'=>$old_id));
+	if($res) {
+		while ($record = $res->fetchAssoc()) {
+			$sn_node = node_load($record['sn_id']);
+			$res2 = db_insert('shivadata_links')->fields(array(
+				'data_id' => $data_id,
+				'vis_id' => $record['sn_id'],
+				'uid' => $sn_node->uid,
+				'created' => $record['created'],
+			))->execute();
+		}
 	}
 }
 

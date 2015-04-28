@@ -219,7 +219,7 @@ function shivadata_create_data_ctype() {
 
 function shivadata_schema() {
 	// Defines a table for simple linking between data nodes and visualization nodes
-	$schema['shivadata'] = array(
+	$schema['shivadata_links'] = array(
 	  'description' => 'Table linking datanodes to visualizations',
 	  'fields' => array(
 	    'lid'       => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
