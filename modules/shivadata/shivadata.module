@@ -166,7 +166,7 @@ function shivadata_admin_convert_submit($form, &$form_state) {
 
 function shivadata_admin_convert_batch() {
 	$nids = shivadata_get_olddatanids();
-	$nids = array_splice($nids, 0, 200); // Limit to 200 for testing
+	//$nids = array_splice($nids, 0, 200); // Limit to 200 for testing
 	$operation = array();
 	foreach($nids as $nid) {
     $operations[] = array('shivadata_admin_convert_node', array($nid));
@@ -187,7 +187,6 @@ function shivadata_get_olddatanids() {
 	while ($item = $res->fetchAssoc()) {
 		$nids[] = $item['nid'];
 	}
-	//$nodes = node_load_multiple($nids);
 	return $nids;
 }
 
@@ -235,19 +234,32 @@ function shivadata_admin_convert_node($old_nid, &$context) {
 }
 
 function shivadata_migrate_links($node, $old_id) {
+	if(!isset($node->nid)) { return; }
 	$data_id = $node->nid;
 	//watchdog('shivadata', "Migrating links New Nid: $data_id; Old Nid: $old_id");
 	$res = db_query('select * from {shivanode_links} where data_id=:oid', array(':oid'=>$old_id));
 	if($res) {
 		while ($record = $res->fetchAssoc()) {
-			$sn_node = node_load($record['sn_id']);
-			$res2 = db_insert('shivadata_links')->fields(array(
-				'data_id' => $data_id,
-				'vis_id' => $record['sn_id'],
-				'old_data_id' => $old_id,
-				'uid' => $sn_node->uid,
-				'created' => $record['created'],
-			))->execute();
+			if($sn_node = node_load($record['sn_id'])) {
+				$uid = (empty($sn_node->uid)) ? $node->uid : $sn_node->uid;
+				if(empty($uid)) {
+					$uid = 1;
+					watchdog('shivadata convert', "No Uid found for ($data_id). Substituting Admin UID."); 
+				}
+				if(!empty($record['sn_id']) && !empty($record['created'])) {
+					$res2 = db_insert('shivadata_links')->fields(array(
+						'data_id' => $data_id,
+						'vis_id' => $record['sn_id'],
+						'old_data_id' => $old_id,
+						'uid' => $uid,
+						'created' => $record['created'],
+					))->execute();
+				} else {
+					watchdog('shivadata convert', "Could not convert sn data link (link id: {$record['link_id']}).");
+				}
+			} else {
+				watchdog('shivadata convert', "Could not load node {$record['sn_id']} in convert data link");
+			}
 		}
 	}
 }

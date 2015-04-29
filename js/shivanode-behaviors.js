@@ -6,6 +6,20 @@
  *      This is called after every ajax call. Hence the use of context.
  * 			May have to detect context to run some of this only when major page loads.
  */
+
+	/** 
+	 * Views behaviors: Adjusts Shiva views
+	 * 	Used for admin view
+	 */
+	Drupal.behaviors.shivaAdjustViews = {
+		attach: function (context, settings) {
+			if($('.view-id-admin_content').length > 0) {
+				$(".form-item.form-type-textfield.form-item-nid > input#edit-nid").attr('size','10');
+				$(".views-exposed-widget.views-widget-sort-by").css('clear', 'both');
+			}
+		}
+	};
+	
 	// Node view behaviors
 	Drupal.behaviors.shivaViewNode = {
 		attach: function (context, settings) {
@@ -170,5 +184,6 @@
 			}
 		}
 	}; // End of Drupal.behaviors.shivaEntryFormConfig
+	
 	
 }) (jQuery);
