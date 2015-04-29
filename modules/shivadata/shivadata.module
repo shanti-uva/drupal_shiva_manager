@@ -4,6 +4,8 @@
  * Sample url for using a datanode in a new visualization as on shiva production:
  * http://shiva.virginia.edu/node/add/shivanode/3013/chart?ctype=Geo%20Chart
  * 
+ * @TODO: Use only one data node for example per type. Don't create one for each user. Have title Example Data for SHIVA	 
+ * 
  */
 
 function shivadata_menu() {
@@ -47,7 +49,7 @@ function shivadata_menu() {
  * 	TODO: Add ability to upload Excell Docs? Or Require CSV?
  */
 function shivadata_get_url() {
-	// Return url depending on type of data 	
+	// TODO: Return url depending on type of data 	
 }
 
 /**
@@ -97,15 +99,6 @@ function shivadata_create_select_form($form, &$form_state, $nid) {
 	return $form;
 }
 
-function shivadata_create_select_form_submit($form, &$form_state) {
-	//dpm($form_state, 'in create with');
-	drupal_set_message('in create with');
-	$type = $form_state['values']['vistype'];
-	$nid = $form_state['values']['nid'];
-	dpm($type, $nid);
-	watchdog('shivadata', 'in submit handler');
-	
-}
 
 /**
  * Returns a list of nodes using the data node whose id is given. Can be styled as an array of nids or links
@@ -139,14 +132,14 @@ function shivadata_get_links($did, $style='nids') {
  /****** Convert Old Nodes Functions *******/
  /**
   * Add shivanode admin page to convert old data nodes to this new format
-  * Temporary: Move to install when completed
+  * Temporary: Remove after one production cycle once nodes have been converted
   */
  function shivadata_admin_convert_form($form, &$form_state) {
   // Display Settings for Shivanode dealing with size of views etc.
     
   $form['shivadata_convert_header'] = array(
     '#markup' => t('<h3>Shiva Data Convert</h3>') .
-      t('<p>NEED TO DELETE OLD NODES! Convert old shivadata nodes to the new shivadata content type. Only 500 can be converted at one time.</p>'),
+      t('<p>Convert all old shivadata nodes to the new shivadata content type. You will need to delete old nodes separately.</p>'),
   );
 	$old_nodes = shivadata_get_olddatanids();
 	if (count($old_nodes) == 0) {
@@ -159,7 +152,7 @@ function shivadata_get_links($did, $style='nids') {
 	  );
 	  $form['shivadata_convert_button'] = array(
 	    '#type' => 'submit',
-	    '#value' => t('Convert Next 500 Data Nodes'),
+	    '#value' => t('Convert All Data Nodes'),
 	  );
 		$form['#submit'][] = 'shivadata_admin_convert_submit';
 	}
@@ -168,35 +161,15 @@ function shivadata_get_links($did, $style='nids') {
  }
  
 function shivadata_admin_convert_submit($form, &$form_state) {
-	/*//$msg = "The following nodes: <br><ul style=\"padding-left:24px;\">";
-	$selected_nodes = array();
-	foreach ($form_state['values']['shivadata_convert_items'] as $nid => $value) {
-		if ($nid == $value) {
-			$title = $form_state['complete form']['shivadata_convert_items'][$nid]['#title'];
-			//$msg .= "<li>$title ($nid)</li>";
-			$selected_nodes[] = $nid;
-		}
-	}
-	//$msg .= '</ul>';
-	//dpm($selected_nodes, 'selected nodes');
-	shivadata_admin_convert_nodes($selected_nodes);*/
 	batch_set(shivadata_admin_convert_batch());
 }
 
 function shivadata_admin_convert_batch() {
-	drupal_set_message(t('Converting old data nodes to new content type'));
 	$nids = shivadata_get_olddatanids();
-	$nids = array_splice($nids, 0, 500); // Can only do 500 at a time
-	$nodes_to_convert = array();
-	//$node_count = count($nodes_to_convert);
+	$nids = array_splice($nids, 0, 200); // Limit to 200 for testing
 	$operation = array();
-	while(count($nids) > 0) {
-		$part = array_splice($nids,0,100);
-		$nodes_to_convert +=  node_load_multiple($part);
-	}
-	foreach($nodes_to_convert as $nid=>$node) {
-    // $operations[] = array(<function name>, <array of arguments to pass to function>);
-    $operations[] = array('shivadata_admin_convert_node', array($node));
+	foreach($nids as $nid) {
+    $operations[] = array('shivadata_admin_convert_node', array($nid));
   }
 	 // build the batch instructions
   $batch = array(
@@ -218,9 +191,10 @@ function shivadata_get_olddatanids() {
 	return $nids;
 }
 
-function shivadata_admin_convert_node($old_node, &$context) {
-	$context['results'][] = $old_node->nid . ' : ' . check_plain($old_node->title);
-  $context['message'] = t('Processing data node "@title" (@nid)', array('@title' => $old_node->title, '@nid' => $old_node->nid));
+function shivadata_admin_convert_node($old_nid, &$context) {
+	$old_node = node_load($old_nid);
+	$context['results'][] = $old_nid . ' : ' . check_plain($old_node->title);
+  $context['message'] = t('Processing data node "@title" (@nid)', array('@title' => $old_node->title, '@nid' => $old_nid));
   $node = new stdClass();
   $node->title = $old_node->title;
   $node->type = 'shivadata';
@@ -247,22 +221,22 @@ function shivadata_admin_convert_node($old_node, &$context) {
     'value' => $json->dataSourceUrl,
     'safe_value' => $json->dataSourceUrl,
   );
-	// Save node
   $node = node_submit($node); // Prepare node for saving
 	// Change all timestamps to match old node
 	$node->created = $old_node->created; 
 	$node->changed = $old_node->changed;
 	$node->revision_timestamp = $old_node->revision_timestamp;
 	$node->last_comment_timestamp = $old_node->last_comment_timestamp;
-  node_save($node);
-	shivadata_migrate_links($node, $nid);
-	$old_link = l($nid, "node/$nid");
+  node_save($node); // Save new node
+	shivadata_migrate_links($node, $old_nid); // Migrate old data links to refer to new node
+	/*$old_link = l($old_nid, "node/$old_nid");
 	$new_link = l($node->nid, "node/{$node->nid}");
-	//drupal_set_message("Old node $old_link saved as node $new_link");
+	watchdog("shivadata", "Old node $old_link saved as node $new_link");*/
 }
 
 function shivadata_migrate_links($node, $old_id) {
 	$data_id = $node->nid;
+	//watchdog('shivadata', "Migrating links New Nid: $data_id; Old Nid: $old_id");
 	$res = db_query('select * from {shivanode_links} where data_id=:oid', array(':oid'=>$old_id));
 	if($res) {
 		while ($record = $res->fetchAssoc()) {
@@ -270,6 +244,7 @@ function shivadata_migrate_links($node, $old_id) {
 			$res2 = db_insert('shivadata_links')->fields(array(
 				'data_id' => $data_id,
 				'vis_id' => $record['sn_id'],
+				'old_data_id' => $old_id,
 				'uid' => $sn_node->uid,
 				'created' => $record['created'],
 			))->execute();
@@ -279,8 +254,7 @@ function shivadata_migrate_links($node, $old_id) {
 
 function shivadata_admin_convert_finished($success, $results, $operations) {
   if ($success) {
-    // Here we could do something meaningful with the results.
-    // We just display the number of nodes we processed...
+    // display the number of nodes processed
     drupal_set_message(t('@count data nodes converted.', array('@count' => count($results))));
   } else {
     // An error occurred.

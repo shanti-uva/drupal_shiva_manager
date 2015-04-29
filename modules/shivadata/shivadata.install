@@ -225,6 +225,7 @@ function shivadata_schema() {
 	    'lid'       => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
 	    'data_id'   => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
 	    'vis_id'    => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
+	    'old_data_id'   => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE,'default' => 0),
 	    'uid'       => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
 	    'created'   => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
 	  ),
