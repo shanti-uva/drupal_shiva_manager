@@ -6,6 +6,8 @@
  * 
  * @TODO: Use only one data node for example per type. Don't create one for each user. Have title Example Data for SHIVA	 
  * 
+ * Note: After updating delete all "Example Data for SHIVA" nodes created previously and converted.
+ * 
  */
 
 function shivadata_menu() {
