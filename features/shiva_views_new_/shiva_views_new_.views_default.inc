@@ -713,7 +713,15 @@ function shiva_views_new__views_default_views() {
   $handler->display->display_options['fields']['author_name']['label'] = '';
   $handler->display->display_options['fields']['author_name']['exclude'] = TRUE;
   $handler->display->display_options['fields']['author_name']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['author_name']['link_to_entity'] = 0;
+  $handler->display->display_options['fields']['author_name']['link_to_entity'] = 1;
+  /* Field: Author: User ID (indexed) */
+  $handler->display->display_options['fields']['author_uid']['id'] = 'author_uid';
+  $handler->display->display_options['fields']['author_uid']['table'] = 'search_api_index_default_node_index';
+  $handler->display->display_options['fields']['author_uid']['field'] = 'author_uid';
+  $handler->display->display_options['fields']['author_uid']['label'] = '';
+  $handler->display->display_options['fields']['author_uid']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['author_uid']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['author_uid']['link_to_entity'] = 0;
   /* Field: Author: First Name (indexed) */
   $handler->display->display_options['fields']['author_field_fname']['id'] = 'author_field_fname';
   $handler->display->display_options['fields']['author_field_fname']['table'] = 'search_api_index_default_node_index';
@@ -729,11 +737,13 @@ function shiva_views_new__views_default_views() {
   $handler->display->display_options['fields']['author_field_lname']['label'] = '';
   $handler->display->display_options['fields']['author_field_lname']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['author_field_lname']['alter']['text'] = '[author_field_fname] [author_field_lname]';
+  $handler->display->display_options['fields']['author_field_lname']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['author_field_lname']['alter']['path'] = 'user/[author_uid]';
   $handler->display->display_options['fields']['author_field_lname']['element_type'] = '0';
   $handler->display->display_options['fields']['author_field_lname']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['author_field_lname']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['author_field_lname']['element_default_classes'] = FALSE;
-  $handler->display->display_options['fields']['author_field_lname']['empty'] = '<div class="info-wrapper"><div class="info"><a href="node/[nid]">[shivanode_subtype] <br/> Created by  [author_name]<br/>on [created]</a></div></div>';
+  $handler->display->display_options['fields']['author_field_lname']['empty'] = ' [author_name]';
   $handler->display->display_options['fields']['author_field_lname']['type'] = 'text_plain';
   /* Sort criterion: Indexed Node: Date created */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
@@ -880,7 +890,6 @@ function shiva_views_new__views_default_views() {
   /* Display: All Vis Block */
   $handler = $view->new_display('block', 'All Vis Block', 'all_vis_block');
   $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'All Visualizations';
   $handler->display->display_options['display_description'] = 'Block showing all visualizations in SOLR';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
