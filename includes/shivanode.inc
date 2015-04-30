@@ -30,6 +30,8 @@ function _shivanode_element_typelist($byName = FALSE) {
  * Returns list of subtypes for all visualization. Initial array each item has a label (1) and then it's json value (2)
  * A call without parameters returns an array of labels, _shivanode_subtypelist('json') returns an array of json values, and
  * _shivanode_subtypelist('index', 'rgraph') will return the index for the second item. Search value can be either label or json val.
+ * 
+ * Important: This is the allowed_values_function for shivanode_subtype field and cannot be removed or have its name changed.
  */
 function _shivanode_subtypelist($type='label', $search=FALSE) {
 	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
@@ -215,7 +217,7 @@ function _get_shivanode_type($node, $mode = 'string') {
     $typefield = $node->shivanode_element_type;
     $val = $typefield['und']['0']['value'] * 1;
     if ($val == 5) { $val = 13; } // account for old simile 5 
-    $type = ($mode == 'number')? $val : $options[$val];
+    $type = ($mode == 'number' || $mode == 'int')? $val : $options[$val];
   }
   return $type;
 }
@@ -229,6 +231,7 @@ function _get_shivanode_subtype($node, $mode = 'string') {
     $subtype = $node->shivanode_subtype;
     if (isset($subtype['und']['0']['value'])) {
       $val = $subtype['und']['0']['value'] * 1;
+			if($mode == 'number' || $mode == 'int') { return $val; }
       $type = _shivanode_subtypelist($val);
     }
   }
@@ -1991,6 +1994,11 @@ function _shivanode_get_access($node) {
   return null;
 }
 
+/**
+ * Gets thumbnail image for a visualization
+ * 
+ * @TODO: Remove use of pagepeeker!
+ */
 function _get_thumb_image($node) {
   global $base_path;
   // Add image meta tag (og:image)
@@ -2046,60 +2054,27 @@ function _shivanode_add_ms_metafix() {
 /**
  * Function get Help link
  *    Returns the html link code for the help page depending on the shivanode type value sent to function
- *    @param mixed $typeVal (Required) If this is a number, it returns the Shivanode type for that index. This only works for the major types. If it is a string, it uses that as an index on the $helurls array to find the correct help link. This works for visualization sub-types.
- *    @param string $linkStr (Optional) The string to use as the text of the link returned. If omitted, the link display an image of a blue circle with a question mark in it.
- */
-function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
-  global $base_root, $base_path;
-  $helpurls = array(
-      'SHIVA' => 'https://wiki.shanti.virginia.edu/display/KB/SHIVA',
-      'Annotated Time Line' =>  'https://wiki.shanti.virginia.edu/x/aAHLAQ',
-      'Area Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
-      'Bar Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
-      'Candlestick Chart' => 'https://wiki.shanti.virginia.edu/x/MgLLAQ',
-      'Chart' => 'https://wiki.shanti.virginia.edu/x/N5y1AQ',
-      'Column Chart' => 'https://wiki.shanti.virginia.edu/x/HQLLAQ',
-      'Combo Chart' => 'https://wiki.shanti.virginia.edu/x/WQLLAQ',
-      'Gauge' => 'https://wiki.shanti.virginia.edu/x/EADLAQ',
-      'Geo Chart' => 'https://wiki.shanti.virginia.edu/x/XALLAQ',
-      'Line Chart' => 'https://wiki.shanti.virginia.edu/x/tgHLAQ',
-      'Motion Chart' => 'https://wiki.shanti.virginia.edu/x/fgLLAQ',
-      'Org Chart' => 'https://wiki.shanti.virginia.edu/x/dQDAAQ',
-      'Pie Chart' => 'https://wiki.shanti.virginia.edu/x/ZQHLAQ',
-      'Scatter Chart' => 'https://wiki.shanti.virginia.edu/x/ZgDGAQ',
-      'Table' => 'https://wiki.shanti.virginia.edu/x/tgLLAQ',
-      'Tree Map' => 'https://wiki.shanti.virginia.edu/x/g6C1AQ',
-      'Draw' => 'https://wiki.shanti.virginia.edu/x/DaC1AQ',
-      'Earth' => 'https://wiki.shanti.virginia.edu/x/J5XRAQ',
-      'Graph' => '',
-      'Image' => 'https://wiki.shanti.virginia.edu/x/VZ21AQ',
-      'Map' => 'https://wiki.shanti.virginia.edu/x/cZy1AQ',
-      'Network' => 'https://wiki.shanti.virginia.edu/x/o5S1AQ',
-      'Poster' => '',
-      'Subway' => 'https://wiki.shanti.virginia.edu/x/Wp21AQ',
-      'Timeline' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',  // old link to simile instructions: https://wiki.shanti.virginia.edu/x/tZy1AQ
-      'Timeglider' => 'https://wiki.shanti.virginia.edu/x/sprRAQ',
-      'Video' => 'https://wiki.shanti.virginia.edu/x/upy1AQ',
-      'Word Cloud' => ''
-  );
-  
-  $helpStr = 'SHIVA'; 
-  if (is_numeric($typeVal)) { 
-     $helpStr = _shivanode_options_list($typeVal);
-    if ($helpStr == 'Chart') { $helpStr = 'Pie Chart'; }
-    if ($helpStr == 'Wcloud') { $helpStr = 'Word Cloud'; }
-  } else {
-    $helpStr = $typeVal;
-  }
-  if ($helpStr == "Data" || !array_key_exists($helpStr, $helpurls)) {
-    return FALSE;
-  } else {
-    if($linkStr) {
-      return '<a href="' . $helpurls[$helpStr] . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';
-    } else { 
-      return '<a class="sn-helplink" href="' . $helpurls[$helpStr] . '" target="_blank" title="' . $helpStr . ' Help" ><img src="' . 
-                $base_root . '/' .  drupal_get_path('module','shivanode') . '/images/help-bluer-3d-16px.png" /></a>';
-    }
+
+ * 		@param int $typeInd : Index of type or subtype value. Default -1 means general help string
+ * 		@param boolean $isSubtype : whether index is a subtype or not. Defaults to FALSE
+ * 		@param linkStr mixed : String to include in link or FALSE if question mark icon is desired
+ * 
+ **/
+function _shivanode_get_help_link($typeInd = -1, $isSubtype = FALSE, $linkStr=FALSE) {
+  global $base_root;
+  $hurl = 'https://wiki.shanti.virginia.edu/display/KB/Use+SHIVA';
+  $label = 'Shiva Help'; 
+	if($typeInd > -1) {
+		module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+		$helpurls = _shivanode_get_help_urls();
+		$hurl = ($isSubtype) ? $helpurls['subtypes'][$typeInd] : $helpurls['types'][$typeInd];
+		$label = _shivanode_get_type_label($typeInd, $isSubtype);
+	}
+  if($linkStr) {
+    return '<a href="' . $hurl . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';
+  } else { 
+    return '<a class="sn-helplink" href="' . $hurl . '" target="_blank" title="' . $label . ' Help" ><img src="' . 
+              $base_root . '/' .  drupal_get_path('module','shivanode') . '/images/help-bluer-3d-16px.png" /></a>';
   }
 }
 
@@ -2113,43 +2088,24 @@ function _shivanode_get_help_link($typeVal = 7, $linkStr=FALSE) {
  * 
  *    The variable names must also be the name of the .png image file of the thumb. Generic Images are set for nodes in shivanode_node_presave($node).
  */
-function _shivanode_get_generic_image_info($type = 'ALL') {
-  $imgs = array(
-    'chart' => array('label' => t('Default Chart') , 'variable' =>  'sngen-chart-default'),  
-    'chart_annotatedtimeline' => array('label' => t('Annotated Timeline Chart'), 'variable' =>  'sngen-chart-antime'),
-    'chart_areachart' => array('label' => t('Area Chart'), 'variable' =>  'sngen-chart-area'),
-    'chart_barchart' => array('label' => t('Bar Chart'), 'variable' =>  'sngen-chart-bar'),
-    'chart_candlestickchart' => array('label' =>  t('Candlestick Chart'), 'variable' =>  'sngen-chart-candle'),
-    'chart_columnchart' => array('label' => t('Column Chart'), 'variable' =>  'sngen-chart-column'),
-    'chart_gauge' => array('label' => t('Gauge Chart'), 'variable' =>  'sngen-chart-gauge'),
-    'chart_geochart' => array('label' => t('Geo Chart'), 'variable' =>  'sngen-chart-geo'),
-    'chart_linechart' => array('label' => t('Line Chart'), 'variable' =>  'sngen-chart-line'),
-    'chart_motionchart' => array('label' => t('Motion Chart'), 'variable' =>  'sngen-chart-motion'),
-    'chart_orgchart' => array('label' => t('Organization Chart'), 'variable' =>  'sngen-chart-org'),
-    'chart_piechart' => array('label' => t('Pie Chart'), 'variable' =>  'sngen-chart-pie'),
-    'chart_scatterchart' => array('label' => t('Scatter Chart'), 'variable' =>  'sngen-chart-scatter'),
-    'chart_table' => array('label' => t('Table Chart'), 'variable' =>  'sngen-chart-table'),
-    'chart_treemap' => array('label' => t('Tree Map Chart'), 'variable' =>  'sngen-chart-tree'),
-    'draw' => array('label' => t('Draw'), 'variable' =>  'sngen-draw'),
-    'earth' => array('label' => t('Earth'), 'variable' =>  'sngen-earth'),
-    'graph' => array('label' => t('Graph'), 'variable' =>  'sngen-graph'),
-    'image' => array('label' => t('Image') , 'variable' =>  'sngen-image'),
-    'map' => array('label' => t('Map'), 'variable' =>  'sngen-map'),  
-    'multimedia' => array('label' => t('Multimedia'), 'variable' =>  'sngen-qmedia'),  
-    'network' => array('label' => t('Network'), 'variable' =>  'sngen-network'),
-    'poster' => array('label' => t('Poster'), 'variable' =>  'sngen-poster'),  
-    'subway' => array('label' => t('Subway'), 'variable' =>  'sngen-subway'),  
-    'timeline' => array('label' => t('Timeline'), 'variable' =>  'sngen-timeline'),
-    'video' => array('label' => t('Video'), 'variable' =>  'sngen-video'),
-    'word cloud' => array('label' => t('Word Cloud'), 'variable' =>  'sngen-wcloud'),
-  );
+function _shivanode_get_generic_image_info($type = 'ALL', $isSubtype = FALSE) {
+ 
+	$imgs = _shivanode_get_thumb_image_list(); // function in shivanode.types.inc
   if ($type == 'ALL') {
     return $imgs;
-  } else if (isset($imgs[$type]['variable'])) {
-    return variable_get($imgs[$type]['variable'], FALSE);
+  } else if ($type == 'LIST') {
+  	$out = array();
+		foreach($imgs['types'] as $tind => $img) { $out[] = $img; }
+		foreach($imgs['subtypes'] as $stind => $img) { $out[] = $img; }
+		return $out;
   } else {
-    return FALSE;
-  }
+  	$ind = ($isSubtype) ? 'subtypes' : 'types';
+	  if (isset($imgs[$ind][$type])) {
+	    return variable_get($imgs[$ind][$type], FALSE);
+	  } else {
+	    return FALSE;
+	  }
+	}
 }
 
 function _shivanode_get_kmap_fields() {

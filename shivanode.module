@@ -137,10 +137,10 @@ function shivanode_menu() {
 	/*** Node Menu Items ***/
 	
 	// Create Visualization (node) Page
-	$items['create/visual'] = array(
+	$items['create'] = array(
 		'title' => t('Create a Visualization'),
 		'description' => 'Choose which type of visualization to create',
-		'page callback' => 'create_a_shivanode_page',
+		'page callback' => 'create_a_visual_page',
 		'access callback' => 'is_auth_user',
     'file' => 'includes/shivanode.pages.inc',
     'type' => MENU_NORMAL_ITEM,
@@ -660,22 +660,9 @@ function shivanode_node_view_alter(&$build) {
  */
 function shivanode_node_presave($node) {
   if($node->type == 'shivanode') {
-    $lang = (isset($node->language)) ? $node->language : 'und';
-    if(!isset($node->field_image[$lang][0])) {
-      $type = strtolower(_get_shivanode_type($node));
-      if($type == 'data') { return; }
-      if($type == 'chart') {
-        $json = _shivanode_get_json($node);
-        $subtype = strtolower($json['chartType']);
-        if($subtype != '') {
-          $type .= "_$subtype";
-        }
-      }
-      if($fid = _shivanode_get_generic_image_info($type)) {
-        $node->field_image[$lang][0]['fid'] = $fid;
-      }
-    }
-    /** Add or adjust subtype field **/
+    $lang = (isset($node->language)) ? $node->language : 'und';  // Node language
+    
+    // Add or Adjust subtype field if value exists
     $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
     if($json && isset($json->chartType)) {
       $stype = $json->chartType;
@@ -684,6 +671,20 @@ function shivanode_node_presave($node) {
         drupal_set_message(t("No subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
       } else {
         $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
+				// Set thumbnail image for subtype
+				if(!isset($node->field_image[$lang][0])) {
+					if($fid = _shivanode_get_generic_image_info($stind, TRUE)) {
+		        $node->field_image[$lang][0]['fid'] = $fid;
+		      }
+				}
+      }
+    }
+		
+		// Set Thumbnail Gen Image for type if not set for subtype
+    if(!isset($node->field_image[$lang][0])) {
+  		$type = strtolower(_get_shivanode_type($node, 'int'));
+      if($fid = _shivanode_get_generic_image_info($type)) {
+        $node->field_image[$lang][0]['fid'] = $fid;
       }
     }
   }
@@ -1509,12 +1510,13 @@ function shivanode_image_default_styles() {
       array(
         'name' => 'image_scale',
         'data' => array(
-          'height' => '150',
-          'width' => '',
+          'height' => '',
+          'width' => '240',
           'upscale' => 1,
         ),
         'weight' => 0,
       ),
+      /*
       array(
         'name' => 'image_crop',
         'data' => array(
@@ -1523,7 +1525,7 @@ function shivanode_image_default_styles() {
           'width' => '150',
         ),
         'weight' => 1,
-      ),
+      ),*/
     ),
   );
 

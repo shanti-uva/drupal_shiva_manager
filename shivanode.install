@@ -580,12 +580,12 @@ function shivanode_update_7005() {
   // Copy the generic visualization images into the Shivanode public folder and create file entities for them
   global $base_url;
   $snimgdir = $base_url . '/' . drupal_get_path('module', 'shivanode') . '/images/';
-  $visimginfo = _shivanode_get_generic_image_info();
-  foreach($visimginfo as $key => $info) {
-    $imgfn = $info['variable'] . '.png';
+  $visimginfo = _shivanode_get_generic_image_info('LIST');
+  foreach($visimginfo as $key => $varnm) {
+    $imgfn = $varnm . '.png';
     $url = $snimgdir . $imgfn;
     $file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
-    variable_set($info['variable'], $file->fid);
+    variable_set($varnm, $file->fid);
 		// Add shiva teaser style for image
 		$style = image_style_load('shiva_teaser');
 		if($style) { 

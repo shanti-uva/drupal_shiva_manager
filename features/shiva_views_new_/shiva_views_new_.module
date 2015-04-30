@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Shiva Views (new) feature.
+ */
+
+include_once 'shiva_views_new_.features.inc';

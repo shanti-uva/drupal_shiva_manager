@@ -1,29 +1,20 @@
 <?php
 /**
  * @file
- * shiva_views_feature.features.inc
+ * shiva_views_new_.features.inc
  */
-
-/**
- * Implements hook_ctools_plugin_api().
- */
-function shiva_views_feature_ctools_plugin_api($module = NULL, $api = NULL) {
-  if ($module == "facetapi" && $api == "facetapi_defaults") {
-    return array("version" => "1");
-  }
-}
 
 /**
  * Implements hook_views_api().
  */
-function shiva_views_feature_views_api($module = NULL, $api = NULL) {
+function shiva_views_new__views_api($module = NULL, $api = NULL) {
   return array("api" => "3.0");
 }
 
 /**
  * Implements hook_default_search_api_index().
  */
-function shiva_views_feature_default_search_api_index() {
+function shiva_views_new__default_search_api_index() {
   $items = array();
   $items['default_node_index'] = entity_import('search_api_index', '{
     "name" : "Shiva Solr Index",
@@ -86,7 +77,7 @@ function shiva_views_feature_default_search_api_index() {
 /**
  * Implements hook_default_search_api_server().
  */
-function shiva_views_feature_default_search_api_server() {
+function shiva_views_new__default_search_api_server() {
   $items = array();
   $items['shiva_solr_server'] = entity_import('search_api_server', '{
     "name" : "Shiva Solr Server",

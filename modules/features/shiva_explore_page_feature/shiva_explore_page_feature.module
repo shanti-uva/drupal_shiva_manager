@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Shiva Explore Page Feature feature.
- */
-
-include_once 'shiva_explore_page_feature.features.inc';

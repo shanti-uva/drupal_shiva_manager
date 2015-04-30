@@ -76,7 +76,7 @@ function shivadata_preprocess_node(&$vars) {
   //dpm($vars, 'vars in sppn');
 	if($vars['type'] == 'shivadata') {
 		$vars['shivanode_links'] = shivadata_get_links($vars['nid'], 'links');
-		$vars['use_link'] = drupal_render(drupal_get_form('shivadata_create_select_form', $vars['nid']));
+		$vars['use_link'] = l(t('Visualize!'), "visualize/{$vars['nid']}"); //drupal_render(drupal_get_form('shivadata_create_select_form', $vars['nid']));
 	}
 }
 
