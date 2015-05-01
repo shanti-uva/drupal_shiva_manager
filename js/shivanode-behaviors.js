@@ -6,7 +6,15 @@
  *      This is called after every ajax call. Hence the use of context.
  * 			May have to detect context to run some of this only when major page loads.
  */
-
+	/** 
+	 * General behaviors
+	 * 
+	 */
+	Drupal.behaviors.shivaGeneral = {
+		attach: function (context, settings) {
+		}
+	};
+	
 	/** 
 	 * Views behaviors: Adjusts Shiva views
 	 * 	Used for admin view
