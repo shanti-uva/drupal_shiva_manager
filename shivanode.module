@@ -137,10 +137,20 @@ function shivanode_menu() {
 	/*** Node Menu Items ***/
 	
 	// Create Visualization (node) Page
+	$items['explore'] = array(
+		'title' => t('Explore Visualization Types'),
+		'description' => 'Presents a page to explore the type of visualizations',
+		'page callback' => 'explore_vis_page',
+		'access callback' => TRUE,
+    'file' => 'includes/shivanode.pages.inc',
+    'type' => MENU_NORMAL_ITEM,
+	);
+	
+	// Create Visualization (node) Page
 	$items['create'] = array(
 		'title' => t('Create a Visualization'),
 		'description' => 'Choose which type of visualization to create',
-		'page callback' => 'create_a_visual_page',
+		'page callback' => 'create_vis_page',
 		'access callback' => 'is_auth_user',
     'file' => 'includes/shivanode.pages.inc',
     'type' => MENU_NORMAL_ITEM,

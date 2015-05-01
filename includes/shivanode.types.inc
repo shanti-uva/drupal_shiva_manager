@@ -355,7 +355,7 @@ function _get_sn_type_array() {
 			$sts = shivanode_get_types('subtypes');
 			return $sts[$tind][0];
 		} else {
-			$tps = shivanode_get_type('nameindex');
+			$tps = shivanode_get_types('nameindex');
 			return $tps[$tind];
 		}
 	}

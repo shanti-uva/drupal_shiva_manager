@@ -389,6 +389,7 @@ function _shivanode_data_form($form, &$form_state) {
   $type = (isset($args[1])) ? $args[1] : FALSE; 
   $ctype = (isset($args[2])) ? $args[2] : FALSE;
   
+	
   // Set display strings
   if(!preg_match('/' . strtolower(SHIVA_DATA_VISUALIZATIONS) . '/', strtolower($type))) { $type = FALSE; }
   $sntypelabel = ($type) ? ucfirst($type) : t('Charts, Images, Networks, and Timeline');
@@ -2062,6 +2063,7 @@ function _shivanode_add_ms_metafix() {
  **/
 function _shivanode_get_help_link($typeInd = -1, $isSubtype = FALSE, $linkStr=FALSE) {
   global $base_root;
+  //ddebug_backtrace();
   $hurl = 'https://wiki.shanti.virginia.edu/display/KB/Use+SHIVA';
   $label = 'Shiva Help'; 
 	if($typeInd > -1) {
