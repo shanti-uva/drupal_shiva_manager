@@ -353,11 +353,14 @@ function _shivanode_filter_gss_list($sslist) {
   $noelement = array();
   $haselement = array();
   $msg = '';
-	$existing = _get_shivadata_nodes(); 
 	ksort($sslist);
-  //$existing = _get_shivanodes('stype:1 mine'); // Get all Shiva Data entries from Database
+	$existing = _get_shivadata_nodes(); 
+	usort($existing, function($a, $b) { 
+	 return ( $a->title <= $b->title ) ? -1 : 1; 
+	});
+	
+  //$existing = _get_shivanodes('stype:1 mine'); // OLD Get all Shiva Data entries from Database
   foreach ($sslist as $title => $gdoc) {
-    
     // Get current sheets gid and compare with existing data nodes
     $gid = $gdoc['gid'];
     $found = FALSE;
@@ -380,6 +383,7 @@ function _shivanode_filter_gss_list($sslist) {
       }
     }
   }
+	
   // Check for existing data nodes not from this Gdrive account, i.e. do not have the found property
   foreach($existing as $n) {
     if(!isset($n->found) && isset($n->dataGid)) {
@@ -391,6 +395,7 @@ function _shivanode_filter_gss_list($sslist) {
       } catch (Exception $e) { }
     }
   }
+	
   ksort($noelement);
   ksort($haselement);
   return array($noelement, $haselement); // return 2 arrays, list of gsheets not added and list of data nodes already created from gsheets
@@ -768,14 +773,15 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
 }
 
 function shivanode_gdocs_choice_form_submit($form, &$form_state) {
-	dpm($form, 'form');
-	dpm($form_state, 'form state');
 	$mydtitle = $form_state['input']['mydtitle'];
 	$mydtype = $form_state['input']['mydtype'];
 	$mydid = $form_state['input']['mydid'];
 	// if it's a gid (google id) then it has not been made into a node yet
+	$node = FALSE;
 	if($mydtype == 'gid') {
-		
+		$node = shivadata_add_node($mydid, $mydtitle);
+	} else {
+		$node = node_load($mydid);
 	}
 	
 }

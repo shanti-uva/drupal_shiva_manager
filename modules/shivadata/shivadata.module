@@ -35,6 +35,13 @@ function shivadata_menu() {
 	return $items;
 }
 
+/**
+ * Given a Google Doc ID, Title and optional Description, this function creates a shivadata node for the 
+ * spreadsheet.
+ * 
+ * TODO: Extend to add other datatypes
+ * 
+ */
 function shivadata_add_node($gid, $title, $desc='') {
 	global $user;
 	module_load_include('inc', 'gdrive', 'gdrive');
@@ -51,17 +58,11 @@ function shivadata_add_node($gid, $title, $desc='') {
   // Shivadata type 0 = google doc url
   $node->field_data_shivadata_type[$node->language][]['value'] = 0;
 	$gfile = gdrive_get_file($gid);
-	
-  // Entity reference field
-  $node->field_customer_nid[$node->language][] = array(
-    'target_id' => $form_state['values']['entity id'],
-    'target_type' => 'node',
-  );
-  // 'node' is default,
-  // Other possible values are "user" and  "taxonomy_term" 
-
+	$node->field_data_shivadata_source_url[]['value'] = $gfile['alternateLink'];
+	$node->body['und'][]['value'] = $desc;
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
+	return $node;
 }
 
 /**
