@@ -1740,9 +1740,11 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $is_new_el = FALSE; 
   }
   $dnode = node_load($did);
+	dpm($dnode, 'dnode');
   if ($dnode) {
     $form['gdocinfo']['#prefix'] = str_replace('none;', 'block;', $form['gdocinfo']['#prefix']);
-    $dataurl = _shivanode_get_dataurl($dnode);
+    //$dataurl = _shivanode_get_dataurl($dnode);
+    $dataurl = $dnode->shivadata_source_url[LANGUAGE_NONE][0]['value'];
     $datatitle = $dnode->title;
     
     // if it's a new entry use its title for visualizations title

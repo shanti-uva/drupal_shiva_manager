@@ -813,6 +813,12 @@ function shivanode_node_update($node) {
  * Implements hook_FORMID_form_alter(form, form_state, form_id) for Shivanode Form
  *
  *  This code creates the input and edit form for a shivanode
+ * 
+ * 	To add a new node of specific type and subtype with data use the formula:
+ * 
+ * 		node/add/shivanode/{data node id}/{chart machine name}/{subtype machine name}
+ * 
+ * 		node/add/shivanode/7306/chart/BarChart
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
@@ -930,6 +936,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#markup' => $lnkmu,
   );
   
+	// If it IS a NEW element
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
     drupal_add_js(array('shivanode' => array('isNewEl' => 'true')), 'setting');
@@ -938,13 +945,14 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntype])) ? $eltypes[$sntype] : 7; // default value is chart
     $eltype = t('Chart');
       
-    // Use ajax to reload the iframe depending on Visualization type choice
+    // Use ajax to reload the iframe depending on Visualization select type choice
     $form['shivanode_element_type']['und']['#ajax'] = array(
       'callback' => 'shivanode_element_change',
       'wrapper' => 'iframe_container',
     );
     unset($form['shivanode_element_type']['und']['#options'][1]); // remove the data option from the drop down list  Data elements are created automatically by adding spreadsheets
-  } // If not a new element
+  } 
+  // If not a new element
   else {
     // Get the Visualization type and disable the select type dropdown on exiting Visualizations.
     $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
@@ -965,6 +973,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        $form['shivanode_subtype'][LANGUAGE_NONE]['#suffix'] = '</div>';
     }
   }
+	
   //dpm($form['shivanode_access'], 'sn access field');
   // Permission Value (calls JS to enforce only Public and Private)
   $form['shivanode_access']['und'] += array(
@@ -997,7 +1006,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     '#type' => 'markup',
     '#prefix' => '<div class="sn-share-button">',
     '#suffix' => '</div><div id="otherbuttons">',
-    
   );
   
   if (isset($form['#node']->nid) && $sntype != 'Data' && _shivanode_get_access($form['#node']) == 4) {
