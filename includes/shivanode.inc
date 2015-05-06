@@ -128,8 +128,11 @@ function _shivanode_access_modes() {
  * 
  *  If options is just a numeric it will return only elements of that type
  * 
- *  Common Options strings:
- *    'sntype:1 mine' : Returns user's data elements
+ *  Old Common Options strings:
+ *    'sntype:1 mine' : Returns user's data elements (No longer used. See below.)
+ * 
+ * 	NOTE: Data Nodes have since been separated off into their own content type. Use the following method
+ * 				_get_shivadata_nodes() to get these nodes.
  */
 
 function _get_shivanodes($options = array()) {
@@ -201,11 +204,11 @@ function _get_shivanodes($options = array()) {
  * Returns shivadata nodes for either user (my) or all
  */
 function _get_shivadata_nodes($whose='my', $type='url') {
-	dpm("START HERE");
 	$query = db_select('node', 'n')
-		->fields('n')
+		->fields('n', array('nid', 'title'))
 		->condition('n.type', 'shivadata');
-	 $query->join('field_data_shivanode_element_type', 'stype', 'n.nid = stype.entity_id');
+	$query->join('field_data_shivadata_source_url', 'surl', 'n.nid = surl.entity_id');
+	$query->fields('surl', array('shivadata_source_url_value') );
 	if ($whose == 'my') {
 		global $user;
 		$query->condition('n.uid', $user->uid);
@@ -214,9 +217,8 @@ function _get_shivadata_nodes($whose='my', $type='url') {
 	$nodes = array();
 	$results = $query->execute();
 	foreach ($results as $row) {
-		$nodes[] = $row;
-		if (isset($row->shivadata_source_url)) {
-			if($gid = _get_gid_from_url($json->shivadata_source_url)) { 
+		if (isset($row->shivadata_source_url_value)) {
+			if($gid = _get_gid_from_url($row->shivadata_source_url_value)) { 
         $row->dataGid = $gid;
       }
 			$nodes[] = $row;
@@ -351,7 +353,9 @@ function _shivanode_filter_gss_list($sslist) {
   $noelement = array();
   $haselement = array();
   $msg = '';
-  $existing = _get_shivanodes('stype:1 mine'); // Get all Shiva Data entries from Database
+	$existing = _get_shivadata_nodes(); 
+	ksort($sslist);
+  //$existing = _get_shivanodes('stype:1 mine'); // Get all Shiva Data entries from Database
   foreach ($sslist as $title => $gdoc) {
     
     // Get current sheets gid and compare with existing data nodes
@@ -361,7 +365,8 @@ function _shivanode_filter_gss_list($sslist) {
       foreach($existing as $n) {
         if(isset($n->dataGid)) {
           // Spreadsheet has already been used on this site
-          if($n->dataGid == $gid) {
+          //  Can't just match on Google IDs because these have changed over time
+          if($n->dataGid == $gid || str_replace(' (Data)', '', $n->title) == $gdoc['title']) {
             $found = TRUE;
             $n->found = TRUE; // add found property to existing node record
             $gdoc['nid'] = $n->nid;
@@ -544,7 +549,7 @@ function _shivanode_data_form_submit($form, &$form_state) {
   
   $nid = $vals['did'];
   if($vals['dtype'] == 'gid') {
-    $gfile = gdrive_file_attributes(gdrive_get_file($nid));
+    $gfile = gdrive_file_attributes(gdrive_get_file($nid, 'object'));
     $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
   }
@@ -615,8 +620,10 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
    // $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
     // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
     if(!$simple) {
-      $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
-			//dpm($selectFrag, 'selfrag');
+    	$cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'nid', $nid);
+			$formFrag = render($cform);
+			$selectFrag = $xml->createDocumentFragment(); 
+  		$res = $selectFrag->appendXML($formFrag);
     }
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
   }
@@ -680,7 +687,10 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
       $selectFrag = $xml->createDocumentFragment(); 
       $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
       if(!$simple) {
-        $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'gid', $gid );
+	      $cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'gid', $gid );
+				$formFrag = render($cform);
+				$selectFrag = $xml->createDocumentFragment(); 
+	  		$res = $selectFrag->appendXML($formFrag);
       }
       $linkcell->appendChild($selectFrag);
       
@@ -694,16 +704,21 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
 }
 
 /**
- * _shivanode_gdocs_view_select returns a DOM 
+ * _shivanode_gdocs_choice_form returns a form for choosing a gdoc
+ * 	Form for selecting a Google Doc to create a Visualization with
  */
-function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id) {
+function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $title, $type, $id) {
   $divid = 'data-' . $id;
-  $sform = array(
+  /*$sform = array(
     '#prefix' => '<div id="' . $divid . '" class="infoparent">',
     '#suffix' => '</div>',
   );
-  $sform = array();
-  $sform['visselect'] = array(
+  $sform = array();*/
+  $form['#attributes'] = array(
+		'id' => "visselect-$id",
+	);
+	
+  $form['visselect'] = array(
     '#type' => 'select',
     '#multiple' => FALSE,
     '#required' => TRUE,
@@ -712,15 +727,17 @@ function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id
     '#default_value' => 0,
     '#options' => _shivanode_types_using_gdocs(),
     '#attributes' => array(
-    	'onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 
+    	//'onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 
+    	'onchange' => 'form.submit("visselect-' . $id . '")',
     	'class' => array('myclass', $divid, 'visualize-select'),
 		),
   );
+	
   if($vistype) {
-    unset($sform['visselect']);
+    unset($form['visselect']);
     $label = ($ctype) ? ucfirst($ctype) : ucfirst($vistype);
-    $sform['visselect'] = array(
-      '#type' => 'button',
+    $form['visselect'] = array(
+      '#type' => 'submit',
       '#value' => t("Visualize as @type", array('@type' => $label)),
       '#attributes' => array(
       	//'onmousedown' => 'Drupal.Shivanode.setSelectedType(this); return false;',
@@ -728,19 +745,39 @@ function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id
 			),
     );
   }
-  $sform['myinfospan'] = array(
+	$form['mydtitle'] = array(
+		'#type' => 'hidden',
+		'#value' => $title,
+	);
+	$form['mydtype'] = array(
+		'#type' => 'hidden',
+		'#value' => $type,
+	);
+	$form['mydid'] = array(
+		'#type' => 'hidden',
+		'#value' => $id,
+	);
+	/*
+  $form['myinfospan'] = array(
     '#type' => 'markup',
     '#markup' => '<div style="display: none;"><span class="mydtitle">' . htmlentities($title) . '</span>' .
           '<span class="mydtype">' . $type . '</span>' . 
           '<span class="mydid">' . $id . '</span></div>',
-  );
-  $selectForm = drupal_render($sform);
-  // hack because drupal_render does not recognize empty_value the way the drupal_get_form() does
-  $sstr =  t('Visualize as ...');
-  $selectForm = str_replace('<option value="0"></option>', '<option value="0" selected="selected">' . $sstr . '.</option>', $selectForm);
-  $selectFrag = $xml->createDocumentFragment(); 
-  $res = $selectFrag->appendXML($selectForm);
-  return $selectFrag; 
+  );*/
+	return $form;
+}
+
+function shivanode_gdocs_choice_form_submit($form, &$form_state) {
+	dpm($form, 'form');
+	dpm($form_state, 'form state');
+	$mydtitle = $form_state['input']['mydtitle'];
+	$mydtype = $form_state['input']['mydtype'];
+	$mydid = $form_state['input']['mydid'];
+	// if it's a gid (google id) then it has not been made into a node yet
+	if($mydtype == 'gid') {
+		
+	}
+	
 }
 
 function _shivanode_data_use_form_submit($form, &$form_state) {
@@ -1591,7 +1628,7 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   if(!$gid) { drupal_goto('mydata'); }
   $vtype = 'chart';
   $ctype = '';
-  $gfile = gdrive_file_attributes(gdrive_get_file($gid));
+  $gfile = gdrive_file_attributes(gdrive_get_file($gid, 'object'));
  
   if($gfile) {
     $dnode = _shivanode_create_shiva_data_node($title, $gfile['url']); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid

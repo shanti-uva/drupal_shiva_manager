@@ -35,6 +35,35 @@ function shivadata_menu() {
 	return $items;
 }
 
+function shivadata_add_node($gid, $title, $desc='') {
+	global $user;
+	module_load_include('inc', 'gdrive', 'gdrive');
+	$node = new stdClass();
+  $node->title = $title;
+  $node->type = "shivadata";
+  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+  $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+  $node->uid = $user->uid; 
+  $node->status = 1; // Published
+  $node->promote = 0; // Not Promoted to front page
+  $node->comment = 0; // Comments disabled
+
+  // Shivadata type 0 = google doc url
+  $node->field_data_shivadata_type[$node->language][]['value'] = 0;
+	$gfile = gdrive_get_file($gid);
+	
+  // Entity reference field
+  $node->field_customer_nid[$node->language][] = array(
+    'target_id' => $form_state['values']['entity id'],
+    'target_type' => 'node',
+  );
+  // 'node' is default,
+  // Other possible values are "user" and  "taxonomy_term" 
+
+  $node = node_submit($node); // Prepare node for saving
+  node_save($node);
+}
+
 /**
  * @TODO: Need to add a function for modifying the display of this node type to show actual data
  * 
