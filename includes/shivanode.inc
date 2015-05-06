@@ -197,6 +197,34 @@ function _get_shivanodes($options = array()) {
   return $nodes;
 }
 
+/**
+ * Returns shivadata nodes for either user (my) or all
+ */
+function _get_shivadata_nodes($whose='my', $type='url') {
+	dpm("START HERE");
+	$query = db_select('node', 'n')
+		->fields('n')
+		->condition('n.type', 'shivadata');
+	 $query->join('field_data_shivanode_element_type', 'stype', 'n.nid = stype.entity_id');
+	if ($whose == 'my') {
+		global $user;
+		$query->condition('n.uid', $user->uid);
+	}
+	
+	$nodes = array();
+	$results = $query->execute();
+	foreach ($results as $row) {
+		$nodes[] = $row;
+		if (isset($row->shivadata_source_url)) {
+			if($gid = _get_gid_from_url($json->shivadata_source_url)) { 
+        $row->dataGid = $gid;
+      }
+			$nodes[] = $row;
+		}
+	}
+	return $nodes;
+}
+
 function _get_gid_from_url($url) {
   if (preg_match('/\?key=([^\#\&]+)[\#\&]?/', $url, $matches)) { 
     return $matches[1];
@@ -561,7 +589,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     _shivanode_create_shiva_data_node($title, $url);
   }
   // Get the view of data nodes
-  $viewMarkup = views_embed_view('shiva_data_list', 'my_shiva_data_pane');
+  $viewMarkup = views_embed_view('shiva_data_list', 'my_data_pane');
   
   // Load it into a XML DOM Document
   $xml = new DOMDocument();
@@ -574,18 +602,21 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   $result = $xpath->evaluate($xpathstr);
   
   // Iterate through each data element and adjust markup
+  
   foreach($result as $row) {
     $cell3 = $row->childNodes->item(2);
-    $txt = $cell3->childNodes->item(0);
-    $info = explode('|$|', trim($txt->wholeText));
+    $txt = $cell3->nodeValue;
+		$cell3->nodeValue = '';
+    $info = explode('|$|', trim($txt));
     $title = $info[0];
     $nid = $info[1];
     // if simple = true, it's a popup, namely user has chosed a specific type
     $selectFrag = $xml->createDocumentFragment(); 
-    $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
+   // $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
     // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
     if(!$simple) {
       $selectFrag = _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, 'nid', $nid);
+			//dpm($selectFrag, 'selfrag');
     }
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
   }
@@ -680,7 +711,10 @@ function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id
     '#empty_value' => 0,
     '#default_value' => 0,
     '#options' => _shivanode_types_using_gdocs(),
-    '#attributes' => array('onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 'class' => array('myclass ' . $divid)),
+    '#attributes' => array(
+    	'onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 
+    	'class' => array('myclass', $divid, 'visualize-select'),
+		),
   );
   if($vistype) {
     unset($sform['visselect']);
@@ -688,7 +722,10 @@ function _shivanode_gdocs_view_select($xml, $vistype, $ctype, $title, $type, $id
     $sform['visselect'] = array(
       '#type' => 'button',
       '#value' => t("Visualize as @type", array('@type' => $label)),
-      '#attributes' => array('onmousedown' => 'Drupal.Shivanode.setSelectedType(this); return false;'),
+      '#attributes' => array(
+      	//'onmousedown' => 'Drupal.Shivanode.setSelectedType(this); return false;',
+      	'class' => array('visualize-button'),
+			),
     );
   }
   $sform['myinfospan'] = array(
@@ -2069,6 +2106,7 @@ function _shivanode_get_help_link($typeInd = -1, $isSubtype = FALSE, $linkStr=FA
 	if($typeInd > -1) {
 		module_load_include('inc', 'shivanode', 'includes/shivanode.types');
 		$helpurls = _shivanode_get_help_urls();
+		if(!is_int($typeInd)) {$typeInd = _shivanode_get_type_index($typeInd, $isSubtype);}
 		$hurl = ($isSubtype) ? $helpurls['subtypes'][$typeInd] : $helpurls['types'][$typeInd];
 		$label = _shivanode_get_type_label($typeInd, $isSubtype);
 	}

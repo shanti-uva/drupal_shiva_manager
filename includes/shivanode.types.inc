@@ -335,7 +335,7 @@ function _get_sn_type_array() {
 				}
 			}
 		} else {
-			$data = t('Invalid format given in shivanode_get_types (@format) in shivanode.types.inc line 167', array(
+			$data = t('Invalid format given in shivanode_get_types (@format) in shivanode.types.inc', array(
 				'@format' => $format,
 			));
 		}
@@ -380,6 +380,28 @@ function _get_sn_type_array() {
 			}
 		}
 		return $outurls;
+	}
+	
+	/**
+	 * Get the index for a type or subtype given its name
+	 */
+	function _shivanode_get_type_index($typeInd, $isSubtype) {
+		if($isSubtype) {
+			$subtypes = shivanode_get_types('subtypes');
+			foreach($subtypes as $sind => $stype) {
+				if($stype[0] == $typeInd || $stype[1] == $typeInd) {
+					return $sind;
+				}
+			}
+		} else {
+			$alltypes = shivanode_get_types('full');
+			foreach($alltypes as $tind => $type) {
+				if ($tind == $typeInd || $type['name'] == $typeInd) {
+					return $type['index'];
+				}
+			}
+		}
+		return -1;
 	}
 	
 	/**
