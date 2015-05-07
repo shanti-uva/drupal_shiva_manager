@@ -4,7 +4,7 @@
 	Drupal.Shivanode = {};
 	
 	// shiva_settings is assigned by reference from Drupal.settings.shivanode 
-	//      in the shivanode-behaviors.js shivaEntryFormConfig function
+	//      in the shivanode-behaviors.js shivaViewNode function
 	
 	/*
 	 * Debug array:
@@ -15,15 +15,15 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out'];
+	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
-		if(debug_settings.indexOf(type) > -1) {
+		if (debug_settings.indexOf(type) > -1) {
 			return true;
 		}
 		return false;
 	}
-	
+   
 	/**************** Message Sending and Receiving ***********************/
 	/*
 	 * Shiva Message Handler: Processes messages from visualization Ifram
@@ -31,15 +31,15 @@
 	Drupal.Shivanode.shivaMessageHandler = function(e) {
 		var mtype, mdata;
 		var eind = e.data.indexOf('=');
-		if(eind == -1) { 
+		if (eind == -1) { 
 			mtype = e.data;
 		} else {
 			mtype = e.data.substr(0,eind);
 			mdata = e.data.substr(eind + 1);
 		}
-		if(debug_on('message_in')) { console.log('message in: ', mtype, mdata); }
+		if (debug_on('message_in')) { console.log('message in: ', mtype, mdata); }
 				
-		switch(mtype) {
+		switch (mtype) {
 			case 'ChartChanged':
 				Drupal.Shivanode.chartChanged(mdata);
 				break;
@@ -50,7 +50,7 @@
 				break;
 				
 			// Shiva edit frame requests a data source URL from Drupal User. 	
-			case'dataSourceUrl':
+			case 'dataSourceUrl':
 				$('#use-data-element-link a').click(); // Click on link to open lightbox list.
 				break;
 				
@@ -69,10 +69,10 @@
 	 */
 	Drupal.Shivanode.shivaSendMessage = function(iFrameName,cmd) {
 		//console.trace();
-		if(typeof(document.getElementById(iFrameName)) == 'object' && document.getElementById(iFrameName) != null) {
+		if (typeof(document.getElementById(iFrameName)) == 'object' && document.getElementById(iFrameName) != null) {
 			var win=document.getElementById(iFrameName).contentWindow.postMessage(cmd,'*');
-			if(debug_on('message_out')) { console.log("message out: ", cmd); }
-		} else if(debug_on('show_errors')) {
+			if (debug_on('message_out')) { console.log("message out: ", cmd); }
+		} else if (debug_on('show_errors')) {
 	  	console.error('There is no frame by the name of: ' + iFrame); // for debugging messages, send to console
 	  }
 	};
@@ -85,7 +85,7 @@
 	
 	Drupal.Shivanode.dataChanged = function(mdata) {
 		// any datachanged message received when shiva_settings.status is 'ready' means use changed form so data is changed 
-		if(shiva_settings.status == 'ready') { 
+		if (shiva_settings.status == 'ready') { 
 			shiva_settings.dataChanged = true; 
 			Drupal.Shivanode.getJSON();
 		} else {
@@ -94,8 +94,8 @@
 	}; 
 	
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
-		if(debug_on('ready_message')) { console.info('ready message received: ' + shiva_settings.status); }
-		if(shiva_settings.status == 'puttingJSON') {
+		if (debug_on('ready_message')) { console.info('ready message received: ' + shiva_settings.status); }
+		if (shiva_settings.status == 'puttingJSON') {
 			shiva_settings.status = 'ready';
 			shiva_settings.jsonLoaded = true;	
 		} else {
@@ -110,16 +110,16 @@
 	// Adjust IFrame Height and Width to visualization
   Drupal.Shivanode.adjustHeightWidth = function(json) {
     // Set IFrame height and width corresponding to the visualization if it is larger
-    if(typeof(json) == "string") {json = JSON.parse(json); }
+    if (typeof(json) == "string") {json = JSON.parse(json); }
     // Set IFrame height and width corresponding to the visualization if it is larger
-    if(typeof(json.width) == "string" && !isNaN(json.width)) {
+    if (typeof(json.width) == "string" && !isNaN(json.width)) {
       vwidth = json.width * 1;
       if (vwidth > 800) {
         $('#shivaEditFrame').css('width','');
         $('#shivaEditFrame').width(vwidth + 350); // add 350 for settings table on left
       }
     }
-    if(typeof(json.height) == "string" && !isNaN(json.height)) {
+    if (typeof(json.height) == "string" && !isNaN(json.height)) {
       vheight = json.height * 1;
       if (vheight > 900) {
         $('#shivaEditFrame').css('height','');
@@ -133,7 +133,7 @@
 	 * 		This calls the editor iframe which response with the message GetJSON={json string}
 	 */
 	Drupal.Shivanode.getJSON = function() {
-	  if(shiva_settings.status == "gettingJSON") { return; }
+	  if (shiva_settings.status == "gettingJSON") { return; }
 	  shiva_settings.status = "gettingJSON";
 		Drupal.Shivanode.shivaSendMessage('shivaEditFrame','GetJSON');
 	};	
@@ -153,7 +153,7 @@
 			Drupal.Shivanode.adjustHeightWidth(json);
 			shiva_settings.status = 'puttingJSON';
 		} catch(e) {
-			if(typeof(console) == 'object') {
+			if (typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
 			}
 		}
@@ -178,7 +178,7 @@
 		var dt = new Date;
 		var json = '{"dataSourceUrl":"' + gdoc + '","title":"' + gtitle + '","shivaId":"0","shivaMod":"'
 		   + dt.toDateString() + '"}';
-		if(self == top ) {
+		if (self == top ) {
 			Drupal.Shivanode.putJSON('shivaEditFrame',json);
 		} else { 
 			setTimeout(function() { 
@@ -209,9 +209,9 @@
 	Drupal.Shivanode.setUnload = function() {
 		// Set window onbeforeunload to warn if not saving
 		window.onbeforeunload = function (e) {
-			if(shiva_settings.dataChanged == true) {
+			if (shiva_settings.dataChanged == true) {
 				var txt = e.srcElement.activeElement.innerText;
-				if(txt.indexOf('SAVE') == -1 && txt.indexOf('UPDATE') == -1) {
+				if (txt.indexOf('SAVE') == -1 && txt.indexOf('UPDATE') == -1) {
 					return Drupal.t("You have changed the data on this page without saving it!");
 				}
 			}
@@ -220,7 +220,7 @@
 		// Don't allow save unless Title is filled in
 		$('button[id*="edit-submit"]').click(function(e) {
 			var sntitle = $('#edit-title').val();
-			if(sntitle == '') {
+			if (sntitle == '') {
 				alert("You must enter a title before submitting your visualization!");
 				$('#edit-title').addClass('error');
 				e.preventDefault();
