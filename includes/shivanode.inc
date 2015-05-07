@@ -785,6 +785,7 @@ function shivanode_gdocs_choice_form_submit($form, &$form_state) {
 	$mydid = $form_state['input']['mydid'];
 	$vtype = $form_state['input']['vistype'];
 	$vsubtype = $form_state['input']['vissubtype'];
+	
 	// if it's a gid (google id) then it has not been made into a node yet
 	$node = FALSE;
 	if($mydtype == 'gid') {
@@ -863,6 +864,7 @@ function _shivanode_data_use_form_submit($form, &$form_state) {
 
 //** Returns an array of shiva node types that use spreadsheet info **/
 function _shivanode_types_using_gdocs($val = FALSE) {
+	dpm("NEED TO FIX this to use shivanode types function!");
   $gtypes = array(
     '',
     'Annotated Time Line',
