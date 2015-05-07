@@ -348,15 +348,71 @@ function _get_sn_type_array() {
 	}
 
 	/**
-	 * Get the label for a type of subtype
+	 * Get the label for a type or subtype
+	 * 	@param $tind (integer) index for type of subtype (if given a machinename for a type will convert to index)
+	 *  @param $isSubtype (boolean) whether the index represents a type or subtype
 	 */
 	function _shivanode_get_type_label($tind, $isSubtype = FALSE) {
 		if($isSubtype) {
 			$sts = shivanode_get_types('subtypes');
 			return $sts[$tind][0];
 		} else {
+			if (!is_int($tind)) { $tind = _shivanode_get_index($tind); }
 			$tps = shivanode_get_types('nameindex');
 			return $tps[$tind];
+		}
+	}
+	
+	/**
+	 * Gets machine name index from numeric index
+	 */
+	 function _shivanode_get_machine_name($num_index, $isSubtype=FALSE) {
+	 	 $dtypes = _get_sn_type_array('full');
+		 if($isSubtype) {
+		 	$stypes = shivanode_get_types('subtypes');
+			return (isset($stypes[$num_index][1])) ? $stypes[$num_index][1] : FALSE;
+		 } else {
+		 	$types = shivanode_get_types('full');
+			foreach($types as $nind => $titem) {
+				if ($titem['index'] == $num_index) { return $nind; }
+			}
+			return FALSE;
+		 }
+	 }
+
+	/** 
+	 * Get Index from machine name
+	 */
+	function _shivanode_get_index($mnm, $isSubtype=FALSE) {
+		$dtypes = _get_sn_type_array('full');
+		if($isSubtype) {
+			$stypes = shivanode_get_types('subtypes');
+			foreach ($stypes as $n => $stype) {
+				if ($stype[1] == $mnm) {
+					return $n;
+				}
+			}
+			return FALSE;
+		} else {
+			$types = shivanode_get_types('full');
+			foreach($types as $nind => $titem) {
+				if ($nind == $mnm) { return $titem['index']; }
+			}
+			return FALSE;
+		}
+	}
+	
+	/**
+	 * Determines whether node uses data or not
+	 * 
+	 * @return TRUE if uses data otherwise FALS
+	 */
+	function _shivanode_is_data_type($tind) {
+		$dtypes = _get_sn_type_array('full');
+		if (isset($dtypes[$tind])) {
+			return $dtypes[$tind]['uses_data'];
+		} else {
+			return FALSE;
 		}
 	}
 	

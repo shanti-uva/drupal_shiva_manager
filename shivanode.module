@@ -43,7 +43,7 @@ function shivanode_init() {
 			'isNewEl' => false,
 			'jsonLoaded' => false,
 			'latestJSON' => '',
-			'loadJS' => false,
+			'loadGData' => false, // was 'loadJS'
 			'shibstatus' => null,
 			'snviewer' => SHIVA_VIEWER,
 			'status' => 'loading',
@@ -829,29 +829,56 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Remove the Simile timeline option when displaying form only, 
   // but left it in array of types to display type of old existing simile timelines
-  unset($form['shivanode_element_type']['und']['#options'][5]);
+  // Taken out for reworking (@015-05-07)
+  //unset($form['shivanode_element_type']['und']['#options'][5]);
   _shivanode_add_jtree_js(); // add jtree for kmaps
   _shivanode_add_ms_metafix(); // MS Explorer work around
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
+	// Get Chart Type and Subtype
+	dpm($form['#node']);
   $sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
+  $snsubtype = _shivanode_get_subtype($form['#node']);
   $is_new_el = FALSE;
   $submitVal = t('Update');
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
-  $ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
+  // Taken out in reworking (2015-05-07) old way of handling convert all uses to {nid}/{chart type}/{subtype}
+  //$ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
   
   $ptitle = '';
   
   // If the node with the form does not have an nid, we are creating a new shivanode node. 
   // Set variables accordingly by parsing any arguments in url
+  // urls are: node/add/shivanode/7306/chart/BarChart, node/add/shivanode/nd/chart/BarChart, and node/add/shivanode/chart/BarChart
   if(!isset($form['#node']->nid)) {
     $is_new_el = TRUE;
-    $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;
-    $arg2  = (count(arg()) > 4) ? arg(4) : FALSE;
+    $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;  // either node id, nd (for no data), or chart type
+    $arg2  = (count(arg()) > 4) ? arg(4) : FALSE; // 
+    $arg3  = (count(arg()) > 5) ? arg(5) : FALSE; // 
     if($arg1) {
-      if($arg1 == 'nd') { $nodata = TRUE; } 
+    	
+      if($arg1 == 'nd') {
+    	// URL with /nd/{chart type}...
+      	$nodata = TRUE; 
+				$did = FALSE;
+				if($arg2) { $sntype = $arg2; }
+				if($arg3) { $snsubtype = $arg3; }
+				
+			} else if (is_numeric($arg1)) {
+			// URL with /{nid}/{chart type}...
+				$did = $arg1;
+				if($arg2) { $sntype = $arg2; }
+				if($arg3) { $snsubtype = $arg3; }
+				
+			} else {
+			// URL with /{chart type}...
+				$sntype = $arg1;
+				if($arg2) { $snsubtype = $arg2; }
+			}
+			
+			/** old code (2015-05-07)
       $did = (is_numeric($arg1)) ? $arg1 : FALSE; // set $did to the data node nid for reference below
       if($arg2) { 
         $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
@@ -863,34 +890,43 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       } else {
         $sntype = ucfirst($arg1); // When just a visualization type with out a subtype
       }
+			 * */
     }
     
     // If it's a data-based visualization without a data node id at the end, redirect to data list
-    if (strpos(SHIVA_DATA_VISUALIZATIONS,$sntype) > -1 && $did == FALSE && $nodata == FALSE) {
-      $url = 'mydata/'. strtolower($sntype);
-      if($ctype) { $url .= '/' . $ctype; }
+    if (_shivanode_is_data_type($sntype) && $did == FALSE && $nodata == FALSE) {
+      $url = "mydata/$sntype";
+			if($snsubtype) { $url .= "/$snsubtype"; }
       drupal_goto($url);
     } 
     $submitVal = t('Save');
-    $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : $sntype)));
+    $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : _shivanode_get_type_label($sntype))));
     
   // Set Variables for edit form of existing nodes
   } else {
-    $ctype = _get_shivanode_subtype($form['#node']);
+    //$ctype = _get_shivanode_subtype($form['#node']);
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
   }
-  if($sntype == '') { $sntype = t('Chart');}
+  /*if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
-  
+	 * */
+	 
+	// Get Type and Subtype indexes
+	$sntind = _shivanode_get_index($sntype);
+	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
+	
+  // Set the title
   drupal_set_title($ptitle);
   
   // Make a json object from json string if set, otherwise set jobj to FALSE
   $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
             strlen($form['shivanode_json']['und'][0]['value']['#default_value']) > 0) ? 
             json_decode($form['shivanode_json']['und'][0]['value']['#default_value']) : FALSE;
-  if (strpos($action, '?') > -1) { // remove any query param if exists
+						
+	// remove any query param if exists					
+  if (strpos($action, '?') > -1) { 
     $aparts = explode('?', $action); 
     $action = $aparts[0];
   }
@@ -941,8 +977,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     //_shivanode_check_google_login(); only ask when necessary
     drupal_add_js(array('shivanode' => array('isNewEl' => 'true')), 'setting');
     $form['shivanode_access']['und']['#default_value'] = 1;
-    $eltypes = _shivanode_element_typelist(TRUE);
-    $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntype])) ? $eltypes[$sntype] : 7; // default value is chart
+    $eltypes = _shivanode_element_typelist(TRUE, FALSE); // Get Label => index array exculding deprecated types
+    $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntind])) ? $eltypes[$sntind] : 7; // default value is chart
     $eltype = t('Chart');
       
     // Use ajax to reload the iframe depending on Visualization select type choice
@@ -1124,20 +1160,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
   }
   
-  // Set typeVal to form_state value, if set, (meaning we are editing an existing node) or to the default value is not set (meaning new node)
-  $elTypes = _shivanode_element_typelist(TRUE);
-  $typeVal = FALSE;
-  // Type of node when editing
-  if (isset($form_state['node']->shivanode_element_type['und'][0]['value'])) {
-    $typeVal = $form_state['node']->shivanode_element_type['und'][0]['value'];
-  // Use $sntype if set from above TODO: Check if this is necessary
-  } else if(array_key_exists($sntype, $elTypes)) {
-    $typeVal = $elTypes[$sntype];
-  // Default is to use the set value on the form
-  } else {
-    $typeVal = $form_state['input']['shivanode_element_type']['und'];
-  }
-
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
   $iframeUrl = _get_shivaframe_url($typeVal, $nid); 
 
@@ -1145,15 +1167,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if($is_new_el && $ctype) {
     $iframeUrl .= '&chartType=' . str_replace(' ', '', $ctype);
   }
-  $dataInst = ($typeVal == 1) ? '<p style="display: block; clear: both;">' . t("This data node stores the URL of your spreadsheet. ") . 
-       t("This page allows you to change the title by which this URL is referred to in the manager or delete this reference with the Delete button below. ") .
-       t("(Note that deleting this reference will not affect your Google spreadsheet.) ") . 
-       t("You may be able to edit your spreadsheet in the frame below if you are logged into Google. If not, you must go ") . 
-       l(t("here"), $iframeUrl, array('attributes' => array('target' => '_blank'))) . '.</p>':'';
-       
-  // Create Iframe in Fieldset with Help Link in the Legend
+	// NEED to update help links
   $helpLinkHTML = ($ctype) ? _shivanode_get_help_link($ctype) : _shivanode_get_help_link($typeVal);
-  $form['shivanode_json']['#prefix'] = $dataInst . '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
+  $form['shivanode_json']['#prefix'] = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $sntype . $helpLinkHTML . '</span>' . '&nbsp;</legend>' .
         '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
@@ -1271,7 +1287,7 @@ function shivanode_form_validate(&$form, &$form_state) {
 			'shivanode' => array(
 				'iframeSrcUrl' => $iframeurl,
 				'iframeType' => _shivanode_options_list($sntype),
-				'loadJS' => true,
+				'loadGData' => true, // was loadJS
 			),
 		);
 		drupal_add_js($snsettings, 'setting');

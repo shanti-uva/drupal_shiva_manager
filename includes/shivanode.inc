@@ -17,9 +17,9 @@
  *  
  */
  
-function _shivanode_element_typelist($byName = FALSE) {
+function _shivanode_element_typelist($byName=FALSE, $show_deprecated=TRUE) {
 	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
- 	$options = shivanode_get_types(); // returns all types by index=>name including deprecated ones
+ 	$options = shivanode_get_types('nameindex', $show_deprecated); // returns all types by index=>name including deprecated ones by default
   if($byName === TRUE) {
     $options = array_flip($options); // What about when localized in a different language? Will this still work?
   }
@@ -252,21 +252,6 @@ function _get_shivanode_type($node, $mode = 'string') {
   return $type;
 }
 
-/*
- * Gets the subtype of visualization in the Shiva node
- */
-function _get_shivanode_subtype($node, $mode = 'string') {
-  $type = FALSE;
-  if ($node && isset($node->shivanode_subtype)) {
-    $subtype = $node->shivanode_subtype;
-    if (isset($subtype['und']['0']['value'])) {
-      $val = $subtype['und']['0']['value'] * 1;
-			if($mode == 'number' || $mode == 'int') { return $val; }
-      $type = _shivanode_subtypelist($val);
-    }
-  }
-  return $type;
-}
 
 /*
  * Gets the access value (0 = private, 1 = public) of visualization in the Shiva node
@@ -1575,28 +1560,58 @@ function _shivanode_resource_retrieve($nid) {
   return $node;
 }
 
-function _shivanode_get_element_type($node, $type = "string") {
-  if (isset($node->shivanode_element_type)) {
-    $options = _shivanode_element_typelist();
-    $typenum = intval($node->shivanode_element_type['und'][0]['value']);
-    if ($typenum == 5) { $typenum = 13; }
-    return ($type == "number" || $type == "num") ? $typenum : $options[$typenum];
-  } 
-  else {
-    return FALSE;
-  }
+/**
+ * Returns the visualization type in different formats:
+ * 
+ * 	format values:
+ * 		'string' = machine name (default) returns machine name
+ * 		'label' =  label returns capitalized label string
+ *    'number/int' = index return index value
+ * 
+ * if not set returns default value
+ */
+function _shivanode_get_element_type($node, $format="string") {
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+  $typenum = (isset($node->shivanode_element_type)) ? intval($node->shivanode_element_type['und'][0]['value']) : 7; // default is chart
+  //if ($typenum == 5) { $typenum = 13; } // do we still need to look out for simile?
+  if ($format == 'label') {
+  	return _shivanode_get_type_label($typenum);
+  } elseif ($format == 'number' || $format == 'int') {
+  	return $typenum;
+  } else {
+		return _shivanode_get_machine_name($typenum);
+	}
+}
+
+/*
+ * Gets a subtype of visualization in the Shiva node in different Formats:
+ * 
+ * 	format values:
+ * 		'string' = machine name (default) returns machine name
+ * 		'label' =  label returns capitalized label string
+ *    'number/int = index return index value
+ * 
+ */
+function _shivanode_get_subtype($node, $format = 'string') {
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+	$subtypenum = (isset($node->shivanode_subtype['und']['0']['value'])) ?  $node->shivanode_subtype['und']['0']['value'] : 11; // default is pie chart
+  if ($format == 'label') {
+  	return _shivanode_get_type_label($subtypenum, TRUE);
+  } elseif ($format == 'number' || $format == 'int') {
+  	return $subtypenum;
+  } else {
+		return _shivanode_get_machine_name($subtypenum, TRUE);
+	}
 }
 
 function _shivanode_get_json($node, $as_obj = TRUE) {
-  if (gettype($node) != "object") {
-    $node = node_load($node);
-  }
+  if (gettype($node) != "object") { $node = node_load($node); }
   if (isset($node->shivanode_json)) {
     $eljson = $node->shivanode_json['und'][0]['value'];
     return ($as_obj) ? drupal_json_decode($eljson) : $eljson;
   } 
   else {
-    return FALSE;
+    return 11; // default is 11 or pie chart
   }
 }
 
@@ -1606,11 +1621,11 @@ function _shivanode_get_json($node, $as_obj = TRUE) {
  */
 function _shivanode_get_data_element($source) {
   $nid = (is_numeric($source)) ? $source : $source['nid']['#value'];
-  $result = db_select('shivanode_links', 'l')
-      ->fields('l')
-      ->condition('sn_id', $nid, '=')
+  $result = db_select('shivadata_links', 'sdl')
+      ->fields('sdl')
+      ->condition('vis_id', $nid, '=')
       ->execute()
-      ->fetchCol(2); 
+      ->fetchCol(1); 
   if (count($result) > 0) {
     return $result[0];
   } 
@@ -1833,6 +1848,7 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
         'callback' => '_shivanode_set_to_remove_datainfo',
       ),
     );
+		drupal_add_js(array('shivanode' => array('loadGData' => true)), 'setting');
   }
 }
 /*

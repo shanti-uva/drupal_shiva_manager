@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
@@ -46,7 +46,9 @@
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
-				Drupal.Shivanode.dataChanged(mdata);
+			  if(shiva_settings.status == 'ready') {
+					Drupal.Shivanode.dataChanged(mdata);
+				}
 				break;
 				
 			// Shiva edit frame requests a data source URL from Drupal User. 	
@@ -56,11 +58,20 @@
 				
 			case 'GetJSON':
 		  	Drupal.Shivanode.setDrupalJSON(mdata, e);	
+		  	// When frame loads initially it gets the json from it
+		  	// if loadGData is true than combine the google data with it and send it back to the frame
+		  	if(shiva_settings.loadGData == true) {
+		  		shiva_settings.loadGData = false;
+					Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
+		  	}
 		  	break;
 				
 			case 'ShivaReady':
 				Drupal.Shivanode.processReadyMessage(mdata);
 				break;
+				
+			default:
+				console.log("message unprocessed: " + mdata);
 		}
 	};
 	
@@ -80,7 +91,7 @@
 	
 	/********* Message Handling Functions *******************/
 	Drupal.Shivanode.chartChanged = function(mdata) {
-		//console.log("Chart changed: " + shiva_settings.status);
+		console.log("Chart changed: " + shiva_settings.status);
 	}; 
 	
 	Drupal.Shivanode.dataChanged = function(mdata) {
@@ -88,18 +99,24 @@
 		if (shiva_settings.status == 'ready') { 
 			shiva_settings.dataChanged = true; 
 			Drupal.Shivanode.getJSON();
-		} else {
-			console.log("in data changed: " + shiva_settings.status);
 		}
 	}; 
-	
+	/**
+	 * Prodcesses a Ready message from the SHIVA IFrame
+	 *    shiva_settings.status represents the previously set status describing what is now ready
+	 */
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
-		if (debug_on('ready_message')) { console.info('ready message received: ' + shiva_settings.status); }
-		if (shiva_settings.status == 'puttingJSON') {
+		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
+		// Determine what to do depending on previously set status
+		if (shiva_settings.status == 'loading') {
+			// When initially loading the iframe get JSON from it
+			Drupal.Shivanode.getJSON();
+		} else if (shiva_settings.status == 'puttingJSON') {
+		// When sending JSON data to Iframe status = puttingJSON
 			shiva_settings.status = 'ready';
 			shiva_settings.jsonLoaded = true;	
 		} else {
-			console.log(shiva_settings.status);
+			shiva_settings.status = 'ready';
 		}
 	};
 	
@@ -176,8 +193,19 @@
 	 */
 	Drupal.Shivanode.setDataSheet = function(gdoc, gtitle) {
 		var dt = new Date;
-		var json = '{"dataSourceUrl":"' + gdoc + '","title":"' + gtitle + '","shivaId":"0","shivaMod":"'
-		   + dt.toDateString() + '"}';
+		var json = JSON.parse(shiva_settings.latestJSON);
+		// Get chart type from url if adding node
+		//  URL for adding
+		var pn = window.location.pathname;
+		if (isadd = pn.match(/node\/add\/shivanode\/(\d+)\/([^\/]+)\/([^\/]+)/)) {
+			console.log("Changing chart type: " + isadd[3]);
+			json.chartType = isadd[3];
+		} 
+		json.dataSourceUrl = gdoc;
+		json.title = gtitle;
+		json.shivaId = 0;
+		json.shivaMod = dt.toDateString();
+		json = JSON.stringify(json);
 		if (self == top ) {
 			Drupal.Shivanode.putJSON('shivaEditFrame',json);
 		} else { 
@@ -195,7 +223,7 @@
 		// If "new" json is the same as old "latestJSON" then return
     if (shiva_settings.latestJSON == json) { return; }
     $('textarea[id^="edit-shivanode-json"]').val(json);
-    
+    shiva_settings.latestJSON = json;
 		// Set IFrame height and width corresponding to the visualization 
     Drupal.Shivanode.adjustHeightWidth(jobj);
 		//Drupal.Shivanode.checkKMLUrls(jobj);
