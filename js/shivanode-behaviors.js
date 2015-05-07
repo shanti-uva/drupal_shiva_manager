@@ -1,6 +1,12 @@
 
-/** Must be outside of jQuery scope to work from image tag load call */
+/** 
+ * googleStatus function
+ * 		Performs different operations on various pages when user is not signed into a google account
+ * 
+ * 		Must be outside of jQuery scope to work from image tag load call 
+ **/
 function googleStatus(isloggedin) {
+	// For Shivadata Nodes: Show message "login to view" if not logged in	
 	if (jQuery('body').hasClass('node-type-shivadata')) {
 		if(!isloggedin) { 
 			jQuery('.shivaframe').prepend('<div class="message no-google"><p>You are not logged into any Google account and so cannot view this data. Log into Google Drive and <a href="window.location.reload();">refresh this page</a>.</p></div>');
