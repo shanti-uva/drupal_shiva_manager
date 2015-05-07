@@ -694,7 +694,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
 }
 
 /**
- * _shivanode_gdocs_choice_form returns a form for choosing a gdoc
+ * shivanode_gdocs_choice_form returns a form for choosing a gdoc
  * 	Form for selecting a Google Doc to create a Visualization with
  * 	@param $vistype - Type of visualization
  *  @param $ctype   - Subtype of visualization or Chart Type
@@ -723,7 +723,7 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
     '#options' => _shivanode_types_using_gdocs(),
     '#attributes' => array(
     	//'onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 
-    	'onchange' => 'form.submit("visselect-' . $id . '")',
+    	'onchange' => 'console.log(this, "' . $id . '"); jQuery("#submit-' . $id . '").click();', // form.submit("visselect-' . $id . '")
     	'class' => array('myclass', $divid, 'visualize-select'),
 		),
   );
@@ -739,6 +739,12 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
       	'class' => array('visualize-button'),
 			),
     );
+  } else {
+  	$form['fauxsubmit'] = array(
+			'#type' => 'submit',
+			'#value' => 'Submit',
+			'#attributes' => array('id' => 'submit-' . $id, 'style'=>'display:none;'),
+		);
   }
 	$form['mydtitle'] = array(
 		'#type' => 'hidden',
@@ -772,6 +778,8 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
 }
 
 function shivanode_gdocs_choice_form_submit($form, &$form_state) {
+	dpm($form_state['input'], 'forms input');
+	$visselect = (isset($form_state['input']['mydtitle'])) ? $form_state['input']['mydtitle'] : FALSE;
 	$mydtitle = $form_state['input']['mydtitle'];
 	$mydtype = $form_state['input']['mydtype'];
 	$mydid = $form_state['input']['mydid'];
@@ -1076,21 +1084,19 @@ function _shivanode_greset_form_submit($form, &$form_state) {
 }
 
 function _get_shivaframe_url($opt, $nid = '') {
-  if (is_array($opt)) {
-    $opt = $opt[0]; 
-  } // if it's an array take first element value
-  if (!is_numeric($opt)) {
-    $opt = 7; 
-  } // default is visualization
+  if (is_array($opt)) { $opt = $opt[0]; } // if it's an array take first element value
+  if (!is_numeric($opt)) { $opt = _shivanode_get_index($opt);  }  // convert machine name to index
   $player = '';
   switch ($opt) {
-    case 1:  // Data
-      if ($nid != '') {
+    case 1:  // Data (Deprecated)
+    	drupal_set_message('Shivanode data types have been migrated to shivadata nodes. Fix call to this function', 'warning');
+		  ddebug_backtrace();
+      /*if ($nid != '') {
         $njson = _shivanode_get_json($nid);
         if(isset($njson['dataSourceUrl'])) {
           $player = str_replace('https','http', $njson['dataSourceUrl']);
         }
-      }
+      }*/
        //$player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
       break;
     case 2:   // Image
@@ -2168,25 +2174,29 @@ function _shivanode_add_ms_metafix() {
 /**
  * Function get Help link
  *    Returns the html link code for the help page depending on the shivanode type value sent to function
-
- * 		@param int $typeInd : Index of type or subtype value. Default -1 means general help string
- * 		@param boolean $isSubtype : whether index is a subtype or not. Defaults to FALSE
- * 		@param linkStr mixed : String to include in link or FALSE if question mark icon is desired
+ *
+ * 		@param int $typeInd 
+ *			Index of type or subtype value. Default -1 means general help string
+ * 		@param boolean $isSubtype 
+ * 			Indicates whether index is a subtype or not. Defaults to FALSE
+ * 		@param mixed $linkStr 
+ * 			String to include in link or FALSE if question mark icon is desired
  * 
  **/
-function _shivanode_get_help_link($typeInd = -1, $isSubtype = FALSE, $linkStr=FALSE) {
+function _shivanode_get_help_link($typeInd=-1, $isSubtype=FALSE, $linkStr=FALSE) {
   global $base_root;
-  //ddebug_backtrace();
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+	$helpurls = _shivanode_get_help_urls();
+	if (!is_int($typeInd)) { $typeInd = _shivanode_get_type_index($typeInd, $isSubtype); }
   $hurl = 'https://wiki.shanti.virginia.edu/display/KB/Use+SHIVA';
   $label = 'Shiva Help'; 
-	if($typeInd > -1) {
-		module_load_include('inc', 'shivanode', 'includes/shivanode.types');
-		$helpurls = _shivanode_get_help_urls();
-		if(!is_int($typeInd)) {$typeInd = _shivanode_get_type_index($typeInd, $isSubtype);}
+	if ($typeInd > -1) {
 		$hurl = ($isSubtype) ? $helpurls['subtypes'][$typeInd] : $helpurls['types'][$typeInd];
 		$label = _shivanode_get_type_label($typeInd, $isSubtype);
+	} else {
+		$label = t('Visualization');
 	}
-  if($linkStr) {
+  if ($linkStr) {
     return '<a href="' . $hurl . '" target="_blank" title="' . str_replace(' visualization type', '', $linkStr) . ' Help" >' . $linkStr . '</a>';
   } else { 
     return '<a class="sn-helplink" href="' . $hurl . '" target="_blank" title="' . $label . ' Help" ><img src="' . 

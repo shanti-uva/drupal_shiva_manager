@@ -837,7 +837,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     _shivanode_check_google_login();
   }
 	// Get Chart Type and Subtype
-	dpm($form['#node']);
   $sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
   $snsubtype = _shivanode_get_subtype($form['#node']);
   $is_new_el = FALSE;
@@ -1161,16 +1160,19 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   
   $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
-  $iframeUrl = _get_shivaframe_url($typeVal, $nid); 
+  $iframeUrl = _get_shivaframe_url($sntind, $nid); 
 
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
   if($is_new_el && $ctype) {
     $iframeUrl .= '&chartType=' . str_replace(' ', '', $ctype);
   }
-	// NEED to update help links
-  $helpLinkHTML = ($ctype) ? _shivanode_get_help_link($ctype) : _shivanode_get_help_link($typeVal);
+	
+	// Create Markup for IFrame with Label and Helplinks
+	$snlabel = _shivanode_get_type_label($sntind);
+	$helplink = ($snsubtype) ? _shivanode_get_help_link($snsubtind, TRUE) : _shivanode_get_help_link($sntind);
+	$legend = $snlabel . ' ' . $helplink;
   $form['shivanode_json']['#prefix'] = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
-        $sntype . $helpLinkHTML . '</span>' . '&nbsp;</legend>' .
+        $legend . '</span>' . '&nbsp;</legend>' .
         '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .

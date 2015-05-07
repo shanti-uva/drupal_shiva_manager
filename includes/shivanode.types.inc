@@ -18,6 +18,7 @@
  * 		1: Machine Name of subtype
  * 		2: Thumbnail image variable name (name of variable that contains file number for thumb image)
  * 		3: Help URL
+ * 		4: Is Deprecated, include a fifth element set to TRUE to deprecate a subtype
  * 
  * Old prototypes not included are:
  * 
@@ -414,6 +415,31 @@ function _get_sn_type_array() {
 		} else {
 			return FALSE;
 		}
+	}
+	
+	/**
+	 * Returns all types that use data spreadsheets in a variety of formats
+	 */
+	function _shivanode_get_data_types($format='full', $show_deprecated=FALSE) {
+		$alltypes = shivanode_get_types('full');
+		$dtypes = array();
+		foreach ($alltypes as $mnind => $titem) {
+			if ($titem['uses_data']) {
+				if($titem['subtypes']) {
+					foreach ($titem['subtypes'] as $sn => $stype) {
+						if($show_deprecated || !isset($stype[4])) {
+							$dtypes[] = array( 'index' => $sn, 'machine_name' => $stype[1], 'label' => $stype[0], 'is_subtype' => TRUE, );
+						}
+					}
+				} else {
+					if($show_deprecated || !$titem['deprecated']) {
+						$dtypes[] = array( 'index' => $titem['index'], 'machine_name' => $mnind, 'label' => $titem['name'], 'is_subtype' => FALSE, );
+					}
+				}
+			}
+		}
+		usort($dtypes, function($a, $b) { return ($a['label'] > $b['label']) ? TRUE : FALSE; });
+		return $dtypes;
 	}
 	
 	/**
