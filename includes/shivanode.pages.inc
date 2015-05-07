@@ -103,12 +103,20 @@ function explore_vis_page() {
 	return $page;
 	
 }
-
+/**
+ * Creates thumbnail for the explore visualization page
+ * 
+ * @param $ind : index of the item in the php array that defines shivanode types
+ * @param $item : an sequential array of info about the item with title, machine-name, img variable name, and help link in that order
+ * @param $isSubtype : whether or not this is a visualization subtype
+ * 
+ * @return html markup for the thubmnail wrapped in an <li> element for inclusion in a <ul class="shiva-gallery"></ul> list
+ */
 function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
-	$img = variable_get($item[2], FALSE);
+	$img = variable_get($item[2], FALSE); // load image file variable (contains fid for thumb image)
 	if($img) {
-		$f = file_load($img);
-		$img = image_style_url('shiva_teaser', $f->uri);
+		$f = file_load($img); // Load thumb image file
+		$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
 	} else {
 		drupal_set_message('No imgurl found for ' . $item[0], 'warning');
 	}
@@ -133,6 +141,7 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
 		</li>';
 	return $out;
 }
+
 /**
  * Function to create a entry page for creating a visualizations, listing all registered types.
  */

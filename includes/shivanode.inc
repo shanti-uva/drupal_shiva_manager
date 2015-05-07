@@ -711,6 +711,11 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
 /**
  * _shivanode_gdocs_choice_form returns a form for choosing a gdoc
  * 	Form for selecting a Google Doc to create a Visualization with
+ * 	@param $vistype - Type of visualization
+ *  @param $ctype   - Subtype of visualization or Chart Type
+ *  @param $title   - Title of data sheet
+ *  @param $type    - 'gid' = google id or 'nid' = node id for already added sheet
+ *  @param $id      - id of the data source depending on above $type
  */
 function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $title, $type, $id) {
   $divid = 'data-' . $id;
@@ -762,6 +767,15 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
 		'#type' => 'hidden',
 		'#value' => $id,
 	);
+	$form['vistype']  = array(
+		'#type' => 'hidden',
+		'#value' => $vistype,
+	);
+	$form['vissubtype'] = array(
+		'#type' => 'hidden',
+		'#value' => $ctype,
+	);
+	
 	/*
   $form['myinfospan'] = array(
     '#type' => 'markup',
@@ -776,6 +790,8 @@ function shivanode_gdocs_choice_form_submit($form, &$form_state) {
 	$mydtitle = $form_state['input']['mydtitle'];
 	$mydtype = $form_state['input']['mydtype'];
 	$mydid = $form_state['input']['mydid'];
+	$vtype = $form_state['input']['vistype'];
+	$vsubtype = $form_state['input']['vissubtype'];
 	// if it's a gid (google id) then it has not been made into a node yet
 	$node = FALSE;
 	if($mydtype == 'gid') {
@@ -783,7 +799,7 @@ function shivanode_gdocs_choice_form_submit($form, &$form_state) {
 	} else {
 		$node = node_load($mydid);
 	}
-	
+	drupal_goto("node/add/shivanode/{$node->nid}/$vtype/$vsubtype");
 }
 
 function _shivanode_data_use_form_submit($form, &$form_state) {
@@ -1740,7 +1756,6 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     $is_new_el = FALSE; 
   }
   $dnode = node_load($did);
-	dpm($dnode, 'dnode');
   if ($dnode) {
     $form['gdocinfo']['#prefix'] = str_replace('none;', 'block;', $form['gdocinfo']['#prefix']);
     //$dataurl = _shivanode_get_dataurl($dnode);

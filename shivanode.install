@@ -450,6 +450,32 @@ function shivanode_disable() {
 }
 
 /**
+ * Adds a generic image to the file system and creates a shivanode_teaser derrivative.
+ */
+function shivanode_add_gen_image($imgkey) {
+	global $base_url; 
+  $snimgdir = $base_url . '/' . drupal_get_path('module', 'shivanode') . '/images/';
+	$imgfn = $imgkey . '.png';
+	$path = 'public://shivanode';
+	$url = $snimgdir . $imgfn;                // ADD URL to image on system 
+	$file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
+	if(!empty($file->fid)) {
+		variable_set($imgkey, $file->fid);
+		$style = image_style_load('shiva_teaser');
+		if($style) { 
+			$source = 'public://shivanode/' . $imgfn;
+			$destination = 'public://styles/shiva_teaser/public/shivanode/' . $imgfn;
+			$res = image_style_create_derivative($style, $source, $destination);
+			if(!$res) {
+				drupal_set_message(t('Unable to create derrivative image for @fn (shivanode.install)', array('@fn' => $imgfn)), 'error');
+			}
+		}
+	} else {
+		drupal_set_message(t('Unable to create image file for @fn (shivanode.install)', array('@fn' => $imgfn)), 'error');
+	}
+}
+
+/**
  * Change the actual field sizes for the values in the data and revisions tables
  */
 function shivanode_update_7000() {
@@ -602,13 +628,18 @@ function shivanode_update_7005() {
 /**
   //Generic code to add image at at latter time:
   global $base_url; 
-  $imgkey = 'sngen-wcloud';  // name of variable and image file
-  $path = 'public://shivanode';
-  $snimgdir = $base_url . '/' . drupal_get_path('module', 'shivanode') . '/images/';
+  $imgkey = 'sngen-...';  // name of variable and image file REPLACE ...
   $imgfn = $imgkey . '.png';
-  $url = $snimgdir . $imgfn;
+  $path = 'public://shivanode';
+  $url = '';                // ADD URL to image on system 
   $file = system_retrieve_file($url, $path . '/' . $imgfn, TRUE, FILE_EXISTS_REPLACE);
   variable_set($imgkey, $file->fid);
+	$style = image_style_load('shiva_teaser');
+	if($style) { 
+		$source = 'public://shivanode/' . $imgfn;
+		$destination = 'public://styles/shiva_teaser/public/shivanode/' . $imgfn;
+		image_style_create_derivative($style, $source, $destination);
+	}
 */
 }
 
@@ -693,5 +724,13 @@ function shivanode_update_7007() {
 	foreach($old_sn_vars as $nm) {
 		variable_del($nm);
 	}
+}
+
+/**
+ * 	Add thumbnail image for qmedia
+ */
+function shivanode_update_7008() {
+	$imgkey = 'sngen-qmedia';
+	shivanode_add_gen_image($imgkey);
 }
 
