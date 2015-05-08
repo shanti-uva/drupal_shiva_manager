@@ -1163,8 +1163,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $iframeUrl = _get_shivaframe_url($sntind, $nid); 
 
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
-  if($is_new_el && $ctype) {
-    $iframeUrl .= '&chartType=' . str_replace(' ', '', $ctype);
+  if($is_new_el && $sntype) {
+    $iframeUrl .= '&chartType=' . $snsubtype; // was $ctype. Should this be 
   }
 	
 	// Create Markup for IFrame with Label and Helplinks

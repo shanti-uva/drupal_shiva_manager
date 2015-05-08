@@ -53,7 +53,13 @@
 				
 			// Shiva edit frame requests a data source URL from Drupal User. 	
 			case 'dataSourceUrl':
-				$('#use-data-element-link a').click(); // Click on link to open lightbox list.
+				var durl = ($('#chosen_data_element_url').length == 1) ? $.trim($('#chosen_data_element_url').text()) : '';
+				if($('#chosen_data_element_url').text().length > 0) {
+					alert(Drupal.t("You already have a data item associated with this visualization." +
+						"\nRemove this with the 'Remove Data Link' button before selecting a new one."));
+				} else {
+					$('#use-data-element-link a').click(); // Click on link to open lightbox list.
+				}
 				break;
 				
 			case 'GetJSON':

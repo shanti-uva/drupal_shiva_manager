@@ -300,7 +300,7 @@ function _get_sn_type_array() {
 	function shivanode_get_types($format='nameindex', $show_deprecated=TRUE) {
 		$shivanode_types = _get_sn_type_array();
 		//dpm($shivanode_types, 'types');
-		$data = array();
+		$data = array(); // Initialize the return array
 		if($format == 'nameindex') {
 			foreach($shivanode_types as $nind => $typeitem) {
 				if($show_deprecated || $typeitem['deprecated'] == FALSE) {
@@ -332,7 +332,7 @@ function _get_sn_type_array() {
 		} elseif ($format == 'subtypes') {
 			foreach($shivanode_types as $nind => $typeitem) {
 				if($typeitem['subtypes'] && ($show_deprecated || $typeitem['deprecated'] == FALSE)) {
-					$data = $data + $typeitem['subtypes'];
+					$data = $data + $typeitem['subtypes']; // concatenate with return array
 				}
 			}
 		} else {
@@ -396,7 +396,7 @@ function _get_sn_type_array() {
 			return FALSE;
 		} else {
 			$types = shivanode_get_types('full');
-			foreach($types as $nind => $titem) {
+			foreach ($types as $nind => $titem) {
 				if ($nind == $mnm) { return $titem['index']; }
 			}
 			return FALSE;
@@ -404,7 +404,11 @@ function _get_sn_type_array() {
 	}
 	
 	/**
-	 * Determines whether node uses data or not
+	 * Determines whether visualization type uses data from a spreadsheet or not. Only applies to main types
+	 * Subtypes inherit their parent setting in this regard. The item in the array is 'uses_data'.
+	 * 
+	 * @param int $ind
+	 * 	the integer index of the type from the type array
 	 * 
 	 * @return TRUE if uses data otherwise FALS
 	 */
@@ -418,7 +422,36 @@ function _get_sn_type_array() {
 	}
 	
 	/**
+	 * Determines whether a item is a subtype or type based on their machine name
+	 * 
+	 * @param string $mnm
+	 * 	The machine name of the type to determine
+	 * 
+	 * @return int
+	 * 	Returns the integer index of the subtype entry or -1 if not a subtype.
+	 */
+	function _shivanode_is_subtype($mnm) {
+		$dtypes = _get_sn_type_array('full');
+		foreach ($dtypes as $indnm => $item) {
+			if ($mnm == $indnm) { return -1; }
+		}
+		$stypes = _get_sn_type_array('subtypes');
+		foreach ($stypes as $ind => $stype) {
+			if ($mnm == $stype[1]) { return $ind; }
+		}
+		return -1;
+	}
+	
+	/**
 	 * Returns all types that use data spreadsheets in a variety of formats
+	 * 
+	 * @param string $format
+	 * 	Designates the format to return. Acceptible values are:
+	 * 		full : gives the full list of data types
+	 *    select : gives a list of data types alphabetically with initial blank for a select form
+	 * 
+	 * @return array
+	 * 	A list of data types in the desired format
 	 */
 	function _shivanode_get_data_types($format='full', $show_deprecated=FALSE) {
 		$alltypes = shivanode_get_types('full');
@@ -439,13 +472,20 @@ function _get_sn_type_array() {
 			}
 		}
 		usort($dtypes, function($a, $b) { return ($a['label'] > $b['label']) ? TRUE : FALSE; });
+		if ($format == 'select') {
+			$outarray = array(0 => 'Visualize as');
+			foreach ($dtypes as $nind => $type) {
+				$outarray[$type['machine_name']] = $type['label'];
+			}
+			return $outarray;
+		}
 		return $dtypes;
 	}
 	
 	/**
 	 * Get a full list of help urls for both types and subtypes
 	 * 
-	 * returns an associative array of 'types' and 'subtypes' helpurls by index
+	 * @return an associative array of 'types' and 'subtypes' helpurls by index
 	 */
 	function _shivanode_get_help_urls() {
 		$alltypes = shivanode_get_types('full');
@@ -465,20 +505,55 @@ function _get_sn_type_array() {
 	}
 	
 	/**
-	 * Get the index for a type or subtype given its name
+	 * Get the array for that type
+	 * 
+	 * @param int $typeInd
+	 * 	the index integer for that type
+	 * @param boolean $isSubtype
+	 *  whether it is a subtype or not
+	 * 
+	 * @return mixed 
+	 * 	array of data about type or subtype or FALSE if not found
 	 */
-	function _shivanode_get_type_index($typeInd, $isSubtype) {
+	function _shivanode_get_type_info($typeInd, $isSubtype) {
+		if($isSubtype) {
+			$subtypes = shivanode_get_types('subtypes');
+			return $subtypes[$typeInd];
+		} else {
+			$alltypes = shivanode_get_types('full');
+			foreach ($alltypes as $mn => $type) {
+				if ($type['index'] == $typeInd) {
+					return $type;
+				}
+			}
+		}
+		return FALSE;
+	}
+
+	/**
+	 * Get the index for a type or subtype given its name, either machine name or label
+	 * 
+	 * @param string $typeName
+	 * 	The name of the type either as a machine name or label
+	 * @param boolean $isSubtype
+	 * 	Whether the $typeName is that of a subtype or not
+	 * 
+	 * @return int
+	 * 	returns the integer index for the type or subtype or -1 if not found
+	 * 
+	 */
+	function _shivanode_get_type_index($typeName, $isSubtype) {
 		if($isSubtype) {
 			$subtypes = shivanode_get_types('subtypes');
 			foreach($subtypes as $sind => $stype) {
-				if($stype[0] == $typeInd || $stype[1] == $typeInd) {
+				if($stype[0] == $typeName || $stype[1] == $typeName) {
 					return $sind;
 				}
 			}
 		} else {
 			$alltypes = shivanode_get_types('full');
 			foreach($alltypes as $tind => $type) {
-				if ($tind == $typeInd || $type['name'] == $typeInd) {
+				if ($tind == $typeName || $type['name'] == $typeName) {
 					return $type['index'];
 				}
 			}
@@ -487,7 +562,41 @@ function _get_sn_type_array() {
 	}
 	
 	/**
-	 * Get thumb image machine name
+	 * Gets the parent machine name for a subtype
+	 * 
+	 * @param mixed $stind
+	 * 	Subtype index or machine name of subtype
+	 * 
+	 * @return mixed
+	 * 	Returns a string of the machine name of the parent, if found
+	 *  Or returns FALSE if not found
+	 */
+	function _shivanode_get_parent_type($stind) {
+		$alltypes = shivanode_get_types('full');
+		foreach ($alltypes as $pind => $type) {
+			if ($type['subtypes']) {
+				// If it's an integer index
+				if(is_int($stind) && isset($type['subtypes'][$stind])) {
+					return $pind;
+				// If it's a subtype machine name
+				} else if (!is_int($stind)) {
+					foreach ($type['subtypes'] as $sind => $stype) {
+						if($stype[1] == $stind) {
+							return $pind;
+						}
+					}
+				}
+			}
+		}
+		return FALSE; // Return FALSE if not found
+	}
+	
+	/**
+	 * Get a list of thumb images variable names. The variable names can be use with variable_get() to retreive the file Id
+	 * for the thumbnail image stored in Drupal.
+	 * 
+	 * @return array
+	 * 	Returns an array with two keys "types" and "subtypes" each listing the thumb image variable name under its index
 	 */
 	function _shivanode_get_thumb_image_list() {
 		$alltypes = shivanode_get_types('full');

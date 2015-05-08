@@ -712,7 +712,7 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
   $form['#attributes'] = array(
 		'id' => "visselect-$id",
 	);
-	
+	$options = _shivanode_types_using_gdocs();
   $form['visselect'] = array(
     '#type' => 'select',
     '#multiple' => FALSE,
@@ -720,7 +720,7 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
     '#empty_option' => t('Visualize as ...'),
     '#empty_value' => 0,
     '#default_value' => 0,
-    '#options' => _shivanode_types_using_gdocs(),
+    '#options' => $options,
     '#attributes' => array(
     	//'onchange' => 'Drupal.Shivanode.setSelectedType(jQuery(this), true);', 
     	'onchange' => 'console.log(this, "' . $id . '"); jQuery("#submit-' . $id . '").click();', // form.submit("visselect-' . $id . '")
@@ -777,19 +777,36 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
 	return $form;
 }
 
+/**
+ * Submit function to handle choices from my data page, either in the form of a select list choice or a button click
+ * Adds new data node if previously not handled
+ */
 function shivanode_gdocs_choice_form_submit($form, &$form_state) {
 	dpm($form_state['input'], 'forms input');
-	$visselect = (isset($form_state['input']['mydtitle'])) ? $form_state['input']['mydtitle'] : FALSE;
+	// Get inputs from form
+	$visselect = (isset($form_state['input']['visselect'])) ? $form_state['input']['visselect'] : FALSE;
 	$mydtitle = $form_state['input']['mydtitle'];
 	$mydtype = $form_state['input']['mydtype'];
 	$mydid = $form_state['input']['mydid'];
 	$vtype = $form_state['input']['vistype'];
 	$vsubtype = $form_state['input']['vissubtype'];
 	
+	// If selected from list, then $visselect will be a machine name, set vtype and subtype values from it
+	if($visselect) {
+		module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+		$isSubtype = _shivanode_is_subtype($visselect);
+		$sindex = _shivanode_get_type_index($visselect, $isSubtype);
+		if ($isSubtype) {
+			$vtype = _shivanode_get_parent_type($sindex);
+			$vsubtype = $visselect;
+		}
+		dpm($isSubtype, $sindex);
+	}
+	
 	// if it's a gid (google id) then it has not been made into a node yet
 	$node = FALSE;
 	if($mydtype == 'gid') {
-		$node = shivadata_add_node($mydid, $mydtitle);
+		$node = shivadata_add_node($mydid, $mydtitle); // TODO: ?? should check for other nodes with same URL
 	} else {
 		$node = node_load($mydid);
 	}
@@ -862,9 +879,16 @@ function _shivanode_data_use_form_submit($form, &$form_state) {
   }
 }
 
-//** Returns an array of shiva node types that use spreadsheet info **/
+/**
+ * Returns an array of shiva node types that use spreadsheet info for a select in machinenm => label format
+ * Or the Label associated with a value
+ * 
+ * @param mixed $val
+ * 	Either an integer index value or FALSE to return whole list
+ *  
+ **/
 function _shivanode_types_using_gdocs($val = FALSE) {
-	dpm("NEED TO FIX this to use shivanode types function!");
+	/* old array (Previously sequential. New array is associative.)
   $gtypes = array(
     '',
     'Annotated Time Line',
@@ -885,13 +909,16 @@ function _shivanode_types_using_gdocs($val = FALSE) {
     'Slideshow',
     'Network',
     'Timeline'
-  );
+  );*/
+	 
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+	$gdtypes = _shivanode_get_data_types('select');
   if(!$val) {
-    return $gtypes;
-  } else if (!isset($gtypes[$val])) {
+    return $gdtypes;
+  } else if (!isset($gdtypes[$val])) {
     return FALSE;
   } else {
-    return $gtypes[$val];
+    return $gdtypes[$val];
   }
 }
 
@@ -1809,7 +1836,12 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
     );
     $form['gdocinfo']['title_span'] = array(
       '#type' => 'markup',
-      '#markup' => '<span id="chosen_data_element_title">' . $datatitle . '</span> ',
+      '#markup' => '<span id="chosen_data_element_title">' . 
+										l($datatitle, $dataurl, array(
+											'attributes' => array('target' => '_blank', 'title' => t('Click to view spreadsheet in a separate window')), 
+											'external' => TRUE,
+										)) . 
+										'</span> ',
     );
     $form['gdocinfo']['url_span'] = array(
       '#type' => 'markup',
@@ -1820,31 +1852,9 @@ function _shivanode_add_datalink(&$form, $did, $is_new_el) {
       '#prefix' => '<div id="data_sheet_link_buttons">',
       '#suffix' => '</div>',
     );
-    // Link to Edit Google Doc source spreadsheet
-    //$gupts = explode('key=', $dataurl);
-    //$gurl = 'https://docs.google.com/spreadsheet/ccc?key=' . $gupts[1]; //$(this).parent().click();
-    $form['gdocinfo']['button_div']['edit_gdoc'] = array(
-      '#type' => 'markup',
-      '#markup' =>  '&nbsp;' . 
-                    l('<input type="button" value="' . t('Edit Data') . '" onclick="Drupal.Shivanode.dataSheetEdit();" class="form-submit" />', 
-                      $dataurl, 
-                      array(
-                      'attributes' => array(
-                        'target' => '_blank',
-                        'id' => 'datasheeturl'
-                      ),
-                      'html' => true,
-                    )),
-      '#suffix' => ' | ',
-    );
-    // Link to reinsert Google url into data table.
-    $form['gdocinfo']['button_div']['insert_button'] = array(
-      '#type' => 'markup',
-      '#markup' => '<input type="button" value="' . t('Refresh Data') . '" onclick="Drupal.Shivanode.insertDataElement(\'preset\'); return false;" ' .
-        'title="' . t('Insert the Data URL from this link in the form below.') . '" class="form-submit" />',
-        '#suffix' => ' | ',
-    );
+		
     // The clear link to clear the link from shivanode to data entry.
+    // TODO: Make this remove data link button smaller with css class or some such thing
     $form['gdocinfo']['button_div']['remove_datanid'] = array(
       '#type' => 'button',
       '#value' =>  t('Remove Link to Data'),
