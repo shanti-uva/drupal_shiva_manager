@@ -368,7 +368,6 @@ function _get_sn_type_array() {
 	 * Gets machine name index from numeric index
 	 */
 	 function _shivanode_get_machine_name($num_index, $isSubtype=FALSE) {
-	 	 $dtypes = _get_sn_type_array('full');
 		 if($isSubtype) {
 		 	$stypes = shivanode_get_types('subtypes');
 			return (isset($stypes[$num_index][1])) ? $stypes[$num_index][1] : FALSE;
@@ -385,7 +384,6 @@ function _get_sn_type_array() {
 	 * Get Index from machine name
 	 */
 	function _shivanode_get_index($mnm, $isSubtype=FALSE) {
-		$dtypes = _get_sn_type_array('full');
 		if($isSubtype) {
 			$stypes = shivanode_get_types('subtypes');
 			foreach ($stypes as $n => $stype) {
@@ -413,7 +411,7 @@ function _get_sn_type_array() {
 	 * @return TRUE if uses data otherwise FALS
 	 */
 	function _shivanode_is_data_type($tind) {
-		$dtypes = _get_sn_type_array('full');
+		$dtypes = shivanode_get_types('full');
 		if (isset($dtypes[$tind])) {
 			return $dtypes[$tind]['uses_data'];
 		} else {
@@ -431,11 +429,11 @@ function _get_sn_type_array() {
 	 * 	Returns the integer index of the subtype entry or -1 if not a subtype.
 	 */
 	function _shivanode_is_subtype($mnm) {
-		$dtypes = _get_sn_type_array('full');
+		$dtypes = shivanode_get_types('full');
 		foreach ($dtypes as $indnm => $item) {
 			if ($mnm == $indnm) { return -1; }
 		}
-		$stypes = _get_sn_type_array('subtypes');
+		$stypes = shivanode_get_types('subtypes');
 		foreach ($stypes as $ind => $stype) {
 			if ($mnm == $stype[1]) { return $ind; }
 		}

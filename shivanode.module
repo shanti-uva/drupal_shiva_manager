@@ -705,6 +705,7 @@ function shivanode_node_presave($node) {
  *   Save shivanode_link record linking visualization node with data node
  */
 function shivanode_node_insert($node) {
+	shivadata_add_link($node->nid, $node->data_id);
   $sntype = strtolower(_get_shivanode_type($node));
   if($sntype != 'data') {
     _shivanode_add_data_correspondence($node);
@@ -907,6 +908,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
+    $did = '';
   }
   /*if($sntype == '') { $sntype = t('Chart');}
   if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }

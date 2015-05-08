@@ -72,7 +72,6 @@ function shivadata_add_node($gid, $desc='') {
  * @TODO: Modify display of node to include "Use this Data Link"
  */
  
- 
 /**
  * shivadata_get_url: Returns the url for the data depending on the type of data.
  * 		GDoc and CSV return URL from URL field
@@ -107,31 +106,53 @@ function shivadata_preprocess_node(&$vars) {
   //dpm($vars, 'vars in sppn');
 	if($vars['type'] == 'shivadata') {
 		$vars['shivanode_links'] = shivadata_get_links($vars['nid'], 'links');
-		$vars['use_link'] = l(t('Visualize!'), "visualize/{$vars['nid']}"); //drupal_render(drupal_get_form('shivadata_create_select_form', $vars['nid']));
+		$vars['use_link'] = l(t('Visualize!'), "visualize/{$vars['nid']}"); 
 	}
 }
 
-function shivadata_create_select_form($form, &$form_state, $nid) {
-	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
-	$options = array('0' => t("Choose a type")) + shivanode_get_types('datatypes', FALSE);
-	$form['desc'] = array(
-		'#markup' => t("<div id=\"dselmessage\"></div>"),
-	);
-	$form['vistype'] = array(
-		'#type' => 'select',
-		'#title' => t('Visualize this data'),
-		'#options' => $options,
-		'#description' => t('Use this data to create a visualization of your choice.'),
-		'#attributes' => array('onchange' => "form.action += '/' + form.vistype.value; form.submit();"),
-	);
-	$form['nid'] = array(
-			'#type' => 'hidden',
-			'#value' => $nid,
-	);
-	$form['#action'] = url('node/add/shivanode/' . $nid);
-	return $form;
+/**
+ * Add a link to the table given a visualization node id and a data node id
+ * 
+ * @param int $visnid
+ * 	The id of the visualization node
+ * @param int $did
+ * 	The id of the data node
+ * 
+ * @return boolean
+ * 	TRUE if successful
+ */
+function shivandata_add_link($visnid, $did) {
+	global $user;
+	$lid = db_insert('shivadata_links')->fields(array(
+		'data_id' => $did,
+		'vis_id' => $visnid,
+		'uid' => $user->uid,
+		'created' => REQUEST_TIME,
+	))->execute();
+	return (empty($lid)) ? FALSE : TRUE; 
 }
 
+/**
+ * Given a node or node id this function returns the data node id (did)
+ * 
+ * @param mixed $node
+ * 	The node or node id of the visualization to find its linked data
+ * 
+ * @param string $format
+ * 	'id' (default) : returns the node id for the linked data node
+ *  'obj' : returns the loaded node object
+ * 
+ * @return mixed
+ * 	Depending on the desired format returns an id or node object
+ *  or FALSE if no did is found
+ */
+function shivadata_get_did($nid, $format='id') {
+	if(is_object($nid) && isset($nid->nid)) { $nid = $nid->nid; }
+	$result = db_query('select data_id from {shivadata_links} where vis_id=:nid', array(':nid'=>$nid));
+	while($record = $result->fecthAssoc()) {
+		
+	}
+}
 
 /**
  * Returns a list of nodes using the data node whose id is given. Can be styled as an array of nids or links

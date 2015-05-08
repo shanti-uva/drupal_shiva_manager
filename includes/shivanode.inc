@@ -782,7 +782,7 @@ function shivanode_gdocs_choice_form($form, &$form_state, $vistype, $ctype, $tit
  * Adds new data node if previously not handled
  */
 function shivanode_gdocs_choice_form_submit($form, &$form_state) {
-	dpm($form_state['input'], 'forms input');
+	//dpm($form_state['input'], 'forms input');
 	// Get inputs from form
 	$visselect = (isset($form_state['input']['visselect'])) ? $form_state['input']['visselect'] : FALSE;
 	$mydtitle = $form_state['input']['mydtitle'];
@@ -800,7 +800,7 @@ function shivanode_gdocs_choice_form_submit($form, &$form_state) {
 			$vtype = _shivanode_get_parent_type($sindex);
 			$vsubtype = $visselect;
 		}
-		dpm($isSubtype, $sindex);
+		//dpm($isSubtype, $sindex);
 	}
 	
 	// if it's a gid (google id) then it has not been made into a node yet
