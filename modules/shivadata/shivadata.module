@@ -106,7 +106,7 @@ function shivadata_preprocess_node(&$vars) {
   //dpm($vars, 'vars in sppn');
 	if($vars['type'] == 'shivadata') {
 		$vars['shivanode_links'] = shivadata_get_links($vars['nid'], 'links');
-		$vars['use_link'] = l(t('Visualize!'), "visualize/{$vars['nid']}"); 
+		$vars['use_link'] = l(t('Visualize this data!'), "create/{$vars['nid']}"); 
 	}
 }
 
@@ -121,7 +121,7 @@ function shivadata_preprocess_node(&$vars) {
  * @return boolean
  * 	TRUE if successful
  */
-function shivandata_add_link($visnid, $did) {
+function shivadata_add_link($visnid, $did) {
 	global $user;
 	$lid = db_insert('shivadata_links')->fields(array(
 		'data_id' => $did,
