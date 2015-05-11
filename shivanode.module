@@ -51,7 +51,7 @@ function shivanode_init() {
 	);
 	drupal_add_js($snsettings, 'setting');
   drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/shivanode.css');
-  drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
+  //drupal_add_css(drupal_get_path('module', 'shivanode') . '/css/data-tables.css');
 }
 
 /**
