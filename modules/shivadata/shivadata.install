@@ -2,6 +2,7 @@
 
 function shivadata_install() {
 	shivadata_create_data_ctype();
+	drupal_goto('admin/config/content/shivanode/convert');
 }
 
 function shivadata_create_data_ctype() {

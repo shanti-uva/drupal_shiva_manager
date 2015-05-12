@@ -105,8 +105,7 @@ function shivadata_get_url() {
 function shivadata_preprocess_node(&$vars) {
   //dpm($vars, 'vars in sppn');
 	if($vars['type'] == 'shivadata') {
-		$vars['shivanode_links'] = shivadata_get_links($vars['nid'], 'links');
-		$vars['use_link'] = l(t('Visualize this data!'), "create/{$vars['nid']}"); 
+		$vars['vis_links'] = shivadata_get_links($vars['nid'], 'links');
 	}
 }
 
@@ -133,7 +132,7 @@ function shivadata_add_link($visnid, $did) {
 }
 
 /**
- * Given a node or node id this function returns the data node id (did)
+ * Given a Shiva Visualization node or node id this function returns the data node id (did) linked to it, if one exists
  * 
  * @param mixed $node
  * 	The node or node id of the visualization to find its linked data
@@ -144,13 +143,18 @@ function shivadata_add_link($visnid, $did) {
  * 
  * @return mixed
  * 	Depending on the desired format returns an id or node object
- *  or FALSE if no did is found
+ *  or FALSE if no did is found. Only returns first one found so multiple ones should not be allowed
  */
 function shivadata_get_did($nid, $format='id') {
 	if(is_object($nid) && isset($nid->nid)) { $nid = $nid->nid; }
 	$result = db_query('select data_id from {shivadata_links} where vis_id=:nid', array(':nid'=>$nid));
-	while($record = $result->fecthAssoc()) {
-		
+	$record = $result->fetchAssoc();
+	if (!isset($record['data_id'])) {
+		return FALSE;
+	} elseif ($format == 'node') {
+		return node_load($record['data_id']);
+	} else {
+		return $record['data_id'];
 	}
 }
 
@@ -322,12 +326,17 @@ function shivadata_admin_convert_finished($success, $results, $operations) {
   if ($success) {
     // display the number of nodes processed
     drupal_set_message(t('@count data nodes converted.', array('@count' => count($results))));
+		shivadata_delete_old_nodes();
   } else {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     $error_operation = reset($operations);
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
   }
+}
+
+function shivadata_delete_old_nodes() {
+	// TODO: Add code to delete old nodes
 }
 
 /***** End of Convert Old Nodes ****/

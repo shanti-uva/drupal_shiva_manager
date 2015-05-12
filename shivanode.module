@@ -1518,6 +1518,19 @@ function theme_shivanode($variables) {
 }
 
 /**
+ * Implements hook_preprocess_node()
+ * 	Adds data node linked to Shivanod if there is one
+ */
+function shivanode_preprocess_node(&$vars) {
+	//dpm($vars, 'vars here');
+	if($vars['type'] == 'shivanode') {
+		if(module_exists('shivadata')) {
+			$vars['data_node'] = shivadata_get_did($vars['node']->nid, 'node');
+		}
+	}
+}
+
+/**
  * Implements hook_preprocess_page () 
  *   This code  and the registry alter code comes from 
  * 
