@@ -294,7 +294,7 @@ function _get_sn_type_array() {
 	 * 	format:
 	 * 		full = full list 
 	 * 		nameindex = just names by index value
-	 * 		datatypes = just names with lowercase label as index of subtypes that take data urls
+	 * 		datatypes = full type information for all types that use spreadsheet data keyed on machine-name
 	 * 		subtypes = list of subtypes by index value
 	 */
 	function shivanode_get_types($format='nameindex', $show_deprecated=TRUE) {
@@ -312,16 +312,30 @@ function _get_sn_type_array() {
 				if($show_deprecated || $typeitem['deprecated'] == FALSE) {
 					if($typeitem['uses_data']) {
 						if($typeitem['subtypes']) {
-							foreach($typeitem['subtypes'] as $subtype) {
-								$data[$nind . '?ctype=' . $subtype[1]] = $subtype[0]; // this is different from before
+							foreach($typeitem['subtypes'] as $sind => $subtype) {
+								$data[$subtype[1]] = array(
+								  'index' => $sind,
+								  'type' => $nind,
+									'create_url' => $nind . '/' . $subtype[1],
+									'name' => $subtype[0],
+									'image' => $subtype[2], 
+									'help_url' => $subtype[3],
+									'is_subtype' => TRUE,
+								);
 							} 
 						} else {
-							$data[$nind] = $typeitem['name'];
+							$data[$nind] = array(
+								'create_url' => $nind,
+								'is_subtype' => FALSE,
+							);
+							$data[$nind] += $typeitem;
 						}
 					}
 				}
 			}
-			asort($data);
+			uasort($data, function($a, $b) {
+				return strcmp($a['name'], $b['name']);
+			});
 		} elseif ($format == 'full') {
 			if(!$show_deprecated) {
 				$shivanode_types = array_filter($shivanode_types, function($v) {

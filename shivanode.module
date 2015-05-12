@@ -98,8 +98,9 @@ function shivanode_menu() {
     'file' => 'includes/shivanode.admin.inc',
     'weight' => -1
   );
-  
+	
 	/*** Data related Menu Items ***/
+	
   // Menu item to add a gid. First variable is GID. Second is optional type
   $items['data/add/gid'] = array(
     'type' => MENU_NORMAL_ITEM,
@@ -146,15 +147,25 @@ function shivanode_menu() {
     'type' => MENU_NORMAL_ITEM,
 	);
 	
-	// Create Visualization (node) Page
+	// Create Visualization (node) Page from a Data node
+	$items['create/shivanode/%'] = array(
+		'title' => 'Create a Visualization',
+		'description' => 'Presents a page to create visualizations using spreadsheet data',
+		'page callback' => 'create_vis_page',
+		'page arguments' => array(2),
+		'access arguments' => array('create shivanode content'),
+    'file' => 'includes/shivanode.pages.inc',
+		'type' => MENU_NORMAL_ITEM,
+	);
+	
+	/*
 	$items['create'] = array(
 		'title' => t('Create a Visualization'),
 		'description' => 'Choose which type of visualization to create',
 		'page callback' => 'create_vis_page',
 		'access callback' => 'is_auth_user',
-    'file' => 'includes/shivanode.pages.inc',
     'type' => MENU_NORMAL_ITEM,
-	);
+	);*/
 	
   // Return form for obtaining embed codes
   $items['node/%/share'] = array(
@@ -1221,6 +1232,7 @@ function shivanode_element_change($form, $form_state) {
         '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
   return $iframe;
 }
+
 
 function shivanode_node_submit($node, $form, &$form_state) {
   $node->data_id = (isset($form_state['input']['shivanode_data_nid'])) ? $form_state['input']['shivanode_data_nid'] : -1;

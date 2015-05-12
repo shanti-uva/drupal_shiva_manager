@@ -2,11 +2,11 @@
 
 /*************** Page Functions *******************************/
 
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
 /**
  * Function to create a entry page for creating a visualizations, listing all registered types.
  */
 function explore_vis_page() {
-	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
 	$stypes = shivanode_get_types('full', FALSE);
 	
 	$page = array(
@@ -136,6 +136,7 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
 						<li><a href="' . $item[3] .'" target="_blank">Documentation</a></li>
 						<li><a href="/examples?f[0]=' . $facet .'">Examples</a></li>
 						<li class="sn-create-link"><a href="' . $create .'">Create</a></li>
+					</ul>
 				</div> 
 			</div> 
 		</li>';
@@ -143,8 +144,73 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
 }
 
 /**
- * Function to create a entry page for creating a visualizations, listing all registered types.
+ * Function to create a entry page for creating a visualizations from data, listing all registered types that use data.
+ * 
+ * @param int $did
+ * 	Integer ID value for the shivadata node to use
  */
-function create_vis_page() {
-	
+function create_vis_page($did=FALSE) {
+	if (!$did || !is_numeric($did)) {drupal_goto('explore');} // if no data id is given go to explore page from which one can create any visualization
+	$dnode = node_load($did);
+	$dtitle = $dnode->title;
+	$dtypes = array();
+	$page = array(
+		'header' => array(
+			'#markup' => t('<h3>Create a Visualization from a Spreadsheet</h3>'),
+		),
+		'description' => array(
+			'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitl)),
+		),
+		'items' => array(
+			'#prefix' => '<ul class="shanti-gallery">',
+			'#suffix' => '</ul>',
+		),
+	);
+
+	$dtypes = shivanode_get_types('datatypes', FALSE);
+	foreach ($dtypes as $machine_name => $dtype) {
+		$dtinfo = array( $dtype['name'], $machine_name, $dtype['image'], $dtype['help_url'] );
+		if($dtype['is_subtype']) { $dtinfo['type'] = $dtype['type'];}
+		$page['items'][] = array(
+			'#markup' => shivanode_create_thumb($dtype['index'], $dtinfo, $dtype['is_subtype'], $did),
+		);
+	}
+	return $page;
 }
+
+/**
+ * Creates thumbnail for the create visualization page
+ * 
+ * @param $ind : index of the item in the php array that defines shivanode types
+ * @param $item : an sequential array of info about the item with title, machine-name, img variable name, and help link in that order
+ * @param $isSubtype : whether or not this is a visualization subtype
+ * @param mixed $did
+ * 	The data id to use in creating the visualization
+ * @return html markup for the thubmnail wrapped in an <li> element for inclusion in a <ul class="shiva-gallery"></ul> list
+ */
+function shivanode_create_thumb($ind, $item, $isSubtype=FALSE, $did=FALSE) {
+	$img = variable_get($item[2], FALSE); // load image file variable (contains fid for thumb image)
+	if($img) {
+		$f = file_load($img); // Load thumb image file
+		$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
+	} else {
+		$img = '';
+	}
+	$did = ($did) ? $did . '/' : '';
+	$create = ($isSubtype) ? "/node/add/shivanode/{$did}{$item['type']}/{$item[1]}" : "/node/add/shivanode/{$did}{$item[1]}";
+	$out = '<li class="shanti-thumbnail visual" ><a href="' . $create .'">
+			
+		  <div class="shanti-thumbnail-image shanti-field-visuals">
+		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
+		   <span class="icon shanticon-visuals"></span>
+		  </div> 
+		  
+		  <div class="shanti-thumbnail-info">
+				<div class="body-wrap">
+					<div class="title">' . $item[0] . '</div>
+				</div> 
+			</div> 
+		</a></li>';
+	return $out;
+}
+
