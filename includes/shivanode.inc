@@ -374,10 +374,20 @@ function _shivanode_filter_gss_list($sslist) {
     if(!isset($n->found) && isset($n->dataGid)) {
       try {
         $gdoc = gdrive_get_file($n->dataGid) ;
-        if($gdoc) { 
-          $haselement[$gdoc['title']] = gdrive_file_attributes($gdoc);
+        if($gdoc) {
+        	if(isset($gdoc['title']))  {
+	          $haselement[$gdoc['title']] = gdrive_file_attributes($gdoc);
+					} else {
+						watchdog('shivanode', "Gdoc object ({$n->dataGid}) has no title object _shivanode_filter_gss_list() in shivanode.inc");
+					}
         }
-      } catch (Exception $e) { }
+      } catch (Exception $e) {
+      	$msg = $e->getMessage();
+				if (empty($msg)) { $msg = 'No Message'; }
+				$eid = $e->getCode();
+				if (empty($eid)) { $eid = '???'; }
+      	watchdog('shivanode', "Exception {$eid}: {$msg}");
+      }
     }
   }
 	
