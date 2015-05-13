@@ -192,7 +192,7 @@ function create_vis_page($did=FALSE) {
 				'#markup' => t('<h3>Create a Visualization from a Spreadsheet</h3>'),
 			),
 			'description' => array(
-				'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitl)),
+				'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitle)),
 			),
 			'items' => array(
 				'#prefix' => '<ul class="shanti-gallery">',

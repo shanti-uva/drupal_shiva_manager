@@ -1536,6 +1536,9 @@ function shivanode_preprocess_node(&$vars) {
 	if($vars['type'] == 'shivanode') {
 		if(module_exists('shivadata')) {
 			$vars['data_node'] = shivadata_get_did($vars['node']->nid, 'node');
+			if (empty($vars['data_node'])) {
+				$vars['data_node'] = _shivanode_get_dataurl($vars['node']);
+			}
 		}
 	}
 }

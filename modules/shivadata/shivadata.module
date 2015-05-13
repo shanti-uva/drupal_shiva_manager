@@ -42,7 +42,7 @@ function shivadata_menu() {
  * TODO: Extend to add other datatypes
  * 
  */
-function shivadata_add_node($gid, $desc='') {
+function shivadata_add_node($gid, $desc='Node added from Google Docs') {
 	global $user;
 	module_load_include('inc', 'gdrive', 'gdrive');
 	$gfile = gdrive_get_file($gid);
@@ -133,22 +133,42 @@ function shivadata_add_link($visnid, $did) {
 	return (empty($lid)) ? FALSE : TRUE; 
 }
 
+/**
+ * Implements hook node delete for data nodes
+ * 
+ * @param object $node
+ * 	The node being deleted
+ */
+function shivadata_node_delete($node) {
+	if ($node->type == 'shivadata') {
+		shivadata_remove_links($node->nid, 'data');
+	}
+}
 
 /**
- * Removes all links in the table for a given visualization node id 
+ * Removes all links in the table for a given visualization/data node id
+ * Used when user deletes a node of either type or when unlinks data from vis 
  * 
- * @param int $visnid
- * 	The id of the visualization node whose links should be removed
+ * @param int $nid
+ * 	The id of the visualization/data node whose links should be removed
+ * 
+ * @param string $type
+ * 	Type of nid provided: 'visual' or 'data'
  * 
  * @return boolean
  * 	TRUE if successful
  */
-function shivadata_remove_links($visnid) {
+function shivadata_remove_links($nid, $type='visual') {
 	global $user;
+	$column = ($type == 'data') ? 'data_id' : 'vis_id';
 	$lid =  db_delete('shivadata_links')
-	  ->condition('vis_id', $visnid)
+	  ->condition($column, $nid)
 	  ->execute();
-	if($lid > 1) { watchdog('shivadata', "Visualization {$visnid} had multiple links in shivadata link table."); }
+	if($type == 'visual') {
+		if ($lid > 1) { watchdog('shivadata', "Visualization {$nid} had multiple links in shivadata link table."); }
+	} else {
+		drupal_set_message(t("Unlinked @n visualizations from deleted data record.", array('@n' => $lid)));
+	}
 	return (empty($lid)) ? FALSE : TRUE; 
 }
 
