@@ -716,11 +716,9 @@ function shivanode_node_presave($node) {
  *   Save shivanode_link record linking visualization node with data node
  */
 function shivanode_node_insert($node) {
-	shivadata_add_link($node->nid, $node->data_id);
-  $sntype = strtolower(_get_shivanode_type($node));
-  if($sntype != 'data') {
-    _shivanode_add_data_correspondence($node);
-  }
+	if($node->type == "shivanode" && isset($node->data_id)) {
+		shivadata_add_link($node->nid, $node->data_id);
+	}
 }
 
 /*

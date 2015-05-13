@@ -223,4 +223,22 @@ function googleStatus(isloggedin) {
 		}
 	};
 	
+	Drupal.behaviors.shivaDataListFilter = {
+		attach: function (context, settings) {
+			if(context == document) {
+				$("#sn-title-filter").on("keyup", function(e) {
+					console.log($(this).val());
+					var ival = $(this).val();
+					$('.views-field-title').each(function() {
+						var ttxt = $(this).text();
+						if (ttxt.match(ival)) {
+							$(this).parents('tr').show();
+						} else {
+							$(this).parents('tr').hide();
+						}
+					});
+				});
+			}
+		}
+	};
 }) (jQuery);

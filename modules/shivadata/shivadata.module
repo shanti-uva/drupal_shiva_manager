@@ -111,6 +111,7 @@ function shivadata_preprocess_node(&$vars) {
 
 /**
  * Add a link to the table given a visualization node id and a data node id
+ * Deletes any previous datalinks this visualization had
  * 
  * @param int $visnid
  * 	The id of the visualization node
@@ -120,8 +121,9 @@ function shivadata_preprocess_node(&$vars) {
  * @return boolean
  * 	TRUE if successful
  */
-function shivadata_add_link($visnid, $did) {
+function shivadata_add_link($visnid) {
 	global $user;
+	shivadata_remove_links($visnid); // Make sure it doesn't already have a link associated with it, delete them if so.
 	$lid = db_insert('shivadata_links')->fields(array(
 		'data_id' => $did,
 		'vis_id' => $visnid,
@@ -130,6 +132,26 @@ function shivadata_add_link($visnid, $did) {
 	))->execute();
 	return (empty($lid)) ? FALSE : TRUE; 
 }
+
+
+/**
+ * Removes all links in the table for a given visualization node id 
+ * 
+ * @param int $visnid
+ * 	The id of the visualization node whose links should be removed
+ * 
+ * @return boolean
+ * 	TRUE if successful
+ */
+function shivadata_remove_links($visnid, $did) {
+	global $user;
+	$lid =  db_delete('shivadata_links')
+	  ->condition('vis_id', $visnid)
+	  ->execute();
+	if($lid > 1) { watchdog('shivadata', "Visualization {$visnid} had multiple links in shivadata link table."); }
+	return (empty($lid)) ? FALSE : TRUE; 
+}
+
 
 /**
  * Given a Shiva Visualization node or node id this function returns the data node id (did) linked to it, if one exists

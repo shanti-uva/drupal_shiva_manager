@@ -378,7 +378,9 @@ function _shivanode_filter_gss_list($sslist) {
         	if(isset($gdoc['title']))  {
 	          $haselement[$gdoc['title']] = gdrive_file_attributes($gdoc);
 					} else {
-						watchdog('shivanode', "Gdoc object ({$n->dataGid}) has no title object _shivanode_filter_gss_list() in shivanode.inc");
+						$error = 'Problem reading google doc: ' . $n->dataGid . ' ';
+						if (isset($gdoc[0]->message)) { $error .= "({$gdoc[0]->message})"; }
+						watchdog('shivanode', $error);
 					}
         }
       } catch (Exception $e) {
