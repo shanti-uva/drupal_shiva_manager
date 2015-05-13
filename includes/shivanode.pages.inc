@@ -6,15 +6,18 @@
 /**
  * Function to create a entry page for creating a visualizations, listing all registered types.
  */
-function explore_vis_page() {
+function explore_vis_page($mode='explore') {
 	$stypes = shivanode_get_types('full', FALSE);
-	
+	$collapsed = ($mode == 'explore') ? TRUE : FALSE;
 	$page = array(
 		'header' => array(
 			'#markup' => t('<h3>Explore Visualization Types</h3>'),
 		),
 		'description' => array(
 			'#markup' => t('<p>Listed below are the various types of visualizations one can make in SHIVA. Put your cursor over the image of the visualization type you are interested in and a list of choices will appear.</p>'),
+		),
+		'#attributes' => array(
+			'class' => array('shanti-gallery'),
 		),
 		'charts' => array(
 			'#type' => 'fieldset',
@@ -23,7 +26,7 @@ function explore_vis_page() {
 	    '#collapsed' => FALSE,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul>',
+				'#prefix' => '<ul class="sn-explore-list">',
 				'#suffix' => '</ul>',
 			),
 		),
@@ -31,10 +34,10 @@ function explore_vis_page() {
 			'#type' => 'fieldset',
 	    '#title' => t('Relationships'),
 	    '#collapsible' => TRUE, // Added
-	    '#collapsed' => TRUE,  // Added
+	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul>',
+				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -42,10 +45,10 @@ function explore_vis_page() {
 			'#type' => 'fieldset',
 	    '#title' => t('Media'),
 	    '#collapsible' => TRUE, // Added
-	    '#collapsed' => TRUE,  // Added
+	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul>',
+				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -53,20 +56,30 @@ function explore_vis_page() {
 			'#type' => 'fieldset',
 	    '#title' => t('Maps'),
 	    '#collapsible' => TRUE, // Added
-	    '#collapsed' => TRUE,  // Added
+	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul>',
+				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
 	);
 	
+	// if create mode then change headers
+	if ($mode == 'create') {
+		$page['header'] = array(
+				'#markup' => t('<h3>Create a Visualization</h3>'),
+			);
+		$page['description'] = array(
+				'#markup' => t('<p>Click on the type of visualization you want to create</p>'),
+			);
+	}
+	
 	// Fill Charts
 	foreach($stypes['chart']['subtypes'] as $sind => $subtype) {
 		$subtype['type'] = 'chart';
 		$page['charts']['items'][] = array(
-			'#markup' => shivanode_explore_thumb($sind, $subtype, TRUE),
+			'#markup' => shivanode_explore_thumb($sind, $subtype, TRUE, $mode),
 		);
 	}
 	
@@ -76,7 +89,7 @@ function explore_vis_page() {
 		$type = $stypes[$tname];
 		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
 		$page['relationships']['items'][] = array(
-			'#markup' => shivanode_explore_thumb($type['index'], $item),
+			'#markup' => shivanode_explore_thumb($type['index'], $item, FALSE, $mode),
 		);
 	}
 	
@@ -86,7 +99,7 @@ function explore_vis_page() {
 		$type = $stypes[$tname];
 		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
 		$page['mediatypes']['items'][] = array(
-			'#markup' => shivanode_explore_thumb($type['index'], $item),
+			'#markup' => shivanode_explore_thumb($type['index'], $item, FALSE, $mode),
 		);
 	}
 	
@@ -96,7 +109,7 @@ function explore_vis_page() {
 		$type = $stypes[$tname];
 		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
 		$page['maps']['items'][] = array(
-			'#markup' => shivanode_explore_thumb($type['index'], $item),
+			'#markup' => shivanode_explore_thumb($type['index'], $item, FALSE, $mode),
 		);
 	}
 	
@@ -112,7 +125,7 @@ function explore_vis_page() {
  * 
  * @return html markup for the thubmnail wrapped in an <li> element for inclusion in a <ul class="shiva-gallery"></ul> list
  */
-function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
+function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore') {
 	$img = variable_get($item[2], FALSE); // load image file variable (contains fid for thumb image)
 	if($img) {
 		$f = file_load($img); // Load thumb image file
@@ -140,6 +153,22 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
 				</div> 
 			</div> 
 		</li>';
+	// For create mode make a simple thumb linked to create
+	if ($mode == 'create') {
+			$out = '<li class="shanti-thumbnail visual" >
+			<a href="' . $create .'">
+		  <div class="shanti-thumbnail-image shanti-field-visuals">
+		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
+		   <span class="icon shanticon-visuals"></span>
+		  </div> 
+		  
+		  <div class="shanti-thumbnail-info">
+				<div class="body-wrap">
+					<div class="title">' . $item[0] . '</div>
+				</div> 
+			</div> </a>
+		</li>';
+	}	
 	return $out;
 }
 
@@ -150,32 +179,37 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE) {
  * 	Integer ID value for the shivadata node to use
  */
 function create_vis_page($did=FALSE) {
-	if (!$did || !is_numeric($did)) {drupal_goto('explore');} // if no data id is given go to explore page from which one can create any visualization
-	$dnode = node_load($did);
-	$dtitle = $dnode->title;
-	$dtypes = array();
-	$page = array(
-		'header' => array(
-			'#markup' => t('<h3>Create a Visualization from a Spreadsheet</h3>'),
-		),
-		'description' => array(
-			'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitl)),
-		),
-		'items' => array(
-			'#prefix' => '<ul class="shanti-gallery">',
-			'#suffix' => '</ul>',
-		),
-	);
+	if (!$did ) {drupal_goto('explore');} // if no data id is given go to explore page from which one can create any visualization
 
-	$dtypes = shivanode_get_types('datatypes', FALSE);
-	foreach ($dtypes as $machine_name => $dtype) {
-		$dtinfo = array( $dtype['name'], $machine_name, $dtype['image'], $dtype['help_url'] );
-		if($dtype['is_subtype']) { $dtinfo['type'] = $dtype['type'];}
-		$page['items'][] = array(
-			'#markup' => shivanode_create_thumb($dtype['index'], $dtinfo, $dtype['is_subtype'], $did),
+	if ($did == 'all') {
+		return explore_vis_page('create');
+	} else {
+		$dnode = node_load($did);
+		$dtitle = $dnode->title;
+		$dtypes = array();
+		$page = array(
+			'header' => array(
+				'#markup' => t('<h3>Create a Visualization from a Spreadsheet</h3>'),
+			),
+			'description' => array(
+				'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitl)),
+			),
+			'items' => array(
+				'#prefix' => '<ul class="shanti-gallery">',
+				'#suffix' => '</ul>',
+			),
 		);
+	
+		$dtypes = shivanode_get_types('datatypes', FALSE);
+		foreach ($dtypes as $machine_name => $dtype) {
+			$dtinfo = array( $dtype['name'], $machine_name, $dtype['image'], $dtype['help_url'] );
+			if($dtype['is_subtype']) { $dtinfo['type'] = $dtype['type'];}
+			$page['items'][] = array(
+				'#markup' => shivanode_create_thumb($dtype['index'], $dtinfo, $dtype['is_subtype'], $did),
+			);
+		}
+		return $page;
 	}
-	return $page;
 }
 
 /**

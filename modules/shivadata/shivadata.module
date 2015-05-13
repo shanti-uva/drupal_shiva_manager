@@ -121,7 +121,7 @@ function shivadata_preprocess_node(&$vars) {
  * @return boolean
  * 	TRUE if successful
  */
-function shivadata_add_link($visnid) {
+function shivadata_add_link($visnid, $did) {
 	global $user;
 	shivadata_remove_links($visnid); // Make sure it doesn't already have a link associated with it, delete them if so.
 	$lid = db_insert('shivadata_links')->fields(array(
@@ -143,7 +143,7 @@ function shivadata_add_link($visnid) {
  * @return boolean
  * 	TRUE if successful
  */
-function shivadata_remove_links($visnid, $did) {
+function shivadata_remove_links($visnid) {
 	global $user;
 	$lid =  db_delete('shivadata_links')
 	  ->condition('vis_id', $visnid)
