@@ -4,4 +4,4 @@
  * Code for the Shiva Views (new) feature.
  */
 
-include_once 'shiva_views_new_.features.inc';
+include_once 'shiva_views_new.features.inc';
