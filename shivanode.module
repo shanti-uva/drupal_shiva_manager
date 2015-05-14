@@ -37,6 +37,7 @@ function shivanode_init() {
 			'dataChanged' => false,
 			'dataTitle' => '',
 			'dataUrl' => '',
+			'jsonFromDrupal' => false,
 			'formLoaded' => false,
 			'iframeSrcUrl' => '',
 			'iframeType' => '',
@@ -847,9 +848,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     _shivanode_check_google_login();
   }
 	// Get Chart Type and Subtype
-  $sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
-  $snsubtype = _shivanode_get_subtype($form['#node']);
-  $is_new_el = FALSE;
+	$is_new_el = (isset($form['#node']->nid)) ? FALSE: TRUE;
+  $sntype = ($is_new_el) ? "" : _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
+  $snsubtype = ($is_new_el) ? "" : _shivanode_get_subtype($form['#node']);
   $submitVal = t('Update');
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
@@ -861,8 +862,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   // If the node with the form does not have an nid, we are creating a new shivanode node. 
   // Set variables accordingly by parsing any arguments in url
   // urls are: node/add/shivanode/7306/chart/BarChart, node/add/shivanode/nd/chart/BarChart, and node/add/shivanode/chart/BarChart
-  if(!isset($form['#node']->nid)) {
-    $is_new_el = TRUE;
+  if($is_new_el) {
     $arg1 = (count(arg()) > 3) ? arg(3) : FALSE;  // either node id, nd (for no data), or chart type
     $arg2  = (count(arg()) > 4) ? arg(4) : FALSE; // 
     $arg3  = (count(arg()) > 5) ? arg(5) : FALSE; // 
@@ -903,9 +903,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     }
     
     // If it's a data-based visualization without a data node id at the end, redirect to data list
-    if (_shivanode_is_data_type($sntype) && $did == FALSE && $nodata == FALSE) {
+    if(!_shivanode_is_data_type($sntype)) { $sntype = 'chart'; $snsubtype = 'PieChart'; }
+    if ($did == FALSE && $nodata == FALSE) {
       $url = "mydata/$sntype";
-			if($snsubtype) { $url .= "/$snsubtype"; }
+			if($snsubtype ) { $url .= "/$snsubtype"; }
       drupal_goto($url);
     } 
     $submitVal = t('Save');
@@ -931,9 +932,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   drupal_set_title($ptitle);
   
   // Make a json object from json string if set, otherwise set jobj to FALSE
-  $jobj = (isset($form['shivanode_json']['und'][0]['value']['#default_value']) && 
-            strlen($form['shivanode_json']['und'][0]['value']['#default_value']) > 0) ? 
-            json_decode($form['shivanode_json']['und'][0]['value']['#default_value']) : FALSE;
+  $jobj = (isset($form['#node']->nid)) ? _shivanode_get_json($form['#node'], FALSE) : FALSE;
+  drupal_add_js(array('shivanode' => array('jsonFromDrupal' => $jobj)), 'setting');
 						
 	// remove any query param if exists					
   if (strpos($action, '?') > -1) { 
@@ -985,7 +985,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	// If it IS a NEW element
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
-    drupal_add_js(array('shivanode' => array('isNewEl' => 'true')), 'setting');
+    drupal_add_js(array('shivanode' => array('isNewEl' => true)), 'setting');
     $form['shivanode_access']['und']['#default_value'] = 1;
     $eltypes = _shivanode_element_typelist(TRUE, FALSE); // Get Label => index array exculding deprecated types
     $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntind])) ? $eltypes[$sntind] : 7; // default value is chart

@@ -142,14 +142,6 @@ function googleStatus(isloggedin) {
 			if ($('iframe#shivaEditFrame').length > 0) {
 				Drupal.Shivanode.setUnload(); // Set the unload function to check whether data changed.
 				
-				// if not new element load node's json field info
-				if (!Drupal.settings.shivanode.isNewEl) {
-					$('#shivaEditFrame').load(function() { 
-							//Drupal.Shivanode.setDataSheet(Drupal.settings.shivanode.dataUrl, Drupal.settings.shivanode.dataTitle);
-							Drupal.Shivanode.putDrupalJSON();
-					});
-				} 
-				
 				// On load for all visualization
 				$('iframe#shivaEditFrame').load(function() {
 				  //Drupal.Shivanode.shivaSendMessage("shivaEditFrame", "GetType"); // once edit frame is loaded send GetType message just to register this page as parent frame

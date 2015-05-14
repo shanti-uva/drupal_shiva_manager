@@ -1020,32 +1020,35 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
   $actions = array();
   // $gdinfo is the section of the form that has the info about the linked google spreadsheet
   $gdinfo = $form['gdocinfo'];
-  $gdinfo['#prefix'] = '<div id="data_sheet_in_use" style="display: block; clear: both;" class="messages status">';
-  unset($gdinfo['script']);
-  unset($gdinfo['data_nid']);
-  // If it's during the creation of a new visualization, one message
-  if (preg_match('/\/node\/add\/shivanode/', $form['#action'])) {
-    drupal_set_message(t('Link to data has been removed.'));
-    $gdinfo['span']['#markup'] ='<script type="text/javascript">Drupal.Shivanode.setUrl("node/add/shivanode", false);</script>';
-   /* $gdinfo['span']['#markup'] = '<span>' . t('No data entry will be linked to this one.') . '</span>';
-    $gdinfo['button_div'] = array();*/
-  // otherwise if editing an existing visualization, another message and ...
-  } 
-  else {
-    $gdinfo['span']['#markup'] = '<span>' . t('Link to data entry:') . '</span>';
-    $gdinfo['old_button_div'] = array(
-      '#type' => 'markup',
-      '#prefix' => '<div id="old_button_div" class="hidden">',
-      '#suffix' => '</div>',
-    );
-    // Save the old button info in case we want to revert this choice (Not yet implemented)
-    $gdinfo['old_button_div']['content'] = $gdinfo['button_div'];
-    $gdinfo['button_div'] = array();
-    $gdinfo['button_div']['text'] = array(
-      '#type' => 'markup',
-      '#markup' => '<span> ' . t('will be removed upon saving this node.') . '</span>',
-    ); 
-  }
+	$res = shivadata_remove_links($form['#node']->nid);
+	if ($res) {
+  	$gdinfo['#prefix'] = '<div id="data_sheet_in_use" style="display: block; clear: both;" class="messages status">';
+	  unset($gdinfo['script']);
+	  unset($gdinfo['data_nid']);
+	  // If it's during the creation of a new visualization, one message
+	  if (preg_match('/\/node\/add\/shivanode/', $form['#action'])) {
+	    drupal_set_message(t('Link to data has been removed.'));
+	    $gdinfo['span']['#markup'] ='<script type="text/javascript">Drupal.Shivanode.setUrl("node/add/shivanode", false);</script>';
+	   /* $gdinfo['span']['#markup'] = '<span>' . t('No data entry will be linked to this one.') . '</span>';
+	    $gdinfo['button_div'] = array();*/
+	  // otherwise if editing an existing visualization, another message and ...
+	  } 
+	  else {
+	    $gdinfo['span']['#markup'] = '<span>' . t('Link to data entry: ') . ' </span>';
+	    $gdinfo['old_button_div'] = array(
+	      '#type' => 'markup',
+	      '#prefix' => '<div id="old_button_div" class="hidden">',
+	      '#suffix' => '</div>',
+	    );
+	    // Save the old button info in case we want to revert this choice (Not yet implemented)
+	    $gdinfo['old_button_div']['content'] = $gdinfo['button_div'];
+	    $gdinfo['button_div'] = array();
+	    $gdinfo['button_div']['text'] = array(
+	      '#type' => 'markup',
+	      '#markup' => '<span> ' . t(' has been removed.') . '</span>',
+	    ); 
+	  }
+	}
   // Ajax commands to return
   $actions[] = ajax_command_replace('#data_sheet_in_use', drupal_render($gdinfo)); // replace gdinfo markup
   $actions[] = ajax_command_remove('#shivanode_data_nid'); // remove hidden value to link to another data entry from form

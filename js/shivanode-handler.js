@@ -29,6 +29,7 @@
 	 * Shiva Message Handler: Processes messages from visualization Ifram
 	 */ 
 	Drupal.Shivanode.shivaMessageHandler = function(e) {
+		// Separate out param name (message type) and message data
 		var mtype, mdata;
 		var eind = e.data.indexOf('=');
 		if (eind == -1) { 
@@ -37,15 +38,20 @@
 			mtype = e.data.substr(0,eind);
 			mdata = e.data.substr(eind + 1);
 		}
+		if (mdata.indexOf('ready|posterFrame') > -1) {return;} // Ignore old message about poster
 		if (debug_on('message_in')) { console.log('message in: ', mtype, mdata); }
-				
+		
+		// Process message (mdata) depending on message type (mtype)
 		switch (mtype) {
 			case 'ChartChanged':
-				Drupal.Shivanode.chartChanged(mdata);
+				if(shiva_settings.status == 'ready') {
+					Drupal.Shivanode.chartChanged(mdata);
+				}
 				break;
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
+				console.info("status in Data changed", shiva_settings.status);
 			  if(shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
 				}
@@ -63,13 +69,7 @@
 				break;
 				
 			case 'GetJSON':
-		  	Drupal.Shivanode.setDrupalJSON(mdata, e);	
-		  	// When frame loads initially it gets the json from it
-		  	// if loadGData is true than combine the google data with it and send it back to the frame
-		  	if(shiva_settings.loadGData == true) {
-		  		shiva_settings.loadGData = false;
-					Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
-		  	}
+		  	Drupal.Shivanode.processGetJSON(mdata, e);
 		  	break;
 				
 			case 'ShivaReady':
@@ -85,7 +85,6 @@
 	 * Sending message to Iframe
 	 */
 	Drupal.Shivanode.shivaSendMessage = function(iFrameName,cmd) {
-		//console.trace();
 		if (typeof(document.getElementById(iFrameName)) == 'object' && document.getElementById(iFrameName) != null) {
 			var win=document.getElementById(iFrameName).contentWindow.postMessage(cmd,'*');
 			if (debug_on('message_out')) { console.log("message out: ", cmd); }
@@ -97,9 +96,20 @@
 	
 	/********* Message Handling Functions *******************/
 	Drupal.Shivanode.chartChanged = function(mdata) {
-		console.log("Chart changed: " + shiva_settings.status);
+		/** 
+		 * Set toggle loadGData to load Google Doc data 
+		 * New chart will automatically call dataChanged function
+		 * This will call getJSON to get json for new chart and in processGetJson will add in new data.
+		 **/
+		if(shiva_settings.status == "ready" && shiva_settings.isNewEl == true ) {
+			shiva_settings.loadGData = true; 
+		}
 	}; 
 	
+	/**
+	 * When Data is changed, call getJSON to get new JSON format from new chart
+	 * This returns "GetJSON" message which is handled in Drupal.Shivanode.processGetJSON
+	 */
 	Drupal.Shivanode.dataChanged = function(mdata) {
 		// any datachanged message received when shiva_settings.status is 'ready' means use changed form so data is changed 
 		if (shiva_settings.status == 'ready') { 
@@ -107,16 +117,22 @@
 			Drupal.Shivanode.getJSON();
 		}
 	}; 
+	
 	/**
 	 * Prodcesses a Ready message from the SHIVA IFrame
 	 *    shiva_settings.status represents the previously set status describing what is now ready
+	 *   Used to deal with ready message in different contexts.
 	 */
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
 		if (shiva_settings.status == 'loading') {
-			// When initially loading the iframe get JSON from it
-			Drupal.Shivanode.getJSON();
+			if (shiva_settings.loadGData == true && shiva_settings.isNewEl == false) {
+				Drupal.Shivanode.putJSON('shivaEditFrame', shiva_settings.jsonFromDrupal); //Drupal.Shivanode.putDrupalJSON();
+			} else {
+				// When initially loading the iframe get JSON from it
+				Drupal.Shivanode.getJSON();
+			}
 		} else if (shiva_settings.status == 'puttingJSON') {
 		// When sending JSON data to Iframe status = puttingJSON
 			shiva_settings.status = 'ready';
@@ -161,6 +177,16 @@
 		Drupal.Shivanode.shivaSendMessage('shivaEditFrame','GetJSON');
 	};	
 	
+	Drupal.Shivanode.processGetJSON = function(mdata, e) {
+		Drupal.Shivanode.setDrupalJSON(mdata, e);	
+  	// When frame loads initially it gets the json from it
+  	// if loadGData is true than combine the google data with it and send it back to the frame
+  	if(shiva_settings.loadGData == true) {
+  		shiva_settings.loadGData = false;
+			Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
+  	}
+	};
+	
 	/** 
 	 * Send JSON to editor iframe
 	 *    Sends the 'json' string to iframe with the given id
@@ -182,15 +208,6 @@
 		}
 		//setTimeout("Drupal.settings.shivanode.loadJS = false;", 1000);
 		//Drupal.Shivanode.monitorEditFrame(true);
-	};
-	
-	/**
-	 * putDrupalJSON: takes json from node edit form and sends it to internal IFrame with SHIVA editor
-	 */
-	Drupal.Shivanode.putDrupalJSON = function() {
-		var frm = 'shivaEditFrame';
-		var json = $('textarea[id^="edit-shivanode-json"]').val();
-		Drupal.Shivanode.putJSON(frm, json);
 	};
 	
 	/* 
