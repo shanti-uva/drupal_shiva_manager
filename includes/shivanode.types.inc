@@ -65,7 +65,7 @@ function _get_sn_type_array() {
 		'draw' => array(
 			'index' => 11,
 			'name' => t('Draw'),
-			'deprecated' => FALSE,
+			'deprecated' => TRUE,
 			'uses_data' => FALSE,
 			'player' => 'shiva',
 			'help_url' => FALSE,
@@ -303,13 +303,13 @@ function _get_sn_type_array() {
 		$data = array(); // Initialize the return array
 		if($format == 'nameindex') {
 			foreach($shivanode_types as $nind => $typeitem) {
-				if($show_deprecated || $typeitem['deprecated'] == FALSE) {
+				if($show_deprecated || $typeitem['deprecated'] === FALSE) {
 					$data[$typeitem['index']] = $typeitem['name'];
 				}
 			}
 		} elseif ($format == 'datatypes') {
 			foreach($shivanode_types as $nind => $typeitem) {
-				if($show_deprecated || $typeitem['deprecated'] == FALSE) {
+				if($show_deprecated || $typeitem['deprecated'] === FALSE) {
 					if($typeitem['uses_data']) {
 						if($typeitem['subtypes']) {
 							foreach($typeitem['subtypes'] as $sind => $subtype) {

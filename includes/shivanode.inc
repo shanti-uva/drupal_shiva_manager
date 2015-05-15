@@ -5,24 +5,25 @@
  */
 
 /**
- * Returns a structured array defining the values for the chart type list
+ * Returns a indexed array defining the value/Name items for the chart type list
  *
  * @return
  *  An associative array specifying the values we wish to add for the chart type.
+ *  This is used as allowed values function for shivanode_element_type and in the shivanode_form_alter,
+ *  and a few other form related functions for on change and submit
  * 
- * 	Bulk of this code is replaces bye shivanode_get_types in shivanode.type.inc
- *  All types are defined in that include file
+ * 	Use this for an index/Name list of active types. Deprecated types and subtypes are exculded.
+ *  For other versions of the type list use the shivanode_get_types() function in shivanode.type.inc
  * 
- * TODO: Replace all references to this with shivanode_get_types calls
+ *  @see shivanode_get_types() in shivanode.type.inc
+ * 
+ * TODO: Make sure all references to this are replaced with shivanode_get_types calls
  *  
  */
  
-function _shivanode_element_typelist($byName=FALSE, $show_deprecated=TRUE) {
+function _shivanode_element_typelist() {
 	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
- 	$options = shivanode_get_types('nameindex', $show_deprecated); // returns all types by index=>name including deprecated ones by default
-  if($byName === TRUE) {
-    $options = array_flip($options); // What about when localized in a different language? Will this still work?
-  }
+ 	$options = shivanode_get_types('nameindex', FALSE); // returns all types by index=>name excluding deprecated ones by default
   return $options;
 }
 
@@ -71,7 +72,7 @@ function _shivanode_subtypelist($type='label', $search=FALSE) {
  */
 function _shivanode_options_list($option = NULL) {
   $options = array(
-    t('Visualizations') => _shivanode_element_typelist(),  
+    t('Visualizations') => _shivanode_element_typelist(FALSE, TRUE), // show deprecated? 
   );
   if (isset($option)) {
     if (!is_numeric($option)) {
@@ -243,7 +244,7 @@ function _get_gid_from_url($url) {
 function _get_shivanode_type($node, $mode = 'string') {
   $type = FALSE;
   if ($node && isset($node->shivanode_element_type)) {
-    $options = _shivanode_element_typelist();
+    $options = _shivanode_element_typelist(TRUE); 
     $typefield = $node->shivanode_element_type;
     $val = $typefield['und']['0']['value'] * 1;
     if ($val == 5) { $val = 13; } // account for old simile 5 

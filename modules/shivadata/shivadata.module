@@ -123,14 +123,21 @@ function shivadata_preprocess_node(&$vars) {
  */
 function shivadata_add_link($visnid, $did) {
 	global $user;
-	shivadata_remove_links($visnid); // Make sure it doesn't already have a link associated with it, delete them if so.
-	$lid = db_insert('shivadata_links')->fields(array(
-		'data_id' => $did,
-		'vis_id' => $visnid,
-		'uid' => $user->uid,
-		'created' => REQUEST_TIME,
-	))->execute();
-	return (empty($lid)) ? FALSE : TRUE; 
+	try {
+		shivadata_remove_links($visnid); // Make sure it doesn't already have a link associated with it, delete them if so.
+		$lid = db_insert('shivadata_links')->fields(array(
+			'data_id' => $did,
+			'vis_id' => $visnid,
+			'uid' => $user->uid,
+			'created' => REQUEST_TIME,
+		))->execute();
+		return (empty($lid)) ? FALSE : TRUE; 
+	} catch (Exception $e) {
+		drupal_set_message(t("Unable to set link to between visualization (@visnid) and data (@did).", 
+			array('@visnid' => $visnid, '@did' => $did)), 'warning');
+			watchdog('shivadata', "Unable to save link to from visualization $visnid to data $did: {$e->getMessage()}");
+			return FALSE;
+	}
 }
 
 /**

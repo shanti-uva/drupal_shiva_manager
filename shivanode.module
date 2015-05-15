@@ -44,7 +44,7 @@ function shivanode_init() {
 			'isNewEl' => false,
 			'jsonLoaded' => false,
 			'latestJSON' => '',
-			'loadGData' => false, // was 'loadJS'
+			'loadData' => false, // was 'loadJS' can be either "GD" Google doc or "JS" for JSON or false
 			'shibstatus' => null,
 			'snviewer' => SHIVA_VIEWER,
 			'status' => 'loading',
@@ -504,52 +504,6 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
       $disStr = '';
       $iframe = '';
-      if (_shivanode_get_element_type($object) == 'Data') {
-        $json = _shivanode_get_json($object);
-        if ($json && isset($json['dataSourceUrl'])) {
-          $iframeurl = $json['dataSourceUrl'];
-          $disStr = ' onclick="window.open(\'' . $iframeurl . '\');" ';
-          $iframeurl = $iframeurl . '&output=html&widget=true';
-          $dependents = db_select('shivanode_links', 'l')
-            ->fields('l')
-            ->condition('data_id', $object->nid, '=')
-            ->execute()
-            ->fetchCol(1);
-          $flabel = t('No other visualizations use this data.');
-          $fclass = ' normal';
-          if ($dependents) {
-            $flabel = t('Visualizations using this data:') . '&nbsp;';
-            $fclass = '';
-          }
-          $iframe .= '<div class="field field-name-shivanode-dependents field-type-list-integer field-label-inline">';
-          if (user_is_logged_in()) {
-            $flabel .= '<div class="field-items normal">' . l(t('Use this Data'), 'node/add/shivanode/' . $object->nid) . '. &nbsp; </div>';
-          }
-          $iframe .= '<div class="field-label' . $fclass . '">' . $flabel . '</div>' .
-            '<div class="field-items"><div class="field-item even">' ;
-          foreach ($dependents as $n => $dnid) {
-            $dnode = node_load($dnid);
-            if (!node_access('view', $dnode)) {
-              unset($dependents[$n]);
-            }
-          }
-          $deplen = count($dependents);
-          foreach ($dependents as $n => $dnid) {
-            $deplen--;
-            $dnode = node_load($dnid);
-            if (node_access('view', $dnode)) {
-              $iframe .= l($dnode->title, 'node/' . $dnid);
-              if ($deplen > 0) {
-                $iframe .= ', ';
-              }
-              if ($deplen == 1) {
-                $iframe .= 'and ';
-              }
-            }
-          }
-          $iframe .= '</div></div></div></div>';
-        }
-      }
       if (is_numeric($height)) {
         $height += 50;
       }
@@ -644,7 +598,11 @@ function shivanode_node_view_alter(&$build) {
     }
   
     $sntype = _shivanode_get_element_type($node); // type of shiva visualization
-    
+    /**
+		 * 
+		 * Old code: before conversion to shivadata
+		 * removed 5-15-15
+
     if($sntype == 'Data') {
       unset($build['field_image']); // don't show thumbnail for data elements
     } else { 
@@ -672,6 +630,7 @@ function shivanode_node_view_alter(&$build) {
         if(isset($build['field_image'])) { unset($build['field_image']); }
       }
     }
+		*/
   }
 }
 
@@ -717,7 +676,8 @@ function shivanode_node_presave($node) {
  *   Save shivanode_link record linking visualization node with data node
  */
 function shivanode_node_insert($node) {
-	if($node->type == "shivanode" && isset($node->data_id)) {
+	dpm($node->data_id, 'did');
+	if($node->type == "shivanode" && !empty($node->data_id) && $node->data_id > -1) {
 		shivadata_add_link($node->nid, $node->data_id);
 	}
 }
@@ -858,6 +818,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   //$ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
   
   $ptitle = '';
+	$jobj = FALSE;
   
   // If the node with the form does not have an nid, we are creating a new shivanode node. 
   // Set variables accordingly by parsing any arguments in url
@@ -902,18 +863,21 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 			 * */
     }
     
-    // If it's a data-based visualization without a data node id at the end, redirect to data list
-    if(!_shivanode_is_data_type($sntype)) { $sntype = 'chart'; $snsubtype = 'PieChart'; }
-    if ($did == FALSE && $nodata == FALSE) {
-      $url = "mydata/$sntype";
-			if($snsubtype ) { $url .= "/$snsubtype"; }
-      drupal_goto($url);
-    } 
+    // REDIRECT: If it's a data-based visualization without a data node id at the end, redirect to data list
+    if(_shivanode_is_data_type($sntype)) { 
+	    if ($did == FALSE && $nodata == FALSE) {
+	      $url = "mydata/$sntype";
+				if($snsubtype ) { $url .= "/$snsubtype"; }
+	      drupal_goto($url);
+	    } 
+		}
+		
+		// Submit label and Header
     $submitVal = t('Save');
     $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : _shivanode_get_type_label($sntype))));
-    
-  // Set Variables for edit form of existing nodes
+		
   } else {
+  // Set Variables for edit form of existing nodes
     //$ctype = _get_shivanode_subtype($form['#node']);
     $ptitle = $form['#node']->title;
     $ptitle = t('Edit Shivanode: @title', array('@title'=> $ptitle));
@@ -927,13 +891,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	// Get Type and Subtype indexes
 	$sntind = _shivanode_get_index($sntype);
 	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
+	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
 	
   // Set the title
   drupal_set_title($ptitle);
   
-  // Make a json object from json string if set, otherwise set jobj to FALSE
-  $jobj = (isset($form['#node']->nid)) ? _shivanode_get_json($form['#node'], FALSE) : FALSE;
-  drupal_add_js(array('shivanode' => array('jsonFromDrupal' => $jobj)), 'setting');
 						
 	// remove any query param if exists					
   if (strpos($action, '?') > -1) { 
@@ -986,28 +948,36 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if ($is_new_el) {
     //_shivanode_check_google_login(); only ask when necessary
     drupal_add_js(array('shivanode' => array('isNewEl' => true)), 'setting');
+		
     $form['shivanode_access']['und']['#default_value'] = 1;
-    $eltypes = _shivanode_element_typelist(TRUE, FALSE); // Get Label => index array exculding deprecated types
-    $form['shivanode_element_type']['und']['#default_value'] = (isset($eltypes[$sntind])) ? $eltypes[$sntind] : 7; // default value is chart
-    $eltype = t('Chart');
+		$sntind = (isset($eltypes[$sntind])) ? $sntind : 7;
+    $eltype = $eltypes[$sntind];
+    $form['shivanode_element_type']['und']['#default_value'] = (string)$sntind; // default value is chart
       
     // Use ajax to reload the iframe depending on Visualization select type choice
     $form['shivanode_element_type']['und']['#ajax'] = array(
       'callback' => 'shivanode_element_change',
       'wrapper' => 'iframe_container',
     );
-    unset($form['shivanode_element_type']['und']['#options'][1]); // remove the data option from the drop down list  Data elements are created automatically by adding spreadsheets
   } 
   // If not a new element
   else {
+  	// Set JS setting to load Drupal JSON data
+  	drupal_add_js(array('shivanode' => array('loadData' => 'JS')), 'setting');
+  	// Make a json object from json string 
+  	$jobj = _shivanode_get_json($form['#node'], FALSE);
+		
     // Get the Visualization type and disable the select type dropdown on exiting Visualizations.
-    $eltype = _shivanode_options_list($form['shivanode_element_type']['und']['#default_value'][0]);
+    $eltype = $eltypes[$form['shivanode_element_type']['und']['#default_value'][0]];
     $form['shivanode_element_type']['#disabled'] = TRUE;
     $form['shivanode_element_type']['#attributes'] += array(
        'onmousedown' => 'alert("You cannot change the type of an existing Shiva Visualization. \nPlease use the Create Visualization link to create a new Visualization instead.");',
     );
   }
   
+	// Add JSON from drupal $jobj (FALSE if new el)
+  drupal_add_js(array('shivanode' => array('jsonFromDrupal' => $jobj)), 'setting');
+	
   // Subtype field. Disable field change as it is set automatically
   if(isset($form['shivanode_subtype'])) {
     $form['shivanode_subtype']['#disabled'] = TRUE;
@@ -1218,8 +1188,8 @@ function shivanode_element_change($form, $form_state) {
   
   $typeVal = $form_state['values']['shivanode_element_type']['und'][0]['value'];
   setcookie('Drupal.Shivanode.lastElementType',$typeVal, time() + 300,'/','');
-  
-  $typeStr = _shivanode_options_list($typeVal);
+  $etypes = _shivanode_element_typelist();
+  $typeStr = $etypes[$typeVal];
   $iframeUrl = _get_shivaframe_url($typeVal);
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $typeStr  . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
@@ -1297,11 +1267,12 @@ function shivanode_form_validate(&$form, &$form_state) {
                        // Drupal.Shivanode.loadJS = true; 
                     </script>',
     );*/
+    $etypes = _shivanode_element_typelist();
     $snsettings = array(
 			'shivanode' => array(
 				'iframeSrcUrl' => $iframeurl,
-				'iframeType' => _shivanode_options_list($sntype),
-				'loadGData' => true, // was loadJS
+				'iframeType' => $etypes[$sntype],
+				'loadData' => "GD", // was loadJS
 			),
 		);
 		drupal_add_js($snsettings, 'setting');

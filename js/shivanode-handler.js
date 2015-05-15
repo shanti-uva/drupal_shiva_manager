@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
@@ -51,7 +51,6 @@
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
-				console.info("status in Data changed", shiva_settings.status);
 			  if(shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
 				}
@@ -127,7 +126,7 @@
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
 		if (shiva_settings.status == 'loading') {
-			if (shiva_settings.loadGData == true && shiva_settings.isNewEl == false) {
+			if (shiva_settings.loadData == "JS") {
 				Drupal.Shivanode.putJSON('shivaEditFrame', shiva_settings.jsonFromDrupal); //Drupal.Shivanode.putDrupalJSON();
 			} else {
 				// When initially loading the iframe get JSON from it
@@ -180,9 +179,9 @@
 	Drupal.Shivanode.processGetJSON = function(mdata, e) {
 		Drupal.Shivanode.setDrupalJSON(mdata, e);	
   	// When frame loads initially it gets the json from it
-  	// if loadGData is true than combine the google data with it and send it back to the frame
-  	if(shiva_settings.loadGData == true) {
-  		shiva_settings.loadGData = false;
+  	// if loadData is "true"GD" (for google doc) than combine the google data with it and send it back to the frame
+  	if(shiva_settings.loadData == "GD") {
+  		shiva_settings.loadData = false;
 			Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
   	}
 	};
