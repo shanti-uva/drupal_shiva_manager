@@ -389,3 +389,171 @@ function shivadata_delete_old_nodes() {
 }
 
 /***** End of Convert Old Nodes ****/
+
+
+/****************************  Sevice Functions   ***************************/
+/*
+ * Function shivadata_services_resources: 
+ * 
+ *  Implements hook_services_resources from the Services Module
+ *  Defines Shivanode resource with a retrieve (for getting one Shivanode) and index (for getting a list of qualified Shivanodes) methods
+ * 
+ *  URL for REST call to get JSON is: http://shantivis.org/api/rest/shivanode/### where ### is the node number (contains all Drupal fields)
+ *  URL for just SHIVA json is http://shantivis.org/data/json/### where ### is the node number (only contains SHIVA fields)
+ */
+
+function shivadata_services_resources() {
+  $node_resource = array(
+    'shivadata' => array(
+      'retrieve' => array(
+        'file' => array('type' => 'module', 'module' => 'shivadata', 'name' => 'shivadata'),
+        'help' => t('This method retreives a single Shiva data page from its node id.'),
+        'callback' => 'shivadata_resource_retrieve',
+        'args' => array(
+          array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The nid of the shivadata node to get',
+          ),
+        ),
+        'access callback' => '_node_resource_access',
+        'access callback file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
+      ),
+      'index' => array(
+        'file' => array('type' => 'module', 'module' => 'shivadata', 'name' => 'shivadata'),
+        'help' => t('This method retreives a list of Shivanodes by searching for specific parameters such as user ids, etc.'),
+        'callback' => 'shivadata_resource_index',
+        'args' => array(
+          array(
+            'name'          => 'fields',
+            'optional'      => TRUE,
+            'type'          => 'string',
+            'description'   => t('The fields to get, separated by commas.'),
+            'default value' => '*', // use fields=* for all 
+            'source'        => array('param' => 'fields'),
+          ),
+          array(
+            'name'          => 'var',
+            'optional'      => TRUE,
+            'type'          => 'array',
+            'description'   => t('Parameters array'),
+            'default value' => array(),
+            'source'        => array('param' => 'var'),
+          ),
+          array(
+            'name'          => 'page',
+            'optional'      => TRUE,
+            'type'          => 'int',
+            'description'   => t('The zero-based index of the page to get, defaults to 0.'),
+            'default value' => 0,
+            'source'        => array('param' => 'page'),
+          ),
+          array(
+            'name'          => 'pagesize',
+            'optional'      => TRUE,
+            'type'          => 'int',
+            'description'   => t('The number of items per page, defaults to 25.'),
+            'default value' => 25,
+            'source'        => array('param' => 'pagesize'),
+          ),
+        ),
+        'access arguments' => array('access content'),
+      ),
+    ),
+  );
+  return $node_resource;
+}
+
+
+/**
+ * Function shivadata_resource_index: 
+ *    Return an array of optionally paged nids baed on a set of criteria.
+ *
+ * Copied from _shivanode_resource_index in the shivanode/includes/shivanode.inc file.
+ * Modified to use "var" instead of "parameters" and to include a tags search on Taxonomy tags
+ * 
+ * An example request might look like
+ *
+ * http://domain/endpoint/node?fields=nid,title&var[tags]=India,Temple&parameters[uid]=1
+ *
+ * This would return an array of objects with only nid and title defined, which
+ * have either the tage India or Temple and were created by UID = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned.
+ * @param $var
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
+ * @return
+ *   An array of node objects.
+ *
+ * @todo
+ *   Evaluate the functionality here in general. Particularly around
+ *     - Do we need fields at all? Should this just return full nodes?
+ *     - Is there an easier syntax we can define which can make the urls
+ *       for index requests more straightforward?
+ */
+function shivadata_resource_index($fields, $var, $page, $page_size) {
+  module_load_include('inc', 'services', 'services.module');
+  $node_select = db_select('node', 't')
+    ->addTag('node_access')
+    ->orderBy('sticky', 'DESC')
+    ->orderBy('created', 'DESC');
+    
+  // Add type = shivanode
+  $node_select->condition('t.type', 'shivadata');
+  
+  // If UID is a true string, it's users name, so find the ID
+  if (isset($var['uid']) && !is_numeric($var['uid'])) {
+    if ($var['uid'] == 'my') {
+      global $user;
+      $var['uid'] = $user->uid;
+    }
+    $snuser = user_load_by_name($var['uid']);
+    if (isset($snuser->uid)) {
+      $var['uid'] = $snuser->uid;
+    }
+  }
+  
+  // Allow for use of fields=all
+  if ($fields == 'all') {
+    $fields = '*';
+  }
+	
+  services_resource_build_index_query($node_select, $page, $fields, $var, $page_size, 'node');
+
+  if (!user_access('administer nodes')) {
+    $node_select->condition('status', 1);
+  }
+  
+  $results = services_resource_execute_index_query($node_select);
+  $nodes = services_resource_build_index_list($results, 'node', 'nid');
+  foreach ($nodes as $node) {
+    $node->uri = str_replace('/node/', '/shivadata/', $node->uri) . '.json';
+  }
+  return $nodes;
+}
+
+// For the Retreive service of Shiva Data node
+function shivadata_resource_retrieve($nid) {
+  $node = node_load($nid);
+  if ($node) {
+    $uri = entity_uri('node', $node);
+    $node->path = url($uri['path'], array('absolute' => TRUE));
+    // Unset uri as it has complete entity and this
+    // cause never ending recursion in rendering.
+    unset($node->uri);
+  }
+	if (isset($node->shivadata_source_url['und'][0]['value'])) {
+		$node->data_url = $node->shivadata_source_url['und'][0]['value'];
+	}
+  return $node;
+}

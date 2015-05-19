@@ -71,6 +71,10 @@
 		  	Drupal.Shivanode.processGetJSON(mdata, e);
 		  	break;
 				
+			case 'RelayJSON':
+				Drupal.Shivanode.relayJSON(mdata, e);
+				break;
+				
 			case 'ShivaReady':
 				Drupal.Shivanode.processReadyMessage(mdata);
 				break;
@@ -209,6 +213,31 @@
 		//Drupal.Shivanode.monitorEditFrame(true);
 	};
 	
+	Drupal.Shivanode.relayJSON = function(json, e) {
+		var fnm = 'shivaEditFrame';
+		// if edit frame is in a popup, have to first relay to the popup.
+		if($('#' + fnm).length == 0 && $('iframe.overlay-active').length > 0) {
+			fnm = 'shivaOverlay';
+			$('iframe.overlay-active').attr('id',fnm); // Iframe needs an id for messaging.
+			json = e.data; // keep the RelayJSON for overlay
+			Drupal.Shivanode.ShivaMessage(fnm, json);
+		} else { // Edit Iframe is in top page so just PutJSON to it.
+			var jobj = JSON.parse(json);
+			var currjson = shiva_settings.latestJSON;
+			currjson = JSON.parse(currjson);					 // Get Current JSON
+			if (jobj.data_url) {	
+				currjson.dataSourceUrl = jobj.data_url;  // Set the URL and Title to new data nod
+				currjson.title = jobj.title;
+				currjson.shivaMod = dt.toDateString();
+				currjson = JSON.stringify(json);
+				Drupal.Shivanode.putJSON('shivaEditFrame',json);  // Send the JSON to the shiva edit frame child
+				Drupal.Shivanode.setDrupalJSON(json);							// Update the Drupal JSON field in the node record
+				// NEED TO ADD LINK to Visualization somehow
+				alert("Need to add code to write the link to database and not allow link if one exists");
+			}
+		}
+	};
+	
 	/* 
 	 * Send given Gdoc url and title to Visualization editing frame
 	 * 		for creating visualizations from data entrys
@@ -234,6 +263,45 @@
 			setTimeout(function() { 
 				window.parent.postMessage('RelayJSON=' + json,'*');
 			}, 1000);
+		}
+	};
+	
+	/*
+	 * setDataElement(did, isnew) : set or relay the ID for a data entry linked to a visualization
+	 * 					did = the data node's node id (nid)
+	 * 					isnew = whether or not it is a new visualization and the add/shivanode page has not yet been called
+	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
+	 */
+	Drupal.Shivanode.setDataElement = function(did, isnew) {
+	  if(self == top && window.location.search.indexOf('insert=') > -1) { isnew = true; }
+		if(typeof(isnew) == "undefined") { isnew = false;}
+		var e = this.event;
+		if(self != top || $(this).parents('#lightbox').length > 0) {
+			// When it is in the lightbox, send id to parent (SetDataElement) and close window
+			cmd = 'SetDataElement=' + did;
+			window.parent.postMessage(cmd,'*');
+			window.parent.Lightbox.end();
+			$('#bottomNavClose').click(); // if above doesn't work.
+			return false;
+		} else if(isnew) {
+			// if it's a brand new visualization and its in the parent position it's a link from the All Data Entries page
+			//  to create a new visualization based on a data entry so redirect
+			var newloc = Drupal.settings.basePath + 'node/add/shivanode/' + did;
+			setTimeout(function () { window.location.href = newloc;},300);
+			return false;
+		} else {
+			// If the top parent controller, then get the data entry JSON and send to Iframe Editor with RelayJSON message
+			$.ajax({
+				type: "GET",
+				url: Drupal.settings.basePath + 'shivapi/data/' + did + '.json',
+				async: false, 
+				success: function (data) {
+					var jobj = JSON.parse(data.json);
+					jobj.did = did;
+					jobj.isNewDSU = true;
+					window.parent.postMessage('RelayJSON=' + JSON.stringify(jobj),'*');
+				}
+			});
 		}
 	};
 	

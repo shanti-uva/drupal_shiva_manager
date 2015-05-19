@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Shiva Services feature.
+ */
+
+include_once 'shiva_services.features.inc';
