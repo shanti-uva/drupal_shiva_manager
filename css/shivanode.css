@@ -577,7 +577,7 @@ html.lightpop #toolbar, html.lightpop #admin-menu,
 html.lightpop #header-top, html.lightpop #block-search-form {
 	display: none !important;
 }
-
+/*
 html.lightpop body, html.lightpop #page-wrapper {
 	height: 800px !important;
 	width: 800px !important;
@@ -587,6 +587,7 @@ html.lightpop .popup, html.lightpop .form-textarea-wrapper {
 	width: 750px !important;
 }
 
+*/
 html.lightpop #page {
   margin-top: 0px !important;
 }

@@ -597,11 +597,11 @@ function _shivanode_data_form_submit($form, &$form_state) {
  */
 function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   // If user does not have any data nodes, add one so view will show results
-  if(count(_get_shivanodes('stype:1 mine')) == 0) {
+  /*if(count(_get_shivanodes('stype:1 mine')) == 0) {
     $url = 'https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dGVROGVESlJWblBSc1c4RjFPTVpyamc&usp=sharing';
     $title = 'Example Data for SHIVA';
     _shivanode_create_shiva_data_node($title, $url);
-  }
+  }*/
   // Get the view of data nodes
   $viewMarkup = views_embed_view('shiva_data_list', 'my_data_pane');
   
@@ -1723,35 +1723,47 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
   $vtype = 'chart';
   $ctype = '';
   $gfile = gdrive_file_attributes(gdrive_get_file($gid, 'object'));
- 
+	//$gfout = (string)$gfile;
   if($gfile) {
-    $dnode = _shivanode_create_shiva_data_node($title, $gfile['url']); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid
-    if($type == "popup") {
-      $markup = array(
-        '#type' => 'markup',
-        '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
-      );
-      return $markup;
-    }
-    if($type < 15) {
-      $ctype = _shivanode_types_using_gdocs($type); 
-    } else {
-      $vtype = strtolower(_shivanode_types_using_gdocs($type));
-    }
-    
-    if($vtype == 'slideshow') { $vtype = 'image'; }
-    
-    if($ctype == '') {
-      drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
-    } else {
-       drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype, array(
-          'query' => array(
-            'ctype' => $ctype,
-          ),
-       ));
-    }
+		$gid = (isset($gfile['id'])) ? $gfile['id'] : t('ID Unknown');
+  	$gurl = (isset($gfile['url'])) ? $gfile['url'] : FALSE;
+		if (!$gurl && isset($gfile['alternateLink'])) {
+			$gurl = $gfile['alternateLink'];
+		} else {
+			watchdog('shivanode', t('Unable to get link for GDoc: @gid', array('@gid' => $gid)));
+			return;
+		}
+		if (module_exists('shivadata')) { 
+	    $dnode = shivadata_add_node($gid); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid
+	    if($type == "popup") {
+	      $markup = array(
+	        '#type' => 'markup',
+	        '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
+	      );
+	      return $markup;
+	    }
+			/* Old Code. Removing... 2015-05-19 
+	    if($type < 15) {
+	      $ctype = _shivanode_types_using_gdocs($type); 
+	    } else {
+	      $vtype = strtolower(_shivanode_types_using_gdocs($type));
+	    }
+	    
+	    if($vtype == 'slideshow') { $vtype = 'image'; }
+	    
+	    if($ctype == '') {
+	      drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
+	    } else {
+	       drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype, array(
+	          'query' => array(
+	            'ctype' => $ctype,
+	          ),
+	       ));
+	    }*/
+		}
   } else {
     drupal_set_message(t('Unable to access Google Drive file @gid.', array('@gid' => $gid)), 'warning');
+		watchdog('shivanode', t('Unable to access Google Drive file @gid.', array('@gid' => $gid)));
     drupal_goto('node/add/shivanode');
   }
 }

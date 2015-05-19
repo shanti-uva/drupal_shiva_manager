@@ -676,8 +676,8 @@ function shivanode_node_presave($node) {
  *   Save shivanode_link record linking visualization node with data node
  */
 function shivanode_node_insert($node) {
-	dpm($node->data_id, 'did');
 	if($node->type == "shivanode" && !empty($node->data_id) && $node->data_id > -1) {
+		dpm($node->data_id, 'did');
 		shivadata_add_link($node->nid, $node->data_id);
 	}
 }
