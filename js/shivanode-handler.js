@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = ['message_in']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
@@ -38,7 +38,7 @@
 			mtype = e.data.substr(0,eind);
 			mdata = e.data.substr(eind + 1);
 		}
-		if (mdata.indexOf('ready|posterFrame') > -1) {return;} // Ignore old message about poster
+		if (mdata && mdata.indexOf('ready|posterFrame') > -1) {return;} // Ignore old message about poster
 		if (debug_on('message_in')) { console.log('message in: ', mtype, mdata); }
 		
 		// Process message (mdata) depending on message type (mtype)

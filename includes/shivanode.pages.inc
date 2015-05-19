@@ -71,7 +71,10 @@ function explore_vis_page($mode='explore') {
 				'#markup' => t('<h3>Create a Visualization</h3>'),
 			);
 		$page['description'] = array(
-				'#markup' => t('<p>Click on the type of visualization you want to create</p>'),
+				'#markup' => t('<p>Click on the type of visualization you want to create.  Or, <a href="@cfurl">go directly to the entry form</a>.</p>',
+					array(
+						'@cfurl' => url('node/add/shivanode/nd/chart'),
+					)),
 			);
 	}
 	
@@ -192,7 +195,7 @@ function create_vis_page($did=FALSE) {
 				'#markup' => t('<h3>Create a Visualization from a Spreadsheet</h3>'),
 			),
 			'description' => array(
-				'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet</p>', array('@dtitle' => $dtitle)),
+				'#markup' => t('<p>Choose the type of data you want to create with the "@dtitle" spreadsheet.</p>', array('@dtitle' => $dtitle)),
 			),
 			'items' => array(
 				'#prefix' => '<ul class="shanti-gallery">',

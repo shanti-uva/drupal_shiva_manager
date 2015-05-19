@@ -425,6 +425,8 @@ function _shivanode_data_form($form, &$form_state) {
   $type = (isset($args[1])) ? $args[1] : FALSE; 
   $ctype = (isset($args[2])) ? $args[2] : FALSE;
   
+	// Determine whether format=simple, if it is in the popup.
+  $isSimple = (isset($_GET['format']) && $_GET['format'] == 'simple') ? TRUE : FALSE;
 	
   // Set display strings
   if(!preg_match('/' . strtolower(SHIVA_DATA_VISUALIZATIONS) . '/', strtolower($type))) { $type = FALSE; }
@@ -441,8 +443,10 @@ function _shivanode_data_form($form, &$form_state) {
   }
   
   // Create Form
+  $cls = ($isSimple) ? 'simple-data-form' : '';
   $form = array(
     '#prefix' => '<div id="data-element-page">',
+    '#attributes' => array('class' => array($cls)),
     '#suffix' => '</div>',
   );
   
@@ -472,15 +476,18 @@ function _shivanode_data_form($form, &$form_state) {
     '#type' => 'hidden',
     '#value' => $ctype,
   );
-  
-  $form['skip'] = array(
-    '#type' => 'submit',
-    '#value' => t('Skip this step!'),
-    '#name' => 'skipbutton',
-    '#prefix' => '<form class="skip-form" action="' . $baseurl . '">',
-    '#suffix' => '</form>',
-  );
-  
+	
+	// if ?format=simple then it's in the popup chooser within form so don't add skip button
+	if (!$isSimple) {
+	  $form['skip'] = array(
+	    '#type' => 'submit',
+	    '#value' => t('Skip this step!'),
+	    '#name' => 'skipbutton',
+	    '#prefix' => '<form class="skip-form" action="' . $baseurl . '">',
+	    '#suffix' => '</form>',
+	  );
+	}
+	
   $form['p'] = array(
     '#type' => 'markup',
     '#markup' => t('<p>@type visualizations require data in the form of a Google Spreadsheet or simple CSV spreadsheet file.  Below is a list of all the spreadsheets you have registered with this site as well as all the spreadsheets in your Google Drive account. Press the visualization button next to the desired data set to begin to create a visualization base on it.</p><p>If you want to switch Google Drive accounts, make sure your browser is logged into the new account, then <a href="@reauthlink">click here</a>.</p>', array(
@@ -500,7 +507,6 @@ function _shivanode_data_form($form, &$form_state) {
   
   // List GDocs
   // Call _shivanode_gdocs_view function to get HTML list of spreadsheets from view, tweak it and insert in this form
-  $isSimple = (isset($_GET['format']) && $_GET['format'] == 'simple') ? TRUE : FALSE;
   $viewmarkup = _shivanode_gdocs_view($type, $ctype, $isSimple);
   $form['addedview'] = array(
     '#type' => 'markup',
