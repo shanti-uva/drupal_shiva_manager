@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['message_in']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
@@ -73,6 +73,10 @@
 				
 			case 'RelayJSON':
 				Drupal.Shivanode.relayJSON(mdata, e);
+				break;
+				
+			case 'SetDataElement':
+				Drupal.Shivanode.setDataElement(mdata);
 				break;
 				
 			case 'ShivaReady':
@@ -182,6 +186,17 @@
 	
 	Drupal.Shivanode.processGetJSON = function(mdata, e) {
 		Drupal.Shivanode.setDrupalJSON(mdata, e);	
+		var sstr = window.location.search;
+		var m = sstr.match(/ctype=([^\&]+)/);
+		if (m && m.length > 1 && !shiva_settings.ctypeprocessed) {
+			var json = shiva_settings.latestJSON;
+			json = JSON.parse(json);
+			json.chartType = m[1];
+			json = JSON.stringify(json);
+			Drupal.Shivanode.putJSON('shivaEditFrame', json);
+			shiva_settings.latestJSON = json;
+			shiva_settings.ctypeprocessed = true;
+		}
   	// When frame loads initially it gets the json from it
   	// if loadData is "true"GD" (for google doc) than combine the google data with it and send it back to the frame
   	if(shiva_settings.loadData == "GD") {
@@ -259,6 +274,7 @@
 		json = JSON.stringify(json);
 		if (self == top ) {
 			Drupal.Shivanode.putJSON('shivaEditFrame',json);
+			shiva_settings.latestJSON = json;
 		} else { 
 			setTimeout(function() { 
 				window.parent.postMessage('RelayJSON=' + json,'*');
@@ -266,43 +282,51 @@
 		}
 	};
 	
-	/*
-	 * setDataElement(did, isnew) : set or relay the ID for a data entry linked to a visualization
-	 * 					did = the data node's node id (nid)
-	 * 					isnew = whether or not it is a new visualization and the add/shivanode page has not yet been called
-	 * 									if this is true this function will redirect to node/add/shivanode/### which ### = the data node id to use 
+	/**
+	 * sendDataElId: Sends a data element ID to the parent frame. Used from within lightbox popup
 	 */
-	Drupal.Shivanode.setDataElement = function(did, isnew) {
-	  if(self == top && window.location.search.indexOf('insert=') > -1) { isnew = true; }
-		if(typeof(isnew) == "undefined") { isnew = false;}
-		var e = this.event;
-		if(self != top || $(this).parents('#lightbox').length > 0) {
-			// When it is in the lightbox, send id to parent (SetDataElement) and close window
-			cmd = 'SetDataElement=' + did;
-			window.parent.postMessage(cmd,'*');
-			window.parent.Lightbox.end();
-			$('#bottomNavClose').click(); // if above doesn't work.
-			return false;
-		} else if(isnew) {
-			// if it's a brand new visualization and its in the parent position it's a link from the All Data Entries page
-			//  to create a new visualization based on a data entry so redirect
-			var newloc = Drupal.settings.basePath + 'node/add/shivanode/' + did;
-			setTimeout(function () { window.location.href = newloc;},300);
-			return false;
+	Drupal.Shivanode.sendDataElId = function(did) {
+		// When it is in the lightbox, send id to parent (SetDataElement) and close window
+		cmd = 'SetDataElement=' + did;
+		window.parent.postMessage(cmd,'*');
+		window.parent.Lightbox.end();
+		$('#bottomNavClose').click(); // if above doesn't work.
+		return false;
+	};
+	
+	/*
+	 * setDataElement(did) : set the ID for a data entry linked to a visualization
+	 * 					did = the data node's node id (nid)
+	 */
+	Drupal.Shivanode.setDataElement = function(did) {
+		var wpn = window.location.pathname; 
+		// When its a new chart form with no data
+		if (wpn.indexOf('node/add/shivanode/nd') > -1) {
+			wpn = wpn.replace('/nd/', '/' + did + '/');
+			window.location.pathname = wpn;
+		// When its a new chart that had a previous data node id
+		} else if (wpn.match(/node\/add\/shivanode\/\d+/)) {
+			wpn = wpn.replace(/node\/add\/shivanode\/\d+/, '/node/add/shivanode/' + did);
+		// When its an old chart being edited
 		} else {
-			// If the top parent controller, then get the data entry JSON and send to Iframe Editor with RelayJSON message
-			$.ajax({
-				type: "GET",
-				url: Drupal.settings.basePath + 'shivapi/data/' + did + '.json',
-				async: false, 
-				success: function (data) {
-					var jobj = JSON.parse(data.json);
-					jobj.did = did;
-					jobj.isNewDSU = true;
-					window.parent.postMessage('RelayJSON=' + JSON.stringify(jobj),'*');
-				}
-			});
+			console.warn('Need to deal with changing data url for existing node');
+			alert('Need to deal with changing data url for existing node');
 		}
+		/* old code
+		$.ajax({
+			type: "GET",
+			url: Drupal.settings.basePath + 'shivapi/data/' + did + '.json',
+			async: false, 
+			success: function (data) {
+				
+				Drupal.Shivanode.setDataSheet(data.data_url, data.title);
+				shiva_settings.newdid = did;
+				$("#data_sheet_in_use #new-data-sheet").remove();
+				$("#data_sheet_in_use").append('<span id="new-data-sheet"><a href="' + data.data_url + '" target="_blank">' + data.title + '</a></span>');
+				$("#data_sheet_in_use").show();
+			}
+		});
+		*/
 	};
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form

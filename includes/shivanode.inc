@@ -438,7 +438,7 @@ function _shivanode_data_form($form, &$form_state) {
   if($type) {
     $baseurl .= '/nd/' . $type;
     if($ctype) {
-      $baseurl .= '/?ctype=' . $ctype;
+      $baseurl .= '/' . $ctype;
     }
   }
   
@@ -483,8 +483,7 @@ function _shivanode_data_form($form, &$form_state) {
 	    '#type' => 'submit',
 	    '#value' => t('Skip this step!'),
 	    '#name' => 'skipbutton',
-	    '#prefix' => '<form class="skip-form" action="' . $baseurl . '">',
-	    '#suffix' => '</form>',
+	    '#submit' => array('_shivanode_skip_data_choice'),
 	  );
 	}
 	
@@ -528,24 +527,20 @@ function _shivanode_data_form($form, &$form_state) {
   }
   return $form;
 }
- 
+
+/**
+ * Called from the skip this step button
+ */
+function _shivanode_skip_data_choice($form, &$form_state) {
+	$vtype = $form_state['input']['vtype'];
+	$ctype = $form_state['input']['ctype'];
+	drupal_goto(url("/node/add/shivanode/nd/$vtype/$ctype"));
+}
+
+/**
+ * Submit function for _shivanode_data_form()
+ */
 function _shivanode_data_form_submit($form, &$form_state) {
-  // example url: node/add/shivanode/1635/chart?ctype=Candlestick Chart
-  // example url when skipping data choice: node/add/shivanode/nd/timeline
-  if(isset($form_state['input']['skipbutton'])) {
-    // if there's an arg(1) it is type of visualization, so add /nd/ (no data) and then type name
-    $type = (arg(1)) ? '/nd/' . arg(1) : ''; 
-    $type = 'node/add/shivanode' . str_replace('Slideshow', 'Image', $type);
-    $options = array();
-    if(arg(2)) {
-      $options = array(
-        'query' => array(
-          'ctype' => arg(2),
-        )
-      );
-    }
-    drupal_goto($type, $options);
-  }
   $vals = &$form_state['input'];
   if(!isset($vals['did']) || $vals['did'] == '') {
     drupal_set_message('No data id was sent', 'warning');
@@ -574,15 +569,11 @@ function _shivanode_data_form_submit($form, &$form_state) {
       $ctype = $mytype;
       $mytype = 'chart';
     }
-    $url[0] .= '/' . $mytype;
+    $url[0] .= "/$mytype";
   }
   $url = str_replace('Slideshow', 'Image', $url);
   if($ctype) {
-    $url[1] = array(
-      'query' => array(
-        'ctype' => $ctype,
-      )
-    );
+    $url .= "/$ctype";
   }
   $form_state['redirect'] = $url;
 }
@@ -628,10 +619,12 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
     $selectFrag = $xml->createDocumentFragment(); 
    // $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
     // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
-    if(!$simple) {
+    if($simple) {
+    	$markup = '<a href="#" onclick="Drupal.Shivanode.sendDataElId(' . $nid . ');">Visualize</a>';
+    	$res = $selectFrag->appendXML($markup);
+    } else {
     	$cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'nid', $nid);
 			$formFrag = render($cform);
-			$selectFrag = $xml->createDocumentFragment(); 
   		$res = $selectFrag->appendXML($formFrag);
     }
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
@@ -1738,7 +1731,7 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
 	    if($type == "popup") {
 	      $markup = array(
 	        '#type' => 'markup',
-	        '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">Drupal.Shivanode.setDataElement(' . $dnode->nid . ', true);</script></div>',
+	        '#markup' => '<div><p>Loading data ...</p><script type="text/javascript">var data_set_elid=' . $dnode->nid . ';</script></div>',
 	      );
 	      return $markup;
 	    }

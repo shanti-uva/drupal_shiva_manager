@@ -30,6 +30,11 @@ function googleStatus(isloggedin) {
 	 */
 	Drupal.behaviors.shivaGeneral = {
 		attach: function (context, settings) {
+			// data_set_elid is added to the bottom of the popup window when a new data element is create from a google doc 
+			// the page returned by _shivanode_add_gid in shivanode.inc
+			if(typeof(data_set_elid) != "undefined") {
+				Drupal.Shivanode.sendDataElId(data_set_elid); 
+			} 
 		}
 	};
 	
@@ -107,6 +112,7 @@ function googleStatus(isloggedin) {
 	    }
 	    
 			// if ctype param is there then send message to shivaEditFrame to change the chart type
+			/*
 			if (window.location.search.indexOf('ctype=') > -1) {
 				var pts = window.location.search.split('ctype=');
 				window.frames['shivaEditFrame'].onload = function() {
@@ -115,7 +121,7 @@ function googleStatus(isloggedin) {
 					setTimeout(funct, 800);
 					window.frames['shivaEditFrame'].onload = null; // Only do it once. 
 				};
-			}
+			}*/
 			
 		  // Enable Gallery select buttons
 		  if (window.location.pathname == '/mygallery') {
