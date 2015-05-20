@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
@@ -104,12 +104,12 @@
 	/********* Message Handling Functions *******************/
 	Drupal.Shivanode.chartChanged = function(mdata) {
 		/** 
-		 * Set toggle loadGData to load Google Doc data 
+		 * Set toggle loadData to load Google Doc data 
 		 * New chart will automatically call dataChanged function
 		 * This will call getJSON to get json for new chart and in processGetJson will add in new data.
 		 **/
 		if(shiva_settings.status == "ready" && shiva_settings.isNewEl == true ) {
-			shiva_settings.loadGData = true; 
+			shiva_settings.loadData = "GD"; 
 		}
 	}; 
 	
@@ -133,9 +133,11 @@
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
+		console.log(shiva_settings.status, shiva_settings.loadData);
 		if (shiva_settings.status == 'loading') {
 			if (shiva_settings.loadData == "JS") {
 				Drupal.Shivanode.putJSON('shivaEditFrame', shiva_settings.jsonFromDrupal); //Drupal.Shivanode.putDrupalJSON();
+				shiva_settings.loadData = false;
 			} else {
 				// When initially loading the iframe get JSON from it
 				Drupal.Shivanode.getJSON();
@@ -198,10 +200,12 @@
 			shiva_settings.ctypeprocessed = true;
 		}
   	// When frame loads initially it gets the json from it
-  	// if loadData is "true"GD" (for google doc) than combine the google data with it and send it back to the frame
+  	// if loadData is "GD" (for google doc) than combine the google data with it and send it back to the frame
   	if(shiva_settings.loadData == "GD") {
   		shiva_settings.loadData = false;
-			Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
+  		if (shiva_settings.dataUrl && shiva_settings.dataUrl.length > 0) {
+				Drupal.Shivanode.setDataSheet(shiva_settings.dataUrl, shiva_settings.dataTitle);
+			}
   	}
 	};
 	

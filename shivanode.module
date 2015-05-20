@@ -128,8 +128,8 @@ function shivanode_menu() {
     'menu_name' => 'main-menu',
     'title' => 'Data',
     'description' => 'List of Available Shiva Data Entries',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_shivanode_data_form'),
+    'page callback' => '_shivanode_data_form',
+    //'page arguments' => array(''),
    // 'page callback' => '_shivanode_data_page',
     'access callback' => 'is_auth_user',
     'file' => 'includes/shivanode.inc',
@@ -677,7 +677,7 @@ function shivanode_node_presave($node) {
  */
 function shivanode_node_insert($node) {
 	if($node->type == "shivanode" && !empty($node->data_id) && $node->data_id > -1) {
-		dpm($node->data_id, 'did');
+		//dpm($node->data_id, 'did');
 		shivadata_add_link($node->nid, $node->data_id);
 	}
 }
@@ -1268,7 +1268,7 @@ function shivanode_form_validate(&$form, &$form_state) {
                     </script>',
     );*/
     $etypes = _shivanode_element_typelist();
-    $snsettings = array(
+    /*$snsettings = array(
 			'shivanode' => array(
 				'iframeSrcUrl' => $iframeurl,
 				'iframeType' => $etypes[$sntype],
@@ -1276,6 +1276,7 @@ function shivanode_form_validate(&$form, &$form_state) {
 			),
 		);
 		drupal_add_js($snsettings, 'setting');
+		 * */
   }
 }
 

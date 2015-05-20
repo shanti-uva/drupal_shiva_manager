@@ -396,11 +396,8 @@ function shivadata_delete_old_nodes() {
  * Function shivadata_services_resources: 
  * 
  *  Implements hook_services_resources from the Services Module
- *  Defines Shivanode resource with a retrieve (for getting one Shivanode) and index (for getting a list of qualified Shivanodes) methods
- * 
- *  URL for REST call to get JSON is: http://shantivis.org/api/rest/shivanode/### where ### is the node number (contains all Drupal fields)
- *  URL for just SHIVA json is http://shantivis.org/data/json/### where ### is the node number (only contains SHIVA fields)
- */
+ *
+ **/
 
 function shivadata_services_resources() {
   $node_resource = array(
