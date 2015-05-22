@@ -86,6 +86,8 @@ function shiva_views_new_default_search_api_server() {
     "class" : "search_api_solr_service",
     "options" : {
       "clean_ids" : true,
+      "site_hash_form" : [],
+      "site_hash" : false,
       "scheme" : "http",
       "host" : "localhost",
       "port" : "8080",
@@ -95,6 +97,8 @@ function shiva_views_new_default_search_api_server() {
       "excerpt" : 0,
       "retrieve_data" : 0,
       "highlight_data" : 0,
+      "skip_schema_check" : 0,
+      "solr_version" : "3",
       "http_method" : "AUTO"
     },
     "enabled" : "1",
