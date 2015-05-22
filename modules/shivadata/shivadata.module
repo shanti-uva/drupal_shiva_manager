@@ -385,7 +385,24 @@ function shivadata_admin_convert_finished($success, $results, $operations) {
 }
 
 function shivadata_delete_old_nodes() {
-	// TODO: Add code to delete old nodes
+	// Query for all Shivanodes with element_type = 1 (old data nodes)
+	$q = db_select('node', 'n');
+	$q->join('field_data_shivanode_element_type','et', 'n.nid = et.entity_id and et.shivanode_element_type_value = 1');
+	$q->fields('n', array('nid'));
+	$res = $q->execute();
+	$allnids = array();
+	// Get NIDs of all old data nodes
+	while ($item = $res->fetchAssoc()) {
+		$allnids[] = $item['nid'];
+	}
+	$ct = 0;
+	// Delete 100 at a time
+	while (count($allnids) > 0) {
+		$nids = array_splice($allnids, 0, 100);
+		node_delete_multiple($nids);
+		$ct++;
+	}
+	drupal_set_message(t("@ct old Shiva data records deleted after conversion to new data records"));
 }
 
 /***** End of Convert Old Nodes ****/
