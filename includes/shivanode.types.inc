@@ -136,7 +136,7 @@ function _get_sn_type_array() {
 		'network' => array(
 			'index' => 10,
 			'name' => t('Network'),
-			'deprecated' => FALSE,
+			'deprecated' => TRUE,
 			'uses_data' => TRUE,
 			'player' => 'shiva',
 			'help_url' => 'https://wiki.shanti.virginia.edu/display/KB/Use+the+Network+Tool',

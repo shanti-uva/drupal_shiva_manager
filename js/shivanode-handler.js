@@ -59,7 +59,7 @@
 			// Shiva edit frame requests a data source URL from Drupal User. 	
 			case 'dataSourceUrl':
 				var durl = ($('#chosen_data_element_url').length == 1) ? $.trim($('#chosen_data_element_url').text()) : '';
-				if($('#chosen_data_element_url').text().length > 0) {
+				if($('#chosen_data_element_url').text().length > 0 && $('#sn-data-removed').length == 0) {
 					alert(Drupal.t("You already have a data item associated with this visualization." +
 						"\nRemove this with the 'Remove Data Link' button before selecting a new one."));
 				} else {
@@ -133,7 +133,7 @@
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
-		console.log(shiva_settings.status, shiva_settings.loadData);
+		//console.log(shiva_settings.status, shiva_settings.loadData);
 		if (shiva_settings.status == 'loading') {
 			if (shiva_settings.loadData == "JS") {
 				Drupal.Shivanode.putJSON('shivaEditFrame', shiva_settings.jsonFromDrupal); //Drupal.Shivanode.putDrupalJSON();
@@ -146,6 +146,10 @@
 		// When sending JSON data to Iframe status = puttingJSON
 			shiva_settings.status = 'ready';
 			shiva_settings.jsonLoaded = true;	
+		} else if (shiva_settings.status == 'newdata') {
+			if (shiva_settings.latestJSON) {
+				Drupal.Shivanode.setDrupalJSON(shiva_settings.latestJSON);
+			}
 		} else {
 			shiva_settings.status = 'ready';
 		}
@@ -215,14 +219,15 @@
 	 * 		This Iframe should hold a Shiveye editor page, such as chart.htm, timeline.htm, etc.
 	 * 		Those pages then handle the putJSON= message, which is not handled in this JS
 	 */
-	Drupal.Shivanode.putJSON = function(iframe,json) {
+	Drupal.Shivanode.putJSON = function(iframe,json,status) {
 		if (typeof(json) == 'object') { json = JSON.stringify(json); }
+		if (typeof(status) == 'undefined') { status = 'puttingJSON'; }
 		try {
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.shivaSendMessage(iframe,cmd);
 			shiva_settings.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
-			shiva_settings.status = 'puttingJSON';
+			shiva_settings.status = status;
 		} catch(e) {
 			if (typeof(console) == 'object') {
 				console.error("Error parsing JSON for put into Iframe (" + iframe + "): \n" + e);
@@ -268,7 +273,7 @@
 		//  URL for adding
 		var pn = window.location.pathname;
 		if (isadd = pn.match(/node\/add\/shivanode\/(\d+)\/([^\/]+)\/([^\/]+)/)) {
-			console.log("Changing chart type: " + isadd[3]);
+			//console.log("Changing chart type: " + isadd[3]);
 			json.chartType = isadd[3];
 		} 
 		json.dataSourceUrl = gdoc;
@@ -277,7 +282,7 @@
 		json.shivaMod = dt.toDateString();
 		json = JSON.stringify(json);
 		if (self == top ) {
-			Drupal.Shivanode.putJSON('shivaEditFrame',json);
+			Drupal.Shivanode.putJSON('shivaEditFrame',json, 'newdata');
 			shiva_settings.latestJSON = json;
 		} else { 
 			setTimeout(function() { 
@@ -313,38 +318,36 @@
 			wpn = wpn.replace(/node\/add\/shivanode\/\d+/, '/node/add/shivanode/' + did);
 		// When its an old chart being edited
 		} else {
-			console.warn('Need to deal with changing data url for existing node');
-			alert('Need to deal with changing data url for existing node');
+			$.ajax({
+				type: "GET",
+				url: Drupal.settings.basePath + 'shivapi/data/' + did + '.json',
+				async: false, 
+				success: function (data) {
+					Drupal.Shivanode.setDataSheet(data.data_url, data.title);
+					shiva_settings.newdid = did;
+					$("#data_sheet_in_use #new-data-sheet").remove();
+					$("#data_sheet_in_use").append('<span id="new-data-sheet"><a href="' + data.data_url + '" target="_blank">' + data.title + '</a></span>');
+					$("#data_sheet_in_use").append('<input type="hidden" name="shivanode_data_nid" id="shivanode_data_nid" value="' + did + '"></input>');
+					$("#data_sheet_in_use").show();
+				}
+			});
 		}
-		/* old code
-		$.ajax({
-			type: "GET",
-			url: Drupal.settings.basePath + 'shivapi/data/' + did + '.json',
-			async: false, 
-			success: function (data) {
-				
-				Drupal.Shivanode.setDataSheet(data.data_url, data.title);
-				shiva_settings.newdid = did;
-				$("#data_sheet_in_use #new-data-sheet").remove();
-				$("#data_sheet_in_use").append('<span id="new-data-sheet"><a href="' + data.data_url + '" target="_blank">' + data.title + '</a></span>');
-				$("#data_sheet_in_use").show();
-			}
-		});
-		*/
 	};
 	
 	// Function to set the JSON value of visualizations within a Shivanode edit/create form
 	Drupal.Shivanode.setDrupalJSON = function(json, e) {
-    shiva_settings.status = "ready";
 		var jobj = JSON.parse(json); 
     json = JSON.stringify(jobj);
 		// If "new" json is the same as old "latestJSON" then return
-    if (shiva_settings.latestJSON == json) { return; }
+    if (shiva_settings.latestJSON == json && shiva_settings.status != 'newdata') { 
+	    shiva_settings.status = "ready";
+	    return; 
+	   }
     $('textarea[id^="edit-shivanode-json"]').val(json);
     shiva_settings.latestJSON = json;
 		// Set IFrame height and width corresponding to the visualization 
     Drupal.Shivanode.adjustHeightWidth(jobj);
-		//Drupal.Shivanode.checkKMLUrls(jobj);
+    shiva_settings.status = "ready";
 	};
 	
 	/**

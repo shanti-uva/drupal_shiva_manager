@@ -1043,7 +1043,7 @@ function _shivanode_set_to_remove_datainfo($form, $form_state) {
 	  $gdinfo['button_div'] = array();
 	  $gdinfo['button_div']['text'] = array(
 	    '#type' => 'markup',
-	    '#markup' => '<span> ' . t(' has been removed.') . '</span>',
+	    '#markup' => '<span id="sn-data-removed"> ' . t(' has been removed.') . '</span>',
 	  ); 
 	}
   // Ajax commands to return

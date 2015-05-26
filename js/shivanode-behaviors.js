@@ -14,7 +14,25 @@ function googleStatus(isloggedin) {
 		}
 	}
 }
-				
+
+/**
+ * Set help link changes help link when chart type is changed
+ */			
+	
+function setHelpLink(hlink, typestr) {
+	jQuery('#iframe_container legend a.sn-helplink').attr({
+      'href' : hlink,
+      'title' : typestr + " help"
+    }).show();
+    
+  // Reset Title and Breadcrumbs
+  var newtitle = 'Create a ' + typestr;
+	var pts = jQuery('.breadcrumb').html().split('› ');
+	pts[pts.length - 1] = newtitle;
+	jQuery('.breadcrumb').html(pts.join('› '));
+  jQuery('#page-title').text(newtitle);
+}
+	
 (function($) {
 /** shivanode.js: Javascript functions for use within shivanode Drupal Module */
 	

@@ -727,51 +727,11 @@ function shivanode_node_delete($node) {
  */
 function shivanode_node_update($node) {
   if ($node->type == 'shivanode') {
-    // if it's a data visualization update shiva visualizations linked to it
-    if (_shivanode_get_element_type($node) == "Data") {
-      $nids = array();
-      $result = db_select('shivanode_links', 'l')
-        ->fields('l')
-        ->condition('data_id', $node->nid, '=')
-        ->execute()
-        ->fetchCol(1);
-      foreach ($result as $n => $nid) {
-        $dependent = node_load($nid);
-        if (_shivanode_get_element_type($dependent) != "Data") {
-          $dep_json = _shivanode_get_json($dependent);
-          $pres_json = _shivanode_get_json($node);
-          if (isset($dep_json->dataSourceUrl) && $dep_json->dataSourceUrl != $pres_json->dataSourceUrl) {
-            $dep_json->dataSourceUrl = $pres_json->dataSourceUrl;
-            $dependent->shivanode_json['und'][0]['value'] = json_encode($dep_json);
-            node_save($dependent);
-            $nids[] = $dependent->title . ' (' . $dependent->nid . ')';
-          }
-        }
-      }
-      if (count($nids) > 0) {
-        $msg = implode(', ', $nids);
-        if (count($nids) > 1) {
-          $msg = substr_replace($msg, ', and', strrpos($msg, ','), 1);
-        }
-        drupal_set_message(
-            check_plain(t("The following Shiva visualizations which use this data have also been modified:")) . " " . $msg
-        );
-      }
-    // otherwise if data_id is set, store that in the shivanode_links table
-    } 
-    elseif (isset($node->data_id)) {
+    if (isset($node->data_id)) {
       if ($node->data_id == -1 ) {
         _shivanode_remove_datalink($node);
       } else {
-        $result = db_update('shivanode_links')
-          ->fields(array(
-              'data_id' => $node->data_id,
-            ))
-          ->condition('sn_id', $node->nid, '=')
-          ->execute();
-        if (!$result) {
-          _shivanode_add_data_correspondence($node); 
-        }
+				shivadata_add_link($node->nid, $node->data_id);
       }
     }
   }
@@ -1191,13 +1151,14 @@ function shivanode_element_change($form, $form_state) {
   $etypes = _shivanode_element_typelist();
   $typeStr = $etypes[$typeVal];
   $iframeUrl = _get_shivaframe_url($typeVal);
+	$helpLink = _shivanode_get_help_link($typeVal);
   $iframe = '<fieldset id="iframe_container" class="form-wrapper"><legend><span class="fieldset-legend">' . 
         $typeStr  . _shivanode_get_help_link($typeVal) . '</span>' . '&nbsp;</legend>' .
         '<div id="sneditmessage" style="display: none;"></div>' .
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
-        '" scrolling="auto" frameborder="0" onload="Drupal.Shivanode.setIframeSpecifics();"> </iframe>' .
-        '<div><script type="text/javascript">Drupal.Shivanode.setHelpLink("' . $typeStr . '");</script></div></fieldset>';
+        '" scrolling="auto" frameborder="0" > </iframe>' . // onload="Drupal.Shivanode.setIframeSpecifics();"
+        '<div><script type="text/javascript">setHelpLink(\'' . $helpLink . '\', "' . $typeStr . '");</script></div></fieldset>';
   return $iframe;
 }
 
