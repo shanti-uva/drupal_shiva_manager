@@ -641,7 +641,7 @@ function shivanode_node_view_alter(&$build) {
  */
 function shivanode_node_presave($node) {
   if($node->type == 'shivanode') {
-    $lang = (isset($node->language)) ? $node->language : LANGUAGE_NONE;  // Node language
+    $lang = LANGUAGE_NONE;  // Node language
     
     // Add or Adjust subtype field if value exists
     $json = json_decode($node->shivanode_json[$lang][0]['value']);
