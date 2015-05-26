@@ -402,7 +402,7 @@ function shivadata_delete_old_nodes() {
 		node_delete_multiple($nids);
 		$ct++;
 	}
-	drupal_set_message(t("@ct old Shiva data records deleted after conversion to new data records"));
+	drupal_set_message(t("@ct old Shiva data records deleted after conversion to new data records", array('@ct' => $ct)));
 }
 
 /***** End of Convert Old Nodes ****/
