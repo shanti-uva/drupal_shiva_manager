@@ -87,7 +87,7 @@ function explore_vis_page($mode='explore') {
 	}
 	
 	// Fill Relationships
-	$reltypes = array('graph', 'network', 'subway', 'timeline', 'word_cloud' ) ;
+	$reltypes = array('graph', 'subway', 'timeline', 'word_cloud' ) ;
 	foreach ($reltypes as $tname) {
 		$type = $stypes[$tname];
 		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
