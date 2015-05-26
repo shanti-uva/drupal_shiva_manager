@@ -641,19 +641,19 @@ function shivanode_node_view_alter(&$build) {
  */
 function shivanode_node_presave($node) {
   if($node->type == 'shivanode') {
-    $lang = (isset($node->language)) ? $node->language : 'und';  // Node language
+    $lang = (isset($node->language)) ? $node->language : LANGUAGE_NONE;  // Node language
     
     // Add or Adjust subtype field if value exists
-    $json = json_decode($node->shivanode_json[LANGUAGE_NONE][0]['value']);
+    $json = json_decode($node->shivanode_json[$lang][0]['value']);
     if($json && isset($json->chartType)) {
       $stype = $json->chartType;
       $stind = _shivanode_subtypelist('index', $stype);
       if(!$stind || $stind == '') {
         drupal_set_message(t("No subtype found for: @stype (no index found)", array('@stype' => $stype)), 'warning');
       } else {
-        $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
+        $node->shivanode_subtype[$lang][0]['value'] = $stind;
 				// Set thumbnail image for subtype
-				if(empty($node->field_image)) {
+				if(empty($node->field_image[$lang])) {
 					if($fid = _shivanode_get_generic_image_info($stind, TRUE)) {
 		        $node->field_image[$lang][0]['fid'] = $fid;
 		      }
@@ -662,7 +662,7 @@ function shivanode_node_presave($node) {
     }
 		
 		// Set Thumbnail Gen Image for type if not set for subtype
-    if(empty($node->field_image)) {
+    if(empty($node->field_image[$lang])) {
   		$type = strtolower(_get_shivanode_type($node, 'int'));
       if($fid = _shivanode_get_generic_image_info($type)) {
         $node->field_image[$lang][0]['fid'] = $fid;
