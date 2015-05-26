@@ -653,7 +653,7 @@ function shivanode_node_presave($node) {
       } else {
         $node->shivanode_subtype[LANGUAGE_NONE][0]['value'] = $stind;
 				// Set thumbnail image for subtype
-				if(!isset($node->field_image[$lang][0])) {
+				if(empty($node->field_image)) {
 					if($fid = _shivanode_get_generic_image_info($stind, TRUE)) {
 		        $node->field_image[$lang][0]['fid'] = $fid;
 		      }
@@ -662,7 +662,7 @@ function shivanode_node_presave($node) {
     }
 		
 		// Set Thumbnail Gen Image for type if not set for subtype
-    if(!isset($node->field_image[$lang][0])) {
+    if(empty($node->field_image)) {
   		$type = strtolower(_get_shivanode_type($node, 'int'));
       if($fid = _shivanode_get_generic_image_info($type)) {
         $node->field_image[$lang][0]['fid'] = $fid;
