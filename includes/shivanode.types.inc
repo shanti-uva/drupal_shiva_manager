@@ -367,7 +367,7 @@ function _get_sn_type_array() {
 	 * 	@param $tind (integer) index for type of subtype (if given a machinename for a type will convert to index)
 	 *  @param $isSubtype (boolean) whether the index represents a type or subtype
 	 */
-	function _shivanode_get_type_label($tind, $isSubtype = FALSE) {
+	function _shivanode_get_type_label($tind, $isSubtype=FALSE) {
 		if($isSubtype) {
 			$sts = shivanode_get_types('subtypes');
 			return $sts[$tind][0];
@@ -527,7 +527,7 @@ function _get_sn_type_array() {
 	 * @return mixed 
 	 * 	array of data about type or subtype or FALSE if not found
 	 */
-	function _shivanode_get_type_info($typeInd, $isSubtype) {
+	function _shivanode_get_type_info($typeInd, $isSubtype=FALSE) {
 		if($isSubtype) {
 			$subtypes = shivanode_get_types('subtypes');
 			return $subtypes[$typeInd];
@@ -554,7 +554,7 @@ function _get_sn_type_array() {
 	 * 	returns the integer index for the type or subtype or -1 if not found
 	 * 
 	 */
-	function _shivanode_get_type_index($typeName, $isSubtype) {
+	function _shivanode_get_type_index($typeName, $isSubtype=FALSE) {
 		if($isSubtype) {
 			$subtypes = shivanode_get_types('subtypes');
 			foreach($subtypes as $sind => $stype) {
@@ -626,3 +626,27 @@ function _get_sn_type_array() {
 		}
 		return $outurls;
 	}
+	
+	/**
+	 * Determines whether a type is deprecated or not
+	 * 
+	 * @param int $tindex
+	 * 	Type or subtype index
+	 * 
+	 * @param boolean $isSubtype
+	 * 	Whether this is a subtype or not
+	 * 
+	 */
+function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
+	$stindex = -1;
+	if ($isSubtype) {
+		$stindex = $tindex;
+		$parentnm = _shivanode_get_parent_type($stindex);
+		$tindex = _shivanode_get_index($parentnm);
+	}
+	$tinfo = _shivanode_get_type_info($tindex);
+	if (is_array($tinfo) && isset($tinfo['deprecated'])) {
+		return $tinfo['deprecated'];
+	}
+	return FALSE;
+}	

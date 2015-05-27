@@ -1620,7 +1620,7 @@ function _shivanode_resource_retrieve($nid) {
  */
 function _shivanode_get_element_type($node, $format="string") {
 	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
-  $typenum = (isset($node->shivanode_element_type)) ? intval($node->shivanode_element_type['und'][0]['value']) : 7; // default is chart
+  $typenum = (isset($node->shivanode_element_type['und'][0]['value'])) ? intval($node->shivanode_element_type['und'][0]['value']) : 7; // default is chart
   //if ($typenum == 5) { $typenum = 13; } // do we still need to look out for simile?
   if ($format == 'label') {
   	return _shivanode_get_type_label($typenum);
