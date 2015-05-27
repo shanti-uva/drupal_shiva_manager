@@ -1124,22 +1124,31 @@ function _shivanode_greset_form_submit($form, &$form_state) {
   drupal_goto($base_root . $base_path . 'mydata');
 }
 
-function _get_shivaframe_url($opt, $nid = '') {
+/**
+ * Returns the editor url for each active visualiztion type to be included in the edit form for shivanodes
+ * If type has been deprecated, returns only player url. Shivadata handled seprately in its own submodule
+ * 
+ * @param mixed $int
+ * 	The integer index or machine name of the desired visualization type
+ * 
+ * @return string Url for the editor
+ */
+function _get_shivaframe_url($opt, $nid = FALSE) {
   if (is_array($opt)) { $opt = $opt[0]; } // if it's an array take first element value
   if (!is_numeric($opt)) { $opt = _shivanode_get_index($opt);  }  // convert machine name to index
-  $player = '';
+  $player = FALSE;
   switch ($opt) {
-    case 1:  // Data (Deprecated)
+    /*case 1:  // Data (Deprecated)
     	drupal_set_message('Shivanode data types have been migrated to shivadata nodes. Fix call to this function', 'warning');
 		  ddebug_backtrace();
-      /*if ($nid != '') {
+      if ($nid != '') {
         $njson = _shivanode_get_json($nid);
         if(isset($njson['dataSourceUrl'])) {
           $player = str_replace('https','http', $njson['dataSourceUrl']);
         }
-      }*/
+      }
        //$player = variable_get('shivanode_data_editor', SHIVA_DATA_EDITOR); //"$otherroot/data.htm?pr=d";
-      break;
+      break;*/
     case 2:   // Image
       $player =  SHIVA_IMAGE_EDITOR;
       break;
@@ -1160,7 +1169,7 @@ function _get_shivaframe_url($opt, $nid = '') {
     case 7:  // Chart
       $player =  SHIVA_CHART_EDITOR;
       break;
-    case 8:  // Controls
+    /*case 8:  // Controls
       $player =  SHIVA_CONTROL_EDITOR;
       break;
     case 9:  // Canvas
@@ -1174,13 +1183,13 @@ function _get_shivaframe_url($opt, $nid = '') {
       break;
     case 12:  // Earth
       $player = SHIVA_EARTH_EDITOR; 
-      break;
+      break;*/
     case 13: // Timeglider
       $player =  SHIVA_TIMEGLIDER_EDITOR;
       break;
-    case 14: // Poster
+    /*case 14: // Poster
       $player =  SHIVA_POSTER_EDITOR;
-      break;
+      break;*/
     case 15: // Word Cloud
       $player =  SHIVA_WCLOUD_EDITOR;
       break;
@@ -1191,7 +1200,15 @@ function _get_shivaframe_url($opt, $nid = '') {
 			$player = SHIVA_QMEDIA_EDITOR;
 			break;
   }
-  if (strpos($player, 'http://') === FALSE && $opt > 1) {
+  // If $player is not set after that, set it to the viewer and add node id to it
+	if (!$player) {
+		$player = SHIVA_VIEWER;
+		if($nid) {
+			$nurl = url('/data/json/' . $nid, array('absolute'=>TRUE));
+			$nurl = preg_replace('/https?:/','', $nurl);
+			$player .= '?m=' . $nurl . '&pr=d';
+		}
+	} else if (strpos($player, 'http://') === FALSE && $opt > 1) {
     $player = variable_get('shivanode_shiva_home', SHIVA_HOME) . $player; 
     $player = $player . '?pr=d';
   }
@@ -1702,6 +1719,12 @@ function _shivanode_get_tags() {
     $tags[$tag->tid] = $tag;
   }
   return $tags;
+}
+
+
+function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
+	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+	return _shivanode_is_type_deprecated($tindex, $isSubtype);
 }
 
 /**

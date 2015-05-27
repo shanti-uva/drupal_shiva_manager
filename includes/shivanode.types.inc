@@ -293,7 +293,7 @@ function _get_sn_type_array() {
 	 * shivanode_get_types: returns a list of shivanode types according to parameters
 	 * 	format:
 	 * 		full = full list 
-	 * 		nameindex = just names by index value
+	 * 		nameindex = just names by index value, e.g. index => Name
 	 * 		datatypes = full type information for all types that use spreadsheet data keyed on machine-name
 	 * 		subtypes = list of subtypes by index value
 	 */
@@ -628,7 +628,7 @@ function _get_sn_type_array() {
 	}
 	
 	/**
-	 * Determines whether a type is deprecated or not
+	 * Determines whether a type is deprecated or not called by _shivanode_is_deprecated in shivanode.inc to not require include load each time
 	 * 
 	 * @param int $tindex
 	 * 	Type or subtype index
@@ -637,7 +637,7 @@ function _get_sn_type_array() {
 	 * 	Whether this is a subtype or not
 	 * 
 	 */
-function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
+function _shivanode_is_type_deprecated($tindex, $isSubtype=FALSE) {
 	$stindex = -1;
 	if ($isSubtype) {
 		$stindex = $tindex;

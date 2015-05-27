@@ -767,18 +767,26 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   if (!isset($_SESSION['gdoc_token']) && isset($_GET['token'])) {
     _shivanode_check_google_login();
   }
-	// Get Chart Type and Subtype
-	$is_new_el = (isset($form['#node']->nid)) ? FALSE: TRUE;
+	// Node and Chart Info
+	$is_new_el = (isset($form['#node']->nid)) ? FALSE : TRUE;
+  $nid = isset($form['#node']->nid) ? $form['#node']->nid : FALSE;
   $sntype = ($is_new_el) ? "" : _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
   $snsubtype = ($is_new_el) ? "" : _shivanode_get_subtype($form['#node']);
+	
+	// Get Type and Subtype indexes
+	$sntind = _shivanode_get_index($sntype);
+	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
+	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
+	$is_deprecated = _shivanode_is_deprecated($sntind);
+	
+	// Other variables
   $submitVal = t('Update');
   $did = FALSE;  // Data id a numeric node id of the associated data if any
   $nodata = FALSE; // boolean to determine whether to show the form without going to the data page. Only relevant for certain visualizations.
-  // Taken out in reworking (2015-05-07) old way of handling convert all uses to {nid}/{chart type}/{subtype}
-  //$ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
-  
   $ptitle = '';
 	$jobj = FALSE;
+  // Taken out in reworking (2015-05-07) old way of handling convert all uses to {nid}/{chart type}/{subtype}
+  //$ctype = (isset($_GET['ctype'])) ? $_GET['ctype'] : FALSE; // Chart type variable
   
   // If the node with the form does not have an nid, we are creating a new shivanode node. 
   // Set variables accordingly by parsing any arguments in url
@@ -836,7 +844,12 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $submitVal = t('Save');
     $ptitle = t('Create a @type', array('@type' => (($sntype == '') ? 'Visualization' : _shivanode_get_type_label($sntype))));
 		
-  } else {
+  } else { // if not new element
+  	// Update form option list to include deprecated
+  	module_load_include('inc', 'shivanode', 'shivanode.types');
+		$lst = shivanode_get_types();
+		unset($lst[1]); // Remove data type
+  	$form['shivanode_element_type']['und']['#options'] = $lst;
   // Set Variables for edit form of existing nodes
     //$ctype = _get_shivanode_subtype($form['#node']);
     $ptitle = $form['#node']->title;
@@ -844,14 +857,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $ptitle = html_entity_decode($ptitle, ENT_QUOTES); // decode aposrophe entities and all other entities in title
     $did = '';
   }
-  /*if($sntype == '') { $sntype = t('Chart');}
-  if($sntype == 'Wcloud') { $sntype = t('Word Cloud'); }
-	 * */
-	 
-	// Get Type and Subtype indexes
-	$sntind = _shivanode_get_index($sntype);
-	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
-	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
 	
   // Set the title
   drupal_set_title($ptitle);
@@ -928,7 +933,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   	$jobj = _shivanode_get_json($form['#node'], FALSE);
 		
     // Get the Visualization type and disable the select type dropdown on exiting Visualizations.
-    $eltype = $eltypes[$form['shivanode_element_type']['und']['#default_value'][0]];
+    //$eltype = $eltypes[$form['shivanode_element_type']['und']['#default_value'][0]];
     $form['shivanode_element_type']['#disabled'] = TRUE;
     $form['shivanode_element_type']['#attributes'] += array(
        'onmousedown' => 'alert("You cannot change the type of an existing Shiva Visualization. \nPlease use the Create Visualization link to create a new Visualization instead.");',
@@ -1100,13 +1105,17 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     } 
   }
   
-  $nid = isset($form['#node']->nid) ? $form['#node']->nid:'';
   $iframeUrl = _get_shivaframe_url($sntind, $nid); 
 
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
   if($is_new_el && $sntype) {
     $iframeUrl .= '&chartType=' . $snsubtype; // was $ctype. Should this be 
   }
+	// Add messages for deprecated types
+  if ($is_deprecated) {
+  	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)));
+		$form['shivanode_json']['#disabled'] = TRUE;
+  } 
 	
 	// Create Markup for IFrame with Label and Helplinks
 	$snlabel = _shivanode_get_type_label($sntind);
@@ -1132,7 +1141,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     $form['#suffix'] = '';
     $form['shivanode_json']['#prefix'] = '<div id="shivanode-json-add-more-wrapper" style="display: none; clear:both;"></div><div style="display: block; clear: both !important; color:red; ">The specs for this type of visualization cannot be edited because it is no longer supported.<br/><br/></div>';
   }
-
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
