@@ -92,7 +92,7 @@ function _get_sn_type_array() {
 			'image' => 'sngen-graph',
 			'subtypes' => array(
 		    23 => array(t('Bubble'), 'Bubble', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Bubble+Graph'),
-		    21 => array(t('Chord'), 'Chord', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Chord+Graph'),
+		    26 => array(t('Chord'), 'Chord', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Chord+Graph'),
 				21 => array(t('Network'), 'Network', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Simple+Network+Graph'),
 		    25 => array(t('Parallel'), 'Parallel', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Parallel+Graph'),
 		    24 => array(t('Stream'), 'Stream', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Stream+Graph'),
@@ -252,7 +252,7 @@ function _get_sn_type_array() {
     23 => array(t('Bubble'), 'Bubble'),
     24 => array(t('Stream'), 'Stream'),
     25 => array(t('Parallel'), 'Parallel'),
-    21 => array(t('Chord'), 'Chord'),
+    26 => array(t('Chord'), 'Chord'),
   );
  */
  
