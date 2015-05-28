@@ -141,7 +141,7 @@ function shivadata_add_link($visnid, $did) {
 }
 
 /**
- * Implements hook node delete for data nodes
+ * Implements hook node delete for data or visualization nodes
  * 
  * @param object $node
  * 	The node being deleted
@@ -149,6 +149,8 @@ function shivadata_add_link($visnid, $did) {
 function shivadata_node_delete($node) {
 	if ($node->type == 'shivadata') {
 		shivadata_remove_links($node->nid, 'data');
+	} else if ($node->type == 'shivanode') {
+		shivadata_remove_links($node->nid);
 	}
 }
 
@@ -221,14 +223,17 @@ function shivadata_get_links($did, $style='nids') {
 	while($record = $result->fetchAssoc()){
 		$nid = $record['vis_id'];
 		if($style == 'links') {
-			$node = node_load($nid);
-			$user = user_load($record['uid']);
-			$date = Date('M. j, Y', $record['created']);
-			$links[] = l($node->title, "node/$nid", array(
-				'attributes' => array(
-					'title' => "Created by {$user->name} on {$date}",
-				),
-			));
+			if ($node = node_load($nid)) {
+				$user = user_load($record['uid']);
+				$date = Date('M. j, Y', $record['created']);
+				$links[] = l($node->title, "node/$nid", array(
+					'attributes' => array(
+						'title' => "Created by {$user->name} on {$date}",
+					),
+				));
+			} else {
+				drupal_set_message(t('Link of data to non-existing node @nid in shivadata_get_links()', array('@nid' => $nid)), 'warning');
+			}
 		} else {
 			$links[] = $nid;
 		}

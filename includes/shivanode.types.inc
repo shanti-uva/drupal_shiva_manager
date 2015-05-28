@@ -92,11 +92,11 @@ function _get_sn_type_array() {
 			'image' => 'sngen-graph',
 			'subtypes' => array(
 		    23 => array(t('Bubble'), 'Bubble', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Bubble+Graph'),
-		    26 => array(t('Chord'), 'Chord', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Chord+Graph'),
-				21 => array(t('Network'), 'Network', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Simple+Network+Graph'),
-		    25 => array(t('Parallel'), 'Parallel', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Parallel+Graph'),
-		    24 => array(t('Stream'), 'Stream', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Stream+Graph'),
-		    22 => array(t('Tree'), 'Tree', 'sngen-graph', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Tree+Graph'),
+		    26 => array(t('Chord'), 'Chord', 'sngen-graph-chord', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Chord+Graph'),
+				21 => array(t('Network'), 'Network', 'sngen-graph-network', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Simple+Network+Graph'),
+		    25 => array(t('Parallel'), 'Parallel', 'sngen-graph-parallel', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Parallel+Graph'),
+		    24 => array(t('Stream'), 'Stream', 'sngen-graph-stream', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Stream+Graph'),
+		    22 => array(t('Tree'), 'Tree', 'sngen-graph-tree', 'https://wiki.shanti.virginia.edu/display/KB/Create+a+Tree+Graph'),
 			),
 		),
 		'image' => array(
