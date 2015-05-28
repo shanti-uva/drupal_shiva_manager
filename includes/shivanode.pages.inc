@@ -87,7 +87,16 @@ function explore_vis_page($mode='explore') {
 	}
 	
 	// Fill Relationships
-	$reltypes = array('graph', 'subway', 'timeline', 'word_cloud' ) ;
+	// Graph subtypes first
+	foreach($stypes['graph']['subtypes'] as $sind => $subtype) {
+		$subtype['type'] = 'graph';
+		$page['relationships']['items'][] = array(
+			'#markup' => shivanode_explore_thumb($sind, $subtype, TRUE, $mode),
+		);
+	}
+	
+	// Then other relationship types
+	$reltypes = array('subway', 'timeline', 'word_cloud' ) ;
 	foreach ($reltypes as $tname) {
 		$type = $stypes[$tname];
 		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );

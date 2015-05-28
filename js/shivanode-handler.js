@@ -15,7 +15,7 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
 		
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
