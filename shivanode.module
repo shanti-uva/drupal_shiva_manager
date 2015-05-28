@@ -1538,7 +1538,9 @@ function shivanode_image_default_styles() {
 }
 
 /** Rewrite Author widget text to use first and last name if available 
- *  And rewrite link for 0 item facets to perform new search on just that facet */
+ *  And rewrite link for 0 item facets to perform new search on just that facet 
+ **/
+ // Doesn't seem to be reaching this hook?? (ndg, 2015-05-28)
 function shivanode_facet_items_alter(&$build, &$settings) {
   if ($settings->facet == "author:name") {
     foreach($build as $key => $item) {
@@ -1559,6 +1561,174 @@ function shivanode_facet_items_alter(&$build, &$settings) {
       $param = array_pop($fq);
       $build[$key]['#query']['f'] = array( $param );
     }
+  }
+}
+
+
+/*
+ *  Implements hook_facetapi_widget: 
+ *     Creates a widget option in the facet display page called 'Mediabase Select Tree' that calls the MBSolrFacetapiWidgetMbSolrTree class
+ */
+function shivanode_facetapi_widgets() {
+  return array(
+    'shivanode_types' => array(
+      'handler' => array(
+        'label' => t('Shivanode Types'),
+        'class' => 'FacetapiWidgetShivanodeTypes',
+        'query types' => array('term', 'date'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Shivatypes Facet Widget:
+ * 
+ * Code copied from facet_api/plugins/facetapi/widget_links.inc and modified
+ */
+class FacetapiWidgetShivanodeTypes extends FacetapiWidgetLinks {
+   
+  /**
+   * Overrides FacetapiWidget::__construct().
+   *
+   * For links, it is better to use the machine name of the facet as opposed to
+   * the alias for the key. Alias are usually, but not necessarily, unique. It
+   * doesn't make sense to group links in the same element as they are usually
+   * rendered in blocks with are separate from one another.
+   */
+  public function __construct($id, array $realm, FacetapiFacet $facet, stdClass $settings) {
+    parent::__construct($id, $realm, $facet, $settings);
+    $this->jsSettings['limit'] = $this->settings->settings['soft_limit'];
+    $this->key = $facet['name'];
+  }
+
+  /**
+   * Implements FacetapiWidget::execute().
+   *
+   * Transforms the render array into something that can be themed by
+   * theme_item_list().
+   *
+   * @see FacetapiWidgetLinks::setThemeHooks()
+   * @see FacetapiWidgetLinks::buildListItems()
+   */
+  public function execute() {
+    $element = &$this->build[$this->facet['field alias']];
+
+    // Sets each item's theme hook, builds item list.
+    $this->setThemeHooks($element);
+    $element = array(
+      '#theme' => 'item_list',
+      '#items' => $this->buildListItems($element),
+      '#attributes' => $this->build['#attributes'],
+    );
+  }
+
+  /**
+   * Recursive function that sets each item's theme hook.
+   *
+   * The indivual items will be rendered by different theme hooks depending on
+   * whether or not they are active.
+   *
+   * @param array &$build
+   *   A render array containing the facet items.
+   *
+   * @return FacetapiWidget
+   *   An instance of this class.
+   *
+   * @see theme_facetapi_link_active()
+   * @see theme_facetapi_link_inactive()
+   */
+   /*
+  protected function setThemeHooks(array &$build) {
+    foreach ($build as $value => &$item) {
+      $item['#theme'] = ($item['#active']) ? 'facetapi_link_active' : 'facetapi_link_inactive';
+      if (!empty($item['#item_children'])) {
+        $this->setThemeHooks($item['#item_children']);
+      }
+    }
+    return $this;
+  }*/
+
+  /**
+   * Transforms the render array for use with theme_item_list().
+   *
+   * The recursion allows this function to act on the various levels of a
+   * hierarchical data set.
+   *
+   * @param array $build
+   *   The items in the facet's render array being transformed.
+   *
+   * @return array
+   *   The "items" parameter for theme_item_list().
+   */
+  function buildListItems($build) {
+    $settings = $this->settings->settings;
+
+    // Initializes links attributes, adds rel="nofollow" if configured.
+    $attributes = ($settings['nofollow']) ? array('rel' => 'nofollow') : array();
+    $attributes += array('class' => $this->getItemClasses());
+
+    // Builds rows.
+    $items = array();
+    foreach ($build as $value => $item) {
+      $row = array('class' => array());
+
+      // Allow adding classes via altering.
+      if (isset($item['#class'])) {
+        $attributes['class'] = array_merge($attributes['class'], $item['#class']);
+      }
+      // Initializes variables passed to theme hook.
+      $fname = $item['#markup']; // check if #markup (or title) is numeric, if so look up in full list of types
+			if (is_numeric($fname)) {
+				module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+				$sntypes = shivanode_get_types();
+				$fname = $sntypes[$fname];
+			}
+      $variables = array(
+        'text' => $fname,
+        'path' => $item['#path'],
+        'count' => $item['#count'],
+        'options' => array(
+          'attributes' => $attributes,
+          'html' => $item['#html'],
+          'query' => $item['#query'],
+        ),
+      );
+
+      // Adds the facetapi-zero-results class to items that have no results.
+      if (!$item['#count']) {
+        $variables['options']['attributes']['class'][] = 'facetapi-zero-results';
+      }
+
+      // Add an ID to identify this link.
+      $variables['options']['attributes']['id'] = drupal_html_id('facetapi-link');
+
+      // If the item has no children, it is a leaf.
+      if (empty($item['#item_children'])) {
+        $row['class'][] = 'leaf';
+      }
+      else {
+        // If the item is active or the "show_expanded" setting is selected,
+        // show this item as expanded so we see its children.
+        if ($item['#active'] || !empty($settings['show_expanded'])) {
+          $row['class'][] = 'expanded';
+          $row['children'] = $this->buildListItems($item['#item_children']);
+        }
+        else {
+          $row['class'][] = 'collapsed';
+        }
+      }
+
+      // Gets theme hook, adds last minute classes.
+      $class = ($item['#active']) ? 'facetapi-active' : 'facetapi-inactive';
+      $variables['options']['attributes']['class'][] = $class;
+
+      // Themes the link, adds row to items.
+      $row['data'] = theme($item['#theme'], $variables);
+      $items[] = $row;
+    }
+
+    return $items;
   }
 }
 
@@ -1597,3 +1767,4 @@ function reset_ginfo_checked($form, $form_state) {
 function shivanode_redirect_to_new() {
   drupal_goto('node/add/shivanode');
 }
+
