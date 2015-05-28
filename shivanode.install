@@ -727,10 +727,19 @@ function shivanode_update_7007() {
 }
 
 /**
- * 	Add thumbnail image for qmedia
+ * 	Add thumbnail images for graph types and qmedia
  */
 function shivanode_update_7008() {
-	$imgkey = 'sngen-qmedia';
-	shivanode_add_gen_image($imgkey);
+	$imgkeys = array(
+		'sngen-graph-chord', 
+		'sngen-graph-network', 
+		'sngen-graph-parallel', 
+		'sngen-graph-stream', 
+		'sngen-graph-tree', 
+		'sngen-qmedia'
+	);
+	foreach ($imgkeys as $imgkey) {
+		shivanode_add_gen_image($imgkey);
+	}
 }
 
