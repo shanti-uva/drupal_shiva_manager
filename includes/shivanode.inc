@@ -242,15 +242,16 @@ function _get_gid_from_url($url) {
  * Gets the type of visualization in the Shiva node
  */
 function _get_shivanode_type($node, $mode = 'string') {
-  $type = FALSE;
   if ($node && isset($node->shivanode_element_type)) {
-    $options = _shivanode_element_typelist(TRUE); 
+  	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+ 		$options = shivanode_get_types('nameindex', TRUE); 
     $typefield = $node->shivanode_element_type;
     $val = $typefield['und']['0']['value'] * 1;
-    if ($val == 5) { $val = 13; } // account for old simile 5 
-    $type = ($mode == 'number' || $mode == 'int')? $val : $options[$val];
+    if ($val == 5) { $val = 13; }  // account for old simile 5 
+    if ($mode == 'string' && isset($options[$val])) { return $options[$val]; } // Return string if set
+    if ($mode == 'number' || $mode == 'int') { return $val; } // Return int if that's what's needed
   }
-  return $type;
+  return FALSE; // Otherwise return FALSE
 }
 
 
