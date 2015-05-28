@@ -472,7 +472,7 @@ function _get_sn_type_array() {
 			if ($titem['uses_data']) {
 				if($titem['subtypes']) {
 					foreach ($titem['subtypes'] as $sn => $stype) {
-						if($show_deprecated || !isset($stype[4])) {
+						if($show_deprecated || !$titem['deprecated']) {
 							$dtypes[] = array( 'index' => $sn, 'machine_name' => $stype[1], 'label' => $stype[0], 'is_subtype' => TRUE, );
 						}
 					}
