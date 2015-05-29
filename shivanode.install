@@ -467,12 +467,18 @@ function shivanode_add_gen_image($imgkey) {
 			$destination = 'public://styles/shiva_teaser/public/shivanode/' . $imgfn;
 			$res = image_style_create_derivative($style, $source, $destination);
 			if(!$res) {
-				drupal_set_message(t('Unable to create derrivative image for @fn (shivanode.install)', array('@fn' => $imgfn)), 'error');
+				drupal_set_message(t('Unable to create derrivative image for @fn (shivanode.install)', array('@fn' => $imgfn)), 'warning');
+				return FALSE;
 			}
+		} else {
+			drupal_set_message(t('No shiva_teaser image style to format image with.'), 'warning');
+			return FALSE;
 		}
 	} else {
-		drupal_set_message(t('Unable to create image file for @fn (shivanode.install)', array('@fn' => $imgfn)), 'error');
+		drupal_set_message(t('Unable to create image file for @fn (shivanode.install)', array('@fn' => $imgfn)), 'warning');
+		return FALSE;
 	}
+	return TRUE;
 }
 
 /**

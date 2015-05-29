@@ -238,7 +238,11 @@ function shivanode_create_thumb($ind, $item, $isSubtype=FALSE, $did=FALSE) {
 	$img = variable_get($item[2], FALSE); // load image file variable (contains fid for thumb image)
 	if($img) {
 		$f = file_load($img); // Load thumb image file
-		$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
+		if (is_object($f) && !empty($f->uri)) {
+			$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
+		} else {
+			drupal_set_message(t("No file found for thumbnail image @img", array('@img' => $item[2])), 'warning');
+		}
 	} else {
 		$img = '';
 	}
