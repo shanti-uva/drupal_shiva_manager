@@ -59,7 +59,7 @@ function shiva_views_new_default_search_api_index() {
         "og_membership" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "og_membership" },
         "search_api_language" : { "type" : "string" },
         "shivanode_access" : { "type" : "integer" },
-        "shivanode_element_type" : { "type" : "integer" },
+        "shivanode_element_type" : { "type" : "string" },
         "shivanode_subtype" : { "type" : "integer" },
         "shivanode_tags" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "status" : { "type" : "integer" },
