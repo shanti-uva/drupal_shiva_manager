@@ -882,6 +882,13 @@ function shiva_views_new_views_default_views() {
     1 => '1',
   );
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Indexed Node: Status */
+  $handler->display->display_options['filters']['shivanode_access']['id'] = 'shivanode_access';
+  $handler->display->display_options['filters']['shivanode_access']['table'] = 'search_api_index_default_node_index';
+  $handler->display->display_options['filters']['shivanode_access']['field'] = 'shivanode_access';
+  $handler->display->display_options['filters']['shivanode_access']['value'] = array(
+    4 => '4',
+  );
   $handler->display->display_options['path'] = 'gallery';
 
   /* Display: Shiva Gallery Examples */
@@ -1006,6 +1013,13 @@ function shiva_views_new_views_default_views() {
     1 => '1',
   );
   $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Indexed Node: Status */
+  $handler->display->display_options['filters']['shivanode_access']['id'] = 'shivanode_access';
+  $handler->display->display_options['filters']['shivanode_access']['table'] = 'search_api_index_default_node_index';
+  $handler->display->display_options['filters']['shivanode_access']['field'] = 'shivanode_access';
+  $handler->display->display_options['filters']['shivanode_access']['value'] = array(
+    4 => '4',
+  );
 
   /* Display: My Vis Block */
   $handler = $view->new_display('block', 'My Vis Block', 'my_vis_block');
