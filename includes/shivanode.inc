@@ -535,8 +535,8 @@ function _shivanode_data_form() {
  */
  /* "data_form" no longer a form but a page
 function _shivanode_data_form_submit($form, &$form_state) {
-	dpm($form, 'form');
-	dpm($form_state, 'formstate');
+	//dpm($form, 'form');
+	//dpm($form_state, 'formstate');
   $vals = &$form_state['input'];
   if(!isset($vals['did']) || $vals['did'] == '') {
     drupal_set_message('No data id was sent', 'warning');
