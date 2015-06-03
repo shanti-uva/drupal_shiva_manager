@@ -1729,26 +1729,17 @@ function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
 }
 
 /**
- *  _shivanode_add_gid($gid, $type): Called from the My Data list, this function is connected to the menu url: /data/add/gid/
+ *  _shivanode_add_gid($gid): Called from the My Data list, this function is connected to the menu url: /data/add/gid/
  *      Adds a Google doc and creates a node from it.
  *      type param is the value of the select drop down defined in _shivanode_types_using_gdocs() funciton that includes all shiva vis that use gdocs
  */
-function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
-  if(!$gid) { drupal_goto('mydata'); }
-  $vtype = 'chart';
-  $ctype = '';
+function _shivanode_add_gid($gid = FALSE) {
+  if(empty($gid)) { drupal_goto('mydata'); }
+	// Make sure valie gdoc url
   $gfile = gdrive_file_attributes(gdrive_get_file($gid, 'object'));
-	//$gfout = (string)$gfile;
   if($gfile) {
-		$gid = (isset($gfile['id'])) ? $gfile['id'] : t('ID Unknown');
-  	$gurl = (isset($gfile['url'])) ? $gfile['url'] : FALSE;
-		if (!$gurl && isset($gfile['alternateLink'])) {
-			$gurl = $gfile['alternateLink'];
-		} else {
-			watchdog('shivanode', t('Unable to get link for GDoc: @gid', array('@gid' => $gid)));
-			return;
-		}
-		if (module_exists('shivadata')) { 
+		if (module_exists('shivadata')) {
+			// Create the new shivadata node based on GDoc id 
 	    $dnode = shivadata_add_node($gid); // 2nd param was: 'https://docs.google.com/spreadsheet/ccc?key=' . $gid
 	    if($type == "popup") {
 	      $markup = array(
@@ -1757,25 +1748,8 @@ function _shivanode_add_gid($gid = NULL, $type = NULL, $title = NULL) {
 	      );
 	      return $markup;
 	    }
-			/* Old Code. Removing... 2015-05-19 
-	    if($type < 15) {
-	      $ctype = _shivanode_types_using_gdocs($type); 
-	    } else {
-	      $vtype = strtolower(_shivanode_types_using_gdocs($type));
-	    }
-	    
-	    if($vtype == 'slideshow') { $vtype = 'image'; }
-	    
-	    if($ctype == '') {
-	      drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype);
-	    } else {
-	       drupal_goto('node/add/shivanode/' . $dnode->nid . '/' . $vtype, array(
-	          'query' => array(
-	            'ctype' => $ctype,
-	          ),
-	       ));
-	    }*/
 		}
+	// Otherwise give warning of invalid GID
   } else {
     drupal_set_message(t('Unable to access Google Drive file @gid.', array('@gid' => $gid)), 'warning');
 		watchdog('shivanode', t('Unable to access Google Drive file @gid.', array('@gid' => $gid)));
