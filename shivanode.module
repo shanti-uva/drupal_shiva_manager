@@ -758,6 +758,7 @@ function shivanode_node_update($node) {
  */
 function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id) {
   global $base_path;
+	
   // Get the last part of the URL to determing what we are showing
   $action = $form['#action']; // the action url as stored in form
   $action_url_parts = explode('/', $action);
@@ -868,7 +869,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	
   // Set the title
   drupal_set_title($ptitle);
-						
 	// remove any query param if exists					
   if (strpos($action, '?') > -1) { 
     $aparts = explode('?', $action); 
@@ -961,7 +961,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
        $form['shivanode_subtype'][LANGUAGE_NONE]['#suffix'] = '</div>';
     }
   }
-	
+
   //dpm($form['shivanode_access'], 'sn access field');
   // Permission Value (calls JS to enforce only Public and Private)
   $form['shivanode_access']['und'] += array(
@@ -1111,7 +1111,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       _shivanode_add_datalink($form, $dataNodeId, $is_new_el);
     } 
   }
-  
+	
   $iframeUrl = _get_shivaframe_url($sntind, $nid); 
 
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.

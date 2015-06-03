@@ -1212,7 +1212,7 @@ function _get_shivaframe_url($opt, $nid = FALSE) {
 	} else if ($opt != 1 && $opt != 17) {
     $player = variable_get('shivanode_shiva_home', SHIVA_HOME) . $player; 
   }
-	dpm(strpos($player, '?'));
+
 	$dsuff = (strpos($player, '?') === FALSE) ? '?pr=d' : '&pr=d';
   $player = $player . $dsuff;
   $player = preg_replace('/https?\:\/\//', '//', $player); // added 2013-08-19 for Firefox 23 which blocks mixed content in iframes
