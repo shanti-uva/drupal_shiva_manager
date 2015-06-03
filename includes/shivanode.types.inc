@@ -105,7 +105,7 @@ function _get_sn_type_array() {
 			'deprecated' => FALSE,
 			'uses_data' => TRUE,
 			'player' => 'shiva',
-			'help_url' => 'https://wiki.shanti.virginia.edu/display/KB/SHIVA+Images+Tool',
+			'help_url' => 'https://wiki.shanti.virginia.edu/display/KB/Use+the+Image+Tool',
 			'image' => 'sngen-image',
 			'subtypes' => array(
 				18 => array(t('Slideshow'), 'Slideshow', 'sngen-image', 'https://wiki.shanti.virginia.edu/display/KB/SHIVA+Images+Tool'),
