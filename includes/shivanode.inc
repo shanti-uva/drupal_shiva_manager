@@ -1733,7 +1733,7 @@ function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
  *      Adds a Google doc and creates a node from it.
  *      type param is the value of the select drop down defined in _shivanode_types_using_gdocs() funciton that includes all shiva vis that use gdocs
  */
-function _shivanode_add_gid($gid = FALSE) {
+function _shivanode_add_gid($gid = FALSE, $type="normal") {
   if(empty($gid)) { drupal_goto('mydata'); }
 	// Make sure valie gdoc url
   $gfile = gdrive_file_attributes(gdrive_get_file($gid, 'object'));
