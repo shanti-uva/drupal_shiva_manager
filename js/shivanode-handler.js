@@ -109,6 +109,19 @@
 		 * This will call getJSON to get json for new chart and in processGetJson will add in new data.
 		 **/
 		if(shiva_settings.status == "ready" && shiva_settings.isNewEl == true ) {
+			// if a new chart, then add the subtype to the end of the url and reload.
+			var winloc = window.location.pathname;
+			if(winloc.indexOf('node/add') > -1) {
+				// determine whether there's a data node id in url or if /nd/
+				var dstr = (winloc.indexOf('/nd/') > -1) ? '/nd/' : winloc.match(/\/(\d+)\//)[0];
+				if (dstr) {
+					// replace subtype with new chart type and reload
+					var locpts = winloc.split(dstr);
+					var postpts = locpts[1].split('/');
+					winloc = locpts[0] + dstr + postpts[0] + "/" + mdata.replace(' ','');
+					window.location.pathname = winloc;
+				}
+			}
 			shiva_settings.loadData = "GD"; 
 		}
 	}; 
@@ -359,6 +372,7 @@
 		// Set window onbeforeunload to warn if not saving
 		window.onbeforeunload = function (e) {
 			if (shiva_settings.dataChanged == true) {
+				if (typeof(e.srcElement) == "undefined") { return; }
 				var txt = e.srcElement.activeElement.innerText;
 				if (txt.indexOf('SAVE') == -1 && txt.indexOf('UPDATE') == -1) {
 					return Drupal.t("You have changed the data on this page without saving it!");

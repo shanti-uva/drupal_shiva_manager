@@ -176,7 +176,10 @@ function shivadata_remove_links($nid, $type='visual') {
 	if($type == 'visual') {
 		if ($lid > 1) { watchdog('shivadata', "Visualization {$nid} had multiple links in shivadata link table."); }
 	} else {
-		drupal_set_message(t("Unlinked @n visualizations from deleted data record.", array('@n' => $lid)));
+		if ($lid > 0) {
+			drupal_set_message(t("Unlinked @n visualizations from deleted data record (@nid).", 
+				array('@n' => $lid, '@nid' => $nid))); 
+		}
 	}
 	return (empty($lid)) ? FALSE : TRUE; 
 }
