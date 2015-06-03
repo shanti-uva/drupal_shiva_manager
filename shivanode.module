@@ -496,11 +496,16 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
 	  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
 	  	$jsonurl .= '/teaser';
 	  }
+			
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
-      $iframeurl = SHIVA_VIEWER . '?m=' . $jsonurl;
+			$vtype = _get_shivanode_type($object);
+			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
+      $iframeurl = $viewer . '?m=' . $jsonurl;
+			dpm($iframeurl);
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
+
       //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
       $disStr = '';
       $iframe = '';
@@ -1108,7 +1113,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
   
   $iframeUrl = _get_shivaframe_url($sntind, $nid); 
-	
+	dpm($iframeUrl);
   // if it's a new element and chart type is specified add that to url for chart to go directly to that chart type.
   if($is_new_el && $sntype) {
     $iframeUrl .= '&chartType=' . $snsubtype; // was $ctype. Should this be 

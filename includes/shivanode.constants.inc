@@ -13,9 +13,6 @@ define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivano
 // SHIVA Home in Libraries Folder
 define('SHIVA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/SHIVA/'));
 
-// Qmedia Home in Libraries Folder
-define('QMEDIA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/Qmedia/'));
-
 // default URL for Visualization Player
 define('SHIVA_VIEWER', SHIVA_HOME . 'go.htm'); 
 
@@ -66,6 +63,12 @@ define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 
 // default URL for Word Cloud Editor
 define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
+
+// Qmedia Home in Libraries Folder
+define('QMEDIA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/Qmedia/'));
+
+// default URL for QMedia Player
+define('SHIVA_QMEDIA_VIEWER', QMEDIA_HOME . 'show.htm'); 
 
 // default URL for Qmedia Editor
 define('SHIVA_QMEDIA_EDITOR', QMEDIA_HOME . 'edit.htm');

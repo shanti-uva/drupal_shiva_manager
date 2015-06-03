@@ -1000,7 +1000,7 @@ function _shivanode_create_shiva_data_node($title, $url) {
  */
 function _shivanode_get_dataurl($node) {
   $result = FALSE;
-  if (isset($node->shivanode_json)) {
+  if (isset($node->shivanode_json) && !empty($node->shivanode_json['und'][0]['value'])) {
     $json_str = $node->shivanode_json['und'][0]['value'];
     $json = json_decode($json_str);
     if (isset($json->dataSourceUrl)) {
@@ -1207,12 +1207,14 @@ function _get_shivaframe_url($opt, $nid = FALSE) {
 		if($nid) {
 			$nurl = url('/data/json/' . $nid, array('absolute'=>TRUE));
 			$nurl = preg_replace('/https?:/','', $nurl);
-			$player .= '?m=' . $nurl . '&pr=d';
+			$player .= '?m=' . $nurl;
 		}
-	} else if (strpos($player, 'http://') === FALSE && $opt > 1) {
+	} else if ($opt != 1 && $opt != 17) {
     $player = variable_get('shivanode_shiva_home', SHIVA_HOME) . $player; 
-    $player = $player . '?pr=d';
   }
+	dpm(strpos($player, '?'));
+	$dsuff = (strpos($player, '?') === FALSE) ? '?pr=d' : '&pr=d';
+  $player = $player . $dsuff;
   $player = preg_replace('/https?\:\/\//', '//', $player); // added 2013-08-19 for Firefox 23 which blocks mixed content in iframes
   return $player;
 }
