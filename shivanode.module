@@ -501,7 +501,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
 			$vtype = _get_shivanode_type($object);
 			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
       $iframeurl = $viewer . '?m=' . $jsonurl;
-			dpm($iframeurl);
+
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
