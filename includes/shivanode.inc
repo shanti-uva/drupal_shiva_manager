@@ -2159,7 +2159,6 @@ function _shivanode_get_access($node) {
  * @param object $node
  * 	The node that is a single search result
  * 
- * @TODO: Remove use of pagepeeker!
  */
 function _get_thumb_image($node, $mode='url') {
   global $base_path;
@@ -2169,10 +2168,7 @@ function _get_thumb_image($node, $mode='url') {
   $imgurl = url($base_path . drupal_get_path('module', 'shivanode') . '/images/sngen-chart-default.png', array('absolute' => TRUE)); // Default url for when there is no thumbnail
   if (isset($node->field_image['und'][0]['uri']) ) {
     $imgurl = file_create_url($node->field_image['und'][0]['uri']);
-  } /*else {
-    // Use PagePeeker Thumbnails as a default for sharing.
-    $imgurl = 'http://pagepeeker.com/thumbs.php?size=l&url=https://shiva.virginia.edu/node/' . $node->nid;
-  }*/
+  } 
   if ($mode == 'img') { drupal_goto($imgurl); }
   return $imgurl;
 }
