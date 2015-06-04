@@ -201,9 +201,19 @@ function shivanode_menu() {
       'file' => 'includes/shivanode.inc',
     );
 
+  // Return form for obtaining embed codes
+  $items['api/thumb/%'] = array(
+    'title' => '',
+    'description' => 'Return the url for the thumbnail of an node',
+    'page callback' => '_get_thumb_image',
+    'page arguments' => array(2, 'img'),
+    'access callback' => TRUE,
+    'file' => 'includes/shivanode.inc',
+  );
+	
   // Return a json summary or html fragment displaying a node for AJAX calls
   //   api/json/{id} or api/ajax/{id}
-    
+  
   $items['api/%/%'] = array(
     'title' => 'HTML Fragment for Embedding a Node',
     'description' => 'Return an HTML fragment for embedding a node',
