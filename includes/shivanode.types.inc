@@ -374,7 +374,7 @@ function _get_sn_type_array() {
 		} else {
 			if (!is_int($tind)) { $tind = _shivanode_get_index($tind); }
 			$tps = shivanode_get_types('nameindex');
-			return $tps[$tind];
+			return (isset($tps[$tind])) ? $tps[$tind] : ""; 
 		}
 	}
 	
