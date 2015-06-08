@@ -511,12 +511,13 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
 			$vtype = _get_shivanode_type($object);
 			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
       $iframeurl = $viewer . '?m=' . $jsonurl;
-
+			
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
-
+			$iframeurl .= '&pr=d';
       //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
+      
       $disStr = '';
       $iframe = '';
       if (is_numeric($height)) {

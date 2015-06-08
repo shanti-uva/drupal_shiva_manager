@@ -141,7 +141,11 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 	$img = variable_get($item[2], FALSE); // load image file variable (contains fid for thumb image)
 	if($img) {
 		$f = file_load($img); // Load thumb image file
-		$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
+		if (isset($f->uri)) {
+			$img = image_style_url('shiva_teaser', $f->uri); // Get image tag
+		} else {
+			watchdog('shivanode', "No image found for $item[2]", array(), WATCHDOG_WARNING);
+		}
 	} else {
 		drupal_set_message('No imgurl found for ' . $item[0], 'warning');
 	}

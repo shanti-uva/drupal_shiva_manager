@@ -96,7 +96,8 @@
 			var win=document.getElementById(iFrameName).contentWindow.postMessage(cmd,'*');
 			if (debug_on('message_out')) { console.log("message out: ", cmd); }
 		} else if (debug_on('show_errors')) {
-	  	console.error('There is no frame by the name of: ' + iFrame); // for debugging messages, send to console
+	  	console.error('There is no frame by the name of: ' + iFrameName); // for debugging messages, send to console
+	  	console.trace();
 	  }
 	};
 	// End of Message Sending and Receiving
@@ -144,6 +145,7 @@
 	 *   Used to deal with ready message in different contexts.
 	 */
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
+		console.log("process ready", mdata);
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
 		//console.log(shiva_settings.status, shiva_settings.loadData);
@@ -200,7 +202,9 @@
 	Drupal.Shivanode.getJSON = function() {
 	  if (shiva_settings.status == "gettingJSON") { return; }
 	  shiva_settings.status = "gettingJSON";
-		Drupal.Shivanode.shivaSendMessage('shivaEditFrame','GetJSON');
+	  if ($('#shivaEditFrame').length > 0) {
+			Drupal.Shivanode.shivaSendMessage('shivaEditFrame','GetJSON');
+		}
 	};	
 	
 	Drupal.Shivanode.processGetJSON = function(mdata, e) {
