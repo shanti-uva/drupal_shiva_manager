@@ -515,7 +515,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
-			$iframeurl .= '&pr=d';
+			//$iframeurl .= '&pr=d';
       //Old: $iframeurl = SHIVA_VIEWER . '?pr=d'; // pr=d means parent=drupal // may need to re instate this for localhosts
       
       $disStr = '';
