@@ -126,7 +126,7 @@ function _get_sn_type_array() {
 		'multimedia' => array(
 			'index' => 17,
 			'name' => t('Multimedia'),
-			'deprecated' => FALSE,
+			'deprecated' => TRUE,
 			'uses_data' => FALSE,
 			'player' => 'qmedia',
 			'help_url' => FALSE,
