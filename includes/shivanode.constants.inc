@@ -8,10 +8,10 @@
 global $base_root, $base_path;
  
  // OLD default (base) URL for Visualization Editors
-define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivanode') . '/SHIVA/');
+//define('SHIVA_ROOT', $base_root . $base_path . drupal_get_path('module','shivanode') . '/SHIVA/');
 
 // SHIVA Home in Libraries Folder
-define('SHIVA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/SHIVA/'));
+define('SHIVA_HOME', preg_replace('/https?:/','', variable_get('shivanode_shiva_home', $base_root . $base_path . 'sites/all/libraries/SHIVA/')));
 
 // default URL for Visualization Player
 define('SHIVA_VIEWER', SHIVA_HOME . 'go.htm'); 
@@ -65,7 +65,7 @@ define('SHIVA_CANVAS_EDITOR', 'canvas.htm');
 define('SHIVA_WCLOUD_EDITOR', 'wordcloud.htm');
 
 // Qmedia Home in Libraries Folder
-define('QMEDIA_HOME', preg_replace('/https?:/','', $base_root . $base_path . 'sites/all/libraries/Qmedia/'));
+define('QMEDIA_HOME', preg_replace('/https?:/','', variable_get('shivanode_qmedia_home', $base_root . $base_path . 'sites/all/libraries/Qmedia/')));
 
 // default URL for QMedia Player
 define('SHIVA_QMEDIA_VIEWER', QMEDIA_HOME . 'show.htm'); 
