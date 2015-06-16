@@ -108,11 +108,13 @@ function explore_vis_page($mode='explore') {
 	// Fill mediatypes
 	$reltypes = array('image', 'video', 'multimedia' ) ;
 	foreach ($reltypes as $tname) {
-		$type = $stypes[$tname];
-		$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
-		$page['mediatypes']['items'][] = array(
-			'#markup' => shivanode_explore_thumb($type['index'], $item, FALSE, $mode),
-		);
+		if (isset($stypes[$tname])) {
+			$type = $stypes[$tname];
+			$item = array( $type['name'], $tname, $type['image'], $type['help_url'] );
+			$page['mediatypes']['items'][] = array(
+				'#markup' => shivanode_explore_thumb($type['index'], $item, FALSE, $mode),
+			);
+		}
 	}
 	
 	// Fill maps
