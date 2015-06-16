@@ -510,7 +510,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
 			$vtype = _get_shivanode_type($object);
 			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
-			dpm($viewer, 'viewer');
+//			dpm($viewer, 'viewer');
       $iframeurl = $viewer . '?m=' . $jsonurl;
 			
       if(_shivanode_get_access($object) == "1") {
@@ -529,7 +529,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       }
       if(!isset($height) || !is_numeric($height) || $height == 0) { $height = 800; }
       if(!isset($width) || !is_numeric($width) || $width == 0) { $width = 800; }
-			dpm($iframeurl, 'iframe url');
+			//dpm($iframeurl, 'iframe url');
       $iframe .= '<iframe id="shivaViewFrame" src="' . preg_replace('/https?\:\/\//','//', $iframeurl) . '"';
       $iframe .= ' height="' . $height . '" width="' . $width . '"';
       $iframe .= ' scrolling="auto" style="overflow: auto;" frameborder="0" ' . $disStr;
