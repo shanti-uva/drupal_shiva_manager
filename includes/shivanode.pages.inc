@@ -149,7 +149,7 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 			watchdog('shivanode', "No image found for $item[2]", array(), WATCHDOG_WARNING);
 		}
 	} else {
-		drupal_set_message('No imgurl found for ' . $item[0], 'warning');
+		return ''; // No image file then return nothing.
 	}
 	$facet = ($isSubtype) ? 'shivanode_subtype%3A' . $ind : 'shivanode_element_type%3A' . $ind;
 	$create = ($isSubtype) ? "/node/add/shivanode/{$item['type']}/{$item[1]}" : "/node/add/shivanode/{$item[1]}";
