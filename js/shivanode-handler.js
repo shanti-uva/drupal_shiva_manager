@@ -51,8 +51,12 @@
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
-			  if(shiva_settings.status == 'ready') {
+			  if (shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
+				} else if (shiva_settings.status == 'puttingJSON') {
+					// when putting JSON into editor status is set to puttingJSON so that the dataChanged message is ignored
+					// ignore the message and set status to ready.
+					shiva_settings.status = 'ready';
 				}
 				break;
 				
@@ -149,7 +153,6 @@
 	 *   Used to deal with ready message in different contexts.
 	 */
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
-		console.log("process ready", mdata);
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
 		//console.log(shiva_settings.status, shiva_settings.loadData);
@@ -177,9 +180,10 @@
 	Drupal.Shivanode.loadQmedia = function(mdata) {
 		// If Qmedia, wait a second then load JMedia data.
 		if (mdata && shiva_settings.qmedia && shiva_settings.qmjson) {
-			setTimeout(function() {
+			Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
+			/*setTimeout(function() {
 				Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
-			}, 1000 );
+			}, 1000 );*/
 		}
 	};
 	
@@ -254,7 +258,13 @@
 		if (typeof(status) == 'undefined') { status = 'puttingJSON'; }
 		try {
 			var cmd = 'PutJSON=' + json;
-			Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+			if(shiva_settings.qmedia) {
+					setTimeout(function() {
+						Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+					}, 1000 );
+			} else {
+				Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+			}
 			shiva_settings.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
 			shiva_settings.status = status;
