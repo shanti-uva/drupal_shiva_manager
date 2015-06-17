@@ -16,7 +16,7 @@
 	 * 
 	 */
 	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
-		
+	
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
 			return true;
@@ -259,6 +259,7 @@
 		try {
 			var cmd = 'PutJSON=' + json;
 			if(shiva_settings.qmedia) {
+				console.log("HERE");
 					setTimeout(function() {
 						Drupal.Shivanode.shivaSendMessage(iframe,cmd);
 					}, 1000 );
