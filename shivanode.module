@@ -503,15 +503,18 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $jsonurl = $base_root . $base_path . 'data/json/' . $object->nid;
       // remove distinct protocol https:// or http:// and replace with // so as to match current domain protocol
       $jsonurl = preg_replace("/https?\:\/\//","//", $jsonurl); 
-	  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
-	  	$jsonurl .= '/teaser';
-	  }
+		  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
+		  	$jsonurl .= '/teaser';
+		  }
 			
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
 			$vtype = _get_shivanode_type($object);
-			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
-//			dpm($viewer, 'viewer');
-      $iframeurl = $viewer . '?m=' . $jsonurl;
+			$iframeurl = SHIVA_VIEWER . '?m=' . $jsonurl;
+			if ($vtype == 'Multimedia') {
+				$iframeurl = SHIVA_QMEDIA_VIEWER;
+				//dpm($item, 'qmedia item');
+				drupal_add_js(array('shivanode' => array('qmedia' => TRUE, 'qmjson' => $item['value'])), 'setting');
+			}
 			
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);

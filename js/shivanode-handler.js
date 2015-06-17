@@ -83,6 +83,10 @@
 				Drupal.Shivanode.processReadyMessage(mdata);
 				break;
 				
+			case 'ShowReady': // For Qmedia Show View
+				Drupal.Shivanode.loadQmedia(mdata);
+				break;
+				
 			default:
 				console.log("message unprocessed: " + mdata);
 		}
@@ -167,6 +171,15 @@
 			}
 		} else {
 			shiva_settings.status = 'ready';
+		}
+	};
+	
+	Drupal.Shivanode.loadQmedia = function(mdata) {
+		// If Qmedia, wait a second then load JMedia data.
+		if (mdata && shiva_settings.qmedia && shiva_settings.qmjson) {
+			setTimeout(function() {
+				Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
+			}, 1000 );
 		}
 	};
 	
