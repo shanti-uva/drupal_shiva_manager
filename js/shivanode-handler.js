@@ -257,6 +257,7 @@
 		if (typeof(json) == 'object') { json = JSON.stringify(json); }
 		if (typeof(status) == 'undefined') { status = 'puttingJSON'; }
 		try {
+			console.trace();
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.shivaSendMessage(iframe,cmd);
 			/* Used to try to get QMedia to work
