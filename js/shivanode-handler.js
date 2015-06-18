@@ -180,10 +180,12 @@
 	Drupal.Shivanode.loadQmedia = function(mdata) {
 		// If Qmedia, wait a second then load JMedia data.
 		if (mdata && shiva_settings.qmedia && shiva_settings.qmjson) {
-			Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
-			/*setTimeout(function() {
+			if (shiva_settings.status == 'puttingJSON') { 
+				shiva_settings.status = 'ready';
+			} else {
+				shiva_settings.status = 'puttingJSON';
 				Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
-			}, 1000 );*/
+			}
 		}
 	};
 	
