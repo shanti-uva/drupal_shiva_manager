@@ -2110,7 +2110,7 @@ function _shivanode_add_share_meta($node) {
   drupal_add_html_head($element, 'og_title');
   
   // Add Meta Description
-  $desc = 'A visualization created with the SHIVA application provided by SHANTI at the University of Virginia (http://shiva.virginia.edu/)';
+  $desc = 'A visualization created with the SHIVA application provided by SHANTI at the University of Virginia (http://visuals.shanti.virginia.edu/)';
   if(isset($node->shivanode_description['und'][0])) {
     if($node->shivanode_description['und'][0]['safe_summary'] != '') {
       $desc = trim(strip_tags($node->shivanode_description['und'][0]['safe_summary']));
