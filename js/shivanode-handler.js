@@ -258,14 +258,16 @@
 		if (typeof(status) == 'undefined') { status = 'puttingJSON'; }
 		try {
 			var cmd = 'PutJSON=' + json;
+			Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+			/* Used to try to get QMedia to work
 			if(shiva_settings.qmedia) {
-				console.log("HERE");
 					setTimeout(function() {
 						Drupal.Shivanode.shivaSendMessage(iframe,cmd);
 					}, 1000 );
 			} else {
 				Drupal.Shivanode.shivaSendMessage(iframe,cmd);
 			}
+			*/
 			shiva_settings.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
 			shiva_settings.status = status;
