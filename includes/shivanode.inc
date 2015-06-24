@@ -1981,7 +1981,7 @@ function _shivanode_node_embed_page($nid) {
 		'tablk' => array(
 			'#type' => 'markup',
 			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-lk"><h3>Link</h3><p>To link to this visualization on a web page use the following link code: </p>' .
-							'<pre class="code">&lt;a href="' . $nurl . '">' . $node->title .  '</a></pre></div>'
+							'<pre class="code">&lt;a href="' . $nurl . '">' . $node->title .  '&lt;/a></pre></div>'
 		),
 		'taburl' => array(
 			'#type' => 'markup',
