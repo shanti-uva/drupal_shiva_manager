@@ -156,6 +156,7 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 	$out = '<li class="shanti-thumbnail visual" >
 			
 		  <div class="shanti-thumbnail-image shanti-field-visuals">
+    	 <span class="overlay"><span class="icon"></span></span>
 		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
 		   <span class="icon shanticon-visuals"></span>
 		  </div> 

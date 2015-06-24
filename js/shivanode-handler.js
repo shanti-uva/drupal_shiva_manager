@@ -15,8 +15,8 @@
 	 * 		'show_errors'   : displays errors in console.	
 	 * 
 	 */
-	debug_settings = ['show_errors', 'ready_message', 'message_in', 'message_out']; // 'show_errors', 'ready_message', 'message_in', 'message_out'
-		
+	debug_settings = []; // 'show_errors', 'ready_message', 'message_in', 'message_out'
+	
 	function debug_on(type) {
 		if (debug_settings.indexOf(type) > -1) {
 			return true;
@@ -51,8 +51,12 @@
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
-			  if(shiva_settings.status == 'ready') {
+			  if (shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
+				} else if (shiva_settings.status == 'puttingJSON') {
+					// when putting JSON into editor status is set to puttingJSON so that the dataChanged message is ignored
+					// ignore the message and set status to ready.
+					shiva_settings.status = 'ready';
 				}
 				break;
 				
@@ -81,6 +85,10 @@
 				
 			case 'ShivaReady':
 				Drupal.Shivanode.processReadyMessage(mdata);
+				break;
+				
+			case 'ShowReady': // For Qmedia Show View
+				Drupal.Shivanode.loadQmedia(mdata);
 				break;
 				
 			default:
@@ -145,7 +153,6 @@
 	 *   Used to deal with ready message in different contexts.
 	 */
 	Drupal.Shivanode.processReadyMessage = function(mdata) {
-		console.log("process ready", mdata);
 		if (debug_on('ready_message')) { console.info('ready message received: [' + shiva_settings.status + ']'); }
 		// Determine what to do depending on previously set status
 		//console.log(shiva_settings.status, shiva_settings.loadData);
@@ -167,6 +174,18 @@
 			}
 		} else {
 			shiva_settings.status = 'ready';
+		}
+	};
+	
+	Drupal.Shivanode.loadQmedia = function(mdata) {
+		// If Qmedia, wait a second then load JMedia data.
+		if (mdata && shiva_settings.qmedia && shiva_settings.qmjson) {
+			if (shiva_settings.status == 'puttingJSON') { 
+				shiva_settings.status = 'ready';
+			} else {
+				shiva_settings.status = 'puttingJSON';
+				Drupal.Shivanode.putJSON('shivaViewFrame', shiva_settings.qmjson);
+			}
 		}
 	};
 	
@@ -240,8 +259,18 @@
 		if (typeof(json) == 'object') { json = JSON.stringify(json); }
 		if (typeof(status) == 'undefined') { status = 'puttingJSON'; }
 		try {
+			console.trace();
 			var cmd = 'PutJSON=' + json;
 			Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+			/* Used to try to get QMedia to work
+			if(shiva_settings.qmedia) {
+					setTimeout(function() {
+						Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+					}, 1000 );
+			} else {
+				Drupal.Shivanode.shivaSendMessage(iframe,cmd);
+			}
+			*/
 			shiva_settings.latestJSON = json;
 			Drupal.Shivanode.adjustHeightWidth(json);
 			shiva_settings.status = status;

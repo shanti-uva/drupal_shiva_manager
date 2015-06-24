@@ -45,6 +45,8 @@ function shivanode_init() {
 			'jsonLoaded' => false,
 			'latestJSON' => '',
 			'loadData' => false, // was 'loadJS' can be either "GD" Google doc or "JS" for JSON or false
+			'qmedia' => false,
+			'gmjson' => '',
 			'shibstatus' => null,
 			'snviewer' => SHIVA_VIEWER,
 			'status' => 'loading',
@@ -503,15 +505,18 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $jsonurl = $base_root . $base_path . 'data/json/' . $object->nid;
       // remove distinct protocol https:// or http:// and replace with // so as to match current domain protocol
       $jsonurl = preg_replace("/https?\:\/\//","//", $jsonurl); 
-	  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
-	  	$jsonurl .= '/teaser';
-	  }
+		  if (isset($display['settings']['context']) && $display['settings']['context'] == 'teaser') {
+		  	$jsonurl .= '/teaser';
+		  }
 			
       // create IFrame URL using the new Viewer which takes a URL to the JSONP of the source
 			$vtype = _get_shivanode_type($object);
-			$viewer = ($vtype == 'Multimedia') ? SHIVA_QMEDIA_VIEWER : SHIVA_VIEWER;
-//			dpm($viewer, 'viewer');
-      $iframeurl = $viewer . '?m=' . $jsonurl;
+			$iframeurl = SHIVA_VIEWER . '?m=' . $jsonurl;
+			if ($vtype == 'Multimedia') {
+				$iframeurl = SHIVA_QMEDIA_VIEWER;
+				//dpm($item, 'qmedia item');
+				drupal_add_js(array('shivanode' => array('qmedia' => TRUE, 'qmjson' => $item['value'])), 'setting');
+			}
 			
       if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
@@ -843,7 +848,6 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       }
 			 * */
     }
-    
     // REDIRECT: If it's a data-based visualization without a data node id at the end, redirect to data list
     if(_shivanode_is_data_type($sntype)) { 
 	    if ($did == FALSE && $nodata == FALSE) {
@@ -860,7 +864,10 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   } else { // if not new element
   	$sntype = _shivanode_get_element_type($form['#node']); // Set the Shivanode visualization type
   	$snsubtype = _shivanode_get_subtype($form['#node']);
-	
+		// If multimedia set qmedia setting to true because they are processed differently
+	  if ($sntype == 'multimedia') {
+	  	drupal_add_js(array('shivanode' => array('qmedia' => true)), 'setting');
+	  }
   	// Update form option list to include deprecated
   	module_load_include('inc', 'shivanode', 'shivanode.types');
 		$lst = shivanode_get_types();

@@ -1981,7 +1981,7 @@ function _shivanode_node_embed_page($nid) {
 		'tablk' => array(
 			'#type' => 'markup',
 			'#markup' => '<div role="tabpanel" class="tab-pane" id="tab-lk"><h3>Link</h3><p>To link to this visualization on a web page use the following link code: </p>' .
-							'<pre class="code">&lt;a href="' . $nurl . '">' . $node->title .  '</a></pre></div>'
+							'<pre class="code">&lt;a href="' . $nurl . '">' . $node->title .  '&lt;/a></pre></div>'
 		),
 		'taburl' => array(
 			'#type' => 'markup',
@@ -2110,7 +2110,7 @@ function _shivanode_add_share_meta($node) {
   drupal_add_html_head($element, 'og_title');
   
   // Add Meta Description
-  $desc = 'A visualization created with the SHIVA application provided by SHANTI at the University of Virginia (http://shiva.virginia.edu/)';
+  $desc = 'A visualization created with the SHIVA application provided by SHANTI at the University of Virginia (http://visuals.shanti.virginia.edu/)';
   if(isset($node->shivanode_description['und'][0])) {
     if($node->shivanode_description['und'][0]['safe_summary'] != '') {
       $desc = trim(strip_tags($node->shivanode_description['und'][0]['safe_summary']));
