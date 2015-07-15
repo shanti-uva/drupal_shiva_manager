@@ -129,7 +129,7 @@ function _get_sn_type_array() {
 			'deprecated' => FALSE,
 			'uses_data' => FALSE,
 			'player' => 'qmedia',
-			'help_url' => FALSE,
+			'help_url' => 'https://wiki.shanti.virginia.edu/display/KB/Qmedia+Interactive+Presentations',
 			'image' => 'sngen-qmedia',
 			'subtypes' => FALSE,
 		),
