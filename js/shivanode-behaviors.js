@@ -33,6 +33,12 @@ function setHelpLink(hlink, typestr) {
   jQuery('#page-title').text(newtitle);
 }
 	
+	/*
+function confirmQmediaLoad() {
+	console.log('here');
+}
+*/
+
 (function($) {
 /** shivanode.js: Javascript functions for use within shivanode Drupal Module */
 	
@@ -53,6 +59,16 @@ function setHelpLink(hlink, typestr) {
 			if(typeof(data_set_elid) != "undefined") {
 				Drupal.Shivanode.sendDataElId(data_set_elid); 
 			} 
+			/*
+			var shiva_settings = Drupal.settings.Shivanode;
+			if (shiva_settings && shiva_settings.qmedia) {
+				if (shiva_settings.status == "loading") {
+					setTimeout(confirmQmediaLoad, 3000);
+				}
+			}
+			console.info("test");
+			console.info(Drupal.settings);
+			*/
 		}
 	};
 	
