@@ -516,9 +516,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
 				$iframeurl = SHIVA_QMEDIA_VIEWER;
 				//dpm($item, 'qmedia item');
 				drupal_add_js(array('shivanode' => array('qmedia' => TRUE, 'qmjson' => $item['value'])), 'setting');
-			}
-			
-      if(_shivanode_get_access($object) == "1") {
+			} else if(_shivanode_get_access($object) == "1") {
         $iframeurl .= '-' . md5($object->title);
       }
 			//$iframeurl .= '&pr=d';
