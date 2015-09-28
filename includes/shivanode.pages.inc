@@ -176,17 +176,18 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 	// For create mode make a simple thumb linked to create
 	if ($mode == 'create') {
 			$out = '<li class="shanti-thumbnail visual" >
-			<a href="' . $create .'">
 		  <div class="shanti-thumbnail-image shanti-field-visuals">
-		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
-		   <span class="icon shanticon-visuals"></span>
+		  	<a href="' . $create .'" class="shanti-thumbnail-link">
+			   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
+			   <span class="icon shanticon-visuals"></span>
+			 </a>
 		  </div> 
 		  
 		  <div class="shanti-thumbnail-info">
 				<div class="body-wrap">
 					<div class="title">' . $item[0] . '</div>
 				</div> 
-			</div> </a>
+			</div> 
 		</li>';
 	}	
 	return $out;
