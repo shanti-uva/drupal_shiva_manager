@@ -26,7 +26,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => FALSE,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul class="sn-explore-list">',
+				'#prefix' => '<ul class="sn-explore-list shanty-gallery">',
 				'#suffix' => '</ul>',
 			),
 		),
@@ -37,7 +37,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -48,7 +48,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -59,7 +59,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -154,38 +154,40 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 	$facet = ($isSubtype) ? 'shivanode_subtype%3A' . $ind : 'shivanode_element_type%3A' . $ind;
 	$create = ($isSubtype) ? "/node/add/shivanode/{$item['type']}/{$item[1]}" : "/node/add/shivanode/{$item[1]}";
 	$out = '<li class="shanti-thumbnail visual" >
-			
-		  <div class="shanti-thumbnail-image shanti-field-visuals">
-    	 <span class="overlay"><span class="icon"></span></span>
-		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
-		   <span class="icon shanticon-visuals"></span>
-		  </div> 
+		  	<a name="' . $item[0] . '" class="shanti-thumbnail-link">
+		  		<div class="shanti-thumbnail-image shanti-field-visuals">
+	    	 			<span class="overlay"><span class="icon"></span></span>
+			  		<img class="img-responsive" typeof="foaf:Image" src="' . $img . '" />       
+			   		<span class="icon shanticon-visuals"></span>
+		  		</div> 
 		  
-		  <div class="shanti-thumbnail-info">
-				<div class="body-wrap">
-					<div class="title">' . $item[0] . '</div>
-					<ul class="links">
-						<li><a href="' . $item[3] .'" target="_blank">Documentation</a></li>
-						<li><a href="/examples?f[0]=' . $facet .'">Examples</a></li>
-						<li class="sn-create-link"><a href="' . $create .'">Create</a></li>
-					</ul>
+			  <div class="shanti-thumbnail-info">
+					<div class="body-wrap">
+						<div class="title">' . $item[0] . '</div>
+						<ul class="links">
+							<li><a href="' . $item[3] .'" target="_blank">Documentation</a></li>
+							<li><a href="/examples?f[0]=' . $facet .'">Examples</a></li>
+							<li class="sn-create-link"><a href="' . $create .'">Create</a></li>
+						</ul>
+					</div> 
 				</div> 
-			</div> 
+			</a>
 		</li>';
 	// For create mode make a simple thumb linked to create
 	if ($mode == 'create') {
 			$out = '<li class="shanti-thumbnail visual" >
-			<a href="' . $create .'">
 		  <div class="shanti-thumbnail-image shanti-field-visuals">
-		   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
-		   <span class="icon shanticon-visuals"></span>
+		  	<a href="' . $create .'" class="shanti-thumbnail-link">
+			   <img class="img-responsive" typeof="foaf:Image" src="' . $img . '">       
+			   <span class="icon shanticon-visuals"></span>
+			 </a>
 		  </div> 
 		  
 		  <div class="shanti-thumbnail-info">
 				<div class="body-wrap">
 					<div class="title">' . $item[0] . '</div>
 				</div> 
-			</div> </a>
+			</div> 
 		</li>';
 	}	
 	return $out;
