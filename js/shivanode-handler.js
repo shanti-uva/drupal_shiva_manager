@@ -45,6 +45,7 @@
 		switch (mtype) {
 			case 'ChartChanged':
 				if(shiva_settings.status == 'ready') {
+					shiva_settings.status = "chartchanged";
 					Drupal.Shivanode.chartChanged(mdata);
 				}
 				break;
@@ -53,7 +54,7 @@
 			case 'DataChanged':
 			  if (shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
-				} else if (shiva_settings.status == 'puttingJSON') {
+				} else if (shiva_settings.status == 'puttingJSON' || shiva_settings.status == 'chartchanged') {
 					// when putting JSON into editor status is set to puttingJSON so that the dataChanged message is ignored
 					// ignore the message and set status to ready.
 					shiva_settings.status = 'ready';
