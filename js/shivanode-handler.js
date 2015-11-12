@@ -47,6 +47,7 @@
 				if(shiva_settings.status == 'ready') {
 					shiva_settings.status = "chartchanged";
 					Drupal.Shivanode.chartChanged(mdata);
+					console.log("Chart changed: " + mdata);
 				}
 				break;
 				
