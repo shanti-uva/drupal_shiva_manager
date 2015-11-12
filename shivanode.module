@@ -10,6 +10,7 @@ module_load_include('inc', 'shivanode', 'includes/shivanode.constants');
 module_load_include('inc', 'shivanode', 'includes/shivanode');
 module_load_include('inc', 'shivanode', 'includes/shivanode.admin');
 module_load_include('inc', 'shivanode', 'includes/shivanode.pages');
+module_load_include('inc', 'shivanode', 'includes/shivanode.types');
 
 /**
  * Implements hook_init.
@@ -48,6 +49,7 @@ function shivanode_init() {
 			'qmedia' => false,
 			'gmjson' => '',
 			'shibstatus' => null,
+			'sntypes' => _get_sn_type_array(),
 			'snviewer' => SHIVA_VIEWER,
 			'status' => 'loading',
 		),

@@ -120,6 +120,9 @@ define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Graph|Image|Network|Timeline');
  * 							15 = Word Cloud, 16 = Graph, 17 = Multimedia (Qmedia)
  * 
  * 		* means "deprecated"
+ * 
+ * 	TODO: This seems to have been replaced by _get_sn_type_array() in shivanodes.types.inc. Check if $shiva_types is still used and delete if not.
+ * 
  */
 $shiva_types = array(
 	2 =>  array(

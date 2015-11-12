@@ -45,9 +45,13 @@
 		switch (mtype) {
 			case 'ChartChanged':
 				if(shiva_settings.status == 'ready') {
-					shiva_settings.status = "chartchanged";
+					shiva_settings.status = "chartchanged"; // used in DataChanged to not register change after chart changed so you can leave without prompt
 					Drupal.Shivanode.chartChanged(mdata);
-					console.log("Chart changed: " + mdata);
+					// In no data (nd) chart, add chart type to url when changed but don't refresh page (use pushState)
+					var mypath = window.location.pathname;
+					if (mypath.indexOf('node/add/shivanode/nd') > -1) {
+						window.history.pushState("visualization subtype page", mdata, mypath + "/" + mdata.replace(/\s+/g, ''));
+					}
 				}
 				break;
 				
