@@ -277,9 +277,15 @@ function confirmQmediaLoad() {
 	Drupal.behaviors.shivaPopup = {
 		attach: function (context, settings) {
 			if(context == document) {
+				// Only perform on data selector popup
 				if (window.location.pathname == '/mydata' && window.location.search.indexOf('format=simple') > -1) {
+					// Hide popup once something is chosen
 					$('.views-table td.views-field-nothing a').click(function() {
 						$('body').hide();
+					});
+					// Remove links from titles in popups
+					$('.views-table .views-field-title a').each(function() {
+						$(this).parent().html('<span>' + $(this).text() + '</span>');
 					});
 				}
 			}
