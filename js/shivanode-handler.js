@@ -50,7 +50,8 @@
 					// In no data (nd) chart, add chart type to url when changed but don't refresh page (use pushState)
 					var mypath = window.location.pathname;
 					if (mypath.indexOf('node/add/shivanode/nd') > -1) {
-						window.history.pushState("visualization subtype page", mdata, mypath + "/" + mdata.replace(/\s+/g, ''));
+						if (mypath.charAt(mypath.length - 1) != '/') { mypath = mypath + "/"; }
+						window.history.pushState("visualization subtype page", mdata, mypath + mdata.replace(/\s+/g, ''));
 					}
 				}
 				break;
