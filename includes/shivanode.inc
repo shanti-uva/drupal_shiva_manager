@@ -586,11 +586,13 @@ function _shivanode_data_form_submit($form, &$form_state) {
  */
 function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   // If user does not have any data nodes, add one so view will show results
-  /*if(count(_get_shivanodes('stype:1 mine')) == 0) {
+  /*
+   if(count(_get_shivanodes('stype:1 mine')) == 0) {
     $url = 'https://docs.google.com/spreadsheet/ccc?key=0AhXu2Gubcj72dGVROGVESlJWblBSc1c4RjFPTVpyamc&usp=sharing';
     $title = 'Example Data for SHIVA';
     _shivanode_create_shiva_data_node($title, $url);
-  }*/
+  }
+   **/
   // Get the view of data nodes
   $viewMarkup = views_embed_view('shiva_data_list', 'my_data_pane');
   

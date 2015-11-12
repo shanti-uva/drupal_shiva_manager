@@ -273,4 +273,17 @@ function confirmQmediaLoad() {
 			}
 		}
 	};
+	
+	Drupal.behaviors.shivaPopup = {
+		attach: function (context, settings) {
+			if(context == document) {
+				if (window.location.pathname == '/mydata' && window.location.search.indexOf('format=simple') > -1) {
+					$('.views-table td.views-field-nothing a').click(function() {
+						$('body').hide();
+					});
+				}
+			}
+		}
+	};
+	
 }) (jQuery);

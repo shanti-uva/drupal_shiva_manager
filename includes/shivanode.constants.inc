@@ -120,13 +120,16 @@ define('SHIVA_DATA_VISUALIZATIONS', 'Chart|Graph|Image|Network|Timeline');
  * 							15 = Word Cloud, 16 = Graph, 17 = Multimedia (Qmedia)
  * 
  * 		* means "deprecated"
+ * 
+ * 	TODO: This seems to have been replaced by _get_sn_type_array() in shivanodes.types.inc. Check if $shiva_types is still used and delete if not.
+ * 
  */
 $shiva_types = array(
 	2 =>  array(
 		'label' => t('Images'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_IMAGE_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(
 			18 => array('label' => t('Slideshow'), 'value' => 'Slideshow'),
@@ -138,7 +141,7 @@ $shiva_types = array(
 		'label' => t('Map'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_MAP_EDITOR,
 		'helpurl' => '',
 		'subtypes' => FALSE,
 	),
@@ -146,7 +149,7 @@ $shiva_types = array(
 		'label' => t('Subway'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_SUBWAY_EDITOR,
 		'helpurl' => '',
 		'subtypes' => FALSE,
 	),
@@ -159,7 +162,7 @@ $shiva_types = array(
 		'label' => t('Video'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_VIDEO_EDITOR,
 		'helpurl' => '',
 		'subtypes' => FALSE,
 	),
@@ -167,7 +170,7 @@ $shiva_types = array(
 		'label' => t('Chart'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_CHART_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(
 			1 => array('label' => t('Annotated Timeline'), 'value' => 'AnnotatedTimeLine'),
@@ -200,7 +203,7 @@ $shiva_types = array(
 		'label' => t('Network'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_NETWORK_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(
 			15 => array('label' => t('Radial Graph'), 'value' => 'rgraph'),
@@ -214,7 +217,7 @@ $shiva_types = array(
 		'player' => SHIVA_VIEWER,
 	),
 	12 => array(
-		'label' => t('Eart (deprecated)'),
+		'label' => t('Earth (deprecated)'),
 		'deprecated' => 1,
 		'player' => SHIVA_VIEWER,
 	),
@@ -222,12 +225,12 @@ $shiva_types = array(
 		'label' => t('Timeline'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_TIMELINE_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(),
 	),
 	14 => array(
-		'label' => t('Timeline (deprecated)'),
+		'label' => t('Poster (deprecated)'),
 		'deprecated' => 1,
 		'player' => SHIVA_VIEWER,
 	),
@@ -235,7 +238,7 @@ $shiva_types = array(
 		'label' => t('Word Cloud'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_WCLOUD_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(),
 	),
@@ -243,7 +246,7 @@ $shiva_types = array(
 		'label' => t('Graph'),
 		'deprecated' => 0,
 		'player' => SHIVA_VIEWER,
-		'editor' => '',
+		'editor' => SHIVA_GRAPH_EDITOR,
 		'helpurl' => '',
 		'subtypes' => array(
 			21 => array('label' => t('Network'), 'value' => 'Network'),
@@ -253,6 +256,14 @@ $shiva_types = array(
 			25 => array('label' => t('Parallel'), 'value' => 'Parallel'),
 			21 => array('label' => t('Chord'), 'value' => 'Chord'),
 		),
+	),
+	17 => array(
+		'label' => t('Multimedia'),
+		'deprecated' => 0,
+		'player' => SHIVA_QMEDIA_VIEWER,
+		'editor' => SHIVA_QMEDIA_EDITOR,
+		'helpurl' => '',
+		'subtypes' => array(),
 	),
 	/*
 	# => array(
