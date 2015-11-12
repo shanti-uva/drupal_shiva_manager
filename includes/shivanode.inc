@@ -620,11 +620,11 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
    // $res = $selectFrag->appendXML('<a href="#" onclick="Drupal.Shivanode.setDataElement(' . $nid . ', \'true\');">Visualize</a>');
     // Otherwise, just viewing data page so give user select options of types of visualizations to choose from
     if($simple) {
-    	$markup = '<a href="#" onclick="Drupal.Shivanode.sendDataElId(' . $nid . ');">Visualize</a>';
-    	$res = $selectFrag->appendXML($markup);
+	    	$markup = '<a href="#" onclick="Drupal.Shivanode.sendDataElId(' . $nid . ');">Visualize</a>';
+	    	$res = $selectFrag->appendXML($markup);
     } else {
-    	$cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'nid', $nid);
-			$formFrag = render($cform);
+    		$cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'nid', $nid);
+		$formFrag = render($cform);
   		$res = $selectFrag->appendXML($formFrag);
     }
     $cell3->replaceChild($selectFrag, $cell3->childNodes->item(0));
