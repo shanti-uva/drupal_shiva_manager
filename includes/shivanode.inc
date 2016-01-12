@@ -611,7 +611,7 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   foreach($result as $row) {
     $cell3 = $row->childNodes->item(2);
     $txt = $cell3->nodeValue;
-		$cell3->nodeValue = '';
+	$cell3->nodeValue = '';
     $info = explode('|$|', trim($txt));
     $title = $info[0];
     $nid = $info[1];
@@ -633,75 +633,99 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
   // Find last row to determine whether even or odd (row mod)
   $xpathstr = '//div[@class="view-content"]//tbody/tr[contains(@class, "views-row-last")]';
   $xpath = new DOMXPath($xml);
+  $tbody = null;
   $result = $xpath->evaluate($xpathstr)->item(0);
-  // If nothing is found, get out of here
-  if(!is_object($result)) {
-    return $xml->saveXML(); 
+  $rowmod = 'even';
+  $remres = FALSE;   // whether to remove the result row or not
+  // if result is an object, then xpath search returned a row, remove last row class and get row mod class (even/odd)
+  if (is_object($result)) {
+      // Remove the 'views-row-last' attribute on last row
+      $result->setAttribute('class', preg_replace('/\s*views-row-last/', '', $result->getAttribute('class')));
+      $tbody = $result->parentNode;
+      $rowmod = $result->getAttribute('class');
+  } else {
+  // Otherwise, no rows of data found. So make a fragment to clone for rows
+      $markup = '<div class="view-content"><table><tbody><tr class="even"><td class="views-field views-field-title"><a href="url">Title</a></td><td class="views-field views-field-created">
+           mm/dd/yy hh:mm   </td><td class="views-field views-field-nothing"><form id="visselect-clone" action="formaction" method="post" accept-charset="UTF-8"><div>
+                       <button class="visualize-button btn btn-primary form-submit" type="submit" id="edit-visselect--##" name="op" value="Visualize">
+                            <span>Visualize as </span>
+                        </button>
+                        <input type="hidden" name="mydtitle" value=""/>
+                        <input type="hidden" name="mydtype" value="gid"/>
+                        <input type="hidden" name="mydid" value=""/>
+                        <input type="hidden" name="vistype" value=""/>
+                        <input type="hidden" name="vissubtype" value=""/>
+                        <input type="hidden" name="form_build_id" value=""/>
+                        <input type="hidden" name="form_token" value=""/>
+                        <input type="hidden" name="form_id" value="shivanode_gdocs_choice_form"/>
+                </div></form>
+            </td></tr></tbody></table></div>';
+       $frag = $xml->createDocumentFragment(); // Create the fragment and append markup
+       $frag->appendXML($markup);
+       
+       $rootel = $xml->documentElement;
+       $rootel->appendChild($frag);
+       $xpath = new DOMXPath($xml);
+       $xpathstr2 = '//div[@class="view-content"]//tbody/tr';  // Find the table body in the doc and append frament to it as "result" to be cloned.
+       $result = $xpath->evaluate($xpathstr2)->item(0);
+       $tbody = $result->parentNode;
+       $remres = TRUE;
   }
-  // Remove the 'views-row-last' attribute on last row
-  $result->setAttribute('class', preg_replace('/\s*views-row-last/', '', $result->getAttribute('class')));
-  $tbody = $result->parentNode;
-  $rowmod = $result->getAttribute('class');
   
   // if logged in, then add gdocs not yet added to the list
   if (_shivanode_check_google_login(FALSE)) {
-    $sslists = _shivanode_get_spreadsheet_list();
-    $gsheets = $sslists[0];
+    $sslists = _shivanode_get_spreadsheet_list(); // Get Spreadsheet lists
+    $gsheets = $sslists[0];                                   // First list is spreadsheets in Gdocs but not added to sites
     foreach($gsheets as $title => $doc) {
-      $shared = TRUE;
-      if(!$doc['shared']) {
-        $shared = FALSE;
-        $title = str_replace('$$notshared$$', '', $title);
+          $shared = TRUE;
+          if(!$doc['shared']) {
+            $shared = FALSE;
+            $title = str_replace('$$notshared$$', '', $title);
+          }
+          // Make a Clone of last row in table
+          $rowclone = $result->cloneNode(TRUE);       // Clone the row
+          $rowmod = ($rowmod == 'even') ? 'odd' : 'even';  // Set the row mod
+          $rowclone->setAttribute('class', $rowmod);
+          
+          // Get individual cells or table: 0 = Title, 1 = Date (not used), 2 = Button/Link
+          // Note: there can be no spaces between the markup of the cells (<td>) because this will return DOMText for e.g. item(1) etc.
+          $gid = $doc['gid'];
+          $titlecell = $rowclone->childNodes->item(0);  
+          $datecell = $rowclone->childNodes->item(1);
+          $linkcell = $rowclone->childNodes->item(2)->cloneNode();
+          
+          // Deal with Title cell
+          $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
+          if(!$shared) {
+            $nsel = $xml->createElement('a','*');
+            $nsel->setAttribute('href', $doc['url']);
+            $nsel->setAttribute('class', 'sn-notpublic');
+            $nsel->setAttribute('target', '_blank');
+            $nsel->setAttribute('title', 'This spreadsheet is not publically shared');
+            $titlecell->appendChild($nsel);
+          }
+          
+          // Deal with Date cell
+          $datecell->replaceChild(new DOMText(t('Not yet used')), $datecell->childNodes->item(0));
+          
+          // Deal with Button/Link/Form cell
+          $selectFrag = $xml->createDocumentFragment(); 
+          $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
+          if(!$simple) {
+                $cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'gid', $gid );
+                $formFrag = render($cform);
+                $selectFrag = $xml->createDocumentFragment(); 
+                $res = $selectFrag->appendXML($formFrag);
+          }
+          $linkcell->appendChild($selectFrag);
+          $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
+          
+          // Append Clone to Table
+          $tbody->appendChild($rowclone);
       }
-      $rowclone = $result->cloneNode(TRUE);
-      $rowmod = ($rowmod == 'even') ? 'odd' : 'even';
-      $rowclone->setAttribute('class', $rowmod);
-      /*$gid = $key;
-      if(strpos($gid, 'http') > -1) {
-        $gid = _get_gid_from_url($gid);
-      }
-      $gfile = gdrive_get_file($gid);
-      
-      if(strpos($key, '?key=') > -1) {
-        $pts = explode('?key=', $key);
-        if(isset($pts[1])) {
-          $gid = $pts[1];
-        }
-      }
-      if(preg_match('/([^\#\&]+)[\#\&]?/', $gid, $matches)) {
-        $gid = $matches[1];
-      }*/
-      //dpm($gid, $key);
-      $gid = $doc['gid'];
-      $titlecell = $rowclone->childNodes->item(0);
-      $datecell = $rowclone->childNodes->item(1);
-      $linkcell = $rowclone->childNodes->item(2)->cloneNode();
-      $titlecell->replaceChild(new DOMText($title), $titlecell->childNodes->item(0));
-      if(!$shared) {
-        $nsel = $xml->createElement('a','*');
-        $nsel->setAttribute('href', $doc['url']);
-        $nsel->setAttribute('class', 'sn-notpublic');
-        $nsel->setAttribute('target', '_blank');
-        $nsel->setAttribute('title', 'This spreadsheet is not publically shared');
-        $titlecell->appendChild($nsel);
-      }
-      $datecell->replaceChild(new DOMText(t('Not yet used')), $datecell->childNodes->item(0));
-      $selectFrag = $xml->createDocumentFragment(); 
-      $res = $selectFrag->appendXML(l(t('Visualize'), 'data/add/gid/' . $gid . '/popup/' . $title));
-      if(!$simple) {
-	      $cform = drupal_get_form('shivanode_gdocs_choice_form', $vistype, $ctype, $title, 'gid', $gid );
-				$formFrag = render($cform);
-				$selectFrag = $xml->createDocumentFragment(); 
-	  		$res = $selectFrag->appendXML($formFrag);
-      }
-      $linkcell->appendChild($selectFrag);
-      
-      $rowclone->replaceChild($linkcell, $rowclone->childNodes->item(2));
-      $tbody->appendChild($rowclone);
-    }
+      if ($remres) { $tbody->removeChild($result);  } // Used when blank row created after empty view results, remove the blank row used for cloning
   }
   $xhtml = $xml->saveXML();
-
   return $xhtml;
 }
 
