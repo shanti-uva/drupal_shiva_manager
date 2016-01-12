@@ -662,8 +662,16 @@ function _shivanode_gdocs_view($vistype='', $ctype=FALSE, $simple=FALSE) {
             </td></tr></tbody></table></div>';
        $frag = $xml->createDocumentFragment(); // Create the fragment and append markup
        $frag->appendXML($markup);
-       
        $rootel = $xml->documentElement;
+       $filtermu = '<div class="view-header">
+            <div class="sn-list-filter">
+                <label>Filter Titles: </label>
+                <input type="text" id="sn-title-filter" name="sn_title_filter" value="" size="30" maxlength="78" class="form-text" />
+            </div>
+        </div>';
+       $filterfrag = $xml->createDocumentFragment();
+       $filterfrag->appendXML($filtermu);
+       $rootel->appendChild($filterfrag);
        $rootel->appendChild($frag);
        $xpath = new DOMXPath($xml);
        $xpathstr2 = '//div[@class="view-content"]//tbody/tr';  // Find the table body in the doc and append frament to it as "result" to be cloned.
