@@ -177,6 +177,8 @@ function confirmQmediaLoad() {
 	// Entry form Behaviors
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
+			// Force Process Ready Message upon edit window load because sometimes data does not get loaded into the form
+			$(window).load(function() { Drupal.Shivanode.processReadyMessage(); });
 			
 			// Send Data to SHIVA editor once loaded
 			if ($('iframe#shivaEditFrame').length > 0) {
