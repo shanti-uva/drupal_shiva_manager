@@ -177,7 +177,10 @@ function confirmQmediaLoad() {
 	// Entry form Behaviors
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
-			
+		    // When window is loaded, act as though Ready Message was received in Entry from
+		    // This is because form doesn't always load data upon load.
+            $(window).load(function() { Drupal.Shivanode.processReadyMessage(); });
+            			
 			// Send Data to SHIVA editor once loaded
 			if ($('iframe#shivaEditFrame').length > 0) {
 				Drupal.Shivanode.setUnload(); // Set the unload function to check whether data changed.
@@ -222,10 +225,10 @@ function confirmQmediaLoad() {
 					// Enable save etc. buttons
 					$('#otherbuttons button[disabled=disabled], #lowerbuttons button[disabled=disabled], ' +
   					'#otherbuttons input[disabled=disabled], #lowerbuttons input[disabled=disabled]').each(function() {
-  				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
-  				});
-  				
-  				shiva_settings.formLoaded = true;
+      				  $(this).removeAttr('disabled').removeClass('form-button-disabled');
+      				});
+      				
+      				shiva_settings.formLoaded = true;
 				});
 				
 				// Adjust JSON field
