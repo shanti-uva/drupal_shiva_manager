@@ -42,6 +42,7 @@ function shivanode_init() {
 			'formLoaded' => false,
 			'iframeSrcUrl' => '',
 			'iframeType' => '',
+			'isDeprecated' => false,
 			'isNewEl' => false,
 			'jsonLoaded' => false,
 			'latestJSON' => '',
@@ -886,7 +887,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
 	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
 	$is_deprecated = _shivanode_is_deprecated($sntind);
-	
+
   // Set the title
   drupal_set_title($ptitle);
 	// remove any query param if exists					
@@ -1141,8 +1142,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
 	// Add messages for deprecated types
   if ($is_deprecated) {
-  	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)));
-		$form['shivanode_json']['#disabled'] = TRUE;
+  	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)), 'warning');
+	$form['shivanode_json']['#disabled'] = TRUE;
+    drupal_add_js(array('shivanode' =>array('isDeprecated' => true)), 'setting');
   } 
 	
 	// Create Markup for IFrame with Label and Helplinks

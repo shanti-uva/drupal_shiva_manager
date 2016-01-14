@@ -246,6 +246,7 @@ function _get_shivanode_type($node, $mode = 'string') {
   	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
  		$options = shivanode_get_types('nameindex', TRUE); 
     $typefield = $node->shivanode_element_type;
+    if (count($typefield) == 0 || !isset($typefield['und']['0']['value'])) { return FALSE; }
     $val = $typefield['und']['0']['value'] * 1;
     if ($val == 5) { $val = 13; }  // account for old simile 5 
     if ($mode == 'string' && isset($options[$val])) { return $options[$val]; } // Return string if set

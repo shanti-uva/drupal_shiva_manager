@@ -26,7 +26,7 @@
    
 	/**************** Message Sending and Receiving ***********************/
 	/*
-	 * Shiva Message Handler: Processes messages from visualization Ifram
+	 * Shiva Message Handler: Processes messages from visualization Iframe
 	 */ 
 	Drupal.Shivanode.shivaMessageHandler = function(e) {
 		// Separate out param name (message type) and message data
