@@ -985,17 +985,11 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 
   //dpm($form['shivanode_access'], 'sn access field');
   // Permission Value (calls JS to enforce only Public and Private)
-<<<<<<< HEAD
+  
   /* TODO: This function is in shivanode-old.js either deprecated or needs to be reinstated
    * $form['shivanode_access']['und'] += array(
     '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
   ); */
-=======
-  /* Function has been deprecated
-  $form['shivanode_access']['und'] += array(
-    '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
-  );*/
->>>>>>> master
   
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
   // Link is hidden but click is mimiced from JS when Iframe sends a message asking for DataSourceURL
