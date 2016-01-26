@@ -26,7 +26,7 @@
    
 	/**************** Message Sending and Receiving ***********************/
 	/*
-	 * Shiva Message Handler: Processes messages from visualization Ifram
+	 * Shiva Message Handler: Processes messages from visualization Iframe
 	 */ 
 	Drupal.Shivanode.shivaMessageHandler = function(e) {
 		// Separate out param name (message type) and message data
@@ -58,8 +58,10 @@
 				
 			// Subway, etc. send "DataChanged=true" but chart sends "DataChanged={chart type}"
 			case 'DataChanged':
-			  if (shiva_settings.status == 'ready') {
+			    if (shiva_settings.status == 'ready') {
 					Drupal.Shivanode.dataChanged(mdata);
+				} if (shiva_settings.status == 'newdata') {
+				    Drupal.Shivanode.getJSON(); // when chart is change automatically by new form url
 				} else if (shiva_settings.status == 'puttingJSON' || shiva_settings.status == 'chartchanged') {
 					// when putting JSON into editor status is set to puttingJSON so that the dataChanged message is ignored
 					// ignore the message and set status to ready.

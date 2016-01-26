@@ -177,10 +177,10 @@ function confirmQmediaLoad() {
 	// Entry form Behaviors
 	Drupal.behaviors.shivaEntryFormConfig = {
 		attach: function (context, settings) {
-		    // When window is loaded, act as though Ready Message was received in Entry from
-		    // This is because form doesn't always load data upon load.
-            $(window).load(function() { Drupal.Shivanode.processReadyMessage(); });
-            			
+		    
+			// Force Process Ready Message upon edit window load because sometimes data does not get loaded into the form
+			$(window).load(function() { Drupal.Shivanode.processReadyMessage(); });
+			
 			// Send Data to SHIVA editor once loaded
 			if ($('iframe#shivaEditFrame').length > 0) {
 				Drupal.Shivanode.setUnload(); // Set the unload function to check whether data changed.

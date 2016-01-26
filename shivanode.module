@@ -42,6 +42,7 @@ function shivanode_init() {
 			'formLoaded' => false,
 			'iframeSrcUrl' => '',
 			'iframeType' => '',
+			'isDeprecated' => false,
 			'isNewEl' => false,
 			'jsonLoaded' => false,
 			'latestJSON' => '',
@@ -886,7 +887,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
 	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
 	$is_deprecated = _shivanode_is_deprecated($sntind);
-	
+
   // Set the title
   drupal_set_title($ptitle);
 	// remove any query param if exists					
@@ -984,10 +985,17 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 
   //dpm($form['shivanode_access'], 'sn access field');
   // Permission Value (calls JS to enforce only Public and Private)
+<<<<<<< HEAD
   /* TODO: This function is in shivanode-old.js either deprecated or needs to be reinstated
    * $form['shivanode_access']['und'] += array(
     '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
   ); */
+=======
+  /* Function has been deprecated
+  $form['shivanode_access']['und'] += array(
+    '#attributes' => array('onchange' => 'if(Drupal) { Drupal.Shivanode.checkPermissionsValue(jQuery(this).val()); }'),
+  );*/
+>>>>>>> master
   
   // Link to list of Data Elements (Hidden because called by JS jQuery.click() when message sent from Iframe form)
   // Link is hidden but click is mimiced from JS when Iframe sends a message asking for DataSourceURL
@@ -1141,8 +1149,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   }
 	// Add messages for deprecated types
   if ($is_deprecated) {
-  	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)));
-		$form['shivanode_json']['#disabled'] = TRUE;
+  	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)), 'warning');
+	$form['shivanode_json']['#disabled'] = TRUE;
+    drupal_add_js(array('shivanode' =>array('isDeprecated' => true)), 'setting');
   } 
 	
 	// Create Markup for IFrame with Label and Helplinks
@@ -1194,7 +1203,7 @@ function shivanode_element_change($form, $form_state) {
         '<iframe id="shivaEditFrame" src="' . $iframeUrl .
         '" height="' . variable_get('shivanode_edit_height', SHIVA_IFRAME_HEIGHT_EDIT) . '" width="' . variable_get('shivanode_edit_width', SHIVA_IFRAME_WIDTH_EDIT) .
         '" scrolling="auto" frameborder="0" > </iframe>' . // onload="Drupal.Shivanode.setIframeSpecifics();"
-        '<div><script type="text/javascript">setHelpLink(\'' . $helpLink . '\', "' . $typeStr . '");</script></div></fieldset>';
+        '<div><script type="text/javascript">setHelpLink(\'' . $helpLink . '\', "' . $typeStr . '"); </script></div></fieldset>';
   return $iframe;
 }
 
