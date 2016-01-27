@@ -201,7 +201,7 @@ $shiva_types = array(
 	),
 	10 => array(
 		'label' => t('Network'),
-		'deprecated' => 0,
+		'deprecated' => 1,
 		'player' => SHIVA_VIEWER,
 		'editor' => SHIVA_NETWORK_EDITOR,
 		'helpurl' => '',

@@ -23,7 +23,12 @@
  
 function _shivanode_element_typelist() {
 	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
- 	$options = shivanode_get_types('nameindex', FALSE); // returns all types by index=>name excluding deprecated ones by default
+    $include_deprecated = FALSE;
+    // Check to see if editing a previously created deprecated type
+    if (preg_match('/\/(\d+)\/edit/', current_path(), $m)) {
+        $include_deprecated = TRUE;
+    }
+ 	$options = shivanode_get_types('nameindex', $include_deprecated); // returns all types by index=>name excluding deprecated ones by default
   return $options;
 }
 
@@ -1282,14 +1287,14 @@ function _shivanode_node_api($mode, $nid) {
 function _shivanode_node_json($nid, $display) {
 	global $user;
   $pwd = '';
-  if(strpos($nid,'-') > -1) {
+  if (strpos($nid,'-') > -1) {
     $pts = explode('-',$nid);
     $nid = $pts[0];
     $pwd = $pts[1];
   }
   $node = node_load($nid);
   // only return JSON if private, or Drupal has added key for embedded visualizations
-  if(_shivanode_get_access($node) == '4' || $user->uid == $node->uid || $pwd == md5($node->title)) { 
+  if (_shivanode_get_access($node) == '4' || ($user->uid == $node->uid) || $pwd == md5($node->title)) { 
     $json = '';
     drupal_add_http_header('Content-Type', 'application/javascript'); // JSONP is actually Javascript
     $json =  _shivanode_get_json($node, FALSE); // FALSE means do NOT return a PHP Object but a JSON string
@@ -1674,16 +1679,24 @@ function _shivanode_resource_retrieve($nid) {
  * if not set returns default value
  */
 function _shivanode_get_element_type($node, $format="string") {
-	module_load_include('inc', 'shivanode', 'includes/shivanode.types');
-  $typenum = (isset($node->shivanode_element_type['und'][0]['value'])) ? intval($node->shivanode_element_type['und'][0]['value']) : 7; // default is chart
-  //if ($typenum == 5) { $typenum = 13; } // do we still need to look out for simile?
-  if ($format == 'label') {
-  	return _shivanode_get_type_label($typenum);
-  } elseif ($format == 'number' || $format == 'int') {
-  	return $typenum;
-  } else {
+	  module_load_include('inc', 'shivanode', 'includes/shivanode.types');
+      $typenum = 7; // default value;
+      if (isset($node->shivanode_element_type['und'][0]['value'])) {
+          $typenum = intval($node->shivanode_element_type['und'][0]['value']);
+      } else {
+          $nid = $node->nid;
+          if (strpos(current_path(), $nid . '/edit') > -1) {
+            drupal_set_message(t('Node @num does not have a visualization type!', array('@num' => $node->nid)), 'warning', FALSE);
+          }
+      }
+      //if ($typenum == 5) { $typenum = 13; } // do we still need to look out for simile?
+      if ($format == 'label') {
+      	return _shivanode_get_type_label($typenum);
+      } elseif ($format == 'number' || $format == 'int') {
+      	return $typenum;
+      } else {
 		return _shivanode_get_machine_name($typenum);
-	}
+	  }
 }
 
 /*
