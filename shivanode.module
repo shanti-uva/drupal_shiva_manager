@@ -887,7 +887,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 	$snsubtind = _shivanode_get_index($snsubtype, TRUE);
 	$eltypes = _shivanode_element_typelist(); // Get name index list of types excluding deprecated
 	$is_deprecated = _shivanode_is_deprecated($sntind);
-
+    
   // Set the title
   drupal_set_title($ptitle);
 	// remove any query param if exists					
@@ -943,7 +943,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
     drupal_add_js(array('shivanode' => array('isNewEl' => true)), 'setting');
 		
     $form['shivanode_access']['und']['#default_value'] = 1;
-		$sntind = (isset($eltypes[$sntind])) ? $sntind : 7;
+	$sntind = (isset($eltypes[$sntind])) ? $sntind : 7;
     $eltype = $eltypes[$sntind];
     $form['shivanode_element_type']['und']['#default_value'] = (string)$sntind; // default value is chart
       
@@ -1146,6 +1146,9 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   	drupal_set_message(t('This @type visualization has been deprecated. You cannot therefore edit the visualization settings itself, though it can still be seen in the view mode.', array('@type' => $sntype)), 'warning');
 	$form['shivanode_json']['#disabled'] = TRUE;
     drupal_add_js(array('shivanode' =>array('isDeprecated' => true)), 'setting');
+    if (empty($form['shivanode_element_type']['und']['#default_value'])) {
+        $form['shivanode_element_type']['und']['#default_value'] = array($sntind);
+    }
   } 
 	
 	// Create Markup for IFrame with Label and Helplinks
@@ -1175,7 +1178,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
- 
+    //dpm(array($form, $form_state), "end of form alter");
 }
 
 /*
@@ -1214,7 +1217,7 @@ function shivanode_node_submit($node, $form, &$form_state) {
     $editurl = 'node/' . $node->nid . '/edit';
     drupal_goto($editurl);
   }
-}
+}   
 
 /**
  * Implements form_id_validate(form, form_state)
