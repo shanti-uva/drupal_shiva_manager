@@ -297,6 +297,7 @@ function _shivanode_parse_json($jdata) {
         if (is_string($outstr)) {
           $outstr .= '&';
         }
+        if (!is_string($value)) { $value = json_encode($value); }
         $outstr .= $key . "=" . $value;
       }
     }
