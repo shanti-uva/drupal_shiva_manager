@@ -785,7 +785,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   
   // Remove the Simile timeline option when displaying form only, 
   // but left it in array of types to display type of old existing simile timelines
-  // Taken out for reworking (@015-05-07)
+  // Taken out for reworking (2015-05-07)
   //unset($form['shivanode_element_type']['und']['#options'][5]);
   _shivanode_add_jtree_js(); // add jtree for kmaps
   _shivanode_add_ms_metafix(); // MS Explorer work around
@@ -834,21 +834,8 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
 				$sntype = $arg1;
 				if($arg2) { $snsubtype = $arg2; }
 			}
-			
-			/** old code (2015-05-07)
-      $did = (is_numeric($arg1)) ? $arg1 : FALSE; // set $did to the data node nid for reference below
-      if($arg2) { 
-        $snnewtype = (is_numeric($arg1) || $arg1 == 'nd') ? $arg2 : $arg1;
-        if($snnewtype == '') {$snnewtype = 'chart';}
-        $sntype = ucfirst($snnewtype);
-        if($arg1 == 'chart' && $arg2) {
-          $ctype = $arg2;
-        }
-      } else {
-        $sntype = ucfirst($arg1); // When just a visualization type with out a subtype
-      }
-			 * */
     }
+    
     // REDIRECT: If it's a data-based visualization without a data node id at the end, redirect to data list
     if(_shivanode_is_data_type($sntype)) { 
 	    if ($did == FALSE && $nodata == FALSE) {
@@ -1084,7 +1071,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
       'title' => t('Save changes and continue editing'),
       //'disabled' => 'disabled',
     ),
-  );
+  ); // End of 
   
   $form['upperbuttons']['closetag'] = array(
     '#markup' => '</div>',
@@ -1177,8 +1164,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_description']['#weight'] = '5';
   $form['#validate'][]='shivanode_form_validate';
   $form['actions'] = array(); // remove standard buttons, as these are replaced by custom ones.
-    //dpm(array($form, $form_state), "end of form alter");
-}
+}  // End of shivanode_form_shivanode_node_form_alter
 
 /*
  * Function shivanode_element_change($form, $form_state) :
