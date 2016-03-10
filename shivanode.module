@@ -1783,3 +1783,6 @@ function shivanode_redirect_to_new() {
   drupal_goto('node/add/shivanode');
 }
 
+function shivanode_get_subtype_name($index) {
+    return _shivanode_get_type_label($index, TRUE);
+}
