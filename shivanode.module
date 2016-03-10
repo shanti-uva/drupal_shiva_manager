@@ -482,6 +482,7 @@ function shivanode_field_formatter_view($object_type, $object, $field, $instance
       $width = variable_get('shivanode_default_width', (isset($display['settings']['width'])?$display['settings']['width']:SHIVA_IFRAME_WIDTH));
       $jdata = _shivanode_parse_json($item['value']); // turning the json into an iframe param;
       $jobj = json_decode($item['value']); // making a PHP object of json to query
+      if (!isset($jobj->height)) { $jobj->height = $jobj->width; } // When jobj->height is not set, it's a square visualization
       if(isset($jobj->height) && $jobj->height > $height) { $height = $jobj->height; } // use visualization height and width if greater than default
       if(isset($jobj->width) && $jobj->width > $width) { $width = $jobj->width; }
       
