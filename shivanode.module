@@ -623,39 +623,6 @@ function shivanode_node_view_alter(&$build) {
     }
   
     $sntype = _shivanode_get_element_type($node); // type of shiva visualization
-    /**
-		 * 
-		 * Old code: before conversion to shivadata
-		 * removed 5-15-15
-
-    if($sntype == 'Data') {
-      unset($build['field_image']); // don't show thumbnail for data elements
-    } else { 
-      $data_id = _shivanode_get_data_element($node->nid); // related data_id if it's linked
-      // only do the modifications for Shivanodes that are non-Data visualizations, i.e. actual visualizations
-      if ($node->type == 'shivanode') {
-        // If it's got a data element link, display that info
-        if ($data_id) {
-          $dnode = node_load($data_id);
-          if ($dnode && node_access('view', $dnode)) {
-            // make text to display: link if user has permission to view, otherwise just text
-            $dtext = (node_access('view', $dnode)) ? l($dnode->title, 'node/' . $data_id) : $dnode->title;
-            // Put it after visualization type or assign it a weight of 12
-            $weight = (isset($build['shivanode_element_type '])) ? $build['shivanode_element_type ']['#weight'] + 1 : 12;
-            $build['data_element'] = array(
-              '#type' => 'markup',
-              '#markup' => '<div class="field field-name-shivanode-access field-type-list-integer field-label-above">' .
-                  '<div class="field-label">Data Element Used:&nbsp;</div>' .
-                  '<div class="field-items"><div class="field-item even">' . $dtext . '</div></div></div>',
-              '#weight' => $weight,
-            );
-          }
-        }
-        _shivanode_add_share_meta($node);
-        if(isset($build['field_image'])) { unset($build['field_image']); }
-      }
-    }
-		*/
   }
 }
 
