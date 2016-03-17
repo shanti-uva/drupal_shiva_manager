@@ -1750,6 +1750,16 @@ function shivanode_redirect_to_new() {
   drupal_goto('node/add/shivanode');
 }
 
+/**
+ * shivanode_get_type_name: Looks up type name from index value. Wrapper function to call shivanode.types.inc.
+ */
+function shivanode_get_type_name($index) {
+    return _shivanode_get_type_label((int)$index, FALSE);
+}
+
+/**
+ *  shivanode_get_subtype_name: Looks up subtype name from index value. Wrapper function to call shivanode.types.inc.
+ */
 function shivanode_get_subtype_name($index) {
-    return _shivanode_get_type_label($index, TRUE);
+    return _shivanode_get_type_label((int)$index, TRUE);
 }
