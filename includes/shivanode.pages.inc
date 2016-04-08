@@ -26,7 +26,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => FALSE,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => '<ul class="sn-explore-list shanty-gallery">',
+				'#prefix' => '<ul class="sn-explore-list shanti-gallery">',
 				'#suffix' => '</ul>',
 			),
 		),
@@ -37,7 +37,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanti-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -48,7 +48,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanti-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
@@ -59,7 +59,7 @@ function explore_vis_page($mode='explore') {
 	    '#collapsed' => $collapsed,  // Added
 	    '#description' => t("this is a fieldset element"),
 	    'items' => array(
-				'#prefix' => "<ul class=\"sn-explore-list shanty-gallery $mode\">",
+				'#prefix' => "<ul class=\"sn-explore-list shanti-gallery $mode\">",
 				'#suffix' => '</ul>',
 			),
 		),
