@@ -167,7 +167,7 @@ function shivanode_explore_thumb($ind, $item, $isSubtype=FALSE, $mode='explore')
 						<ul class="links">
 							<li><a href="' . $item[3] .'" target="_blank">Documentation</a></li>
 							<li><a href="/examples?f[0]=' . $facet .'">Examples</a></li>
-							<li class="sn-create-link"><a href="' . $create .'">Create</a></li>
+							<li class="sn-create-link"><a href="' . $create .'" class="btn btn-primary">Create</a></li>
 						</ul>
 					</div> 
 				</div> 
