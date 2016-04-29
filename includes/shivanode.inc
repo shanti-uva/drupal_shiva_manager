@@ -1963,7 +1963,7 @@ function _shivanode_node_embed_page($nid) {
 	     <li><a href="#tab-lk" aria-controls="profile" role="tab" data-toggle="tab">Link</a></li>
 	     <li><a href="#tab-url" aria-controls="profile" role="tab" data-toggle="tab">URL</a></li>
 	     <li><a href="#tab-js" aria-controls="profile" role="tab" data-toggle="tab">JSON</a></li>
-   </ul>'; // <nav id="sidebar-first" class="col-xs-6 col-md-3 col-lg-2 sidebar-offcanvas equal-height"></nav>
+   </ul>'; // <div id="sidebar-first" class="col-xs-6 col-md-3 col-lg-2 sidebar-offcanvas equal-height"></div>
     $smtab = '';
 	if(module_exists('sharethis')) {
 	    // add meta tag for share image
