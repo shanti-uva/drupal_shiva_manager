@@ -1120,7 +1120,7 @@ function shivanode_form_shivanode_node_form_alter(&$form, &$form_state, $form_id
   $form['shivanode_json']['#weight'] = '4';
   $njson = _shivanode_get_json($form['#node']);
   if(isset($njson['dataSourceUrl']) && $gid = _get_gid_from_url($njson['dataSourceUrl'])) {
-    if(!$file = gdrive_get_file($gid)) {
+  if(!$file = shanti_gdrive_get_file($gid)) {
       drupal_set_message(t('This data file is not associated with the currently logged in Google Account!'), 'warning');
     }
   }

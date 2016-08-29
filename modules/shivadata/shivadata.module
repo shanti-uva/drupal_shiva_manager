@@ -44,8 +44,8 @@ function shivadata_menu() {
  */
 function shivadata_add_node($gid, $desc='Node added from Google Docs') {
 	global $user;
-	module_load_include('inc', 'gdrive', 'gdrive');
-	$gfile = gdrive_get_file($gid);
+	module_load_include('inc', 'shanti_gdrive', 'shanti_gdrive');
+	$gfile = shanti_gdrive_get_file($gid);
 	$node = new stdClass();
   $node->title = $gfile['title'];
   $node->type = "shivadata";

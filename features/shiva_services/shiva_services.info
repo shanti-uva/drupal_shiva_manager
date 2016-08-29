@@ -3,9 +3,10 @@ description = Set up the services api
 core = 7.x
 package = SHANTI
 version = 7.x-1.0-alpha1
-project = shiva_services
+
 dependencies[] = ctools
 dependencies[] = services
+dependencies[] = shivanode
 features[ctools][] = services:services:3
 features[features_api][] = api:2
 features[services_endpoint][] = get_shivanode

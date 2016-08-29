@@ -2,7 +2,7 @@ name = SHIVA Visualizations
 description = A custom node module for creating and managing visualizations in Drupal through the SHANTI Interactive Visualization Application (SHIVA)
 package = SHANTI
 core = 7.x
-dependencies[] = gdrive
+dependencies[] = shanti_gdrive
 dependencies[] = datatables
 dependencies[] = lightbox2
 dependencies[] = services
@@ -10,7 +10,6 @@ dependencies[] = rest_server
 dependencies[] = taxonomy
 dependencies[] = views
 dependencies[] = views_content
-; dependencies[] = zend (7.x-1.0-beta1) ; replaced by gdrive
 
 files[] = shivanode.module
 files[] = includes/shivanode.constants.inc
@@ -22,4 +21,4 @@ scripts[] = js/shivanode-behaviors.js
 scripts[] = js/shivanode-handler.js
 
 configure = admin/config/content/shivanode
-version = "7.x-1.5-beta1"
+

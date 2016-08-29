@@ -325,7 +325,7 @@ function _get_recent_shivanodes() {
 
 function _shivanode_get_spreadsheet_list() {
   try {
-    $gdocs = gdrive_get_filelist();
+    $gdocs = shanti_gdrive_get_filelist();
     $sslist = array();
     foreach ($gdocs as $doc) {
       $sslist[$doc['title']] = $doc;
@@ -382,10 +382,10 @@ function _shivanode_filter_gss_list($sslist) {
   foreach($existing as $n) {
     if(!isset($n->found) && isset($n->dataGid)) {
       try {
-        $gdoc = gdrive_get_file($n->dataGid) ;
+        $gdoc = shanti_gdrive_get_file($n->dataGid) ;
         if($gdoc) {
         	if(isset($gdoc['title']))  {
-	          $haselement[$gdoc['title']] = gdrive_file_attributes($gdoc);
+	          $haselement[$gdoc['title']] = shanti_gdrive_file_attributes($gdoc);
 					} else {
 						$error = 'Problem reading google doc: ' . $n->dataGid . ' ';
 						if (isset($gdoc[0]->message)) { $error .= "({$gdoc[0]->message})"; }
@@ -413,7 +413,7 @@ function _shivanode_filter_gss_list($sslist) {
  *      else it returns false
  */
 function _shivanode_check_google_login($authenticate = TRUE) {
-  return gdrive_is_authorized();
+  return shanti_gdrive_is_authorized();
 }
 
 
@@ -889,7 +889,7 @@ function _shivanode_data_use_form_submit($form, &$form_state) {
   $nid = $id; // by default assume it is an existing datanode and the nid is passed as ssurl;
   // if sstype is 'gid', then it's a spreadsheet that has not been added.
   if($type == 'gid') {
-    $gfile = gdrive_get_file($id);
+    $gfile = shanti_gdrive_get_file($id);
     $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
     $form_state['values']['datatype'] = 'nid';
@@ -1005,7 +1005,7 @@ function _shivanode_data_elements_submit($form, &$form_state) {
     if(strpos($ssurl, 'http') > -1) {
       $gid = _get_gid_from_url($ssurl);
     }
-    $gfile = gdrive_get_file($gid);
+    $gfile = shanti_gdrive_get_file($gid);
     $newel = _shivanode_create_shiva_data_node($gfile['title'], $gfile['url']);
     $nid = $newel->nid;
   }
@@ -1787,7 +1787,7 @@ function _shivanode_is_deprecated($tindex, $isSubtype=FALSE) {
 function _shivanode_add_gid($gid = FALSE, $type="normal") {
   if(empty($gid)) { drupal_goto('mydata'); }
 	// Make sure valie gdoc url
-  $gfile = gdrive_file_attributes(gdrive_get_file($gid, 'object'));
+  $gfile = shanti_gdrive_file_attributes(shanti_gdrive_get_file($gid, 'object'));
   if($gfile) {
 		if (module_exists('shivadata')) {
 			// Create the new shivadata node based on GDoc id 
@@ -1963,7 +1963,7 @@ function _shivanode_node_embed_page($nid) {
 	     <li><a href="#tab-lk" aria-controls="profile" role="tab" data-toggle="tab">Link</a></li>
 	     <li><a href="#tab-url" aria-controls="profile" role="tab" data-toggle="tab">URL</a></li>
 	     <li><a href="#tab-js" aria-controls="profile" role="tab" data-toggle="tab">JSON</a></li>
-   </ul>'; // <section id="sidebar-first" class="region sidebar sidebar-first col-xs-6 col-md-3 col-lg-2 sidebar-offcanvas equal-height"></section>
+   </ul>'; // <aside class="content-resources col-xs-6 col-sm-3 col-md-3 col-lg-2 sidebar-offcanvas equal-height"></aside>
     $smtab = '';
 	if(module_exists('sharethis')) {
 	    // add meta tag for share image
